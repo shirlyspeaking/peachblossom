@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>張老師 - 桃花源作者</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --berry-dark: #8e2157;
+            --berry-mid: #c94b7c;
+            --berry-light: #f8a5c2;
+            --peach-pink: #ffb8d0;
+            --cream: #fff5f7;
+            --rose-gold: #e8b4bc;
+            --text-dark: #5c1a3d;
+            --text-mid: #8e4a6d;
+        }
+
+        body {
+            font-family: "Kaiti", "STKaiti", "Songti TC", "Noto Serif TC", "Microsoft YaHei", serif;
+            background: linear-gradient(135deg, 
+                #ffeef2 0%, 
+                #ffd6e0 20%, 
+                #ffb8d0 40%, 
+                #f8a5c2 60%, 
+                #e8b4bc 80%, 
+                #d4a5b9 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* === 背景花瓣 === */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .petal {
+            position: absolute;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.5; }
+            100% {
+                transform: translateY(105vh) translateX(30px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* === 導航欄 === */
+        nav {
+            position: relative;
+            z-index: 10;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            color: var(--berry-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-mid);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--berry-dark);
+        }
+
+        /* === 主容器 === */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px 80px;
+        }
+
+        /* === 個人資料卡片 === */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(142, 33, 87, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin: 0 auto 25px;
+            box-shadow: 0 10px 30px rgba(142, 33, 87, 0.3);
+            border: 4px solid white;
+        }
+
+        .profile-name {
+            font-size: 2.5rem;
+            color: var(--berry-dark);
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .profile-title {
+            font-size: 1.2rem;
+            color: var(--text-mid);
+            margin-bottom: 20px;
+        }
+
+        .profile-bio {
+            font-size: 1.1rem;
+            color: var(--text-mid);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(201, 75, 124, 0.1) 0%, rgba(248, 165, 194, 0.15) 100%);
+            border: 1px solid rgba(201, 75, 124, 0.3);
+            border-radius: 25px;
+            color: var(--berry-dark);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(142, 33, 87, 0.3);
+        }
+
+        /* === 內容區塊 === */
+        .section {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 40px rgba(142, 33, 87, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--berry-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: "✿";
+            color: var(--berry-mid);
+        }
+
+        /* === 技能標籤 === */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .skill-tag {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--berry-light) 0%, var(--peach-pink) 100%);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--berry-dark);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* === 項目列表 === */
+        .project-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .project-item {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .project-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(142, 33, 87, 0.1);
+        }
+
+        .project-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .project-info h3 {
+            font-size: 1.1rem;
+            color: var(--berry-dark);
+            margin-bottom: 5px;
+        }
+
+        .project-info p {
+            font-size: 0.9rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        /* === 時間軸 === */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--berry-mid), var(--berry-light));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .timeline-item::before {
+            content: "❀";
+            position: absolute;
+            left: -30px;
+            top: 0;
+            color: var(--berry-mid);
+            font-size: 1rem;
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--berry-mid);
+            margin-bottom: 5px;
+        }
+
+        .timeline-content h3 {
+            font-size: 1.1rem;
+            color: var(--berry-dark);
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        /* === 聯繫區塊 === */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .contact-icon {
+            font-size: 1.5rem;
+        }
+
+        .contact-info {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+        }
+
+        .contact-info strong {
+            display: block;
+            color: var(--berry-dark);
+            margin-bottom: 2px;
+        }
+
+        /* === 底部 === */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-mid);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--berry-dark);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* === 響應式 === */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .profile-card {
+                padding: 30px 20px;
+            }
+
+            .profile-name {
+                font-size: 2rem;
+            }
+
+            .avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 3rem;
+            }
+
+            .section {
+                padding: 25px 20px;
+            }
+
+            .project-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .project-icon {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景花瓣 -->
+    <div class="bg-decoration" id="bgDecoration"></div>
+
+    <!-- 導航欄 -->
+    <nav>
+        <a href="index.html" class="nav-logo">
+            🌸 桃花源
+        </a>
+        <div class="nav-links">
+            <a href="index.html">首頁</a>
+            <a href="huadian.html">唐風花鈿</a>
+            <a href="about.html">關於作者</a>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 個人資料卡片 -->
+        <div class="profile-card">
+            <div class="avatar">👩‍🏫</div>
+            <h1 class="profile-name">張老師</h1>
+            <p class="profile-title">桃花源 創作者 · 數位藝術愛好者</p>
+            <p class="profile-bio">
+                熱愛將傳統文化與現代科技融合，致力於創造富有東方美學的數位體驗。
+                希望透過「桃花源」平台，讓更多人感受中華傳統文化的魅力。
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link">📧 電子郵件</a>
+                <a href="#" class="social-link">🐦 Twitter</a>
+                <a href="#" class="social-link">💼 LinkedIn</a>
+                <a href="#" class="social-link">🐙 GitHub</a>
+            </div>
+        </div>
+
+        <!-- 技能專長 -->
+        <div class="section">
+            <h2 class="section-title">技能專長</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">前端開發</span>
+                <span class="skill-tag">AR/VR 技術</span>
+                <span class="skill-tag">UI/UX 設計</span>
+                <span class="skill-tag">數位藝術</span>
+                <span class="skill-tag">傳統文化研究</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">MediaPipe</span>
+                <span class="skill-tag">Canvas 繪圖</span>
+            </div>
+        </div>
+
+        <!-- 作品集 -->
+        <div class="section">
+            <h2 class="section-title">作品集</h2>
+            <div class="project-list">
+                <div class="project-item">
+                    <div class="project-icon">💮</div>
+                    <div class="project-info">
+                        <h3>唐風花鈿 AR 試妝</h3>
+                        <p>結合 MediaPipe 人臉識別技術，讓用戶體驗唐代仕女的精緻花鈿妝容，支援手勢互動與虛擬背景。</p>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-icon">🎨</div>
+                    <div class="project-info">
+                        <h3>水墨丹青（開發中）</h3>
+                        <p>數位水墨畫創作工具，模擬傳統書畫的筆觸與墨韻。</p>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-icon">🏮</div>
+                    <div class="project-info">
+                        <h3>更多作品即將推出...</h3>
+                        <p>持續探索傳統文化與科技的結合，敬請期待更多精彩內容。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 經歷 -->
+        <div class="section">
+            <h2 class="section-title">經歷</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2026 年</div>
+                    <div class="timeline-content">
+                        <h3>創建「桃花源」平台</h3>
+                        <p>開始構建數位古風體驗平台，發布首款作品「唐風花鈿」。</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">持續進行中</div>
+                    <div class="timeline-content">
+                        <h3>數位藝術創作</h3>
+                        <p>探索 AR、AI 等技術在傳統文化領域的應用。</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">未來規劃</div>
+                    <div class="timeline-content">
+                        <h3>擴展平台內容</h3>
+                        <p>計劃推出更多融合傳統文化的互動體驗應用。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 聯繫方式 -->
+        <div class="section">
+            <h2 class="section-title">聯繫方式</h2>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-info">
+                        <strong>電子郵件</strong>
+                        example@email.com
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <div class="contact-info">
+                        <strong>所在地</strong>
+                        台灣
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🌐</span>
+                    <div class="contact-info">
+                        <strong>網站</strong>
+                        桃花源平台
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">💬</span>
+                    <div class="contact-info">
+                        <strong>合作洽談</strong>
+                        歡迎聯繫
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    <footer>
+        <p>🌸 <a href="index.html">返回桃花源</a> · © 2026 張老師</p>
+    </footer>
+
+    <script>
+        // 創建飄落的花瓣
+        function createPetals() {
+            const container = document.getElementById('bgDecoration');
+            const petals = ['🌸', '💮', '✿', '❀'];
+            
+            for (let i = 0; i < 25; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.innerHTML = petals[Math.floor(Math.random() * petals.length)];
+                petal.style.left = Math.random() * 100 + '%';
+                petal.style.animationDuration = (12 + Math.random() * 10) + 's';
+                petal.style.animationDelay = Math.random() * 12 + 's';
+                petal.style.fontSize = (14 + Math.random() * 10) + 'px';
+                container.appendChild(petal);
+            }
+        }
+        createPetals();
+    </script>
+</body>
+</html>
