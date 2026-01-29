@@ -252,7 +252,7 @@
                 scale: 1.2, yOffset: -15,
                 // 背景：洛陽牡丹花海
                 bgType: "peony",
-                bgImage: "https://images.unsplash.com/photo-1520763185298-1b434c919102?w=1920&q=80" // 牡丹花海圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?peony,flower,chinese" // 牡丹花海圖片，可替換為本地圖片
             },
             {
                 name: "金菱鈿",
@@ -260,7 +260,7 @@
                 scale: 1.0, yOffset: -10,
                 // 背景：大明宮詞（宮牆紅 + 金色）
                 bgType: "daming",
-                bgImage: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=1920&q=80" // 中國宮殿圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?chinese,palace,temple" // 中國宮殿圖片，可替換為本地圖片
             },
             {
                 name: "翠羽蓮",
@@ -268,7 +268,7 @@
                 scale: 1.3, yOffset: -20,
                 // 背景：江南煙雨（水墨青綠）
                 bgType: "jiangnan",
-                bgImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1920&q=80" // 江南水鄉圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?chinese,water,landscape" // 江南水鄉圖片，可替換為本地圖片
             },
             {
                 name: "蝶戀花",
@@ -276,7 +276,7 @@
                 scale: 1.4, yOffset: -15,
                 // 背景：御花園（桃花粉）
                 bgType: "garden",
-                bgImage: "https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1920&q=80" // 粉色花園圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?cherry,blossom,pink" // 粉色花園圖片，可替換為本地圖片
             },
             {
                 name: "飛天火",
@@ -285,7 +285,7 @@
                 scale: 1.1, yOffset: -12,
                 // 背景：敦煌壁畫（赭石 + 土黃）
                 bgType: "dunhuang",
-                bgImage: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1920&q=80" // 沙漠/壁畫風格圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?desert,sand,ancient" // 沙漠/壁畫風格圖片，可替換為本地圖片
             },
             {
                 name: "珍珠點",
@@ -294,7 +294,7 @@
                 scale: 0.9, yOffset: -8,
                 // 背景：月下長安（夜景）
                 bgType: "changan",
-                bgImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1920&q=80" // 夜景圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?night,city,lights" // 夜景圖片，可替換為本地圖片
             },
             {
                 name: "祥雲鈿",
@@ -303,7 +303,7 @@
                 scale: 1.3, yOffset: -18,
                 // 背景：仙境雲海
                 bgType: "cloudSea",
-                bgImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80" // 雲海圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?clouds,mountain,sky" // 雲海圖片，可替換為本地圖片
             },
             {
                 name: "鳳羽翎",
@@ -312,7 +312,7 @@
                 scale: 1.2, yOffset: -15,
                 // 背景：鳳凰台（皇家紫金）
                 bgType: "phoenix",
-                bgImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1920&q=80" // 金色/紫色宮殿圖片，可替換為本地圖片
+                bgImage: "https://source.unsplash.com/1920x1080/?golden,purple,royal" // 金色/紫色宮殿圖片，可替換為本地圖片
             }
         ];
 
@@ -356,16 +356,27 @@
                 // 載入背景圖片
                 if (asset.bgImage) {
                     const bgImg = new Image();
-                    bgImg.crossOrigin = "anonymous"; // 允許跨域圖片
-                    bgImg.src = asset.bgImage;
+                    // 嘗試設置跨域，如果失敗則不設置
+                    try {
+                        bgImg.crossOrigin = "anonymous";
+                    } catch(e) {
+                        // 某些瀏覽器可能不支持，忽略錯誤
+                    }
+                    
                     bgImg.onerror = function() {
-                        console.warn(`背景圖片載入失敗: ${asset.bgImage}，將使用漸變背景`);
+                        console.warn(`背景圖片載入失敗: ${asset.name} (${asset.bgImage})，將使用漸變背景`);
                         loadedBgImages[index] = null; // 標記為載入失敗，將使用漸變背景
                     };
+                    
                     bgImg.onload = function() {
+                        console.log(`✓ 背景圖片載入成功: ${asset.name}`);
                         loadedBgImages[index] = bgImg; // 載入成功
                     };
-                    loadedBgImages[index] = bgImg; // 先設置，等待載入
+                    
+                    // 設置 src 觸發載入
+                    bgImg.src = asset.bgImage;
+                    // 先設置為 null，等待載入完成
+                    loadedBgImages[index] = null;
                 } else {
                     loadedBgImages[index] = null; // 沒有背景圖片
                 }
@@ -402,6 +413,17 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
+            
+            // 調試信息：檢查背景圖片載入狀態
+            if (index >= 0) {
+                const bgImg = loadedBgImages[index];
+                const asset = huadianAssets[index];
+                if (bgImg && bgImg instanceof Image && bgImg.complete && bgImg.naturalWidth > 0) {
+                    console.log(`選擇花鈿: ${asset.name}，背景圖片已載入 (${bgImg.naturalWidth}x${bgImg.naturalHeight})`);
+                } else {
+                    console.log(`選擇花鈿: ${asset.name}，背景圖片未載入，將使用漸變背景`);
+                }
+            }
             // 選擇時，背景替換邏輯會在 renderLoop 中自動讀取 selectedIndex
         }
 
@@ -553,29 +575,38 @@
         function drawBackground(ctx, w, h, type, index) {
             // 優先使用背景圖片
             const bgImg = loadedBgImages[index];
-            if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
-                // 計算圖片填滿畫布的縮放比例 (cover 模式)
-                const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
-                const canvasRatio = w / h;
-                
-                let drawW, drawH, offsetX, offsetY;
-                
-                if (imgRatio > canvasRatio) {
-                    // 圖片較寬，以高度為準
-                    drawH = h;
-                    drawW = h * imgRatio;
-                    offsetX = (w - drawW) / 2;
-                    offsetY = 0;
-                } else {
-                    // 圖片較高，以寬度為準
-                    drawW = w;
-                    drawH = w / imgRatio;
-                    offsetX = 0;
-                    offsetY = (h - drawH) / 2;
+            
+            // 檢查圖片是否已載入且有效
+            if (bgImg && bgImg instanceof Image) {
+                // 檢查圖片是否完全載入
+                if (bgImg.complete && bgImg.naturalWidth > 0 && bgImg.naturalHeight > 0) {
+                    try {
+                        // 計算圖片填滿畫布的縮放比例 (cover 模式)
+                        const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
+                        const canvasRatio = w / h;
+                        
+                        let drawW, drawH, offsetX, offsetY;
+                        
+                        if (imgRatio > canvasRatio) {
+                            // 圖片較寬，以高度為準
+                            drawH = h;
+                            drawW = h * imgRatio;
+                            offsetX = (w - drawW) / 2;
+                            offsetY = 0;
+                        } else {
+                            // 圖片較高，以寬度為準
+                            drawW = w;
+                            drawH = w / imgRatio;
+                            offsetX = 0;
+                            offsetY = (h - drawH) / 2;
+                        }
+                        
+                        ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
+                        return; // 圖片載入成功，直接返回
+                    } catch (e) {
+                        console.warn(`繪製背景圖片時出錯 (${huadianAssets[index].name}): ${e.message}，將使用漸變背景`);
+                    }
                 }
-                
-                ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
-                return; // 圖片載入成功，直接返回
             }
             
             // 備用：使用原有的漸變背景（圖片未載入或載入失敗時）
