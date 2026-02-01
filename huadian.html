@@ -335,6 +335,11 @@
         let lastClickTime = 0;
         let lastHoveredElement = null;
 
+        // 唐風背景圖（從 tang-backgrounds 資料夾隨機選用）
+        let tangBgList = [];
+        let tangBgImages = [];  // 已載入的 Image 物件，與 tangBgList 對應
+        let currentBgImageIndex = -1;  // 當前隨機到的背景圖索引
+
         // --- 3. 初始化資源 ---
         function initImages() {
             const grid = document.getElementById('options-grid');
@@ -375,7 +380,34 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            // 選擇時，背景替換邏輯會在 renderLoop 中自動讀取 selectedIndex
+            // 換背景時從 tang-backgrounds 隨機選一張圖
+            const loadedIndices = tangBgImages
+                .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
+                .filter(i => i >= 0);
+            if (loadedIndices.length > 0) {
+                currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            } else {
+                currentBgImageIndex = -1;
+            }
+        }
+
+        // 載入唐風背景圖清單並預載圖片（從 tang-backgrounds 資料夾）
+        function loadTangBackgrounds() {
+            fetch('tang-backgrounds/list.json')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.images && Array.isArray(data.images)) {
+                        tangBgList = data.images;
+                        tangBgImages.length = tangBgList.length;
+                        tangBgList.forEach((entry, i) => {
+                            const img = new Image();
+                            img.onload = () => { tangBgImages[i] = img; };
+                            img.onerror = () => { /* 略過載入失敗的檔 */ };
+                            img.src = 'tang-backgrounds/' + entry.file;
+                        });
+                    }
+                })
+                .catch(() => { /* 無 list.json 時沿用漸層背景 */ });
         }
 
         // --- 4. 初始化所有模型 ---
@@ -500,9 +532,13 @@
                 canvasCtx.globalCompositeOperation = 'source-in';
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
 
-                // 3. 繪製背景：在人物之後繪製
+                // 3. 繪製背景：優先從 tang-backgrounds 隨機圖，否則用漸層
                 canvasCtx.globalCompositeOperation = 'destination-over';
-                drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
+                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
+                } else {
+                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                }
 
                 // 4. 恢復正常繪製模式 (為了之後畫花鈿)
                 canvasCtx.globalCompositeOperation = 'source-over';
@@ -522,6 +558,16 @@
         }
 
         // --- 7. 輔助繪圖函數 ---
+
+        // 以「覆蓋」方式繪製背景圖（填滿畫布，保持比例，可能裁切）
+        function drawBackgroundImage(ctx, w, h, img) {
+            if (!img || !img.naturalWidth) return;
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = Math.max(w / iw, h / ih);
+            const sw = iw * scale, sh = ih * scale;
+            const sx = (w - sw) / 2, sy = (h - sh) / 2;
+            ctx.drawImage(img, 0, 0, iw, ih, sx, sy, sw, sh);
+        }
 
         function drawBackground(ctx, w, h, type) {
             let gradient;
@@ -741,6 +787,7 @@
 
         // 啟動
         initImages();
+        loadTangBackgrounds();
         initModels();
 
     </script>
