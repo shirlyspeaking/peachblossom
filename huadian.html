@@ -422,14 +422,18 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-// 換背景時從 tang-backgrounds 隨機選一張圖
-            const loadedIndices = tangBgImages
-                .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
-                .filter(i => i >= 0);
-            if (loadedIndices.length > 0) {
-                currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            // 每次選取花鈿時，從 tang-backgrounds 資料夾隨機選用一張背景圖
+            if (index >= 0) {
+                const loadedIndices = tangBgImages
+                    .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
+                    .filter(i => i >= 0);
+                if (loadedIndices.length > 0) {
+                    currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+                } else {
+                    currentBgImageIndex = -1;
+                }
             } else {
-                currentBgImageIndex = -1;
+                currentBgImageIndex = -1; // 卸妝時清除
             }
         }
 
@@ -574,9 +578,9 @@
                 canvasCtx.globalCompositeOperation = 'source-in';
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
 
-                // 3. 繪製背景：優先從 tang-backgrounds 隨機圖，否則用漸層
+                // 3. 繪製背景：每次選取花鈿時已隨機選好一張，有圖則用圖，否則用漸層
                 canvasCtx.globalCompositeOperation = 'destination-over';
-if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
+                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
                     drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
                 } else {
                     drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
