@@ -243,7 +243,7 @@
 
     <script>
         // --- 1. 花鈿與虛擬背景配置 ---
-        // 我們使用 Canvas Gradient 來模擬唐朝場景，避免加載外部圖片出錯
+        // 每個花鈿都有對應的唐代風格背景圖片
         const huadianAssets = [
             {
                 name: "梅花妝", // 紅色花鈿
@@ -251,28 +251,32 @@
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cGF0aCBkPSJNNTAgMjAgQzYwIDAgOTAgMjAgODAgNTAgQzkwIDgwIDYwIDEwMCA1MCA4MCBDNDAgMTAwIDEwIDgwIDIwIDUwIEMxMCAyMCA0MCAwIDUwIDIwIFoiIGZpbGw9IiNjYzAwMDAiIHN0cm9rZT0ibm9uZSIgb3BhY2l0eT0iMC44NSIvPgo8L3N2Zz4=",
                 scale: 1.2, yOffset: -15,
                 // 背景：洛陽牡丹花海
-                bgType: "peony"
+                bgType: "peony",
+                bgImage: "https://picsum.photos/1920/1080?random=1" // 牡丹花海圖片，可替換為本地圖片
             },
             {
                 name: "金菱鈿",
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cGF0aCBkPSJNNTAgMTAgTDUwIDEwIEw5MCA1MCBMNTAgOTAgTDEwIDUwIFoiIGZpbGw9IiNmZmQ3MDAiIHN0cm9rZT0iI2ZmYjMwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1IiBmaWxsPSIjZmZmIiAvPgo8L3N2Zz4=",
                 scale: 1.0, yOffset: -10,
                 // 背景：大明宮詞（宮牆紅 + 金色）
-                bgType: "daming"
+                bgType: "daming",
+                bgImage: "https://picsum.photos/1920/1080?random=2" // 中國宮殿圖片，可替換為本地圖片
             },
             {
                 name: "翠羽蓮",
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cGF0aCBkPSJNNTAgMTAgQzcwIDMwIDgwIDYwIDUwIDkwIEMyMCA2MCAzMCAzMCA1MCAxMCBaIiBmaWxsPSIjMDA5OWNjIiBvcGFjaXR5PSIwLjgiLz4KICA8cGF0aCBkPSJNNTAgMTAgQzYwIDMwIDcwIDUwIDUwIDcwIEMzMCA1MCA0MCAzMCA1MCAxMCBaIiBmaWxsPSIjMDBiYmZmIiAvPgo8L3N2Zz4=",
                 scale: 1.3, yOffset: -20,
                 // 背景：江南煙雨（水墨青綠）
-                bgType: "jiangnan"
+                bgType: "jiangnan",
+                bgImage: "https://picsum.photos/1920/1080?random=3" // 江南水鄉圖片，可替換為本地圖片
             },
             {
                 name: "蝶戀花",
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cGF0aCBkPSJNNTAgNTAgQzcwIDMwIDkwIDMwIDkwIDUwIEM5MCA4MCA1MCA4MCA1MCA1MCBaIiBmaWxsPSIjZmY4MGFiIiBvcGFjaXR5PSIwLjgiIC8+CiAgPHBhdGggZD0iTTUwIDUwIEMzMCAzMCAxMCAzMCAxMCA1MCBDMTAgODAgNTAgODAgNTAgNTAgWiIgZmlsbD0iI2ZmODBhYiIgb3BhY2l0eT0iMC44IiAvPgogIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTUiIHI9IjUiIGZpbGw9IiNmZmYiIC8+Cjwvc3ZnPg==",
                 scale: 1.4, yOffset: -15,
                 // 背景：御花園（桃花粉）
-                bgType: "garden"
+                bgType: "garden",
+                bgImage: "https://picsum.photos/1920/1080?random=4" // 粉色花園圖片，可替換為本地圖片
             },
             {
                 name: "飛天火",
@@ -280,7 +284,8 @@
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAgMTAgUTcwIDUwIDkwIDYwIFE5MCA5MCA1MCA5NSBRMTAgOTAgMTAgNjAgUTMwIDUwIDUwIDEwIFoiIGZpbGw9IiNmZjM1MDUiIC8+PC9zdmc+",
                 scale: 1.1, yOffset: -12,
                 // 背景：敦煌壁畫（赭石 + 土黃）
-                bgType: "dunhuang"
+                bgType: "dunhuang",
+                bgImage: "https://picsum.photos/1920/1080?random=5" // 沙漠/壁畫風格圖片，可替換為本地圖片
             },
             {
                 name: "珍珠點",
@@ -288,7 +293,8 @@
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzNSIgZmlsbD0iI2Y4YmJkMCIgc3Ryb2tlPSIjZTkxZTYzIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSIzOCIgY3k9IjM4IiByPSIxMiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iMC42Ii8+PC9zdmc+",
                 scale: 0.9, yOffset: -8,
                 // 背景：月下長安（夜景）
-                bgType: "changan"
+                bgType: "changan",
+                bgImage: "https://picsum.photos/1920/1080?random=6" // 夜景圖片，可替換為本地圖片
             },
             {
                 name: "祥雲鈿",
@@ -296,7 +302,8 @@
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMjUgNTUgUTE1IDQ1IDI1IDM1IFE0MCAyNSA1NSAzNSBRNzAgMjUgODAgNDAgUTkwIDU1IDc1IDY1IFE2MCA3NSA0NSA2NSBRMzAgNzUgMjUgNTUgWiIgZmlsbD0iIzljMjdiMCIgb3BhY2l0eT0iMC44NSIvPjxjaXJjbGUgY3g9IjUyIiBjeT0iNTAiIHI9IjEwIiBmaWxsPSIjZTFiZWU3Ii8+PC9zdmc+",
                 scale: 1.3, yOffset: -18,
                 // 背景：仙境雲海
-                bgType: "cloudSea"
+                bgType: "cloudSea",
+                bgImage: "https://picsum.photos/1920/1080?random=7" // 雲海圖片，可替換為本地圖片
             },
             {
                 name: "鳳羽翎",
@@ -304,7 +311,8 @@
                 src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAgNSBRNzAgMjUgNzUgNTAgUTgwIDc1IDUwIDk1IFEyMCA3NSAyNSA1MCBRMzAgMjUgNTAgNSBaIiBmaWxsPSIjZmY2ZjAwIi8+PHBhdGggZD0iTTUwIDIwIFE2MCAzNSA2MiA1MCBRNjUgNjUgNTAgODAgUTM1IDY1IDM4IDUwIFE0MCAzNSA1MCAyMCBaIiBmaWxsPSIjZmZjYzgwIi8+PC9zdmc+",
                 scale: 1.2, yOffset: -15,
                 // 背景：鳳凰台（皇家紫金）
-                bgType: "phoenix"
+                bgType: "phoenix",
+                bgImage: "https://picsum.photos/1920/1080?random=8" // 金色/紫色宮殿圖片，可替換為本地圖片
             }
         ];
 
@@ -320,6 +328,7 @@
         
         let selectedIndex = -1;
         let loadedImages = [];
+        let loadedBgImages = []; // 背景圖片緩存
         
         // 核心模型
         let faceMesh, hands, selfieSegmentation;
@@ -344,9 +353,42 @@
         function initImages() {
             const grid = document.getElementById('options-grid');
             huadianAssets.forEach((asset, index) => {
+                // 載入花鈿圖片
                 const img = new Image();
                 img.src = asset.src;
                 loadedImages.push(img);
+
+                // 載入背景圖片
+                if (asset.bgImage) {
+                    const bgImg = new Image();
+                    // 嘗試設置跨域屬性（某些圖片服務需要）
+                    // 如果圖片服務不支持 CORS，這可能會導致載入失敗，但我們有錯誤處理
+                    try {
+                        bgImg.crossOrigin = "anonymous";
+                    } catch(e) {
+                        // 忽略錯誤
+                    }
+                    
+                    bgImg.onerror = function() {
+                        console.warn(`背景圖片載入失敗: ${asset.name}，URL: ${asset.bgImage}`);
+                        console.warn(`將使用漸變背景作為備用方案`);
+                        loadedBgImages[index] = null; // 標記為載入失敗，將使用漸變背景
+                    };
+                    
+                    bgImg.onload = function() {
+                        console.log(`✓ 背景圖片載入成功: ${asset.name}`);
+                        console.log(`  圖片尺寸: ${bgImg.naturalWidth}x${bgImg.naturalHeight}`);
+                        console.log(`  圖片 URL: ${asset.bgImage}`);
+                        loadedBgImages[index] = bgImg; // 載入成功，保存圖片對象
+                    };
+                    
+                    // 先設置為 null，等待載入完成
+                    loadedBgImages[index] = null;
+                    // 最後設置 src 觸發載入（必須在設置事件處理器之後）
+                    bgImg.src = asset.bgImage;
+                } else {
+                    loadedBgImages[index] = null; // 沒有背景圖片
+                }
 
                 const btn = document.createElement('div');
                 btn.className = 'huadian-btn';
@@ -380,7 +422,7 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            // 換背景時從 tang-backgrounds 隨機選一張圖
+// 換背景時從 tang-backgrounds 隨機選一張圖
             const loadedIndices = tangBgImages
                 .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
                 .filter(i => i >= 0);
@@ -534,7 +576,7 @@
 
                 // 3. 繪製背景：優先從 tang-backgrounds 隨機圖，否則用漸層
                 canvasCtx.globalCompositeOperation = 'destination-over';
-                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
+if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
                     drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
                 } else {
                     drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
@@ -559,7 +601,7 @@
 
         // --- 7. 輔助繪圖函數 ---
 
-        // 以「覆蓋」方式繪製背景圖（填滿畫布，保持比例，可能裁切）
+// 以「覆蓋」方式繪製背景圖（填滿畫布，保持比例，可能裁切）
         function drawBackgroundImage(ctx, w, h, img) {
             if (!img || !img.naturalWidth) return;
             const iw = img.naturalWidth, ih = img.naturalHeight;
