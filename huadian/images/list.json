@@ -1,0 +1,13 @@
+{
+  "description": "唐風花鈿換背景用圖，共 8 張。可將更多圖片放入此資料夾並在 images 陣列中新增項目。",
+  "images": [
+    { "name": "洛陽龍門石窟", "file": "01-longmen.jpg" },
+    { "name": "牡丹花", "file": "02-peony.jpg" },
+    { "name": "唐朝酒肆", "file": "03-tavern.jpg" },
+    { "name": "長安城", "file": "04-changan.jpg" },
+    { "name": "大明宮", "file": "05-daming.jpg" },
+    { "name": "敦煌石窟", "file": "06-dunhuang.jpg" },
+    { "name": "江南煙雨", "file": "07-jiangnan.jpg" },
+    { "name": "御花園", "file": "08-garden.jpg" }
+  ]
+}
