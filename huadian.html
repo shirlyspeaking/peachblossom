@@ -344,6 +344,11 @@
         let lastClickTime = 0;
         let lastHoveredElement = null;
 
+        // 唐風背景圖（從 tang-backgrounds 資料夾隨機選用）
+        let tangBgList = [];
+        let tangBgImages = [];  // 已載入的 Image 物件，與 tangBgList 對應
+        let currentBgImageIndex = -1;  // 當前隨機到的背景圖索引
+
         // --- 3. 初始化資源 ---
         function initImages() {
             const grid = document.getElementById('options-grid');
@@ -416,18 +421,38 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            
-            // 調試信息：檢查背景圖片載入狀態
+            // 每次選取花鈿時，從 tang-backgrounds 資料夾隨機選用一張背景圖
             if (index >= 0) {
-                const bgImg = loadedBgImages[index];
-                const asset = huadianAssets[index];
-                if (bgImg && bgImg instanceof Image && bgImg.complete && bgImg.naturalWidth > 0) {
-                    console.log(`選擇花鈿: ${asset.name}，背景圖片已載入 (${bgImg.naturalWidth}x${bgImg.naturalHeight})`);
+                const loadedIndices = tangBgImages
+                    .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
+                    .filter(i => i >= 0);
+                if (loadedIndices.length > 0) {
+                    currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
                 } else {
-                    console.log(`選擇花鈿: ${asset.name}，背景圖片未載入，將使用漸變背景`);
+                    currentBgImageIndex = -1;
                 }
+            } else {
+                currentBgImageIndex = -1; // 卸妝時清除
             }
-            // 選擇時，背景替換邏輯會在 renderLoop 中自動讀取 selectedIndex
+        }
+
+        // 載入唐風背景圖清單並預載圖片（從 tang-backgrounds 資料夾）
+        function loadTangBackgrounds() {
+            fetch('tang-backgrounds/list.json')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.images && Array.isArray(data.images)) {
+                        tangBgList = data.images;
+                        tangBgImages.length = tangBgList.length;
+                        tangBgList.forEach((entry, i) => {
+                            const img = new Image();
+                            img.onload = () => { tangBgImages[i] = img; };
+                            img.onerror = () => { /* 略過載入失敗的檔 */ };
+                            img.src = 'tang-backgrounds/' + entry.file;
+                        });
+                    }
+                })
+                .catch(() => { /* 無 list.json 時沿用漸層背景 */ });
         }
 
         // --- 4. 初始化所有模型 ---
@@ -552,9 +577,13 @@
                 canvasCtx.globalCompositeOperation = 'source-in';
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
 
-                // 3. 繪製背景：在人物之後繪製
+                // 3. 繪製背景：每次選取花鈿時已隨機選好一張，有圖則用圖，否則用漸層
                 canvasCtx.globalCompositeOperation = 'destination-over';
-                drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType, selectedIndex);
+                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
+                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
+                } else {
+                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                }
 
                 // 4. 恢復正常繪製模式 (為了之後畫花鈿)
                 canvasCtx.globalCompositeOperation = 'source-over';
@@ -579,50 +608,38 @@
             // 優先使用背景圖片
             const bgImg = loadedBgImages[index];
             
-            // 詳細檢查圖片是否已載入且有效
-            if (bgImg && bgImg instanceof Image) {
-                // 檢查圖片是否完全載入
-                if (bgImg.complete && bgImg.naturalWidth > 0 && bgImg.naturalHeight > 0) {
-                    try {
-                        // 計算圖片填滿畫布的縮放比例 (cover 模式)
-                        const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
-                        const canvasRatio = w / h;
-                        
-                        let drawW, drawH, offsetX, offsetY;
-                        
-                        if (imgRatio > canvasRatio) {
-                            // 圖片較寬，以高度為準
-                            drawH = h;
-                            drawW = h * imgRatio;
-                            offsetX = (w - drawW) / 2;
-                            offsetY = 0;
-                        } else {
-                            // 圖片較高，以寬度為準
-                            drawW = w;
-                            drawH = w / imgRatio;
-                            offsetX = 0;
-                            offsetY = (h - drawH) / 2;
-                        }
-                        
-                        // 繪製背景圖片
-                        ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
-                        
-                        // 調試信息（只在第一次繪製時輸出）
-                        if (!bgImg._drawn) {
-                            console.log(`✓ 正在繪製背景圖片: ${huadianAssets[index].name}`);
-                            bgImg._drawn = true;
-                        }
-                        return; // 圖片繪製成功，直接返回
-                    } catch (e) {
-                        console.error(`繪製背景圖片時出錯 (${huadianAssets[index].name}):`, e);
-                        console.warn(`錯誤詳情: ${e.message}，將使用漸變背景`);
+            // 檢查圖片是否已載入且有效
+            if (bgImg && bgImg instanceof Image && bgImg.complete && bgImg.naturalWidth > 0 && bgImg.naturalHeight > 0) {
+                try {
+                    // 計算圖片填滿畫布的縮放比例 (cover 模式)
+                    const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
+                    const canvasRatio = w / h;
+                    
+                    let drawW, drawH, offsetX, offsetY;
+                    
+                    if (imgRatio > canvasRatio) {
+                        // 圖片較寬，以高度為準
+                        drawH = h;
+                        drawW = h * imgRatio;
+                        offsetX = (w - drawW) / 2;
+                        offsetY = 0;
+                    } else {
+                        // 圖片較高，以寬度為準
+                        drawW = w;
+                        drawH = w / imgRatio;
+                        offsetX = 0;
+                        offsetY = (h - drawH) / 2;
                     }
-                } else {
-                    // 圖片還在載入中或載入失敗
-                    if (!bgImg._loadingLogged) {
-                        console.log(`背景圖片載入中: ${huadianAssets[index].name} (complete: ${bgImg.complete}, width: ${bgImg.naturalWidth})`);
-                        bgImg._loadingLogged = true;
+                    
+                    ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
+                    // 只在第一次成功繪製時輸出日誌（避免重複輸出）
+                    if (!bgImg._drawn) {
+                        console.log(`✓ 正在使用背景圖片: ${huadianAssets[index].name}`);
+                        bgImg._drawn = true;
                     }
+                    return; // 圖片載入成功，直接返回
+                } catch (e) {
+                    console.warn(`繪製背景圖片時出錯 (${huadianAssets[index].name}): ${e.message}，將使用漸變背景`);
                 }
             }
             
@@ -844,6 +861,7 @@
 
         // 啟動
         initImages();
+        loadTangBackgrounds();
         initModels();
 
     </script>
