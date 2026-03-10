@@ -245,6 +245,10 @@
             background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
         }
 
+        .app-icon.smartread {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        }
+
         .app-icon.coming-soon {
             background: linear-gradient(135deg, var(--rose-gold) 0%, #d4a5b9 100%);
             border: 2px dashed rgba(142, 33, 87, 0.3);
@@ -404,6 +408,7 @@
         .app-card:nth-child(2) { animation-delay: 0.2s; }
         .app-card:nth-child(3) { animation-delay: 0.3s; }
         .app-card:nth-child(4) { animation-delay: 0.4s; }
+        .app-card:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             from {
@@ -541,6 +546,19 @@
                     <span class="tag">唐風美學</span>
                 </div>
                 <span class="app-button primary">立即體驗</span>
+            </a>
+
+            <!-- 智閱 SmartRead - 已上線 -->
+            <a href="smartread/" class="app-card" style="text-decoration: none;">
+                <div class="app-icon smartread">📖</div>
+                <h2 class="app-name">智閱 SmartRead</h2>
+                <p class="app-desc">中學生閱讀平台。AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀，讓學習更輕鬆有趣。</p>
+                <div class="app-tags">
+                    <span class="tag">AI 閱讀</span>
+                    <span class="tag">語音朗讀</span>
+                    <span class="tag">教育</span>
+                </div>
+                <span class="app-button primary">進入閱讀</span>
             </a>
 
             <!-- 即將推出 - 佔位卡片 -->

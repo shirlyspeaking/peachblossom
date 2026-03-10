@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智閱 SmartRead - 中學生閱讀平台</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Kaiti", "STKaiti", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 480px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .icon { font-size: 4rem; margin-bottom: 20px; }
+        h1 { font-size: 1.8rem; color: #0369a1; margin-bottom: 12px; }
+        p { color: #64748b; line-height: 1.7; margin-bottom: 24px; }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+        .hint {
+            margin-top: 24px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .hint code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📖</div>
+        <h1>智閱 SmartRead</h1>
+        <p>中學生閱讀平台 · AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀</p>
+        <a href="http://localhost:3000" class="btn" id="launchBtn">啟動智閱</a>
+        <p class="hint">若尚未啟動，請在終端機執行：<br><code>cd smartread && npm install && npm run dev</code><br>然後訪問 <a href="http://localhost:3000" style="color:#0ea5e9">http://localhost:3000</a></p>
+    </div>
+    <script>
+        document.getElementById('launchBtn').addEventListener('click', function(e) {
+            window.open('http://localhost:3000', '_self');
+        });
+    </script>
+</body>
+</html>
