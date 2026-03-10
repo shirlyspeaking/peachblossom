@@ -73,7 +73,12 @@
         const RSS_SOURCES = [
             { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
             { name: '科技新報', url: 'https://technews.tw/feed', desc: '科技產業動態' },
-            { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' }
+            { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' },
+            { name: '三聯生活周刊', url: 'http://app.lifeweek.com.cn/rss.php?catid=1', desc: '文化、生活、深度報導' },
+            { name: '運動去', url: 'https://feeds.feedburner.com/go-sport', desc: '運動健身、體育資訊' },
+            { name: '運動視界', url: 'https://www.sportsv.net/feed', desc: '運動賽事、體育評論' },
+            { name: '台視娛樂', url: 'https://www.ttv.com.tw/rss/RSSHandler.ashx?d=news&t=F', desc: '娛樂新聞' },
+            { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' }
         ];
 
         const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
@@ -81,9 +86,12 @@
         const FALLBACK_ARTICLES = [
             { title: '黑洞如何形成？從恆星死亡到時空扭曲', source: '科學人', summary: '黑洞是宇宙中最神秘的天體。當大質量恆星耗盡燃料後，核心會發生引力坍縮，若超過約 3 倍太陽質量，就會形成黑洞。黑洞邊界稱為「事件視界」，一旦跨越就無法逃脫。科學家透過觀察黑洞對周圍物質的影響，以及 2019 年公布的首張黑洞影像，逐步揭開其神秘面紗。', link: '#', date: '' },
             { title: 'AI 如何改變我們的學習方式', source: '科技新報', summary: '人工智慧正在重塑教育。AI 可根據學生進度提供個人化學習路徑，智能系統能即時回答疑問並給予針對性講解。此外，AI 協助教師批改作業、分析學習數據。未來 AI 與教育的結合將更緊密，為學生創造更好的學習體驗。', link: '#', date: '' },
-            { title: '氣候變遷下的極地生態', source: '環境資訊中心', summary: '氣候變遷嚴重威脅極地生態。北極海冰逐年減少，北極熊生存空間受壓縮；南極企鵝也面臨棲地縮小與食物減少。科學家指出，減少化石燃料、保護森林、採取永續生活方式，都是我們能做的具體行動。每個人的小小改變，都能為地球帶來正面影響。', link: '#', date: '' },
-            { title: '量子電腦：下一代運算革命', source: '科學人', summary: '量子電腦利用疊加與糾纏特性，讓量子位元可同時處於多種狀態。這使量子電腦在密碼破解、藥物研發模擬、優化計算等問題上具有超越傳統電腦的潛力。目前各國正積極投入研發，這場運算革命正在進行中。', link: '#', date: '' },
-            { title: '鄭和下西洋：明朝的海上絲路', source: '國家地理', summary: '十五世紀初，鄭和率領龐大船隊七次遠航西洋。船隊規模空前，最大寶船據說長達百公尺。遠航目的包括宣揚國威、發展貿易、建立外交。船隊曾到達東南亞、印度、阿拉伯半島與東非。鄭和下西洋比歐洲大航海時代早數十年，是人類航海史上的重要篇章。', link: '#', date: '' }
+            { title: '一本雜誌和他倡導的生活', source: '三聯生活周刊', summary: '三聯生活周刊以深度報導與文化評論見長，涵蓋封面故事、文化藝術、經濟社會、時尚生活等面向。每期以專題形式深入探討當代議題，為讀者提供有品質的閱讀體驗與生活思考。', link: 'https://www.lifeweek.com.cn/', date: '' },
+            { title: '跑步新手入門：從零開始的訓練計畫', source: '運動去', summary: '跑步是門檻最低的運動之一。新手可從快走開始，逐步加入慢跑間歇。建議每週三次、每次 20 至 30 分鐘，配合適當的熱身與收操，避免運動傷害。持之以恆，你也能享受跑步帶來的健康與樂趣。', link: 'https://go-sport.tw/', date: '' },
+            { title: 'NBA 季後賽：球星如何在高壓下發揮', source: '運動視界', summary: '季後賽的強度與張力遠超例行賽。頂尖球星如何在關鍵時刻保持專注、克服壓力？心理素質、團隊信任與戰術執行缺一不可。回顧經典戰役，看見運動員超越自我的瞬間。', link: 'https://www.sportsv.net/', date: '' },
+            { title: '金曲獎背後的音樂產業變遷', source: '台視娛樂', summary: '金曲獎見證了華語音樂的發展軌跡。從實體唱片到串流時代，音樂產業經歷巨大轉型。獨立音樂崛起、跨域合作增加，頒獎典禮不僅是榮耀時刻，更是產業趨勢的縮影。', link: 'https://www.ttv.com.tw/', date: '' },
+            { title: '氣候變遷下的極地生態', source: '環境資訊中心', summary: '氣候變遷嚴重威脅極地生態。北極海冰逐年減少，北極熊生存空間受壓縮；南極企鵝也面臨棲地縮小與食物減少。科學家指出，減少化石燃料、保護森林、採取永續生活方式，都是我們能做的具體行動。', link: '#', date: '' },
+            { title: '鄭和下西洋：明朝的海上絲路', source: '國家地理', summary: '十五世紀初，鄭和率領龐大船隊七次遠航西洋。船隊規模空前，最大寶船據說長達百公尺。遠航目的包括宣揚國威、發展貿易、建立外交。船隊曾到達東南亞、印度、阿拉伯半島與東非。', link: '#', date: '' }
         ];
 
         function stripHtml(html) {
@@ -110,18 +118,23 @@
             try {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(xmlText, 'text/xml');
-                const entries = doc.querySelectorAll('item');
+                let entries = doc.querySelectorAll('item');
+                if (entries.length === 0) entries = doc.querySelectorAll('entry');
                 entries.forEach((el, i) => {
-                    if (i >= 5) return;
+                    if (i >= 4) return;
                     const title = el.querySelector('title')?.textContent?.trim() || '';
-                    const link = el.querySelector('link')?.textContent?.trim() || '#';
-                    const desc = el.querySelector('description')?.textContent?.trim() || '';
-                    const pubDate = el.querySelector('pubDate')?.textContent?.trim() || '';
-                    if (title && desc) {
+                    const linkEl = el.querySelector('link');
+                    const link = linkEl?.getAttribute?.('href') || linkEl?.textContent?.trim() || '#';
+                    const desc = el.querySelector('description')?.textContent?.trim() 
+                        || el.querySelector('content')?.textContent?.trim() 
+                        || el.querySelector('summary')?.textContent?.trim() || '';
+                    const pubDate = el.querySelector('pubDate')?.textContent?.trim() 
+                        || el.querySelector('updated')?.textContent?.trim() || '';
+                    if (title && (desc || title)) {
                         items.push({
                             title,
-                            link,
-                            summary: createSummary(desc, SUMMARY_LENGTH),
+                            link: link,
+                            summary: createSummary(desc || title, SUMMARY_LENGTH),
                             date: pubDate
                         });
                     }
@@ -152,7 +165,7 @@
             }
             if (all.length === 0) all = FALLBACK_ARTICLES;
             all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            return all.slice(0, 10);
+            return all.slice(0, 15);
         }
 
         function esc(s) {
