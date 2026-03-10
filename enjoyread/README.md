@@ -1,4 +1,4 @@
-# 智閱 SmartRead — 中學生閱讀平台
+# 悅讀 EnjoyRead — 中學生閱讀平台
 
 整合 AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀的現代化教育平台。
 
@@ -15,7 +15,7 @@
 ## 快速開始
 
 ```bash
-cd smartread
+cd enjoyread
 npm install
 cp .env.example .env.local
 # 編輯 .env.local 填入 API Key

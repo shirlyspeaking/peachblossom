@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "智閱 SmartRead - 中學生閱讀平台",
+  title: "悅讀 EnjoyRead - 中學生閱讀平台",
   description: "整合 AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀的現代化教育平台",
 };
 

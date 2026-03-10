@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("smartread-theme") as Theme | null;
+    const stored = localStorage.getItem("enjoyread-theme") as Theme | null;
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initial = stored || (prefersDark ? "dark" : "light");
     setThemeState(initial);
@@ -27,14 +27,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = React.useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem("smartread-theme", newTheme);
+    localStorage.setItem("enjoyread-theme", newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   }, []);
 
   const toggleTheme = React.useCallback(() => {
     setThemeState((prev) => {
       const next = prev === "light" ? "dark" : "light";
-      localStorage.setItem("smartread-theme", next);
+      localStorage.setItem("enjoyread-theme", next);
       document.documentElement.classList.toggle("dark", next === "dark");
       return next;
     });

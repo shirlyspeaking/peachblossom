@@ -1,6 +1,6 @@
 const STORAGE_KEYS = {
-  READ_ARTICLES: "smartread-read-articles",
-  QUIZ_SCORES: "smartread-quiz-scores",
+  READ_ARTICLES: "enjoyread-read-articles",
+  QUIZ_SCORES: "enjoyread-quiz-scores",
 } as const;
 
 export interface ReadRecord {

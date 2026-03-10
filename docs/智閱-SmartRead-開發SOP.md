@@ -1,4 +1,4 @@
-# 智閱 (SmartRead) 中學生閱讀平台 — Cursor 開發 SOP
+# 悅讀 (EnjoyRead) 中學生閱讀平台 — Cursor 開發 SOP
 
 ## 專案目標
 
@@ -206,7 +206,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ## 專案結構建議
 
 ```
-smartread/
+enjoyread/
 ├── app/
 │   ├── api/
 │   │   ├── search/
@@ -230,4 +230,4 @@ smartread/
 
 ---
 
-*本 SOP 適用於使用 Cursor IDE 進行智閱平台開發，可依實際需求調整各階段 Prompt。*
+*本 SOP 適用於使用 Cursor IDE 進行悅讀平台開發，可依實際需求調整各階段 Prompt。*
