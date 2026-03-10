@@ -201,7 +201,7 @@
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}">
+                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 語音朗讀摘要" data-stop-text="⏸ 停止朗讀">
                         🔊 語音朗讀摘要
                     </button>
                 </div>
@@ -211,26 +211,38 @@
         }
 
         let articles = [];
-        let currentUtterance = null;
+        let currentPlayingIdx = -1;
 
         function readSummary(idx) {
             if (!('speechSynthesis' in window)) {
                 alert('您的瀏覽器不支援語音朗讀');
                 return;
             }
-            speechSynthesis.cancel();
             const btn = document.getElementById('ttsBtn' + idx);
+            if (currentPlayingIdx === idx) {
+                speechSynthesis.cancel();
+                currentPlayingIdx = -1;
+                btn.classList.remove('playing');
+                btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要';
+                return;
+            }
+            speechSynthesis.cancel();
+            currentPlayingIdx = idx;
             const summary = articles[idx]?.summary;
             if (!summary) return;
 
-            document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('playing'));
+            document.querySelectorAll('.tts-btn').forEach(b => {
+                b.classList.remove('playing');
+                b.textContent = b.dataset.defaultText || '🔊 語音朗讀摘要';
+            });
             btn.classList.add('playing');
+            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
 
             const u = new SpeechSynthesisUtterance(summary);
             u.lang = 'zh-TW';
             u.rate = 1;
-            u.onend = () => btn.classList.remove('playing');
-            u.onerror = () => btn.classList.remove('playing');
+            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
+            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
             speechSynthesis.speak(u);
         }
 
