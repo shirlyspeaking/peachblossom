@@ -3,223 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>悅讀 EnjoyRead - 中學生閱讀平台</title>
+    <title>悅讀 EnjoyRead - 最新有趣文章</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
-        .navbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
-        .logo { font-size: 1.25rem; font-weight: 600; color: #0284c7; }
-        .search-input { flex: 1; max-width: 400px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-        .hero { text-align: center; padding: 48px 20px; }
-        .hero h1 { font-size: 2rem; margin-bottom: 12px; color: #0c4a6e; }
-        .hero p { color: #64748b; margin-bottom: 24px; }
-        .hero-search { display: flex; gap: 8px; max-width: 480px; margin: 0 auto 32px; }
-        .hero-search input { flex: 1; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .btn { padding: 10px 20px; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
-        .btn:hover { background: #0284c7; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: box-shadow 0.2s; }
-        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .card-source { font-size: 0.75rem; color: #0ea5e9; margin-bottom: 8px; }
-        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
-        .card-summary { font-size: 0.9rem; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
-        .card-meta { font-size: 0.8rem; color: #94a3b8; margin-bottom: 16px; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #0ea5e9; text-decoration: none; }
-        .back-link:hover { text-decoration: underline; }
-        .article-layout { display: grid; grid-template-columns: 1fr 360px; gap: 32px; }
-        @media (max-width: 900px) { .article-layout { grid-template-columns: 1fr; } }
-        .article-content { background: #fff; padding: 24px; border-radius: 12px; line-height: 1.8; }
-        .quiz-section { background: #fff; padding: 24px; border-radius: 12px; }
-        .quiz-section h3 { margin-bottom: 16px; }
-        .quiz-option { display: block; width: 100%; padding: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
-        .quiz-option:hover { background: #f1f5f9; }
-        .tts-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .tts-bar select { padding: 6px 10px; border-radius: 6px; }
-        .highlight { background: #bae6fd; padding: 0 2px; }
-        .hidden { display: none !important; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #1e293b; min-height: 100vh; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+        .logo { font-size: 1.25rem; font-weight: 600; color: #0284c7; text-decoration: none; }
+        .logo:hover { color: #0369a1; }
+        .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+        .page-title { font-size: 1.75rem; color: #0c4a6e; margin-bottom: 8px; }
+        .page-desc { color: #64748b; margin-bottom: 32px; line-height: 1.6; }
+        .article-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            transition: box-shadow 0.2s;
+        }
+        .article-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .article-source { font-size: 0.8rem; color: #0ea5e9; font-weight: 500; margin-bottom: 8px; }
+        .article-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #0f172a; }
+        .article-summary { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 16px; }
+        .article-meta { font-size: 0.8rem; color: #94a3b8; margin-bottom: 16px; }
+        .tts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .tts-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35); }
+        .tts-btn.playing { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        .loading { text-align: center; padding: 48px; color: #64748b; }
+        .loading-spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg { background: #fef2f2; color: #b91c1c; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
+        .refresh-btn { margin-top: 16px; padding: 8px 16px; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
-        <input type="text" class="search-input" id="navSearch" placeholder="搜尋文章...">
-        <button class="btn" onclick="doSearch()">搜尋</button>
     </nav>
 
-    <div id="homeView" class="container">
-        <section class="hero">
-            <h1>探索知識，輕鬆閱讀</h1>
-            <p>輸入關鍵字，發現適合中學生的優質文章</p>
-            <div class="hero-search">
-                <input type="text" id="heroSearch" placeholder="試試：黑洞、AI、鄭和下西洋...">
-                <button class="btn" onclick="doSearch()">搜尋</button>
-            </div>
-        </section>
-        <h2 style="margin-bottom: 20px;">熱門文章</h2>
-        <div class="grid" id="articleGrid"></div>
-    </div>
+    <div class="container">
+        <h1 class="page-title">最新 · 最有趣的文章</h1>
+        <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
 
-    <div id="articleView" class="container hidden">
-        <a href="#" class="back-link" onclick="showHome(); return false;">← 返回文章列表</a>
-        <div class="article-layout">
-            <div>
-                <div class="tts-bar">
-                    <button class="btn" id="ttsBtn" onclick="toggleTts()">🔊 語音朗讀</button>
-                    <label>語速：<select id="ttsSpeed"><option value="0.8">0.8x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option></select></label>
-                </div>
-                <div class="article-content" id="articleContent"></div>
-            </div>
-            <div class="quiz-section">
-                <h3>理解測驗</h3>
-                <div id="quizArea"></div>
-                <div id="quizScore" class="hidden" style="margin-top: 16px; padding: 16px; background: #f0f9ff; border-radius: 8px;"></div>
+        <div id="contentArea">
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>正在搜集最新文章...</p>
             </div>
         </div>
     </div>
 
     <script>
-        const MOCK_ARTICLES = [
-            { id: "1", title: "黑洞如何形成？從恆星死亡到時空扭曲", summary: "探索宇宙中最神秘的天體——黑洞。從恆星的生命週期到引力坍縮，了解黑洞形成的科學原理。", source: "科學人", url: "#", readTime: 8, category: "科學",
-              fullText: "黑洞是宇宙中最神秘的天體之一。當一顆質量足夠大的恆星在生命末期耗盡核燃料後，核心會發生引力坍縮。如果恆星質量超過約 3 倍太陽質量，沒有任何力量能阻止坍縮，最終形成黑洞。黑洞的邊界稱為「事件視界」，一旦物質或光線跨越這個邊界，就無法逃脫。黑洞會扭曲周圍的時空，產生強大的引力效應。科學家透過觀察黑洞對周圍恆星和氣體的影響，以及 2019 年公布的首張黑洞影像，逐步揭開黑洞的神秘面紗。",
-              questions: [{ q: "黑洞的邊界稱為什麼？", options: ["A. 事件視界", "B. 光速邊界", "C. 引力圈", "D. 時空邊界"], correct: 0, exp: "事件視界是黑洞的邊界，一旦跨越就無法逃脫。" }, { q: "恆星質量超過幾倍太陽質量可能形成黑洞？", options: ["A. 1 倍", "B. 2 倍", "C. 3 倍", "D. 5 倍"], correct: 2, exp: "約 3 倍太陽質量以上的恆星，核心坍縮後可能形成黑洞。" }, { q: "首張黑洞影像於哪一年公布？", options: ["A. 2017", "B. 2018", "C. 2019", "D. 2020"], correct: 2, exp: "2019 年事件視界望遠鏡團隊公布了首張黑洞影像。" }] },
-            { id: "2", title: "AI 如何改變我們的學習方式", summary: "人工智慧正在重塑教育領域。從個人化學習到智能輔助，看看 AI 如何幫助學生更有效學習。", source: "科技新報", url: "#", readTime: 6, category: "科技",
-              fullText: "人工智慧正在重塑教育領域。AI 可以根據每個學生的學習進度，提供個人化的學習路徑與練習題。智能輔助系統能夠即時回答學生的疑問，並根據錯誤類型給予針對性講解。此外，AI 還能協助教師批改作業、分析學習數據，讓教學更有效率。未來，AI 與教育的結合將更加緊密，為學生創造更好的學習體驗。",
-              questions: [{ q: "AI 如何幫助學生學習？", options: ["A. 僅批改作業", "B. 個人化學習路徑", "C. 取代教師", "D. 僅用於考試"], correct: 1, exp: "AI 可根據學生進度提供個人化學習路徑與練習。" }, { q: "AI 對教師的幫助不包括？", options: ["A. 批改作業", "B. 分析學習數據", "C. 完全取代教學", "D. 即時回答學生疑問"], correct: 2, exp: "AI 是輔助工具，不會完全取代教師的教學角色。" }] },
-            { id: "3", title: "鄭和下西洋：明朝的海上絲路", summary: "十五世紀初，鄭和率領龐大船隊七次遠航，開創了人類航海史上的壯舉。回顧這段輝煌歷史。", source: "國家地理", url: "#", readTime: 10, category: "歷史",
-              fullText: "十五世紀初，明朝宦官鄭和奉命率領龐大船隊七次遠航西洋。船隊規模空前，最大的寶船據說長達一百多公尺。鄭和遠航的目的包括宣揚國威、發展貿易、以及建立外交關係。船隊曾到達東南亞、印度、阿拉伯半島，甚至東非沿岸。鄭和下西洋比歐洲大航海時代早了數十年，是人類航海史上的重要篇章。",
-              questions: [{ q: "鄭和共幾次遠航西洋？", options: ["A. 五次", "B. 六次", "C. 七次", "D. 八次"], correct: 2, exp: "鄭和共七次率領船隊遠航西洋。" }, { q: "鄭和遠航的主要目的不包括？", options: ["A. 宣揚國威", "B. 發展貿易", "C. 殖民擴張", "D. 建立外交"], correct: 2, exp: "鄭和遠航以和平交往為主，並非殖民擴張。" }] },
-            { id: "4", title: "氣候變遷下的極地生態", summary: "北極熊、企鵝的棲息地正在消失。了解氣候變遷如何影響極地生態系統，以及我們能做些什麼。", source: "環境資訊中心", url: "#", readTime: 7, category: "社會",
-              fullText: "氣候變遷正嚴重威脅極地生態。北極海冰逐年減少，北極熊的生存空間受到壓縮。南極的企鵝也面臨著棲息地縮小與食物來源減少的問題。科學家指出，減少化石燃料使用、保護森林、以及採取永續生活方式，都是我們可以對抗氣候變遷的具體行動。每個人的小小改變，都能為地球帶來正面影響。",
-              questions: [{ q: "北極熊面臨的主要威脅是什麼？", options: ["A. 獵捕", "B. 海冰減少", "C. 食物過多", "D. 天敵增加"], correct: 1, exp: "北極海冰減少導致北極熊的生存空間受到壓縮。" }, { q: "對抗氣候變遷的具體行動不包括？", options: ["A. 減少化石燃料", "B. 保護森林", "C. 增加工業排放", "D. 永續生活"], correct: 2, exp: "增加工業排放會加劇氣候變遷，應減少而非增加。" }] },
-            { id: "5", title: "量子電腦：下一代運算革命", summary: "量子位元、疊加態、糾纏——這些概念如何讓量子電腦在特定任務上超越傳統電腦？", source: "科學人", url: "#", readTime: 9, category: "科技",
-              fullText: "量子電腦利用量子力學的疊加與糾纏特性，讓量子位元可以同時處於多種狀態。這使得量子電腦在特定問題上，例如密碼破解、藥物研發模擬、優化計算等，具有超越傳統電腦的潛力。目前各國正積極投入量子電腦的研發，這場運算革命正在悄然進行中。",
-              questions: [{ q: "量子位元利用什麼特性？", options: ["A. 僅加法", "B. 疊加與糾纏", "C. 僅儲存", "D. 僅傳輸"], correct: 1, exp: "量子疊加與糾纏是量子電腦的核心特性。" }, { q: "量子電腦擅長的領域不包括？", options: ["A. 密碼破解", "B. 藥物模擬", "C. 文書處理", "D. 優化計算"], correct: 2, exp: "文書處理是傳統電腦的日常應用，非量子電腦優勢。" }] },
-            { id: "6", title: "民主制度的起源與演變", summary: "從古希臘雅典到現代代議民主，追溯民主思想的發展歷程與當代挑戰。", source: "天下雜誌", url: "#", readTime: 12, category: "社會",
-              fullText: "民主制度起源於古希臘雅典，當時公民可直接參與政治決策。現代民主多採代議制，由人民選出代表行使權力。民主的核心價值包括自由、平等、人權與法治。當代民主面臨假資訊、極端主義等挑戰，需要公民積極參與與理性思考，才能讓民主制度持續運作。",
-              questions: [{ q: "民主制度最早起源於哪裡？", options: ["A. 羅馬", "B. 古希臘雅典", "C. 英國", "D. 美國"], correct: 1, exp: "古希臘雅典是民主制度的發源地。" }, { q: "現代民主多採何種制度？", options: ["A. 直接民主", "B. 代議制", "C. 君主制", "D. 獨裁制"], correct: 1, exp: "現代國家多採代議民主，由人民選出代表。" }] }
+        const SUMMARY_LENGTH = 150; // 約 150 字
+
+        const RSS_SOURCES = [
+            { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
+            { name: '科技新報', url: 'https://technews.tw/feed', desc: '科技產業動態' },
+            { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' }
         ];
 
-        let articles = [...MOCK_ARTICLES];
-        let currentArticle = null;
-        let synth = null;
-        let isPlaying = false;
+        const CORS_PROXIES = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?'
+        ];
 
-        function renderCards() {
-            const grid = document.getElementById('articleGrid');
-            grid.innerHTML = articles.map(a => `
-                <div class="card" onclick="openArticle('${a.id}')" style="cursor:pointer">
-                    <div class="card-source">${a.source}</div>
-                    <div class="card-title">${a.title}</div>
-                    <div class="card-summary">${a.summary}</div>
-                    <div class="card-meta">約 ${a.readTime} 分鐘</div>
-                    <button class="btn">進入導讀</button>
-                </div>
-            `).join('');
+        const FALLBACK_ARTICLES = [
+            { title: '黑洞如何形成？從恆星死亡到時空扭曲', source: '科學人', summary: '黑洞是宇宙中最神秘的天體。當大質量恆星耗盡燃料後，核心會發生引力坍縮，若超過約 3 倍太陽質量，就會形成黑洞。黑洞邊界稱為「事件視界」，一旦跨越就無法逃脫。科學家透過觀察黑洞對周圍物質的影響，以及 2019 年公布的首張黑洞影像，逐步揭開其神秘面紗。', link: '#', date: '' },
+            { title: 'AI 如何改變我們的學習方式', source: '科技新報', summary: '人工智慧正在重塑教育。AI 可根據學生進度提供個人化學習路徑，智能系統能即時回答疑問並給予針對性講解。此外，AI 協助教師批改作業、分析學習數據。未來 AI 與教育的結合將更緊密，為學生創造更好的學習體驗。', link: '#', date: '' },
+            { title: '氣候變遷下的極地生態', source: '環境資訊中心', summary: '氣候變遷嚴重威脅極地生態。北極海冰逐年減少，北極熊生存空間受壓縮；南極企鵝也面臨棲地縮小與食物減少。科學家指出，減少化石燃料、保護森林、採取永續生活方式，都是我們能做的具體行動。每個人的小小改變，都能為地球帶來正面影響。', link: '#', date: '' },
+            { title: '量子電腦：下一代運算革命', source: '科學人', summary: '量子電腦利用疊加與糾纏特性，讓量子位元可同時處於多種狀態。這使量子電腦在密碼破解、藥物研發模擬、優化計算等問題上具有超越傳統電腦的潛力。目前各國正積極投入研發，這場運算革命正在進行中。', link: '#', date: '' },
+            { title: '鄭和下西洋：明朝的海上絲路', source: '國家地理', summary: '十五世紀初，鄭和率領龐大船隊七次遠航西洋。船隊規模空前，最大寶船據說長達百公尺。遠航目的包括宣揚國威、發展貿易、建立外交。船隊曾到達東南亞、印度、阿拉伯半島與東非。鄭和下西洋比歐洲大航海時代早數十年，是人類航海史上的重要篇章。', link: '#', date: '' }
+        ];
+
+        function stripHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html || '';
+            return div.textContent || div.innerText || '';
         }
 
-        function doSearch() {
-            const q = (document.getElementById('heroSearch')?.value || document.getElementById('navSearch')?.value || '').toLowerCase();
-            articles = q ? MOCK_ARTICLES.filter(a => 
-                a.title.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q) || (a.source||'').toLowerCase().includes(q)
-            ) : [...MOCK_ARTICLES];
-            renderCards();
-        }
-
-        function showHome() {
-            document.getElementById('homeView').classList.remove('hidden');
-            document.getElementById('articleView').classList.add('hidden');
-            if (synth && isPlaying) { synth.cancel(); isPlaying = false; }
-        }
-
-        function openArticle(id) {
-            answers = {};
-            currentArticle = MOCK_ARTICLES.find(a => a.id === id);
-            if (!currentArticle) return;
-            document.getElementById('homeView').classList.add('hidden');
-            document.getElementById('articleView').classList.remove('hidden');
-
-            const content = document.getElementById('articleContent');
-            const sentences = currentArticle.fullText.split(/(?<=[。！？])/).filter(s => s.trim());
-            content.innerHTML = sentences.map((s, i) => 
-                `<span class="sentence" data-idx="${i}">${s}</span>`
-            ).join('');
-
-            const quizArea = document.getElementById('quizArea');
-            quizArea.innerHTML = currentArticle.questions.map((q, qi) => `
-                <div style="margin-bottom:20px">
-                    <p style="font-weight:600; margin-bottom:8px">${q.q}</p>
-                    ${q.options.map((o, oi) => 
-                        `<button class="quiz-option" onclick="answerQuiz(${qi}, ${oi})" data-qi="${qi}" data-oi="${oi}">${o}</button>`
-                    ).join('')}
-                    <div class="quiz-explanation hidden" id="exp-${qi}" style="margin-top:8px; padding:8px; background:#f1f5f9; border-radius:6px; font-size:0.9rem"></div>
-                </div>
-            `).join('');
-
-            document.getElementById('quizScore').classList.add('hidden');
-            document.getElementById('ttsBtn').textContent = '🔊 語音朗讀';
-        }
-
-        let answers = {};
-        function answerQuiz(qi, oi) {
-            if (answers[qi] !== undefined) return;
-            answers[qi] = oi;
-            const q = currentArticle.questions[qi];
-            const expEl = document.getElementById(`exp-${qi}`);
-            expEl.textContent = '解析：' + q.exp;
-            expEl.classList.remove('hidden');
-            document.querySelectorAll(`[data-qi="${qi}"]`).forEach(btn => {
-                btn.disabled = true;
-                if (parseInt(btn.dataset.oi) === q.correct) btn.style.background = '#dcfce7';
-                else if (parseInt(btn.dataset.oi) === oi && oi !== q.correct) btn.style.background = '#fee2e2';
-            });
-            const total = currentArticle.questions.length;
-            const correct = Object.keys(answers).filter(k => answers[k] === currentArticle.questions[k].correct).length;
-            if (Object.keys(answers).length === total) {
-                const scoreEl = document.getElementById('quizScore');
-                scoreEl.innerHTML = `得分：${correct} / ${total} (${Math.round(correct/total*100)}%)`;
-                scoreEl.classList.remove('hidden');
+        function createSummary(text, maxLen) {
+            const clean = stripHtml(text).replace(/\s+/g, ' ').trim();
+            if (clean.length <= maxLen) return clean;
+            let cut = clean.slice(0, maxLen);
+            const lastPunct = cut.search(/[。！？]$/);
+            if (lastPunct === -1) {
+                const lastComma = cut.lastIndexOf('，');
+                if (lastComma > maxLen * 0.5) cut = cut.slice(0, lastComma + 1);
+                else cut = cut + '…';
             }
+            return cut;
         }
 
-        function toggleTts() {
-            if (!('speechSynthesis' in window)) { alert('您的瀏覽器不支援語音朗讀'); return; }
-            if (isPlaying) {
-                speechSynthesis.cancel();
-                isPlaying = false;
-                document.getElementById('ttsBtn').textContent = '🔊 語音朗讀';
-                document.querySelectorAll('.sentence').forEach(s => s.classList.remove('highlight'));
+        function parseRssXml(xmlText) {
+            const items = [];
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlText, 'text/xml');
+                const entries = doc.querySelectorAll('item');
+                entries.forEach((el, i) => {
+                    if (i >= 5) return;
+                    const title = el.querySelector('title')?.textContent?.trim() || '';
+                    const link = el.querySelector('link')?.textContent?.trim() || '#';
+                    const desc = el.querySelector('description')?.textContent?.trim() || '';
+                    const pubDate = el.querySelector('pubDate')?.textContent?.trim() || '';
+                    if (title && desc) {
+                        items.push({
+                            title,
+                            link,
+                            summary: createSummary(desc, SUMMARY_LENGTH),
+                            date: pubDate
+                        });
+                    }
+                });
+            } catch (e) { console.warn('RSS parse error', e); }
+            return items;
+        }
+
+        async function fetchRss(source) {
+            for (const proxy of CORS_PROXIES) {
+                const proxyUrl = proxy === CORS_PROXIES[1] 
+                    ? proxy + encodeURIComponent(source.url) 
+                    : proxy + encodeURIComponent(source.url);
+                try {
+                    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+                    const text = await res.text();
+                    const items = parseRssXml(text);
+                    if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
+                } catch (e) { continue; }
+            }
+            return [];
+        }
+
+        async function loadArticles() {
+            let all = [];
+            for (const src of RSS_SOURCES) {
+                const items = await fetchRss(src);
+                all = all.concat(items);
+            }
+            if (all.length === 0) all = FALLBACK_ARTICLES;
+            all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            return all.slice(0, 10);
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        function renderArticles(articles) {
+            const html = articles.map((a, idx) => {
+                const titleHtml = a.link && a.link !== '#' 
+                    ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(a.title)}</a>` 
+                    : esc(a.title);
+                return `
+                <div class="article-card" data-idx="${idx}">
+                    <div class="article-source">${esc(a.source)}</div>
+                    <h2 class="article-title">${titleHtml}</h2>
+                    <p class="article-summary">${esc(a.summary)}</p>
+                    <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
+                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}">
+                        🔊 語音朗讀摘要
+                    </button>
+                </div>
+            `;
+            }).join('');
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        let articles = [];
+        let currentUtterance = null;
+
+        function readSummary(idx) {
+            if (!('speechSynthesis' in window)) {
+                alert('您的瀏覽器不支援語音朗讀');
                 return;
             }
-            const u = new SpeechSynthesisUtterance(currentArticle.fullText);
-            u.rate = parseFloat(document.getElementById('ttsSpeed').value);
+            speechSynthesis.cancel();
+            const btn = document.getElementById('ttsBtn' + idx);
+            const summary = articles[idx]?.summary;
+            if (!summary) return;
+
+            document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('playing'));
+            btn.classList.add('playing');
+
+            const u = new SpeechSynthesisUtterance(summary);
             u.lang = 'zh-TW';
-            const sentences = currentArticle.fullText.split(/(?<=[。！？])/).filter(s => s.trim());
-            let charCount = 0;
-            u.onboundary = (e) => {
-                if (e.charIndex > 0) {
-                    let c = 0;
-                    for (let i = 0; i < sentences.length; i++) {
-                        c += sentences[i].length;
-                        if (c >= e.charIndex) {
-                            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('highlight'));
-                            const el = document.querySelector(`.sentence[data-idx="${i}"]`);
-                            if (el) el.classList.add('highlight');
-                            break;
-                        }
-                    }
-                }
-            };
-            u.onend = () => { isPlaying = false; document.getElementById('ttsBtn').textContent = '🔊 語音朗讀'; document.querySelectorAll('.sentence').forEach(s => s.classList.remove('highlight')); };
+            u.rate = 1;
+            u.onend = () => btn.classList.remove('playing');
+            u.onerror = () => btn.classList.remove('playing');
             speechSynthesis.speak(u);
-            isPlaying = true;
-            document.getElementById('ttsBtn').textContent = '⏸ 停止朗讀';
         }
 
-        document.getElementById('heroSearch')?.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(); });
-        document.getElementById('navSearch')?.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(); });
+        async function init() {
+            try {
+                articles = await loadArticles();
+                if (articles.length === 0) articles = FALLBACK_ARTICLES;
+                renderArticles(articles);
+            } catch (e) {
+                articles = FALLBACK_ARTICLES;
+                renderArticles(articles);
+            }
+        }
 
-        renderCards();
+        init();
     </script>
 </body>
 </html>
