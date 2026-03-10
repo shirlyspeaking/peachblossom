@@ -76,10 +76,7 @@
             { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' }
         ];
 
-        const CORS_PROXIES = [
-            'https://api.allorigins.win/raw?url=',
-            'https://corsproxy.io/?'
-        ];
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
         const FALLBACK_ARTICLES = [
             { title: '黑洞如何形成？從恆星死亡到時空扭曲', source: '科學人', summary: '黑洞是宇宙中最神秘的天體。當大質量恆星耗盡燃料後，核心會發生引力坍縮，若超過約 3 倍太陽質量，就會形成黑洞。黑洞邊界稱為「事件視界」，一旦跨越就無法逃脫。科學家透過觀察黑洞對周圍物質的影響，以及 2019 年公布的首張黑洞影像，逐步揭開其神秘面紗。', link: '#', date: '' },
@@ -134,17 +131,16 @@
         }
 
         async function fetchRss(source) {
-            for (const proxy of CORS_PROXIES) {
-                const proxyUrl = proxy === CORS_PROXIES[1] 
-                    ? proxy + encodeURIComponent(source.url) 
-                    : proxy + encodeURIComponent(source.url);
-                try {
-                    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
-                    const text = await res.text();
-                    const items = parseRssXml(text);
-                    if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
-                } catch (e) { continue; }
-            }
+            const proxyUrl = CORS_PROXY + encodeURIComponent(source.url);
+            try {
+                const ctrl = new AbortController();
+                const t = setTimeout(() => ctrl.abort(), 5000);
+                const res = await fetch(proxyUrl, { signal: ctrl.signal });
+                clearTimeout(t);
+                const text = await res.text();
+                const items = parseRssXml(text);
+                if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
+            } catch (e) { /* ignore */ }
             return [];
         }
 
@@ -210,17 +206,22 @@
         }
 
         async function init() {
+            articles = FALLBACK_ARTICLES;
+            renderArticles(articles);
             try {
-                articles = await loadArticles();
-                if (articles.length === 0) articles = FALLBACK_ARTICLES;
-                renderArticles(articles);
-            } catch (e) {
-                articles = FALLBACK_ARTICLES;
-                renderArticles(articles);
-            }
+                const loaded = await loadArticles();
+                if (loaded.length > 0) {
+                    articles = loaded;
+                    renderArticles(articles);
+                }
+            } catch (e) { /* keep fallback */ }
         }
 
-        init();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
