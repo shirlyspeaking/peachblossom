@@ -293,7 +293,7 @@
         let isCameraRunning = false;
         
         // 數據緩存 (用於渲染循環合成)
-        let latestFaceLandmarks = null;
+        let latestFaceLandmarks = [];
         let latestHandLandmarks = null;
         let latestSegmentationMask = null;
 
@@ -416,12 +416,12 @@
             try {
                 // A. Face Mesh (人臉)
                 faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-                faceMesh.setOptions({maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
+                faceMesh.setOptions({maxNumFaces: 3, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
                 faceMesh.onResults(results => {
                     if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                        latestFaceLandmarks = results.multiFaceLandmarks[0];
+                        latestFaceLandmarks = results.multiFaceLandmarks;
                     } else {
-                        latestFaceLandmarks = null;
+                        latestFaceLandmarks = [];
                     }
                 });
                 await faceMesh.initialize();
@@ -550,9 +550,11 @@
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
             }
 
-            // B. 繪製花鈿
-            if (latestFaceLandmarks && selectedIndex !== -1) {
-                drawHuadian(latestFaceLandmarks, selectedIndex);
+            // B. 繪製花鈿（支援多張臉，各自依臉部大小縮放）
+            if (latestFaceLandmarks.length > 0 && selectedIndex !== -1) {
+                for (let i = 0; i < latestFaceLandmarks.length; i++) {
+                    drawHuadian(latestFaceLandmarks[i], selectedIndex);
+                }
             }
 
             requestAnimationFrame(renderLoop);

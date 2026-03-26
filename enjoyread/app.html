@@ -97,7 +97,10 @@
             { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' }
         ];
 
-        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+        const CORS_PROXIES = [
+            'https://corsproxy.io/?',
+            'https://api.allorigins.win/raw?url='
+        ];
 
         const FALLBACK_ARTICLES = [
             { title: '生成式 AI 如何重塑創作與學習', source: '科技新報', summary: 'ChatGPT、Midjourney 等工具正改變我們創作與學習的方式。學生可用 AI 輔助寫作與研究，但如何分辨 AI 產出與原創內容成為新課題。教育界思考如何將 AI 融入教學，同時培養批判思考能力。', link: 'https://technews.tw/', date: '' },
@@ -160,16 +163,20 @@
         }
 
         async function fetchRss(source) {
-            const proxyUrl = CORS_PROXY + encodeURIComponent(source.url);
-            try {
-                const ctrl = new AbortController();
-                const t = setTimeout(() => ctrl.abort(), 5000);
-                const res = await fetch(proxyUrl, { signal: ctrl.signal });
-                clearTimeout(t);
-                const text = await res.text();
-                const items = parseRssXml(text);
-                if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
-            } catch (e) { /* ignore */ }
+            for (const proxy of CORS_PROXIES) {
+                const proxyUrl = proxy.includes('corsproxy') 
+                    ? proxy + encodeURIComponent(source.url) 
+                    : proxy + encodeURIComponent(source.url);
+                try {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 6000);
+                    const res = await fetch(proxyUrl, { signal: ctrl.signal });
+                    clearTimeout(t);
+                    const text = await res.text();
+                    const items = parseRssXml(text);
+                    if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
+                } catch (e) { continue; }
+            }
             return [];
         }
 
