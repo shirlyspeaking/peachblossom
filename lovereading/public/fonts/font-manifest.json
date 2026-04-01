@@ -1,0 +1,31 @@
+{
+  "fonts": [
+    {
+      "id": "noto",
+      "displayName": "思源黑體",
+      "fileName": "NotoSansTC-Regular.ttf",
+      "licenseTag": "OFL-1.1",
+      "licenseNote": "SIL Open Font License 1.1",
+      "source": "Google Fonts / Noto",
+      "reviewDate": "2026-12-31"
+    },
+    {
+      "id": "kai",
+      "displayName": "思源宋體",
+      "fileName": "NotoSerifTC-Regular.otf",
+      "licenseTag": "OFL-1.1",
+      "licenseNote": "SIL Open Font License 1.1",
+      "source": "Google Fonts / Noto",
+      "reviewDate": "2026-12-31"
+    },
+    {
+      "id": "hand",
+      "displayName": "硬筆楷體",
+      "fileName": "NotoSansTC-Regular.ttf",
+      "licenseTag": "OFL-1.1",
+      "licenseNote": "SIL Open Font License 1.1",
+      "source": "Google Fonts / Noto",
+      "reviewDate": "2026-12-31"
+    }
+  ]
+}
