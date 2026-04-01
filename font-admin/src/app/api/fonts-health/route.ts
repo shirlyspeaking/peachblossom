@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const fontDir = path.join(process.cwd(), "..", "lovereading", "public", "fonts");
+    const fontDir = path.join(process.cwd(), "..", "calligraphy-studio", "public", "fonts");
     const manifestFonts = await readManifest(fontDir);
 
     const rows = await Promise.all(
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
         status: 200,
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": 'attachment; filename="font-health-report.csv"',
+          "Content-Disposition": 'attachment; filename="copybook-platform-report.csv"',
         },
       });
     }
@@ -98,7 +98,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        message: "無法讀取 lovereading/public/fonts 或 font-manifest.json",
+        message: "無法讀取 calligraphy-studio/public/fonts 或 font-manifest.json",
         error: error instanceof Error ? error.message : "unknown",
       },
       { status: 500 }

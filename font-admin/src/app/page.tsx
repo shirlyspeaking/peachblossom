@@ -76,7 +76,7 @@ export default function Page() {
       const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "font-health-report.json";
+      link.download = "copybook-platform-report.json";
       link.click();
       URL.revokeObjectURL(link.href);
       return;
@@ -85,15 +85,15 @@ export default function Page() {
     const blob = await res.blob();
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "font-health-report.csv";
+    link.download = "copybook-platform-report.csv";
     link.click();
     URL.revokeObjectURL(link.href);
   }
 
   return (
     <main className="container">
-      <h1>管理員字型健康檢查</h1>
-      <p>檢查來源：`lovereading/public/fonts`（跨 app 檢查）</p>
+      <h1>書法字帖平台維運後台</h1>
+      <p>資產來源：`calligraphy-studio/public/fonts`（跨 app 檢查）</p>
       <p>
         <a href="../index.html">返回桃花源首頁</a>
       </p>

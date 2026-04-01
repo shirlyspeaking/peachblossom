@@ -7,7 +7,6 @@ import {
 } from "@/lib/calligraphy/types";
 
 type ValidationResult<T> = { ok: true; data: T } | { ok: false; message: string };
-
 type UnknownRecord = Record<string, unknown>;
 
 export function normalizeText(input: string): string {
@@ -23,12 +22,8 @@ function isObject(value: unknown): value is UnknownRecord {
 }
 
 function asInt(value: unknown, fallback: number): number {
-  if (typeof value === "number" && Number.isInteger(value)) {
-    return value;
-  }
-  if (typeof value === "string" && /^\d+$/.test(value)) {
-    return Number(value);
-  }
+  if (typeof value === "number" && Number.isInteger(value)) return value;
+  if (typeof value === "string" && /^\d+$/.test(value)) return Number(value);
   return fallback;
 }
 
@@ -40,9 +35,7 @@ function asBool(value: unknown, fallback: boolean): boolean {
 }
 
 export function validateLayoutConfig(input: unknown): ValidationResult<PageLayoutConfig> {
-  if (!isObject(input)) {
-    return { ok: false, message: "layout config 必須是物件" };
-  }
+  if (!isObject(input)) return { ok: false, message: "layout config 必須是物件" };
 
   const modeRaw = input.mode;
   const gridTypeRaw = input.gridType;
@@ -52,29 +45,13 @@ export function validateLayoutConfig(input: unknown): ValidationResult<PageLayou
   const cols = asInt(input.cols, 8);
   const showGuideLines = asBool(input.showGuideLines, true);
 
-  if (!CALLIGRAPHY_MODES.includes(modeRaw as CalligraphyMode)) {
-    return { ok: false, message: "mode 僅支援 brush 或 pen" };
-  }
-  if (!GRID_TYPES.includes(gridTypeRaw as GridType)) {
-    return { ok: false, message: "gridType 不合法" };
-  }
-  if (fontSize < 12 || fontSize > 96) {
-    return { ok: false, message: "fontSize 需介於 12-96" };
-  }
-  if (rows < 4 || rows > 20 || cols < 4 || cols > 20) {
-    return { ok: false, message: "rows / cols 需介於 4-20" };
-  }
+  if (!CALLIGRAPHY_MODES.includes(modeRaw as CalligraphyMode)) return { ok: false, message: "mode 僅支援 brush 或 pen" };
+  if (!GRID_TYPES.includes(gridTypeRaw as GridType)) return { ok: false, message: "gridType 不合法" };
+  if (fontSize < 12 || fontSize > 96) return { ok: false, message: "fontSize 需介於 12-96" };
+  if (rows < 4 || rows > 20 || cols < 4 || cols > 20) return { ok: false, message: "rows / cols 需介於 4-20" };
 
   return {
     ok: true,
-    data: {
-      mode: modeRaw as CalligraphyMode,
-      gridType: gridTypeRaw as GridType,
-      fontId,
-      fontSize,
-      rows,
-      cols,
-      showGuideLines,
-    },
+    data: { mode: modeRaw as CalligraphyMode, gridType: gridTypeRaw as GridType, fontId, fontSize, rows, cols, showGuideLines },
   };
 }

@@ -4,16 +4,8 @@ import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, rgb } from "pdf-lib";
 import { FONT_OPTIONS, type FontOption, type LayoutResult } from "@/lib/calligraphy/types";
 
-export type FontAvailability = {
-  availableFontIds: string[];
-  missingFontIds: string[];
-};
-
-export type PdfBuildResult = {
-  buffer: Buffer;
-  usedFontId: string;
-  fallbackFrom?: string;
-};
+export type FontAvailability = { availableFontIds: string[]; missingFontIds: string[] };
+export type PdfBuildResult = { buffer: Buffer; usedFontId: string; fallbackFrom?: string };
 
 function getFontPath(font: FontOption): string {
   return path.join(process.cwd(), "public", "fonts", font.pdfFontFile);
@@ -22,7 +14,6 @@ function getFontPath(font: FontOption): string {
 export async function getFontAvailability(): Promise<FontAvailability> {
   const availableFontIds: string[] = [];
   const missingFontIds: string[] = [];
-
   for (const font of FONT_OPTIONS) {
     try {
       await access(getFontPath(font));
@@ -31,7 +22,6 @@ export async function getFontAvailability(): Promise<FontAvailability> {
       missingFontIds.push(font.id);
     }
   }
-
   return { availableFontIds, missingFontIds };
 }
 
@@ -39,24 +29,12 @@ async function resolveFont(fontId: string): Promise<{ bytes: Uint8Array; usedFon
   const availability = await getFontAvailability();
   const selectedExists = availability.availableFontIds.includes(fontId);
   const selected = FONT_OPTIONS.find((item) => item.id === fontId) ?? FONT_OPTIONS[0];
-
-  if (selectedExists) {
-    return {
-      bytes: await readFile(getFontPath(selected)),
-      usedFontId: selected.id,
-    };
-  }
+  if (selectedExists) return { bytes: await readFile(getFontPath(selected)), usedFontId: selected.id };
 
   const fallbackId = availability.availableFontIds[0];
-  if (!fallbackId) {
-    throw new Error("NO_EMBEDDABLE_CJK_FONT");
-  }
+  if (!fallbackId) throw new Error("NO_EMBEDDABLE_CJK_FONT");
   const fallback = FONT_OPTIONS.find((item) => item.id === fallbackId)!;
-  return {
-    bytes: await readFile(getFontPath(fallback)),
-    usedFontId: fallback.id,
-    fallbackFrom: selected.id,
-  };
+  return { bytes: await readFile(getFontPath(fallback)), usedFontId: fallback.id, fallbackFrom: selected.id };
 }
 
 export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResult> {
@@ -75,24 +53,13 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
 
   for (const current of layout.pages) {
     const page = doc.addPage([width, height]);
-
     for (let c = 0; c <= layout.config.cols; c += 1) {
       const x = margin + c * cellW;
-      page.drawLine({
-        start: { x, y: margin },
-        end: { x, y: height - margin },
-        thickness: 0.7,
-        color: rgb(0.86, 0.86, 0.86),
-      });
+      page.drawLine({ start: { x, y: margin }, end: { x, y: height - margin }, thickness: 0.7, color: rgb(0.86, 0.86, 0.86) });
     }
     for (let r = 0; r <= layout.config.rows; r += 1) {
       const y = margin + r * cellH;
-      page.drawLine({
-        start: { x: margin, y },
-        end: { x: width - margin, y },
-        thickness: 0.7,
-        color: rgb(0.86, 0.86, 0.86),
-      });
+      page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.7, color: rgb(0.86, 0.86, 0.86) });
     }
 
     if (layout.config.showGuideLines && layout.config.gridType !== "lines") {
@@ -100,28 +67,14 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
         for (let c = 0; c < layout.config.cols; c += 1) {
           const x = margin + c * cellW;
           const y = margin + r * cellH;
-          page.drawLine({
-            start: { x, y: y + cellH / 2 },
-            end: { x: x + cellW, y: y + cellH / 2 },
-            thickness: 0.35,
-            color: rgb(0.9, 0.9, 0.9),
-          });
-          page.drawLine({
-            start: { x: x + cellW / 2, y },
-            end: { x: x + cellW / 2, y: y + cellH },
-            thickness: 0.35,
-            color: rgb(0.9, 0.9, 0.9),
-          });
+          page.drawLine({ start: { x, y: y + cellH / 2 }, end: { x: x + cellW, y: y + cellH / 2 }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
+          page.drawLine({ start: { x: x + cellW / 2, y }, end: { x: x + cellW / 2, y: y + cellH }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
         }
       }
     }
 
     page.drawText(`桃花源字帖 | ${layout.config.mode === "brush" ? "毛筆" : "硬筆"}`, {
-      x: margin,
-      y: height - 24,
-      size: 12,
-      font: cjkFont,
-      color: rgb(0.36, 0.36, 0.36),
+      x: margin, y: height - 24, size: 12, font: cjkFont, color: rgb(0.36, 0.36, 0.36),
     });
 
     for (const cell of current.cells) {
@@ -140,9 +93,5 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
   }
 
   const bytes = await doc.save();
-  return {
-    buffer: Buffer.from(bytes),
-    usedFontId: resolved.usedFontId,
-    fallbackFrom: resolved.fallbackFrom,
-  };
+  return { buffer: Buffer.from(bytes), usedFontId: resolved.usedFontId, fallbackFrom: resolved.fallbackFrom };
 }

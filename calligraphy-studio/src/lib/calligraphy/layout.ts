@@ -20,8 +20,8 @@ export function buildLayout(text: string, config: PageLayoutConfig): LayoutResul
   const cfg = defaultConfig(config);
   const characters = toCharacters(text);
   const perPage = cfg.rows * cfg.cols;
-
   const pages: LayoutPage[] = [];
+
   for (let pageIndex = 0; pageIndex * perPage < characters.length; pageIndex += 1) {
     const start = pageIndex * perPage;
     const pageChars = characters.slice(start, start + perPage);
@@ -33,14 +33,7 @@ export function buildLayout(text: string, config: PageLayoutConfig): LayoutResul
     pages.push({ index: pageIndex, cells });
   }
 
-  if (pages.length === 0) {
-    pages.push({ index: 0, cells: [] });
-  }
+  if (pages.length === 0) pages.push({ index: 0, cells: [] });
 
-  return {
-    normalizedText: normalizeText(text),
-    characters,
-    pages,
-    config: cfg,
-  };
+  return { normalizedText: normalizeText(text), characters, pages, config: cfg };
 }

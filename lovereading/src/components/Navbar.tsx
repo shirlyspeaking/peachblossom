@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Search, Compass, Bookmark, TrendingUp, PenTool } from "lucide-react";
+import { BookOpen, Search, Compass, Bookmark, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,6 @@ const navItems = [
   { href: "/", label: "探索", icon: Compass },
   { href: "/favorites", label: "收藏", icon: Bookmark },
   { href: "/progress", label: "學習進度", icon: TrendingUp },
-  { href: "/calligraphy", label: "字帖生成", icon: PenTool },
 ];
 
 export function Navbar() {

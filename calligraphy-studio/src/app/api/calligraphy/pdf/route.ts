@@ -20,15 +20,11 @@ export async function POST(request: Request) {
   }
 
   const layout = buildLayout(body.text, validation.data);
-  const pageLimit = 30;
-  if (layout.pages.length > pageLimit) {
-    return new Response(
-      JSON.stringify({ ok: false, message: `頁數過多，請控制在 ${pageLimit} 頁以內。` }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+  if (layout.pages.length > 30) {
+    return new Response(JSON.stringify({ ok: false, message: "頁數過多，請控制在 30 頁以內。" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   let pdfBuffer: Buffer;
@@ -43,22 +39,17 @@ export async function POST(request: Request) {
     return new Response(
       JSON.stringify({
         ok: false,
-        message:
-          "PDF 字型載入失敗。請將可嵌入中文字型放到 public/fonts（例如 NotoSansTC-Regular.ttf、NotoSerifTC-Regular.otf）。",
+        message: "PDF 字型載入失敗。請將可嵌入中文字型放到 public/fonts。",
       }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-  const filename = `copybook-${Date.now()}.pdf`;
 
   return new Response(pdfBuffer, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `attachment; filename="copybook-${Date.now()}.pdf"`,
       "Cache-Control": "no-store",
       "X-Calligraphy-Font-Used": usedFontId,
       ...(fallbackFrom ? { "X-Calligraphy-Font-Fallback-From": fallbackFrom } : {}),
