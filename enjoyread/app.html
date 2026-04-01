@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悅讀 EnjoyRead - 最新有趣文章</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #1e293b; min-height: 100vh; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+        .logo { font-size: 1.25rem; font-weight: 600; color: #0284c7; text-decoration: none; }
+        .logo:hover { color: #0369a1; }
+        .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+        .page-title { font-size: 1.75rem; color: #0c4a6e; margin-bottom: 8px; }
+        .page-desc { color: #64748b; margin-bottom: 32px; line-height: 1.6; }
+        .article-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            transition: box-shadow 0.2s;
+        }
+        .article-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .article-source { font-size: 0.8rem; color: #0ea5e9; font-weight: 500; margin-bottom: 8px; }
+        .article-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #0f172a; }
+        .article-summary { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 16px; }
+        .article-meta { font-size: 0.8rem; color: #94a3b8; margin-bottom: 16px; }
+        .tts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .tts-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35); }
+        .tts-btn.playing { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        .loading { text-align: center; padding: 48px; color: #64748b; }
+        .loading-spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg { background: #fef2f2; color: #b91c1c; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
+        .refresh-btn { margin-top: 16px; padding: 8px 16px; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .refresh-articles-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .refresh-articles-btn:hover { transform: scale(1.03); opacity: 0.95; }
+        .refresh-articles-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+            <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
+            <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
+        </div>
+        <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
+
+        <div id="contentArea">
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>正在搜集最新文章...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUMMARY_LENGTH = 150; // 約 150 字
+
+        const RSS_SOURCES = [
+            { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
+            { name: '科技新報', url: 'https://technews.tw/feed', desc: '科技產業動態' },
+            { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' },
+            { name: '三聯生活周刊', url: 'http://app.lifeweek.com.cn/rss.php?catid=1', desc: '文化、生活、深度報導' },
+            { name: '運動去', url: 'https://feeds.feedburner.com/go-sport', desc: '運動健身、體育資訊' },
+            { name: '運動視界', url: 'https://www.sportsv.net/feed', desc: '運動賽事、體育評論' },
+            { name: '台視娛樂', url: 'https://www.ttv.com.tw/rss/RSSHandler.ashx?d=news&t=F', desc: '娛樂新聞' },
+            { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' }
+        ];
+
+        const CORS_PROXIES = [
+            'https://corsproxy.io/?',
+            'https://api.allorigins.win/raw?url='
+        ];
+
+        const FALLBACK_ARTICLES = [
+            { title: '生成式 AI 如何重塑創作與學習', source: '科技新報', summary: 'ChatGPT、Midjourney 等工具正改變我們創作與學習的方式。學生可用 AI 輔助寫作與研究，但如何分辨 AI 產出與原創內容成為新課題。教育界思考如何將 AI 融入教學，同時培養批判思考能力。', link: 'https://technews.tw/', date: '' },
+            { title: '巴黎奧運之後：運動員的下一站', source: '運動視界', summary: '奧運落幕後，選手們如何規劃職業生涯？有人轉戰職業聯賽，有人投入教練或體育行政。運動員的轉型之路充滿挑戰，也需要社會支持系統的協助，讓他們的專業得以延續。', link: 'https://www.sportsv.net/', date: '' },
+            { title: '慢生活：在快節奏時代找回自己的步調', source: '三聯生活周刊', summary: '現代人總在趕路，慢下來成了一種奢侈。三聯生活周刊探討慢食、慢旅行、慢閱讀的意義。放慢腳步不是偷懶，而是更清醒地感受當下，在效率至上的時代找回生活的質感。', link: 'https://www.lifeweek.com.cn/', date: '' },
+            { title: '電動車時代來臨：你準備好了嗎？', source: '泛科學', summary: '各國紛紛訂出燃油車退場時程，電動車成為未來趨勢。充電基礎設施、電池技術、續航力與價格，是消費者最關心的議題。了解電動車的優缺點，有助於做出適合自己的選擇。', link: 'https://pansci.asia/', date: '' },
+            { title: '串流大戰：你訂閱了幾個平台？', source: '風傳媒', summary: 'Netflix、Disney+、愛奇藝、KKTV……串流平台百花齊放，訂閱費加總可能比有線電視還貴。如何聰明選擇、避免訂閱疲勞？分享帳號的爭議也引發討論，串流生態正在重新洗牌。', link: 'https://www.storm.mg/', date: '' },
+            { title: '青少年心理健康：我們能做些什麼', source: '環境資訊中心', summary: '學業壓力、人際關係、社群媒體，都可能影響青少年的心理健康。傾聽、陪伴、減少污名化是關鍵。學校與家庭如何建立支持系統？及早發現、適時求助，每個人都能成為他人的光。', link: 'https://e-info.org.tw/', date: '' },
+            { title: '路跑熱潮：從休閒到競技的跑步文化', source: '運動去', summary: '台灣路跑賽事一年超過數百場，從休閒跑者到菁英選手各有舞台。跑步不只強身，更形成社群與文化。如何避免運動傷害、選擇適合的賽事？跑出健康也跑出樂趣。', link: 'https://go-sport.tw/', date: '' },
+            { title: '韓流、日流與華語娛樂的共舞', source: '台視娛樂', summary: 'K-pop、日劇、華語影視在全球市場交會。跨國合作、IP 改編、串流平台推波助瀾，娛樂產業的疆界越來越模糊。觀眾的選擇更多元，創作者也迎來新的機會與挑戰。', link: 'https://www.ttv.com.tw/', date: '' }
+        ];
+
+        function stripHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html || '';
+            return div.textContent || div.innerText || '';
+        }
+
+        function createSummary(text, maxLen) {
+            const clean = stripHtml(text).replace(/\s+/g, ' ').trim();
+            if (clean.length <= maxLen) return clean;
+            let cut = clean.slice(0, maxLen);
+            const lastPunct = cut.search(/[。！？]$/);
+            if (lastPunct === -1) {
+                const lastComma = cut.lastIndexOf('，');
+                if (lastComma > maxLen * 0.5) cut = cut.slice(0, lastComma + 1);
+                else cut = cut + '…';
+            }
+            return cut;
+        }
+
+        function parseRssXml(xmlText) {
+            const items = [];
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlText, 'text/xml');
+                let entries = doc.querySelectorAll('item');
+                if (entries.length === 0) entries = doc.querySelectorAll('entry');
+                entries.forEach((el, i) => {
+                    if (i >= 4) return;
+                    const title = el.querySelector('title')?.textContent?.trim() || '';
+                    const linkEl = el.querySelector('link');
+                    const link = linkEl?.getAttribute?.('href') || linkEl?.textContent?.trim() || '#';
+                    const desc = el.querySelector('description')?.textContent?.trim() 
+                        || el.querySelector('content')?.textContent?.trim() 
+                        || el.querySelector('summary')?.textContent?.trim() || '';
+                    const pubDate = el.querySelector('pubDate')?.textContent?.trim() 
+                        || el.querySelector('updated')?.textContent?.trim() || '';
+                    if (title && (desc || title)) {
+                        items.push({
+                            title,
+                            link: link,
+                            summary: createSummary(desc || title, SUMMARY_LENGTH),
+                            date: pubDate
+                        });
+                    }
+                });
+            } catch (e) { console.warn('RSS parse error', e); }
+            return items;
+        }
+
+        async function fetchRss(source) {
+            for (const proxy of CORS_PROXIES) {
+                const proxyUrl = proxy.includes('corsproxy') 
+                    ? proxy + encodeURIComponent(source.url) 
+                    : proxy + encodeURIComponent(source.url);
+                try {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 6000);
+                    const res = await fetch(proxyUrl, { signal: ctrl.signal });
+                    clearTimeout(t);
+                    const text = await res.text();
+                    const items = parseRssXml(text);
+                    if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
+                } catch (e) { continue; }
+            }
+            return [];
+        }
+
+        async function loadArticles() {
+            let all = [];
+            for (const src of RSS_SOURCES) {
+                const items = await fetchRss(src);
+                all = all.concat(items);
+            }
+            if (all.length === 0) all = FALLBACK_ARTICLES;
+            all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            return all.slice(0, 15);
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        function renderArticles(articles) {
+            const html = articles.map((a, idx) => {
+                const titleHtml = a.link && a.link !== '#' 
+                    ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(a.title)}</a>` 
+                    : esc(a.title);
+                return `
+                <div class="article-card" data-idx="${idx}">
+                    <div class="article-source">${esc(a.source)}</div>
+                    <h2 class="article-title">${titleHtml}</h2>
+                    <p class="article-summary">${esc(a.summary)}</p>
+                    <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
+                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 語音朗讀摘要" data-stop-text="⏸ 停止朗讀">
+                        🔊 語音朗讀摘要
+                    </button>
+                </div>
+            `;
+            }).join('');
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        let articles = [];
+        let currentPlayingIdx = -1;
+
+        function readSummary(idx) {
+            if (!('speechSynthesis' in window)) {
+                alert('您的瀏覽器不支援語音朗讀');
+                return;
+            }
+            const btn = document.getElementById('ttsBtn' + idx);
+            if (currentPlayingIdx === idx) {
+                speechSynthesis.cancel();
+                currentPlayingIdx = -1;
+                btn.classList.remove('playing');
+                btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要';
+                return;
+            }
+            speechSynthesis.cancel();
+            currentPlayingIdx = idx;
+            const summary = articles[idx]?.summary;
+            if (!summary) return;
+
+            document.querySelectorAll('.tts-btn').forEach(b => {
+                b.classList.remove('playing');
+                b.textContent = b.dataset.defaultText || '🔊 語音朗讀摘要';
+            });
+            btn.classList.add('playing');
+            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+
+            const u = new SpeechSynthesisUtterance(summary);
+            u.lang = 'zh-TW';
+            u.rate = 1;
+            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
+            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
+            speechSynthesis.speak(u);
+        }
+
+        async function init(showLoading = true) {
+            if (showLoading) {
+                document.getElementById('contentArea').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>正在搜集最新文章...</p></div>';
+            }
+            articles = FALLBACK_ARTICLES;
+            renderArticles(articles);
+            try {
+                const loaded = await loadArticles();
+                if (loaded.length > 0) {
+                    articles = loaded;
+                    renderArticles(articles);
+                }
+            } catch (e) { /* keep fallback */ }
+        }
+
+        async function refreshArticles() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 更新中...';
+            document.getElementById('contentArea').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>正在重新搜集最新文章...</p></div>';
+            await init(false);
+            btn.disabled = false;
+            btn.textContent = '🔄 更新';
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => init());
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

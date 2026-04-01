@@ -154,6 +154,36 @@
             opacity: 0.8;
         }
 
+        .header-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 24px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            box-shadow: 0 6px 24px rgba(14, 165, 233, 0.35);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .header-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(14, 165, 233, 0.5);
+        }
+
+        .header-cta-icon {
+            font-size: 1.4rem;
+        }
+
+        .header-cta-arrow {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
         /* === 主內容區 === */
         main {
             position: relative;
@@ -243,6 +273,10 @@
 
         .app-icon.huadian {
             background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+        }
+
+        .app-icon.enjoyread {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
         }
 
         .app-icon.coming-soon {
@@ -404,6 +438,7 @@
         .app-card:nth-child(2) { animation-delay: 0.2s; }
         .app-card:nth-child(3) { animation-delay: 0.3s; }
         .app-card:nth-child(4) { animation-delay: 0.4s; }
+        .app-card:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             from {
@@ -521,6 +556,11 @@
         <h1>桃花源</h1>
         <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
         <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
+        <a href="enjoyread/app.html" class="header-cta">
+            <span class="header-cta-icon">📖</span>
+            <span>悅讀 EnjoyRead 中學生閱讀平台</span>
+            <span class="header-cta-arrow">→</span>
+        </a>
     </header>
 
     <!-- 主內容 -->
@@ -530,6 +570,19 @@
         </div>
 
         <div class="apps-grid">
+            <!-- 悅讀 EnjoyRead - 已上線（置頂） -->
+            <a href="enjoyread/app.html" class="app-card" style="text-decoration: none;">
+                <div class="app-icon enjoyread">📖</div>
+                <h2 class="app-name">悅讀 EnjoyRead</h2>
+                <p class="app-desc">中學生閱讀平台。AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀，讓學習更輕鬆有趣。</p>
+                <div class="app-tags">
+                    <span class="tag">AI 閱讀</span>
+                    <span class="tag">語音朗讀</span>
+                    <span class="tag">教育</span>
+                </div>
+                <span class="app-button primary">進入閱讀</span>
+            </a>
+
             <!-- 花鈿試妝 - 已上線 -->
             <a href="huadian/huadian.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon huadian">💮</div>
