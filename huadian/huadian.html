@@ -284,6 +284,8 @@
         const overlay = document.getElementById('overlay');
         const resetBtn = document.getElementById('btn-reset');
         const bgMusic = document.getElementById('bg-music');
+        /** 若 audio/list.json 有填 tracks，隨機僅從此列表抽選；否則用各花鈿預設 bgMusic 路徑合併去重後隨機 */
+        let audioTrackList = [];
         
         let selectedIndex = -1;
         let loadedImages = [];
@@ -369,27 +371,73 @@
             playBgMusic(index);
         }
         
+        function getBgMusicPool() {
+            const fromList = audioTrackList.filter(Boolean);
+            if (fromList.length > 0) {
+                return fromList.map((f) => (f.includes('/') ? f : 'audio/' + f));
+            }
+            return [...new Set(huadianAssets.map((a) => a.bgMusic).filter(Boolean))];
+        }
+
         function playBgMusic(index) {
             if (!bgMusic) return;
-            // 先停止當前播放
+            bgMusic.onerror = null;
             bgMusic.pause();
             bgMusic.currentTime = 0;
             bgMusic.src = '';
-            
-            if (index >= 0) {
-                const asset = huadianAssets[index];
-                const musicUrl = asset.bgMusic;
-                if (musicUrl) {
-                    bgMusic.src = musicUrl;
-                    bgMusic.volume = 0.6; // 適中音量
-                    const playPromise = bgMusic.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(() => {
-                            // 瀏覽器可能阻止自動播放，靜默忽略
-                        });
+
+            if (index < 0) return;
+
+            const pool = getBgMusicPool();
+            if (pool.length === 0) return;
+
+            const tryPlay = (attemptsLeft) => {
+                if (attemptsLeft <= 0) return;
+                bgMusic.onerror = null;
+                bgMusic.src = pool[Math.floor(Math.random() * pool.length)];
+                bgMusic.volume = 0.6;
+                bgMusic.onerror = () => {
+                    bgMusic.onerror = null;
+                    tryPlay(attemptsLeft - 1);
+                };
+                bgMusic.play()
+                    .then(() => { bgMusic.onerror = null; })
+                    .catch(() => {
+                        bgMusic.onerror = null;
+                        tryPlay(attemptsLeft - 1);
+                    });
+            };
+            tryPlay(Math.min(pool.length, 4));
+        }
+
+        /** 須在使用者點擊的同步階段呼叫，之後選花鈿時 audio.play() 較不易被瀏覽器擋下 */
+        function unlockBgAudio() {
+            if (!bgMusic || bgMusic.dataset.unlocked === '1') return;
+            bgMusic.dataset.unlocked = '1';
+            const silentWav =
+                'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQQAAAAAAA==';
+            bgMusic.volume = 0;
+            bgMusic.src = silentWav;
+            bgMusic.play().then(() => {
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+                bgMusic.removeAttribute('src');
+                bgMusic.load();
+                bgMusic.volume = 0.6;
+            }).catch(() => {
+                bgMusic.volume = 0.6;
+            });
+        }
+
+        function loadAudioTracks() {
+            fetch('audio/list.json')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.tracks && Array.isArray(data.tracks)) {
+                        audioTrackList = data.tracks.map((t) => String(t).trim()).filter(Boolean);
                     }
-                }
-            }
+                })
+                .catch(() => { audioTrackList = []; });
         }
 
         // 載入唐風背景圖清單並預載圖片（從 images 資料夾）
@@ -459,6 +507,7 @@
 
         // --- 5. 視頻處理循環 ---
         startBtn.onclick = async function() {
+            unlockBgAudio();
             statusText.innerText = "正在啟動鏡頭...";
             startBtn.style.display = 'none';
             try {
@@ -814,6 +863,7 @@
         // 啟動
         initImages();
         loadTangBackgrounds();
+        loadAudioTracks();
         initModels();
 
     </script>
