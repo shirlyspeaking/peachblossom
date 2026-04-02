@@ -1,8 +1,13 @@
 {
-  "description": "選擇花鈿後從 tracks 隨機播放一首。請只列出 audio 資料夾內實際存在的檔名。",
+  "description": "與 images/list.json 相同編號（01–08）。選擇花鈿後從中隨機播放一首；新增曲目時請同步加入此陣列。",
   "tracks": [
-    "peony.mp3",
-    "garden.mp3",
-    "cloudSea.mp3"
+    "01-longmen.mp3",
+    "02-peony.mp3",
+    "03-tavern.mp3",
+    "04-changan.mp3",
+    "05-chunjianghua.mp3",
+    "06-dunhuang.mp3",
+    "07-jiangnan.mp3",
+    "08-garden.mp3"
   ]
 }
