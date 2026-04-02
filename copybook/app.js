@@ -5,6 +5,8 @@
     var fontPreset = document.getElementById('fontPreset');
     var customFont = document.getElementById('customFont');
     var gridType = document.getElementById('gridType');
+    var copyStyle = document.getElementById('copyStyle');
+    var copyStyleHint = document.getElementById('copyStyleHint');
     var fontSize = document.getElementById('fontSize');
     var lineHeight = document.getElementById('lineHeight');
     var pageSize = document.getElementById('pageSize');
@@ -31,6 +33,34 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
+    }
+
+    function escapeSvgText(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function escapeSvgAttr(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    }
+
+    /** 虛線描紅：SVG 空心字 + stroke-dasharray，與選定字型一致 */
+    function buildTraceSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(76, Math.max(38, Math.round(fs * 1.75)));
+        var strokeW = Math.max(0.85, Math.min(2.1, fs / 24));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true">' +
+            '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" ' +
+            'font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'fill="none" stroke="rgba(224,152,158,0.78)" stroke-width="' + strokeW + '" ' +
+            'stroke-dasharray="3 5" stroke-linecap="round" stroke-linejoin="round">' +
+            body +
+            '</text></svg>'
+        );
     }
 
     function getFontFamily() {
@@ -124,12 +154,19 @@
         var gtype = gridType.value;
         var psize = pageSize.value;
         var font = getFontFamily();
+        var traceMode = copyStyle && copyStyle.value === 'trace';
 
         var rows = buildRows(text, cpl);
         var pages = chunkPages(rows, lpp);
 
         preview.innerHTML = '';
-        preview.className = 'preview preview--' + psize;
+        preview.className = 'preview preview--' + psize + (traceMode ? ' preview--trace' : '');
+
+        if (copyStyleHint) {
+            copyStyleHint.textContent = traceMode
+                ? '虛線描紅：淺色虛線描邊，可覆寫練習；列印與匯出皆適用。'
+                : '標準墨色：實心字，適合對照。';
+        }
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -172,6 +209,9 @@
                         inner.innerHTML = '&nbsp;';
                     } else if (ch === '') {
                         inner.innerHTML = '&nbsp;';
+                    } else if (traceMode) {
+                        inner.className = 'cell-inner cell-inner--trace';
+                        inner.innerHTML = buildTraceSvgChar(ch, font, fs);
                     } else {
                         inner.textContent = ch;
                     }
@@ -346,7 +386,7 @@
     }
 
     var inputs = [
-        textInput, fontPreset, customFont, gridType, fontSize, lineHeight,
+        textInput, fontPreset, customFont, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {
