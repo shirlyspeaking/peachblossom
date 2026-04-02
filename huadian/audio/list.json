@@ -1,4 +1,8 @@
 {
-  "description": "選擇花鈿後會從 tracks 中隨機播放一首。請將實際檔名寫在陣列裡（可只列一個）。若 tracks 為空，則改為從程式內建的花鈿對應檔名（peony.mp3 等）中隨機。",
-  "tracks": []
+  "description": "選擇花鈿後從 tracks 隨機播放一首。請只列出 audio 資料夾內實際存在的檔名。",
+  "tracks": [
+    "peony.mp3",
+    "garden.mp3",
+    "cloudSea.mp3"
+  ]
 }

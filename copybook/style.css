@@ -179,6 +179,7 @@ button:hover {
     box-shadow: 0 8px 30px rgba(142, 33, 87, 0.12);
     padding: 18px;
     border: 1px solid rgba(142, 33, 87, 0.1);
+    overflow-x: auto;
 }
 
 .page-title {
@@ -191,6 +192,10 @@ button:hover {
     display: grid;
     gap: 0;
     border: 1px solid var(--line-soft);
+    width: max-content;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .cell {
@@ -220,11 +225,25 @@ button:hover {
 
 .cell-inner--hong,
 .cell-inner--trace {
-    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
     font-weight: 400;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1.35px rgba(210, 68, 88, 0.9);
-    text-shadow: none;
+}
+
+.cell-inner--hong svg,
+.cell-inner--trace svg {
+    flex: 1 1 auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: visible;
 }
 
 .cell.tian::before,
@@ -284,6 +303,7 @@ button:hover {
         border: none;
         margin: 0;
         padding: 0;
+        overflow: visible;
         break-after: page;
         page-break-after: always;
     }

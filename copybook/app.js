@@ -27,14 +27,36 @@
         if (statusEl) statusEl.textContent = msg;
     }
 
-    /** 描紅：紅色外框、字心透明（鏤空），描邊粗細隨字級 */
-    function applyHongOutlineStyle(el, fs) {
-        var w = Math.max(0.85, Math.min(2.35, fs / 21));
-        var stroke = 'rgba(210, 68, 88, 0.92)';
-        el.style.color = 'transparent';
-        el.style.setProperty('-webkit-text-fill-color', 'transparent');
-        el.style.setProperty('-webkit-text-stroke', w + 'px ' + stroke);
-        el.style.textShadow = 'none';
+    function escapeSvgText(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function escapeSvgAttr(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    }
+
+    /**
+     * 描紅：SVG 空心字（fill=none + 實線 stroke），字心鏤空、格線可透出；
+     * 比 -webkit-text-stroke 跨瀏覽器與 html2canvas 匯出更穩定。
+     */
+    function buildHongSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(78, Math.max(44, Math.round(50 + (fs - 24) * 0.72)));
+        var strokeWU = Math.max(0.7, Math.min(2.4, fontSizeU / 38));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        var attrs =
+            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'text-anchor="middle" dominant-baseline="middle" ' +
+            'fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.95" ' +
+            'stroke-width="' + strokeWU.toFixed(2) + '" stroke-linejoin="round" stroke-linecap="round"';
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<text ' + attrs + '>' + body + '</text></svg>'
+        );
     }
 
     function getFontFamily() {
@@ -173,16 +195,19 @@
                 var chars = padRowToLength(rowStr, cpl);
                 var grid = document.createElement('div');
                 grid.className = 'grid';
-                grid.style.gridTemplateColumns = 'repeat(' + cpl + ', 1fr)';
-
-                var cellMin = Math.max(fs * lh, fs + 8);
-                grid.style.minHeight = '';
+                /* 方格邊長隨字級與行高倍率一併變化，避免只拉高、寬度仍被 1fr 拉扁 */
+                var cellSize = Math.max(Math.round(fs * lh), fs + 8);
+                grid.style.gridTemplateColumns = 'repeat(' + cpl + ', ' + cellSize + 'px)';
+                grid.style.gridTemplateRows = cellSize + 'px';
 
                 for (var c = 0; c < chars.length; c++) {
                     var ch = chars[c];
                     var cell = document.createElement('div');
                     cell.className = cellClassForGrid(gtype);
-                    cell.style.minHeight = cellMin + 'px';
+                    cell.style.width = cellSize + 'px';
+                    cell.style.minWidth = cellSize + 'px';
+                    cell.style.height = cellSize + 'px';
+                    cell.style.minHeight = cellSize + 'px';
 
                     var isLastCol = c === cpl - 1;
                     var isLastRow = r === pageRows.length - 1;
@@ -200,8 +225,7 @@
                         inner.innerHTML = '&nbsp;';
                     } else if (hongMode) {
                         inner.className = 'cell-inner cell-inner--hong';
-                        inner.textContent = ch;
-                        applyHongOutlineStyle(inner, fs);
+                        inner.innerHTML = buildHongSvgChar(ch, font, fs);
                     } else {
                         inner.textContent = ch;
                     }

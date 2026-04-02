@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -68,7 +68,7 @@
 
             <div class="row">
                 <div class="field">
-                    <label for="lineHeight">行高倍率</label>
+                    <label for="lineHeight">行高倍率<span class="label-sub">（方格寬高一併變化）</span></label>
                     <input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.15">
                 </div>
                 <div class="field">
@@ -108,6 +108,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>
