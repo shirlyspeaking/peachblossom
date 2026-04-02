@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桃花源 · 書法字帖生成</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <a href="../index.html" class="back-link">← 返回桃花源</a>
+        <h1>書法字帖生成平台</h1>
+        <p>輸入文字即時排版；可切換字型、田字／米字／空白格，支援列印與 PDF／PNG／TXT 下載。</p>
+    </header>
+
+    <main class="layout">
+        <aside class="panel">
+            <label for="textInput">字帖內容</label>
+            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字，支援換行。">春眠不覺曉，處處聞啼鳥。
+夜來風雨聲，花落知多少。</textarea>
+
+            <div class="row">
+                <div class="field">
+                    <label for="fontPreset">常用字體</label>
+                    <select id="fontPreset">
+                        <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
+                        <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
+                        <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
+                        <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
+                        <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
+                        <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="customFont">自訂字體（選填）</label>
+                    <input id="customFont" type="text" placeholder="例如: LXGW WenKai, Noto Serif TC" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label for="gridType">格線樣式</label>
+                    <select id="gridType">
+                        <option value="tian">田字格</option>
+                        <option value="mi">米字格</option>
+                        <option value="blank">空白格</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="fontSize">字體大小（px）</label>
+                    <input id="fontSize" type="number" min="18" max="72" value="36">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label for="lineHeight">行高倍率</label>
+                    <input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.15">
+                </div>
+                <div class="field">
+                    <label for="pageSize">預覽紙張</label>
+                    <select id="pageSize">
+                        <option value="a4">A4（直式）</option>
+                        <option value="a4l">A4（橫式）</option>
+                        <option value="letter">Letter</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label for="charsPerLine">每行字數</label>
+                    <input id="charsPerLine" type="number" min="4" max="20" value="12">
+                </div>
+                <div class="field">
+                    <label for="linesPerPage">每頁行數</label>
+                    <input id="linesPerPage" type="number" min="4" max="20" value="12">
+                </div>
+            </div>
+
+            <div class="actions actions-5">
+                <button id="btnRegenerate" type="button">重新生成</button>
+                <button id="btnPrint" type="button">列印字帖</button>
+                <button id="btnPdf" type="button">下載 PDF</button>
+                <button id="btnPng" type="button">下載 PNG</button>
+                <button id="btnTxt" type="button">下載 TXT</button>
+            </div>
+
+            <p id="status" class="status">準備就緒</p>
+        </aside>
+
+        <section class="preview-wrap">
+            <div id="preview" class="preview" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
