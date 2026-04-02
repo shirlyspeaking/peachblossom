@@ -86,6 +86,16 @@ textarea {
     gap: 10px;
 }
 
+.row.row-single {
+    grid-template-columns: 1fr;
+}
+
+.label-sub {
+    font-weight: 400;
+    color: #8a5b73;
+    font-size: 0.88em;
+}
+
 .actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -132,27 +142,16 @@ button:hover {
     gap: 16px;
 }
 
-/* 描紅版：格線略淡，與淺紅字協調 */
+/* 淺色描紅版：格線略淡，與範字協調 */
 .preview.preview--trace {
     --line-soft: rgba(199, 79, 123, 0.22);
-}
-
-.field-hint {
-    display: flex;
-    align-items: flex-end;
 }
 
 .copy-style-hint {
     font-size: 0.85rem;
     color: #7c4761;
     line-height: 1.45;
-    margin-top: 1.75rem;
-}
-
-@media (max-width: 980px) {
-    .copy-style-hint {
-        margin-top: 0.5rem;
-    }
+    margin: 0.45rem 0 0;
 }
 
 .preview--a4 .page {
@@ -219,23 +218,10 @@ button:hover {
     line-height: 1;
 }
 
+/* 淺色描紅：實心淡紅字（無虛線） */
 .cell-inner--trace {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-}
-
-.cell-inner--trace svg {
-    flex: 1 1 auto;
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
+    color: rgba(200, 88, 102, 0.58);
+    font-weight: 400;
 }
 
 .cell.tian::before,

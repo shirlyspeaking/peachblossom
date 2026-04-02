@@ -13,7 +13,7 @@
     <header class="site-header">
         <a href="../index.html" class="back-link">← 返回桃花源</a>
         <h1>書法字帖生成平台</h1>
-        <p>輸入文字即時排版；可切換字型、田字／米字／空白格，並可選<strong>虛線描紅（淺色）</strong>版本；支援列印與 PDF／PNG／TXT 下載。</p>
+        <p>輸入文字即時排版；可切換字型、田字／米字／空白格，並可選<strong>淺色描紅</strong>範字；支援列印與 PDF／PNG／TXT 下載。</p>
     </header>
 
     <main class="layout">
@@ -40,6 +40,17 @@
                 </div>
             </div>
 
+            <div class="row row-single">
+                <div class="field">
+                    <label for="copyStyle">字帖版本<span class="label-sub">（標準墨色／淺色描紅）</span></label>
+                    <select id="copyStyle" name="copyStyle" aria-describedby="copyStyleHint">
+                        <option value="standard">標準墨色</option>
+                        <option value="trace">淺色描紅</option>
+                    </select>
+                    <p class="copy-style-hint" id="copyStyleHint">標準墨色：實心字，適合對照。</p>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="field">
                     <label for="gridType">格線樣式</label>
@@ -50,26 +61,16 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="copyStyle">字帖版本</label>
-                    <select id="copyStyle">
-                        <option value="standard">標準墨色</option>
-                        <option value="trace">虛線描紅（淺色）</option>
-                    </select>
+                    <label for="fontSize">字體大小（px）</label>
+                    <input id="fontSize" type="number" min="18" max="72" value="36">
                 </div>
             </div>
 
             <div class="row">
-                <div class="field">
-                    <label for="fontSize">字體大小（px）</label>
-                    <input id="fontSize" type="number" min="18" max="72" value="36">
-                </div>
                 <div class="field">
                     <label for="lineHeight">行高倍率</label>
                     <input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.15">
                 </div>
-            </div>
-
-            <div class="row">
                 <div class="field">
                     <label for="pageSize">預覽紙張</label>
                     <select id="pageSize">
@@ -77,9 +78,6 @@
                         <option value="a4l">A4（橫式）</option>
                         <option value="letter">Letter</option>
                     </select>
-                </div>
-                <div class="field field-hint">
-                    <span class="copy-style-hint" id="copyStyleHint">標準墨色：實心字，適合對照。</span>
                 </div>
             </div>
 

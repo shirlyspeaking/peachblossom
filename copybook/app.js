@@ -27,42 +27,6 @@
         if (statusEl) statusEl.textContent = msg;
     }
 
-    function escapeHtml(s) {
-        return String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-
-    function escapeSvgText(s) {
-        return String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-
-    function escapeSvgAttr(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-    }
-
-    /** 虛線描紅：SVG 空心字 + stroke-dasharray，與選定字型一致 */
-    function buildTraceSvgChar(ch, fontFamily, fs) {
-        var fontSizeU = Math.min(76, Math.max(38, Math.round(fs * 1.75)));
-        var strokeW = Math.max(0.85, Math.min(2.1, fs / 24));
-        var ff = escapeSvgAttr(fontFamily);
-        var body = escapeSvgText(ch);
-        return (
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true">' +
-            '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" ' +
-            'font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
-            'fill="none" stroke="rgba(224,152,158,0.78)" stroke-width="' + strokeW + '" ' +
-            'stroke-dasharray="3 5" stroke-linecap="round" stroke-linejoin="round">' +
-            body +
-            '</text></svg>'
-        );
-    }
-
     function getFontFamily() {
         var preset = fontPreset.value.trim();
         var custom = customFont.value.trim();
@@ -164,7 +128,7 @@
 
         if (copyStyleHint) {
             copyStyleHint.textContent = traceMode
-                ? '虛線描紅：淺色虛線描邊，可覆寫練習；列印與匯出皆適用。'
+                ? '淺色描紅：淡紅色實心範字，便於摹寫；列印與匯出皆適用。'
                 : '標準墨色：實心字，適合對照。';
         }
 
@@ -211,7 +175,7 @@
                         inner.innerHTML = '&nbsp;';
                     } else if (traceMode) {
                         inner.className = 'cell-inner cell-inner--trace';
-                        inner.innerHTML = buildTraceSvgChar(ch, font, fs);
+                        inner.textContent = ch;
                     } else {
                         inner.textContent = ch;
                     }
