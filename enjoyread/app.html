@@ -7,9 +7,30 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #1e293b; min-height: 100vh; }
-        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .logo { font-size: 1.25rem; font-weight: 600; color: #0284c7; text-decoration: none; }
         .logo:hover { color: #0369a1; }
+        .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-history-btn {
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #bae6fd;
+            color: #0369a1;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .nav-history-btn:hover { background: #f0f9ff; border-color: #0ea5e9; }
+        .history-empty { text-align: center; padding: 48px 20px; color: #64748b; line-height: 1.7; }
+        .history-item { border-left: 3px solid #0ea5e9; padding-left: 16px; margin-bottom: 20px; }
+        .history-item time { font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 6px; }
+        .history-item h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .history-item h3 a { color: #0c4a6e; text-decoration: none; }
+        .history-item h3 a:hover { text-decoration: underline; color: #0284c7; }
+        .clear-history-btn { margin-top: 16px; padding: 8px 14px; font-size: 0.85rem; color: #64748b; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; }
+        .clear-history-btn:hover { background: #e2e8f0; }
+        .hidden { display: none !important; }
         .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
         .page-title { font-size: 1.75rem; color: #0c4a6e; margin-bottom: 8px; }
         .page-desc { color: #64748b; margin-bottom: 32px; line-height: 1.6; }
@@ -66,14 +87,25 @@
 <body>
     <nav class="navbar">
         <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
+        <div class="nav-actions">
+            <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 悅讀歷史</button>
+            <button type="button" class="nav-history-btn hidden" id="btnBackFeed" onclick="closeHistoryView()">← 返回文章列表</button>
+        </div>
     </nav>
 
     <div class="container">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
-            <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
-            <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
+        <div id="feedHeader">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+                <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
+                <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
+            </div>
+            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
         </div>
-        <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
+
+        <div id="historyHeader" class="hidden">
+            <h1 class="page-title" style="margin-bottom: 0;">悅讀歷史</h1>
+            <p class="page-desc">您曾開啟連結或聆聽語音摘要的文章會記錄在此（僅儲存在本機瀏覽器）。</p>
+        </div>
 
         <div id="contentArea">
             <div class="loading" id="loadingState">
@@ -85,6 +117,84 @@
 
     <script>
         const SUMMARY_LENGTH = 150; // 約 150 字
+        const READ_HISTORY_KEY = 'enjoyread-read-history';
+        const MAX_HISTORY = 50;
+
+        function getReadHistory() {
+            try {
+                const raw = localStorage.getItem(READ_HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function addToHistory(item) {
+            if (!item || !item.title) return;
+            let list = getReadHistory();
+            const key = (item.link || '') + '|' + item.title;
+            list = list.filter((x) => (x.link || '') + '|' + x.title !== key);
+            list.unshift({
+                title: item.title,
+                source: item.source || '',
+                link: item.link || '#',
+                summary: item.summary || '',
+                readAt: new Date().toISOString()
+            });
+            list = list.slice(0, MAX_HISTORY);
+            try {
+                localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(list));
+            } catch (e) { /* quota */ }
+        }
+
+        function clearReadHistory() {
+            if (!confirm('確定要清空所有閱讀歷史嗎？')) return;
+            localStorage.removeItem(READ_HISTORY_KEY);
+            renderHistoryList();
+        }
+
+        let viewMode = 'feed';
+
+        function openHistoryView() {
+            viewMode = 'history';
+            document.getElementById('feedHeader').classList.add('hidden');
+            document.getElementById('historyHeader').classList.remove('hidden');
+            document.getElementById('btnHistory').classList.add('hidden');
+            document.getElementById('btnBackFeed').classList.remove('hidden');
+            renderHistoryList();
+        }
+
+        function closeHistoryView() {
+            viewMode = 'feed';
+            document.getElementById('feedHeader').classList.remove('hidden');
+            document.getElementById('historyHeader').classList.add('hidden');
+            document.getElementById('btnHistory').classList.remove('hidden');
+            document.getElementById('btnBackFeed').classList.add('hidden');
+            renderArticles(articles);
+        }
+
+        function renderHistoryList() {
+            const list = getReadHistory();
+            const el = document.getElementById('contentArea');
+            if (list.length === 0) {
+                el.innerHTML = '<div class="history-empty">尚無閱讀紀錄。<br>點擊文章標題開啟原文，或使用「語音朗讀摘要」後，會自動記錄在此。</div>';
+                return;
+            }
+            el.innerHTML = list.map((h) => {
+                const titleLink = h.link && h.link !== '#'
+                    ? `<a href="${esc(h.link)}" target="_blank" rel="noopener">${esc(h.title)}</a>`
+                    : esc(h.title);
+                const t = h.readAt ? new Date(h.readAt).toLocaleString('zh-TW') : '';
+                return `
+                    <div class="article-card history-item">
+                        <time>${esc(t)}</time>
+                        <div class="article-source">${esc(h.source || '')}</div>
+                        <h3 class="article-title">${titleLink}</h3>
+                        <p class="article-summary">${esc(h.summary || '')}</p>
+                    </div>
+                `;
+            }).join('') + '<p style="text-align:center"><button type="button" class="clear-history-btn" onclick="clearReadHistory()">清空歷史</button></p>';
+        }
 
         const RSS_SOURCES = [
             { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
@@ -112,6 +222,15 @@
             { title: '路跑熱潮：從休閒到競技的跑步文化', source: '運動去', summary: '台灣路跑賽事一年超過數百場，從休閒跑者到菁英選手各有舞台。跑步不只強身，更形成社群與文化。如何避免運動傷害、選擇適合的賽事？跑出健康也跑出樂趣。', link: 'https://go-sport.tw/', date: '' },
             { title: '韓流、日流與華語娛樂的共舞', source: '台視娛樂', summary: 'K-pop、日劇、華語影視在全球市場交會。跨國合作、IP 改編、串流平台推波助瀾，娛樂產業的疆界越來越模糊。觀眾的選擇更多元，創作者也迎來新的機會與挑戰。', link: 'https://www.ttv.com.tw/', date: '' }
         ];
+
+        function shuffleFallback() {
+            const arr = [...FALLBACK_ARTICLES];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr.slice(0, 15);
+        }
 
         function stripHtml(html) {
             const div = document.createElement('div');
@@ -163,15 +282,20 @@
         }
 
         async function fetchRss(source) {
+            const sep = source.url.includes('?') ? '&' : '?';
+            const bustedUrl = source.url + sep + '_nocache=' + Date.now() + '_' + Math.random().toString(36).slice(2);
             for (const proxy of CORS_PROXIES) {
-                const proxyUrl = proxy.includes('corsproxy') 
-                    ? proxy + encodeURIComponent(source.url) 
-                    : proxy + encodeURIComponent(source.url);
+                const proxyUrl = proxy + encodeURIComponent(bustedUrl);
                 try {
                     const ctrl = new AbortController();
-                    const t = setTimeout(() => ctrl.abort(), 6000);
-                    const res = await fetch(proxyUrl, { signal: ctrl.signal });
+                    const t = setTimeout(() => ctrl.abort(), 8000);
+                    const res = await fetch(proxyUrl, {
+                        signal: ctrl.signal,
+                        cache: 'no-store',
+                        mode: 'cors'
+                    });
                     clearTimeout(t);
+                    if (!res.ok) continue;
                     const text = await res.text();
                     const items = parseRssXml(text);
                     if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
@@ -181,12 +305,16 @@
         }
 
         async function loadArticles() {
-            let all = [];
-            for (const src of RSS_SOURCES) {
-                const items = await fetchRss(src);
-                all = all.concat(items);
-            }
-            if (all.length === 0) all = FALLBACK_ARTICLES;
+            const results = await Promise.all(RSS_SOURCES.map((src) => fetchRss(src)));
+            let all = results.flat();
+            const seen = new Set();
+            all = all.filter((item) => {
+                const key = (item.title || '') + '|' + (item.link || '');
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            if (all.length === 0) return shuffleFallback();
             all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
             return all.slice(0, 15);
         }
@@ -200,7 +328,7 @@
         function renderArticles(articles) {
             const html = articles.map((a, idx) => {
                 const titleHtml = a.link && a.link !== '#' 
-                    ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(a.title)}</a>` 
+                    ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" onclick="onArticleLinkClick(${idx})">${esc(a.title)}</a>` 
                     : esc(a.title);
                 return `
                 <div class="article-card" data-idx="${idx}">
@@ -215,6 +343,11 @@
             `;
             }).join('');
             document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function onArticleLinkClick(idx) {
+            const a = articles[idx];
+            if (a) addToHistory(a);
         }
 
         let articles = [];
@@ -238,6 +371,8 @@
             const summary = articles[idx]?.summary;
             if (!summary) return;
 
+            addToHistory(articles[idx]);
+
             document.querySelectorAll('.tts-btn').forEach(b => {
                 b.classList.remove('playing');
                 b.textContent = b.dataset.defaultText || '🔊 語音朗讀摘要';
@@ -253,27 +388,36 @@
             speechSynthesis.speak(u);
         }
 
-        async function init(showLoading = true) {
-            if (showLoading) {
-                document.getElementById('contentArea').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>正在搜集最新文章...</p></div>';
-            }
-            articles = FALLBACK_ARTICLES;
-            renderArticles(articles);
+        function showLoadingMessage(msg) {
+            document.getElementById('contentArea').innerHTML =
+                '<div class="loading"><div class="loading-spinner"></div><p>' + msg + '</p></div>';
+        }
+
+        async function loadAndRenderArticles(loadingMsg) {
+            if (loadingMsg) showLoadingMessage(loadingMsg);
             try {
-                const loaded = await loadArticles();
-                if (loaded.length > 0) {
-                    articles = loaded;
-                    renderArticles(articles);
-                }
-            } catch (e) { /* keep fallback */ }
+                articles = await loadArticles();
+                renderArticles(articles);
+            } catch (e) {
+                articles = shuffleFallback();
+                renderArticles(articles);
+            }
+        }
+
+        async function init() {
+            await loadAndRenderArticles('正在搜集最新文章...');
         }
 
         async function refreshArticles() {
+            if (viewMode === 'history') return;
             const btn = document.getElementById('refreshBtn');
             btn.disabled = true;
             btn.textContent = '⏳ 更新中...';
-            document.getElementById('contentArea').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>正在重新搜集最新文章...</p></div>';
-            await init(false);
+            if (typeof speechSynthesis !== 'undefined') {
+                speechSynthesis.cancel();
+                currentPlayingIdx = -1;
+            }
+            await loadAndRenderArticles('正在重新抓取最新文章，請稍候…');
             btn.disabled = false;
             btn.textContent = '🔄 更新';
         }
