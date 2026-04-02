@@ -142,7 +142,8 @@ button:hover {
     gap: 16px;
 }
 
-/* 淺色描紅版：格線略淡，與範字協調 */
+/* 描紅版：格線略淡，與範字協調 */
+.preview.preview--hong,
 .preview.preview--trace {
     --line-soft: rgba(199, 79, 123, 0.22);
 }
@@ -215,13 +216,15 @@ button:hover {
 .cell-inner {
     position: relative;
     z-index: 2;
-    line-height: 1;
 }
 
-/* 淺色描紅：實心淡紅字（無虛線） */
+.cell-inner--hong,
 .cell-inner--trace {
-    color: rgba(200, 88, 102, 0.58);
+    color: rgba(200, 88, 102, 0.62);
     font-weight: 400;
+    -webkit-text-fill-color: rgba(200, 88, 102, 0.62);
+    -webkit-text-stroke: 0;
+    text-shadow: none;
 }
 
 .cell.tian::before,

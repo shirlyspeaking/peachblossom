@@ -27,6 +27,15 @@
         if (statusEl) statusEl.textContent = msg;
     }
 
+    /** 描紅為實心填色，強制關閉可能造成「虛線／空心」感的 stroke（含 WebKit） */
+    function applySolidHongStyle(el) {
+        var c = 'rgba(200, 88, 102, 0.62)';
+        el.style.color = c;
+        el.style.setProperty('-webkit-text-fill-color', c);
+        el.style.setProperty('-webkit-text-stroke', '0');
+        el.style.textShadow = 'none';
+    }
+
     function getFontFamily() {
         var preset = fontPreset.value.trim();
         var custom = customFont.value.trim();
@@ -113,22 +122,37 @@
         var text = normalizeText(raw);
         var cpl = parseInt(charsPerLine.value, 10) || 12;
         var lpp = parseInt(linesPerPage.value, 10) || 12;
-        var fs = parseInt(fontSize.value, 10) || 36;
-        var lh = parseFloat(lineHeight.value) || 1.15;
+        var fsMin = parseInt(fontSize.getAttribute('min'), 10);
+        var fsMax = parseInt(fontSize.getAttribute('max'), 10);
+        if (!Number.isFinite(fsMin)) fsMin = 18;
+        if (!Number.isFinite(fsMax)) fsMax = 72;
+        var fs = parseInt(String(fontSize.value).trim(), 10);
+        if (!Number.isFinite(fs)) fs = 36;
+        fs = Math.max(fsMin, Math.min(fsMax, fs));
+
+        var lhMin = parseFloat(lineHeight.getAttribute('min'));
+        var lhMax = parseFloat(lineHeight.getAttribute('max'));
+        if (!Number.isFinite(lhMin)) lhMin = 1;
+        if (!Number.isFinite(lhMax)) lhMax = 2.5;
+        var lh = parseFloat(String(lineHeight.value).trim().replace(',', '.'));
+        if (!Number.isFinite(lh)) lh = 1.15;
+        lh = Math.max(lhMin, Math.min(lhMax, lh));
         var gtype = gridType.value;
         var psize = pageSize.value;
         var font = getFontFamily();
-        var traceMode = copyStyle && copyStyle.value === 'trace';
+        var hongMode =
+            copyStyle &&
+            (copyStyle.value === 'hong' || copyStyle.value === 'trace');
 
         var rows = buildRows(text, cpl);
         var pages = chunkPages(rows, lpp);
 
         preview.innerHTML = '';
-        preview.className = 'preview preview--' + psize + (traceMode ? ' preview--trace' : '');
+        preview.className = 'preview preview--' + psize + (hongMode ? ' preview--hong' : '');
 
         if (copyStyleHint) {
-            copyStyleHint.textContent = traceMode
-                ? '淺色描紅：淡紅色實心範字，便於摹寫；列印與匯出皆適用。'
+            copyStyleHint.textContent = hongMode
+                ? '描紅：淡紅色實心範字（無虛線），便於摹寫；列印與匯出皆適用。'
                 : '標準墨色：實心字，適合對照。';
         }
 
@@ -158,9 +182,6 @@
                     var cell = document.createElement('div');
                     cell.className = cellClassForGrid(gtype);
                     cell.style.minHeight = cellMin + 'px';
-                    cell.style.fontSize = fs + 'px';
-                    cell.style.fontFamily = font;
-                    cell.style.lineHeight = lh;
 
                     var isLastCol = c === cpl - 1;
                     var isLastRow = r === pageRows.length - 1;
@@ -169,13 +190,17 @@
 
                     var inner = document.createElement('span');
                     inner.className = 'cell-inner';
+                    inner.style.fontSize = fs + 'px';
+                    inner.style.lineHeight = String(lh);
+                    inner.style.fontFamily = font;
                     if (ch === ' ') {
                         inner.innerHTML = '&nbsp;';
                     } else if (ch === '') {
                         inner.innerHTML = '&nbsp;';
-                    } else if (traceMode) {
-                        inner.className = 'cell-inner cell-inner--trace';
+                    } else if (hongMode) {
+                        inner.className = 'cell-inner cell-inner--hong';
                         inner.textContent = ch;
+                        applySolidHongStyle(inner);
                     } else {
                         inner.textContent = ch;
                     }
