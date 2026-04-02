@@ -220,10 +220,10 @@ button:hover {
 
 .cell-inner--hong,
 .cell-inner--trace {
-    color: rgba(200, 88, 102, 0.62);
+    color: transparent;
     font-weight: 400;
-    -webkit-text-fill-color: rgba(200, 88, 102, 0.62);
-    -webkit-text-stroke: 0;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.35px rgba(210, 68, 88, 0.9);
     text-shadow: none;
 }
 

@@ -251,6 +251,39 @@
             return cut;
         }
 
+        /** 從 RSS item / Atom entry 取出單篇文章網址（避免選到 rel=self 或只連到網站首頁） */
+        function getItemPermalink(el) {
+            const links = el.querySelectorAll('link');
+            for (let j = 0; j < links.length; j++) {
+                const node = links[j];
+                let href = (node.getAttribute('href') || '').trim();
+                if (!href) href = (node.textContent || '').trim();
+                if (!href || !/^https?:\/\//i.test(href)) continue;
+                const rel = (node.getAttribute('rel') || '').toLowerCase();
+                const type = (node.getAttribute('type') || '').toLowerCase();
+                if (rel === 'self' || rel === 'enclosure' || rel === 'replies') continue;
+                if (type === 'application/atom+xml' || type === 'application/rss+xml') continue;
+                if (rel === 'alternate' || rel === 'edit' || rel === '') {
+                    if (!type || type.includes('html') || type === '') return href;
+                }
+            }
+            const rssLink = el.querySelector('link');
+            if (rssLink) {
+                const href = (rssLink.getAttribute('href') || '').trim();
+                if (href && /^https?:\/\//i.test(href)) return href;
+                const txt = (rssLink.textContent || '').trim();
+                if (/^https?:\/\//i.test(txt)) return txt;
+            }
+            const guid = el.querySelector('guid');
+            if (guid) {
+                const g = (guid.textContent || '').trim();
+                if (/^https?:\/\//i.test(g)) return g;
+            }
+            return '#';
+        }
+
+        const ITEMS_PER_FEED = 12;
+
         function parseRssXml(xmlText) {
             const items = [];
             try {
@@ -259,19 +292,18 @@
                 let entries = doc.querySelectorAll('item');
                 if (entries.length === 0) entries = doc.querySelectorAll('entry');
                 entries.forEach((el, i) => {
-                    if (i >= 4) return;
+                    if (i >= ITEMS_PER_FEED) return;
                     const title = el.querySelector('title')?.textContent?.trim() || '';
-                    const linkEl = el.querySelector('link');
-                    const link = linkEl?.getAttribute?.('href') || linkEl?.textContent?.trim() || '#';
-                    const desc = el.querySelector('description')?.textContent?.trim() 
-                        || el.querySelector('content')?.textContent?.trim() 
+                    const link = getItemPermalink(el);
+                    const desc = el.querySelector('description')?.textContent?.trim()
+                        || el.querySelector('content')?.textContent?.trim()
                         || el.querySelector('summary')?.textContent?.trim() || '';
-                    const pubDate = el.querySelector('pubDate')?.textContent?.trim() 
+                    const pubDate = el.querySelector('pubDate')?.textContent?.trim()
                         || el.querySelector('updated')?.textContent?.trim() || '';
                     if (title && (desc || title)) {
                         items.push({
                             title,
-                            link: link,
+                            link,
                             summary: createSummary(desc || title, SUMMARY_LENGTH),
                             date: pubDate
                         });
@@ -285,10 +317,10 @@
             const sep = source.url.includes('?') ? '&' : '?';
             const bustedUrl = source.url + sep + '_nocache=' + Date.now() + '_' + Math.random().toString(36).slice(2);
             for (const proxy of CORS_PROXIES) {
-                const proxyUrl = proxy + encodeURIComponent(bustedUrl);
+                const proxyUrl = proxy + encodeURIComponent(bustedUrl) + (proxy.includes('allorigins') ? '&_=' + Date.now() : '');
                 try {
                     const ctrl = new AbortController();
-                    const t = setTimeout(() => ctrl.abort(), 8000);
+                    const t = setTimeout(() => ctrl.abort(), 12000);
                     const res = await fetch(proxyUrl, {
                         signal: ctrl.signal,
                         cache: 'no-store',
@@ -316,7 +348,7 @@
             });
             if (all.length === 0) return shuffleFallback();
             all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            return all.slice(0, 15);
+            return all.slice(0, 30);
         }
 
         function esc(s) {

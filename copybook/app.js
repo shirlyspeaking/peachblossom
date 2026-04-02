@@ -27,12 +27,13 @@
         if (statusEl) statusEl.textContent = msg;
     }
 
-    /** 描紅為實心填色，強制關閉可能造成「虛線／空心」感的 stroke（含 WebKit） */
-    function applySolidHongStyle(el) {
-        var c = 'rgba(200, 88, 102, 0.62)';
-        el.style.color = c;
-        el.style.setProperty('-webkit-text-fill-color', c);
-        el.style.setProperty('-webkit-text-stroke', '0');
+    /** 描紅：紅色外框、字心透明（鏤空），描邊粗細隨字級 */
+    function applyHongOutlineStyle(el, fs) {
+        var w = Math.max(0.85, Math.min(2.35, fs / 21));
+        var stroke = 'rgba(210, 68, 88, 0.92)';
+        el.style.color = 'transparent';
+        el.style.setProperty('-webkit-text-fill-color', 'transparent');
+        el.style.setProperty('-webkit-text-stroke', w + 'px ' + stroke);
         el.style.textShadow = 'none';
     }
 
@@ -152,7 +153,7 @@
 
         if (copyStyleHint) {
             copyStyleHint.textContent = hongMode
-                ? '描紅：淡紅色實心範字（無虛線），便於摹寫；列印與匯出皆適用。'
+                ? '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。'
                 : '標準墨色：實心字，適合對照。';
         }
 
@@ -200,7 +201,7 @@
                     } else if (hongMode) {
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.textContent = ch;
-                        applySolidHongStyle(inner);
+                        applyHongOutlineStyle(inner, fs);
                     } else {
                         inner.textContent = ch;
                     }
