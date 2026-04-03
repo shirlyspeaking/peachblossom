@@ -165,6 +165,48 @@
         
         .reset-btn.hover { background: #ffcc80; color: #3e2723; }
 
+        #btn-capture {
+            margin-top: 8px;
+            margin-bottom: 10px;
+            padding: 10px 30px;
+            background: transparent;
+            border: 1px solid #81c784;
+            color: #a5d6a7;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 50px;
+        }
+        #btn-capture.hover { background: #81c784; color: #1b5e20; }
+
+        #btn-capture-raw {
+            margin-top: 0;
+            margin-bottom: 10px;
+            padding: 10px 30px;
+            background: transparent;
+            border: 1px solid #90caf9;
+            color: #bbdefb;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 50px;
+        }
+        #btn-capture-raw.hover { background: #64b5f6; color: #0d47a1; }
+
+        #btn-capture-huadian {
+            margin-top: 0;
+            margin-bottom: 10px;
+            padding: 10px 24px;
+            background: transparent;
+            border: 1px solid #ffb74d;
+            color: #ffe0b2;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 50px;
+        }
+        #btn-capture-huadian.hover { background: #ffb74d; color: #4e342e; }
+
         /* 覆蓋層 */
         #overlay {
             position: absolute;
@@ -216,7 +258,7 @@
             }
             .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
             .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
-            h1, .subtitle, .reset-btn { display: none; }
+            h1, .subtitle, #btn-reset { display: none; }
         }
     </style>
 </head>
@@ -239,6 +281,9 @@
         <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴 &nbsp; ✋ 張開手掌卸妝</p>
         <div class="grid-container" id="options-grid"></div>
         <button class="reset-btn" id="btn-reset">卸妝 / 回歸現世</button>
+        <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
+        <button type="button" class="reset-btn" id="btn-capture">拍照（試妝＋虛擬背景）</button>
+        <button type="button" class="reset-btn" id="btn-capture-raw">純鏡頭存圖</button>
     </div>
 
     <!-- 背景音樂（選擇花鈿時切換） -->
@@ -283,6 +328,9 @@
         const startBtn = document.getElementById('start-btn');
         const overlay = document.getElementById('overlay');
         const resetBtn = document.getElementById('btn-reset');
+        const captureHuadianBtn = document.getElementById('btn-capture-huadian');
+        const captureBtn = document.getElementById('btn-capture');
+        const captureRawBtn = document.getElementById('btn-capture-raw');
         const bgMusic = document.getElementById('bg-music');
         /** 若 audio/list.json 有填 tracks，隨機僅從此列表抽選；否則用各花鈿預設 bgMusic 路徑合併去重後隨機 */
         let audioTrackList = [];
@@ -344,8 +392,111 @@
                 selectHuadian(index);
             } else if (element.id === 'btn-reset') {
                 selectHuadian(-1);
+            } else if (element.id === 'btn-capture') {
+                capturePhoto();
+            } else if (element.id === 'btn-capture-huadian') {
+                capturePhotoHuadianOnly();
+            } else if (element.id === 'btn-capture-raw') {
+                capturePhotoRaw();
             }
         }
+
+        function downloadPngFromCanvas(exportCanvas, filenamePrefix) {
+            try {
+                exportCanvas.toBlob((blob) => {
+                    if (!blob) {
+                        alert('無法產生圖片。若畫布含跨來源圖片，瀏覽器可能禁止匯出。');
+                        return;
+                    }
+                    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = filenamePrefix + '-' + ts + '.png';
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }, 'image/png');
+            } catch (err) {
+                alert('匯出失敗：' + (err.message || String(err)));
+            }
+        }
+
+        /** 完整鏡頭畫面 + 花鈿，不含虛擬背景／人像去背；與螢幕鏡像一致 */
+        function capturePhotoHuadianOnly() {
+            if (!isCameraRunning || !canvasElement.width || !canvasElement.height) return;
+            if (selectedIndex < 0) {
+                alert('請先選擇一種花鈿樣式。');
+                return;
+            }
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const tmp = document.createElement('canvas');
+            tmp.width = w;
+            tmp.height = h;
+            const tctx = tmp.getContext('2d');
+            tctx.drawImage(videoElement, 0, 0, w, h);
+            if (latestFaceLandmarks.length > 0) {
+                for (let i = 0; i < latestFaceLandmarks.length; i++) {
+                    drawHuadian(latestFaceLandmarks[i], selectedIndex, tctx, w, h);
+                }
+            } else {
+                alert('目前未偵測到臉部，儲存的相片將只有鏡頭畫面、沒有花鈿。');
+            }
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = w;
+            exportCanvas.height = h;
+            const ex = exportCanvas.getContext('2d');
+            ex.translate(w, 0);
+            ex.scale(-1, 1);
+            ex.drawImage(tmp, 0, 0);
+            downloadPngFromCanvas(exportCanvas, 'tang-huadian-nobg');
+        }
+
+        /** 僅鏡頭畫面，無花鈿、無虛擬背景 */
+        function capturePhotoRaw() {
+            if (!isCameraRunning || !videoElement.videoWidth || !videoElement.videoHeight) return;
+            const w = videoElement.videoWidth;
+            const h = videoElement.videoHeight;
+            const tmp = document.createElement('canvas');
+            tmp.width = w;
+            tmp.height = h;
+            tmp.getContext('2d').drawImage(videoElement, 0, 0, w, h);
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = w;
+            exportCanvas.height = h;
+            const ex = exportCanvas.getContext('2d');
+            ex.translate(w, 0);
+            ex.scale(-1, 1);
+            ex.drawImage(tmp, 0, 0);
+            downloadPngFromCanvas(exportCanvas, 'tang-camera');
+        }
+
+        /** 將目前畫面上的合成畫面（人臉＋花鈿＋虛擬背景）匯出為 PNG；左右翻轉與螢幕鏡像一致 */
+        function capturePhoto() {
+            if (!isCameraRunning || !canvasElement.width || !canvasElement.height) return;
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = w;
+            exportCanvas.height = h;
+            const ex = exportCanvas.getContext('2d');
+            ex.translate(w, 0);
+            ex.scale(-1, 1);
+            ex.drawImage(canvasElement, 0, 0);
+            downloadPngFromCanvas(exportCanvas, 'tang-huadian-full');
+        }
+
+        captureHuadianBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            capturePhotoHuadianOnly();
+        });
+        captureBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            capturePhoto();
+        });
+        captureRawBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            capturePhotoRaw();
+        });
 
         function selectHuadian(index) {
             selectedIndex = index;
@@ -767,9 +918,11 @@
             }
         }
 
-        function drawHuadian(landmarks, index) {
-            const w = canvasElement.width;
-            const h = canvasElement.height;
+        /** ctx / cw / ch 省略時使用主畫布（供拍照到暫存 canvas 時傳入） */
+        function drawHuadian(landmarks, index, ctx, cw, ch) {
+            ctx = ctx || canvasCtx;
+            cw = cw == null ? canvasElement.width : cw;
+            ch = ch == null ? canvasElement.height : ch;
             const config = huadianAssets[index];
             const img = loadedImages[index];
             
@@ -777,28 +930,26 @@
             if (!img || !img.complete || img.naturalWidth === 0) return;
 
             const pt151 = landmarks[151];
-            const cx = pt151.x * w;
-            const cy = pt151.y * h + config.yOffset;
+            const cx = pt151.x * cw;
+            const cy = pt151.y * ch + config.yOffset;
 
             const ptLeft = landmarks[33];
             const ptRight = landmarks[263];
-            const dx = (ptRight.x - ptLeft.x) * w; 
-            const dy = (ptRight.y - ptLeft.y) * h;
+            const dx = (ptRight.x - ptLeft.x) * cw; 
+            const dy = (ptRight.y - ptLeft.y) * ch;
             const angle = Math.atan2(dy, dx);
 
             const tL = landmarks[127];
             const tR = landmarks[356];
-            const dist = Math.sqrt(Math.pow((tL.x - tR.x)*w, 2) + Math.pow((tL.y - tR.y)*h, 2));
+            const dist = Math.sqrt(Math.pow((tL.x - tR.x) * cw, 2) + Math.pow((tL.y - tR.y) * ch, 2));
             
-            // --- 尺寸優化 ---
-            // 之前的係數是 0.4，現在縮小 30% -> 0.4 * 0.7 = 0.28
             const size = dist * 0.28 * config.scale;
 
-            canvasCtx.save();
-            canvasCtx.translate(cx, cy);
-            canvasCtx.rotate(angle);
-            canvasCtx.drawImage(img, -size/2, -size/2, size, size);
-            canvasCtx.restore();
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            ctx.restore();
         }
 
         // --- 8. 手勢處理 (獨立邏輯) ---
