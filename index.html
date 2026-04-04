@@ -154,29 +154,37 @@
             opacity: 0.8;
         }
 
+        /* 橫條漸層：填色不透明度 65%（其餘 35% 透明以透出背景） */
         .header-cta {
             display: inline-flex;
             align-items: center;
             gap: 10px;
             margin-top: 24px;
             padding: 14px 28px;
-            background: linear-gradient(135deg, #e8dff5 0%, #efd0e4 50%, #e8b8c8 100%);
+            background: linear-gradient(
+                135deg,
+                rgba(232, 223, 245, 0.65) 0%,
+                rgba(239, 208, 228, 0.65) 50%,
+                rgba(232, 184, 200, 0.65) 100%
+            );
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             color: var(--berry-dark);
             text-decoration: none;
             border-radius: 30px;
             font-size: 1.05rem;
             font-weight: 500;
-            border: 1px solid rgba(201, 75, 124, 0.22);
-            box-shadow: 0 6px 22px rgba(142, 33, 87, 0.14),
-                inset 0 1px 0 rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(201, 75, 124, 0.28);
+            box-shadow: 0 6px 22px rgba(142, 33, 87, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.55);
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
 
         .header-cta:hover {
             transform: scale(1.05);
-            border-color: rgba(201, 75, 124, 0.35);
-            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            border-color: rgba(201, 75, 124, 0.4);
+            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.65);
         }
 
         .header-cta-icon {

@@ -307,7 +307,7 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換進度 &nbsp; 📐 鏡像區內食指上下移對應進度 &nbsp; ✊ 握拳卸妝</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換進度 &nbsp; 📐 鏡像區內食指上下移對應進度 &nbsp; ✊✊ 雙手握拳貼雙頰卸妝</p>
         <div id="huadian-progress-wrap">
             <span id="huadian-progress-label">花鈿進度</span>
             <div id="huadian-progress-track" title="花鈿切換進度">
@@ -384,9 +384,9 @@
         let isPinching = false;
         let lastClickTime = 0;
         let lastHoveredElement = null;
-        let fistStartTime = 0;  // 握拳開始時間，滿一定時長觸發卸妝
-        const fistHoldDuration = 450;
-        let fistUnmakeupArmed = true;  // 鬆拳後才允許再次握拳卸妝
+        let cheekFistStartTime = 0;  // 雙拳貼頰姿勢維持時間
+        const cheekFistHoldDuration = 550;
+        let cheekUnmakeupArmed = true;  // 姿勢鬆開後才允許再次觸發卸妝
         let waveHistory = [];   // { t, y } 手腕垂直位置，用於「向上揮手」偵測
         let lastWaveNextHuadianTime = 0;
         const waveNextCooldownMs = 1400;
@@ -662,11 +662,11 @@
 
                 // B. Hands (手勢)
                 hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-                hands.setOptions({maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
+                hands.setOptions({maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
                 hands.onResults(results => {
                     if(results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                         latestHandLandmarks = results.multiHandLandmarks[0];
-                        processHandGestures(results.multiHandLandmarks[0]); // 立即處理交互
+                        processHandGestures(results.multiHandLandmarks); // 傳入雙手，供雙拳貼頰卸妝
                     } else {
                         latestHandLandmarks = null;
                         cursor.style.display = 'none';
@@ -1014,6 +1014,57 @@
             return thumbToWrist / handLen < 1.0;
         }
 
+        /** 貼臉頰握拳用：略放寬，避免偵測不到 */
+        function isHandFistRelaxed(landmarks) {
+            const wrist = landmarks[0];
+            const middleMcp = landmarks[9];
+            const handLen = Math.hypot(middleMcp.x - wrist.x, middleMcp.y - wrist.y) + 0.001;
+            const tips = [8, 12, 16, 20];
+            let dSum = 0;
+            for (const i of tips) {
+                dSum += Math.hypot(landmarks[i].x - wrist.x, landmarks[i].y - wrist.y);
+            }
+            const avgTipToWrist = dSum / 4;
+            if (avgTipToWrist / handLen > 0.98) return false;
+            const thumbTip = landmarks[4];
+            const thumbToWrist = Math.hypot(thumbTip.x - wrist.x, thumbTip.y - wrist.y);
+            return thumbToWrist / handLen < 1.12;
+        }
+
+        function handFistCenter(landmarks) {
+            let sx = landmarks[0].x, sy = landmarks[0].y;
+            for (const i of [8, 12, 16, 20]) {
+                sx += landmarks[i].x;
+                sy += landmarks[i].y;
+            }
+            return { x: sx / 5, y: sy / 5 };
+        }
+
+        function lmDist2(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        /** 雙手皆為放鬆握拳，且拳心區域分別靠近臉頰兩側（Face Mesh 234／454） */
+        function bothFistsOnCheeks(faceLm, hand0, hand1) {
+            if (!isHandFistRelaxed(hand0) || !isHandFistRelaxed(hand1)) return false;
+            const cheekA = faceLm[234];
+            const cheekB = faceLm[454];
+            if (!cheekA || !cheekB) return false;
+            const fw = lmDist2(cheekA, cheekB) + 0.001;
+            const thresh = 0.45 * fw;
+            const cheekLeft = cheekA.x <= cheekB.x ? cheekA : cheekB;
+            const cheekRight = cheekA.x > cheekB.x ? cheekA : cheekB;
+            const c0 = handFistCenter(hand0);
+            const c1 = handFistCenter(hand1);
+            const hLeft = c0.x <= c1.x ? c0 : c1;
+            const hRight = c0.x > c1.x ? c0 : c1;
+            return lmDist2(hLeft, cheekLeft) < thresh && lmDist2(hRight, cheekRight) < thresh;
+        }
+
+        function isHandPinchingLm(lm) {
+            return Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.05;
+        }
+
         function isCursorOverStage(cursorX, cursorY) {
             const stageEl = document.getElementById('stage-container');
             if (!stageEl) return false;
@@ -1073,11 +1124,13 @@
             selectHuadian(next);
         }
 
-        function processHandGestures(landmarks) {
+        function processHandGestures(multiHands) {
+            if (!multiHands || multiHands.length === 0) return;
+            const landmarks = multiHands[0];
             const indexTip = landmarks[8];
             const thumbTip = landmarks[4];
 
-            // 鏡像座標轉換
+            // 鏡像座標轉換（仍以第一隻偵測到的手為游標）
             const cursorX = (1 - indexTip.x) * window.innerWidth;
             const cursorY = indexTip.y * window.innerHeight;
 
@@ -1090,22 +1143,30 @@
             const isPinchingNow = pinchDist < pinchThreshold;
             const isFist = isHandFist(landmarks);
 
-            // 握拳卸妝（需維持一段時間；捏合操作按鈕時不觸發；觸發後須鬆拳再握拳才會再次觸發）
-            if (isFist && !isPinchingNow) {
+            // 雙手握拳分別貼在雙頰旁卸妝（需同時偵測到兩隻手；任一手捏合時不計時）
+            const faceLm = latestFaceLandmarks.length > 0 ? latestFaceLandmarks[0] : null;
+            let cheekPose = false;
+            if (multiHands.length >= 2 && faceLm) {
+                cheekPose = bothFistsOnCheeks(faceLm, multiHands[0], multiHands[1]);
+            }
+            const twoHandsPinching = multiHands.length >= 2 &&
+                (isHandPinchingLm(multiHands[0]) || isHandPinchingLm(multiHands[1]));
+
+            if (cheekPose && !twoHandsPinching && selectedIndex >= 0) {
                 waveHistory.length = 0;
-                if (fistUnmakeupArmed) {
-                    if (fistStartTime === 0) fistStartTime = Date.now();
-                    if (Date.now() - fistStartTime >= fistHoldDuration) {
+                if (cheekUnmakeupArmed) {
+                    if (cheekFistStartTime === 0) cheekFistStartTime = Date.now();
+                    if (Date.now() - cheekFistStartTime >= cheekFistHoldDuration) {
                         selectHuadian(-1);
                         posPickCandidate = -1;
-                        fistStartTime = 0;
-                        fistUnmakeupArmed = false;
+                        cheekFistStartTime = 0;
+                        cheekUnmakeupArmed = false;
                         lastClickTime = Date.now();
                     }
                 }
             } else {
-                fistStartTime = 0;
-                if (!isFist) fistUnmakeupArmed = true;
+                cheekFistStartTime = 0;
+                if (!cheekPose) cheekUnmakeupArmed = true;
             }
 
             // 向上揮手切換花鈿並驅動側欄進度條（非捏合、非握拳時偵測手腕上下擺動）

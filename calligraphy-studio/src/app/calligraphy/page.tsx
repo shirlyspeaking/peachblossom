@@ -186,23 +186,45 @@ export default function CalligraphyPage() {
         <Card ref={previewRef}>
           <CardHeader><CardTitle>字帖預覽（第一頁）</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid w-full overflow-hidden rounded-lg border border-slate-200 bg-white" style={{ gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))` }}>
-              {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
-                const row = Math.floor(idx / config.cols);
-                const col = idx % config.cols;
-                const char = activePage?.cells.find((cell) => cell.row === row && cell.col === col)?.char || "";
-                return (
-                  <div key={`${row}-${col}`} className="relative flex aspect-square items-center justify-center border border-slate-200 text-slate-900" style={cellStyle}>
-                    {config.showGuideLines && config.gridType !== "lines" ? (
-                      <>
-                        <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-slate-200" />
-                        <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-slate-200" />
-                      </>
-                    ) : null}
-                    <span>{char}</span>
-                  </div>
-                );
-              })}
+            {/* 外框單一邊框，左右寬度一致；內格僅用右/下分隔線，避免雙線與欄數變化時外緣粗細不一 */}
+            <div
+              className="w-full overflow-hidden rounded-lg border-2 border-slate-400 bg-white"
+              style={{ aspectRatio: `${config.cols} / ${config.rows}` }}
+            >
+              <div
+                className="grid h-full w-full"
+                style={{ gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${config.rows}, minmax(0, 1fr))` }}
+              >
+                {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
+                  const row = Math.floor(idx / config.cols);
+                  const col = idx % config.cols;
+                  const char = activePage?.cells.find((cell) => cell.row === row && cell.col === col)?.char || "";
+                  const isLines = config.gridType === "lines";
+                  const showInnerVertical = !isLines && col < config.cols - 1;
+                  const showInnerHorizontal = row < config.rows - 1;
+                  const cellBorder =
+                    isLines
+                      ? showInnerHorizontal
+                        ? "border-b border-slate-300"
+                        : ""
+                      : [showInnerVertical ? "border-r border-slate-300" : "", showInnerHorizontal ? "border-b border-slate-300" : ""].filter(Boolean).join(" ");
+                  return (
+                    <div
+                      key={`${row}-${col}`}
+                      className={`relative flex min-h-0 min-w-0 items-center justify-center text-slate-900 ${cellBorder}`}
+                      style={cellStyle}
+                    >
+                      {config.showGuideLines && !isLines ? (
+                        <>
+                          <span className="pointer-events-none absolute left-1/2 top-0 z-0 h-full w-px -translate-x-1/2 bg-slate-200" />
+                          <span className="pointer-events-none absolute left-0 top-1/2 z-0 h-px w-full -translate-y-1/2 bg-slate-200" />
+                        </>
+                      ) : null}
+                      <span className="relative z-10">{char}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
