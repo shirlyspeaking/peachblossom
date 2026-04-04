@@ -160,19 +160,25 @@
             gap: 10px;
             margin-top: 24px;
             padding: 14px 28px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 245, 247, 0.88) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--berry-dark);
             text-decoration: none;
             border-radius: 30px;
             font-size: 1.05rem;
             font-weight: 500;
-            box-shadow: 0 6px 24px rgba(14, 165, 233, 0.35);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(201, 75, 124, 0.35);
+            box-shadow: 0 6px 24px rgba(142, 33, 87, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
 
         .header-cta:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 32px rgba(14, 165, 233, 0.5);
+            border-color: rgba(201, 75, 124, 0.55);
+            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
         }
 
         .header-cta-icon {
@@ -273,10 +279,6 @@
 
         .app-icon.huadian {
             background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
-        }
-
-        .app-icon.enjoyread {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
         }
 
         .app-icon.copybook {
@@ -574,19 +576,6 @@
         </div>
 
         <div class="apps-grid">
-            <!-- 悅讀 EnjoyRead - 已上線（置頂） -->
-            <a href="enjoyread/app.html" class="app-card" style="text-decoration: none;">
-                <div class="app-icon enjoyread">📖</div>
-                <h2 class="app-name">悅讀 EnjoyRead</h2>
-                <p class="app-desc">中學生閱讀平台。AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀，讓學習更輕鬆有趣。</p>
-                <div class="app-tags">
-                    <span class="tag">AI 閱讀</span>
-                    <span class="tag">語音朗讀</span>
-                    <span class="tag">教育</span>
-                </div>
-                <span class="app-button primary">進入閱讀</span>
-            </a>
-
             <!-- 花鈿試妝 - 已上線 -->
             <a href="huadian/huadian.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon huadian">💮</div>
