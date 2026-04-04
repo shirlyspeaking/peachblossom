@@ -264,7 +264,7 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴 &nbsp; ✋ 張開手掌卸妝</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👋 揮手切換下一款花鈿 &nbsp; ✊ 握拳卸妝</p>
         <div class="grid-container" id="options-grid"></div>
         <button class="reset-btn" id="btn-reset">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
@@ -335,9 +335,12 @@
         let isPinching = false;
         let lastClickTime = 0;
         let lastHoveredElement = null;
-        let openPalmStartTime = 0;  // 張開手掌開始時間，用於手勢卸妝
-        const openPalmDuration = 400;  // 張開手掌滿 400ms 觸發卸妝
-        const openPalmThreshold = 0.14;  // 拇指與食指距離大於此視為張開
+        let fistStartTime = 0;  // 握拳開始時間，滿一定時長觸發卸妝
+        const fistHoldDuration = 450;
+        let fistUnmakeupArmed = true;  // 鬆拳後才允許再次握拳卸妝
+        let waveHistory = [];   // { t, x } 手腕水平位置，用於揮手偵測
+        let lastWaveNextHuadianTime = 0;
+        const waveNextCooldownMs = 1400;
 
         // 唐風背景圖（從 images 資料夾隨機選用）
         let tangBgList = [];
@@ -452,14 +455,7 @@
 
         captureHuadianBtn.addEventListener('mouseenter', () => { mouseOverNoBgCaptureBtn = true; });
         captureHuadianBtn.addEventListener('mouseleave', () => { mouseOverNoBgCaptureBtn = false; });
-        captureHuadianBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            capturePhotoHuadianOnly();
-        });
-        captureBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            capturePhoto();
-        });
+        // 拍照僅能透過手勢「捏合」觸發（與花鈿、卸妝相同），避免滑鼠／觸控一點就拍
 
         function selectHuadian(index) {
             selectedIndex = index;
@@ -925,6 +921,46 @@
         }
 
         // --- 8. 手勢處理 (獨立邏輯) ---
+        function isHandFist(landmarks) {
+            const wrist = landmarks[0];
+            const middleMcp = landmarks[9];
+            const handLen = Math.hypot(middleMcp.x - wrist.x, middleMcp.y - wrist.y) + 0.001;
+            const tips = [8, 12, 16, 20];
+            let dSum = 0;
+            for (const i of tips) {
+                dSum += Math.hypot(landmarks[i].x - wrist.x, landmarks[i].y - wrist.y);
+            }
+            const avgTipToWrist = dSum / 4;
+            if (avgTipToWrist / handLen > 0.9) return false;
+            const thumbTip = landmarks[4];
+            const thumbToWrist = Math.hypot(thumbTip.x - wrist.x, thumbTip.y - wrist.y);
+            return thumbToWrist / handLen < 1.0;
+        }
+
+        function tryWaveNextHuadian(landmarks) {
+            const now = Date.now();
+            if (now - lastWaveNextHuadianTime < waveNextCooldownMs) return;
+            const wx = 1 - landmarks[0].x;
+            waveHistory.push({ t: now, x: wx });
+            waveHistory = waveHistory.filter(e => now - e.t < 750);
+            if (waveHistory.length < 10) return;
+            const xs = waveHistory.map(e => e.x);
+            const span = Math.max(...xs) - Math.min(...xs);
+            if (span < 0.13) return;
+            let reversals = 0;
+            for (let i = 2; i < xs.length; i++) {
+                const d1 = xs[i - 1] - xs[i - 2];
+                const d2 = xs[i] - xs[i - 1];
+                if (d1 * d2 < 0 && Math.abs(d1) + Math.abs(d2) > 0.018) reversals++;
+            }
+            if (reversals < 2) return;
+            lastWaveNextHuadianTime = now;
+            waveHistory.length = 0;
+            const n = huadianAssets.length;
+    const next = selectedIndex < 0 ? 0 : (selectedIndex + 1) % n;
+    selectHuadian(next);
+}
+
         function processHandGestures(landmarks) {
             const indexTip = landmarks[8];
             const thumbTip = landmarks[4];
@@ -939,18 +975,31 @@
 
             const pinchDist = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
             const pinchThreshold = 0.05;
+            const isPinchingNow = pinchDist < pinchThreshold;
+            const isFist = isHandFist(landmarks);
 
-            // 張開手掌手勢：拇指與食指距離大，維持一段時間即觸發卸妝（不需對準按鈕）
-            const isOpenPalm = pinchDist > openPalmThreshold;
-            if (isOpenPalm && selectedIndex >= 0) {
-                if (openPalmStartTime === 0) openPalmStartTime = Date.now();
-                if (Date.now() - openPalmStartTime >= openPalmDuration) {
-                    selectHuadian(-1);
-                    openPalmStartTime = 0;
-                    lastClickTime = Date.now();
+            // 握拳卸妝（需維持一段時間；捏合操作按鈕時不觸發；觸發後須鬆拳再握拳才會再次觸發）
+            if (isFist && !isPinchingNow) {
+                waveHistory.length = 0;
+                if (fistUnmakeupArmed) {
+                    if (fistStartTime === 0) fistStartTime = Date.now();
+                    if (Date.now() - fistStartTime >= fistHoldDuration) {
+                        selectHuadian(-1);
+                        fistStartTime = 0;
+                        fistUnmakeupArmed = false;
+                        lastClickTime = Date.now();
+                    }
                 }
             } else {
-                openPalmStartTime = 0;
+                fistStartTime = 0;
+                if (!isFist) fistUnmakeupArmed = true;
+            }
+
+            // 揮手切換下一款花鈿（非捏合、非握拳時偵測手腕左右擺動）
+            if (!isPinchingNow && !isFist) {
+                tryWaveNextHuadian(landmarks);
+            } else {
+                waveHistory.length = 0;
             }
 
             // 捏合：點擊光標下的按鈕（花鈿或卸妝）
