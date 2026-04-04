@@ -154,7 +154,7 @@
             opacity: 0.8;
         }
 
-        /* 橫條漸層：填色不透明度 65%（其餘 35% 透明以透出背景） */
+        /* 橫條：淺紫紅漸層，填色不透明度 70%；色相偏紫紅、弱化白高光以免發灰發白 */
         .header-cta {
             display: inline-flex;
             align-items: center;
@@ -163,28 +163,28 @@
             padding: 14px 28px;
             background: linear-gradient(
                 135deg,
-                rgba(232, 223, 245, 0.65) 0%,
-                rgba(239, 208, 228, 0.65) 50%,
-                rgba(232, 184, 200, 0.65) 100%
+                rgba(196, 155, 218, 0.7) 0%,
+                rgba(210, 130, 175, 0.7) 48%,
+                rgba(198, 105, 150, 0.7) 100%
             );
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: var(--berry-dark);
             text-decoration: none;
             border-radius: 30px;
             font-size: 1.05rem;
             font-weight: 500;
-            border: 1px solid rgba(201, 75, 124, 0.28);
-            box-shadow: 0 6px 22px rgba(142, 33, 87, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(165, 85, 130, 0.45);
+            box-shadow: 0 6px 22px rgba(130, 50, 95, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
 
         .header-cta:hover {
             transform: scale(1.05);
-            border-color: rgba(201, 75, 124, 0.4);
-            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.16),
-                inset 0 1px 0 rgba(255, 255, 255, 0.65);
+            border-color: rgba(150, 70, 115, 0.55);
+            box-shadow: 0 10px 32px rgba(130, 50, 95, 0.24),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
 
         .header-cta-icon {
