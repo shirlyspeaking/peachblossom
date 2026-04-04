@@ -150,6 +150,40 @@
 
         .huadian-name { font-size: 0.8rem; color: #e0e0e0; pointer-events: none; }
 
+        /* 花鈿進度條（向上揮手切換時同步滾動／填充） */
+        #huadian-progress-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #huadian-progress-label {
+            font-size: 0.72rem;
+            color: #bcaaa4;
+            letter-spacing: 2px;
+        }
+        #huadian-progress-track {
+            width: 12px;
+            height: 128px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #6d4c41;
+        }
+        #huadian-progress-fill {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 0%;
+            background: linear-gradient(to top, #bf360c, #ffcc80);
+            transition: height 0.28s ease;
+            border-radius: 0 0 5px 5px;
+        }
+
         .reset-btn {
             margin-top: auto;
             margin-bottom: 10px;
@@ -245,6 +279,15 @@
             .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
             .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
             h1, .subtitle, #btn-reset { display: none; }
+            #huadian-progress-wrap {
+                flex-direction: row;
+                width: auto;
+                margin-bottom: 0;
+                flex-shrink: 0;
+                align-self: stretch;
+            }
+            #huadian-progress-track { height: 100px; }
+            #huadian-progress-label { writing-mode: vertical-rl; font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -264,7 +307,13 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👋 揮手切換下一款花鈿 &nbsp; ✊ 握拳卸妝</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換花鈿（進度條） &nbsp; ✊ 握拳卸妝</p>
+        <div id="huadian-progress-wrap">
+            <span id="huadian-progress-label">花鈿進度</span>
+            <div id="huadian-progress-track" title="花鈿切換進度">
+                <div id="huadian-progress-fill"></div>
+            </div>
+        </div>
         <div class="grid-container" id="options-grid"></div>
         <button class="reset-btn" id="btn-reset">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
@@ -338,7 +387,7 @@
         let fistStartTime = 0;  // 握拳開始時間，滿一定時長觸發卸妝
         const fistHoldDuration = 450;
         let fistUnmakeupArmed = true;  // 鬆拳後才允許再次握拳卸妝
-        let waveHistory = [];   // { t, x } 手腕水平位置，用於揮手偵測
+        let waveHistory = [];   // { t, y } 手腕垂直位置，用於「向上揮手」偵測
         let lastWaveNextHuadianTime = 0;
         const waveNextCooldownMs = 1400;
 
@@ -366,6 +415,7 @@
                 grid.appendChild(btn);
             });
             resetBtn.dataset.action = "reset";
+            updateHuadianProgressBar();
         }
 
         function triggerClick(element) {
@@ -463,6 +513,12 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
+            if (index >= 0) {
+                const activeBtn = document.getElementById(`btn-${index}`);
+                if (activeBtn && activeBtn.scrollIntoView) {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+                }
+            }
             // 每次選取花鈿時，從 images 資料夾隨機選用一張背景圖
             if (index >= 0) {
                 const loadedIndices = tangBgImages
@@ -479,6 +535,22 @@
             
             // 切換背景音樂
             playBgMusic(index);
+            updateHuadianProgressBar();
+        }
+
+        function updateHuadianProgressBar() {
+            const fill = document.getElementById('huadian-progress-fill');
+            if (!fill) return;
+            const n = huadianAssets.length;
+            if (n === 0) {
+                fill.style.height = '0%';
+                return;
+            }
+            if (selectedIndex < 0) {
+                fill.style.height = '0%';
+                return;
+            }
+            fill.style.height = ((selectedIndex + 1) / n * 100) + '%';
         }
         
         function getBgMusicPool() {
@@ -937,29 +1009,32 @@
             return thumbToWrist / handLen < 1.0;
         }
 
-        function tryWaveNextHuadian(landmarks) {
+        /** 向上揮手：手腕垂直方向來回擺動且整體上移，切換下一款花鈿並更新進度條 */
+        function tryUpWaveNextHuadian(landmarks) {
             const now = Date.now();
             if (now - lastWaveNextHuadianTime < waveNextCooldownMs) return;
-            const wx = 1 - landmarks[0].x;
-            waveHistory.push({ t: now, x: wx });
-            waveHistory = waveHistory.filter(e => now - e.t < 750);
+            const wy = landmarks[0].y;
+            waveHistory.push({ t: now, y: wy });
+            waveHistory = waveHistory.filter(e => now - e.t < 700);
             if (waveHistory.length < 10) return;
-            const xs = waveHistory.map(e => e.x);
-            const span = Math.max(...xs) - Math.min(...xs);
-            if (span < 0.13) return;
+            const ys = waveHistory.map(e => e.y);
+            const span = Math.max(...ys) - Math.min(...ys);
+            if (span < 0.1) return;
             let reversals = 0;
-            for (let i = 2; i < xs.length; i++) {
-                const d1 = xs[i - 1] - xs[i - 2];
-                const d2 = xs[i] - xs[i - 1];
+            for (let i = 2; i < ys.length; i++) {
+                const d1 = ys[i - 1] - ys[i - 2];
+                const d2 = ys[i] - ys[i - 1];
                 if (d1 * d2 < 0 && Math.abs(d1) + Math.abs(d2) > 0.018) reversals++;
             }
             if (reversals < 2) return;
+            // 整體向上揮：結束時 y 小於開始（座標愈上愈小）
+            if (ys[ys.length - 1] >= ys[0] - 0.03) return;
             lastWaveNextHuadianTime = now;
             waveHistory.length = 0;
             const n = huadianAssets.length;
-    const next = selectedIndex < 0 ? 0 : (selectedIndex + 1) % n;
-    selectHuadian(next);
-}
+            const next = selectedIndex < 0 ? 0 : (selectedIndex + 1) % n;
+            selectHuadian(next);
+        }
 
         function processHandGestures(landmarks) {
             const indexTip = landmarks[8];
@@ -995,9 +1070,9 @@
                 if (!isFist) fistUnmakeupArmed = true;
             }
 
-            // 揮手切換下一款花鈿（非捏合、非握拳時偵測手腕左右擺動）
+            // 向上揮手切換花鈿並驅動側欄進度條（非捏合、非握拳時偵測手腕上下擺動）
             if (!isPinchingNow && !isFist) {
-                tryWaveNextHuadian(landmarks);
+                tryUpWaveNextHuadian(landmarks);
             } else {
                 waveHistory.length = 0;
             }
