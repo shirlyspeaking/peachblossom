@@ -307,7 +307,7 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換花鈿（進度條） &nbsp; ✊ 握拳卸妝</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換進度 &nbsp; 📐 鏡像區內食指上下移對應進度 &nbsp; ✊ 握拳卸妝</p>
         <div id="huadian-progress-wrap">
             <span id="huadian-progress-label">花鈿進度</span>
             <div id="huadian-progress-track" title="花鈿切換進度">
@@ -390,6 +390,10 @@
         let waveHistory = [];   // { t, y } 手腕垂直位置，用於「向上揮手」偵測
         let lastWaveNextHuadianTime = 0;
         const waveNextCooldownMs = 1400;
+        /** 第二種切換：食指在鏡像區內的垂直位置對應花鈿序位（防抖） */
+        let posPickCandidate = -1;
+        let posPickCandidateSince = 0;
+        const posPickStableMs = 160;
 
         // 唐風背景圖（從 images 資料夾隨機選用）
         let tangBgList = [];
@@ -666,6 +670,7 @@
                     } else {
                         latestHandLandmarks = null;
                         cursor.style.display = 'none';
+                        posPickCandidate = -1;
                         if (lastHoveredElement) {
                             lastHoveredElement.classList.remove('hover');
                             lastHoveredElement = null;
@@ -1009,6 +1014,38 @@
             return thumbToWrist / handLen < 1.0;
         }
 
+        function isCursorOverStage(cursorX, cursorY) {
+            const stageEl = document.getElementById('stage-container');
+            if (!stageEl) return false;
+            const r = stageEl.getBoundingClientRect();
+            return cursorX >= r.left && cursorX <= r.right && cursorY >= r.top && cursorY <= r.bottom;
+        }
+
+        /**
+         * 食指指尖 normalized y：畫面上方 → 第一款，愈靠下 → 序位愈後（進度條同步）。
+         * 需在鏡像區內、且非捏合／非握拳；同一序位穩定 posPickStableMs 後才 selectHuadian。
+         */
+        function tryVerticalPositionPickHuadian(landmarks) {
+            const n = huadianAssets.length;
+            if (n <= 0) return;
+            const ny = landmarks[8].y;
+            const topPad = 0.07;
+            const botPad = 0.07;
+            const usable = 1 - topPad - botPad;
+            const t = usable > 0 ? Math.min(1, Math.max(0, (ny - topPad) / usable)) : 0;
+            let idx = Math.min(n - 1, Math.floor(n * t));
+            if (idx < 0) idx = 0;
+            const now = Date.now();
+            if (idx !== posPickCandidate) {
+                posPickCandidate = idx;
+                posPickCandidateSince = now;
+                return;
+            }
+            if (now - posPickCandidateSince >= posPickStableMs && selectedIndex !== idx) {
+                selectHuadian(idx);
+            }
+        }
+
         /** 向上揮手：手腕垂直方向來回擺動且整體上移，切換下一款花鈿並更新進度條 */
         function tryUpWaveNextHuadian(landmarks) {
             const now = Date.now();
@@ -1060,6 +1097,7 @@
                     if (fistStartTime === 0) fistStartTime = Date.now();
                     if (Date.now() - fistStartTime >= fistHoldDuration) {
                         selectHuadian(-1);
+                        posPickCandidate = -1;
                         fistStartTime = 0;
                         fistUnmakeupArmed = false;
                         lastClickTime = Date.now();
@@ -1075,6 +1113,13 @@
                 tryUpWaveNextHuadian(landmarks);
             } else {
                 waveHistory.length = 0;
+            }
+
+            // 第二種：鏡像區內食指上下位置對應花鈿序位與進度條（與揮手可並用；離開鏡像區或捏合／握拳則重置候選）
+            if (!isPinchingNow && !isFist && isCursorOverStage(cursorX, cursorY)) {
+                tryVerticalPositionPickHuadian(landmarks);
+            } else {
+                posPickCandidate = -1;
             }
 
             // 捏合：點擊光標下的按鈕（花鈿或卸妝）
