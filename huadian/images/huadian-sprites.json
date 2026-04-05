@@ -1,0 +1,6 @@
+{
+  "description": "花鈿精靈圖。目前合圖為 1920×1080，預設依 4 欄×2 列均分（上排 0–3、下排 4–7）。若與實際排版不符，請改 cols/rows 或改用 frames 指定每格像素。",
+  "sheet": "origin huadian.png",
+  "cols": 4,
+  "rows": 2
+}
