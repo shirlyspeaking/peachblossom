@@ -22,7 +22,11 @@
             font-family: "Kaiti", "STKaiti", "Songti TC", "Noto Serif TC", serif;
             overflow: hidden;
             color: #f0e6d2;
-            cursor: none; /* 隱藏系統鼠標 */
+            cursor: none; /* 桌面手勢模式隱藏鼠標；觸控裝置見下方 media */
+        }
+
+        @media (pointer: coarse) {
+            body { cursor: auto; }
         }
 
         /* --- 手勢光標 --- */
@@ -86,6 +90,8 @@
             overflow-y: auto;
             z-index: 20;
             user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 204, 128, 0.2);
         }
 
         h1 {
@@ -125,6 +131,9 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 204, 128, 0.25);
         }
         
         .huadian-btn.hover {
@@ -144,13 +153,13 @@
             aspect-ratio: 1;
             flex-shrink: 0;
             margin-bottom: 5px;
-            pointer-events: none;
+            pointer-events: auto;
             background-repeat: no-repeat;
             background-color: transparent;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
         }
 
-        .huadian-name { font-size: 0.8rem; color: #e0e0e0; pointer-events: none; }
+        .huadian-name { font-size: 0.8rem; color: #e0e0e0; pointer-events: auto; }
 
         .reset-btn {
             margin-top: auto;
@@ -270,7 +279,7 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可）</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可） &nbsp; 📱 手機可點按本欄花鈿與按鈕</p>
         <div class="grid-container" id="options-grid"></div>
         <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或對鏡吐舌並微張嘴維持約半秒">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
@@ -435,6 +444,8 @@
                 btn.className = 'huadian-btn';
                 btn.id = `btn-${index}`;
                 btn.dataset.index = index;
+                btn.setAttribute('role', 'button');
+                btn.tabIndex = 0;
 
                 const thumb = document.createElement('div');
                 thumb.className = 'huadian-thumb';
@@ -452,9 +463,10 @@
             resetBtn.dataset.action = "reset";
         }
 
-        function triggerClick(element) {
+        function triggerClick(element, opts) {
             const now = Date.now();
-            if (now - lastClickTime < 1000) return;
+            const debounceMs = opts && opts.quickTap ? 350 : 1000;
+            if (now - lastClickTime < debounceMs) return;
             lastClickTime = now;
 
             element.classList.add('active');
@@ -470,6 +482,31 @@
             } else if (element.id === 'btn-capture-huadian') {
                 capturePhotoHuadianOnly();
             }
+        }
+
+        /** 手機／觸控：點按側欄花鈿格與按鈕（與手勢捏合並存） */
+        function setupMenuTapDelegation() {
+            const menu = document.getElementById('menu-container');
+            if (!menu || menu.dataset.tapBound === '1') return;
+            menu.dataset.tapBound = '1';
+            menu.addEventListener('click', (ev) => {
+                const huadianBtn = ev.target.closest('.huadian-btn');
+                if (huadianBtn) {
+                    triggerClick(huadianBtn, { quickTap: true });
+                    return;
+                }
+                const resetLike = ev.target.closest('.reset-btn');
+                if (resetLike) {
+                    triggerClick(resetLike, { quickTap: true });
+                }
+            });
+            menu.addEventListener('keydown', (ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                const t = ev.target;
+                if (!t || !t.classList.contains('huadian-btn')) return;
+                ev.preventDefault();
+                triggerClick(t, { quickTap: true });
+            });
         }
 
         function downloadPngFromCanvas(exportCanvas, filenamePrefix) {
@@ -1205,6 +1242,7 @@
                 alert('花鈿精靈圖載入失敗：請將合圖放在 images/（預設檔名 origin huadian.png），並檢查 images/huadian-sprites.json 的 sheet、cols、rows 或 frames。');
             }
             initImages();
+            setupMenuTapDelegation();
             loadTangBackgrounds();
             loadAudioTracks();
             initModels();
