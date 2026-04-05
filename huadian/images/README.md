@@ -10,7 +10,7 @@
 | 02-peony.jpg | 牡丹花 |
 | 03-tavern.jpg | 唐朝酒肆 |
 | 04-changan.jpg | 長安城 |
-| 05-daming.jpg | 大明宮 |
+| 05-chunjianghua.jpg | 春江花月 |
 | 06-dunhuang.jpg | 敦煌石窟 |
 | 07-jiangnan.jpg | 江南煙雨 |
 | 08-garden.jpg | 御花園 |

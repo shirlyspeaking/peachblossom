@@ -658,9 +658,16 @@
                         tangBgImages.length = tangBgList.length;
                         tangBgList.forEach((entry, i) => {
                             const img = new Image();
-                            img.onload = () => {
+                            const onReady = () => {
                                 tangBgImages[i] = img;
                                 tryPickTangBg();
+                            };
+                            img.onload = () => {
+                                if (typeof img.decode === 'function') {
+                                    img.decode().then(onReady).catch(onReady);
+                                } else {
+                                    onReady();
+                                }
                             };
                             img.onerror = () => { /* 略過載入失敗的檔 */ };
                             img.src = 'images/' + entry.file;
@@ -708,9 +715,12 @@
                 });
                 await hands.initialize();
 
-                // C. Selfie Segmentation (背景替換)
+                // C. Selfie Segmentation（背景替換）
+                // modelSelection: 1 偏橫向場景；手機直向鏡頭用 0 較易穩定產生蒙版，否則 latestSegmentationMask 常空、背景圖永遠畫不出來
                 selfieSegmentation = new SelfieSegmentation({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`});
-                selfieSegmentation.setOptions({modelSelection: 1}); // 1 = landscape (faster?)
+                selfieSegmentation.setOptions({
+                    modelSelection: (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches) ? 0 : 1
+                });
                 selfieSegmentation.onResults(results => {
                     latestSegmentationMask = results.segmentationMask;
                 });
@@ -731,8 +741,13 @@
             statusText.innerText = "正在啟動鏡頭...";
             startBtn.style.display = 'none';
             try {
+                const narrow = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches;
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }
+                    video: {
+                        width: { ideal: narrow ? 720 : 1280 },
+                        height: { ideal: narrow ? 1280 : 720 },
+                        facingMode: 'user'
+                    }
                 });
                 videoElement.srcObject = stream;
                 videoElement.onloadedmetadata = () => {
@@ -821,8 +836,19 @@
                 canvasCtx.globalCompositeOperation = 'source-over';
                 canvasCtx.restore();
 
+            } else if (selectedIndex !== -1 && !previewNoVirtualBg) {
+                // 已選花鈿但人像蒙版尚未回傳（手機上 Selfie Segmentation 首幀常較晚）：先畫場景圖／漸層再疊半透明鏡頭，避免畫面像「完全沒換背景」
+                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
+                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
+                } else {
+                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                }
+                canvasCtx.save();
+                canvasCtx.globalAlpha = 0.9;
+                canvasCtx.drawImage(videoElement, 0, 0, w, h);
+                canvasCtx.restore();
             } else {
-                // === 完整鏡頭：卸妝，或已選花鈿但懸停「花鈿・無背景」預覽，或尚無分割蒙版 ===
+                // === 完整鏡頭：卸妝，或懸停「花鈿・無背景」預覽 ===
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
             }
 
