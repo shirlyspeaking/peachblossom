@@ -226,16 +226,30 @@ export default function CalligraphyPage() {
                         : ""
                       : [showInnerVertical ? "border-r border-slate-300" : "", showInnerHorizontal ? "border-b border-slate-300" : ""].filter(Boolean).join(" ");
                   const charTone = config.copybookVariant === "lightTracing" ? "text-pink-300" : "text-slate-900";
+                  const showCenterGuides =
+                    config.showGuideLines && !isLines && (config.gridType === "tian" || config.gridType === "mizi" || config.gridType === "jiugong");
+                  const showMiziDiagonals = showCenterGuides && config.gridType === "mizi";
                   return (
                     <div
                       key={`${row}-${col}`}
                       className={`relative flex min-h-0 min-w-0 items-center justify-center ${charTone} ${cellBorder}`}
                       style={cellStyle}
                     >
-                      {config.showGuideLines && !isLines ? (
+                      {showCenterGuides ? (
                         <>
-                          <span className="pointer-events-none absolute left-1/2 top-0 z-0 h-full w-px -translate-x-1/2 bg-slate-200" />
-                          <span className="pointer-events-none absolute left-0 top-1/2 z-0 h-px w-full -translate-y-1/2 bg-slate-200" />
+                          <span className="pointer-events-none absolute left-1/2 top-0 z-0 box-border h-full w-0 -translate-x-1/2 border-l border-dashed border-slate-300" />
+                          <span className="pointer-events-none absolute left-0 top-1/2 z-0 box-border h-0 w-full -translate-y-1/2 border-t border-dashed border-slate-300" />
+                          {showMiziDiagonals ? (
+                            <svg
+                              className="pointer-events-none absolute inset-0 z-0 text-slate-300"
+                              viewBox="0 0 100 100"
+                              preserveAspectRatio="none"
+                              aria-hidden
+                            >
+                              <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1.25" strokeDasharray="4 3.5" />
+                              <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1.25" strokeDasharray="4 3.5" />
+                            </svg>
+                          ) : null}
                         </>
                       ) : null}
                       <span className="relative z-10">{char}</span>

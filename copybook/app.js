@@ -166,17 +166,28 @@
         var hongMode =
             copyStyle &&
             (copyStyle.value === 'hong' || copyStyle.value === 'trace');
+        var lightTracingMode = copyStyle && copyStyle.value === 'lightTracing';
 
         var rows = buildRows(text, cpl);
         var pages = chunkPages(rows, lpp);
 
         preview.innerHTML = '';
-        preview.className = 'preview preview--' + psize + (hongMode ? ' preview--hong' : '');
+        preview.className =
+            'preview preview--' +
+            psize +
+            (hongMode ? ' preview--hong' : '') +
+            (lightTracingMode ? ' preview--light-tracing' : '');
 
         if (copyStyleHint) {
-            copyStyleHint.textContent = hongMode
-                ? '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。'
-                : '標準墨色：實心字，適合對照。';
+            if (hongMode) {
+                copyStyleHint.textContent =
+                    '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。';
+            } else if (lightTracingMode) {
+                copyStyleHint.textContent =
+                    '淺色描紅：淺粉紅實心字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
+            } else {
+                copyStyleHint.textContent = '標準墨色：實心字，適合對照。';
+            }
         }
 
         for (var p = 0; p < pages.length; p++) {
@@ -226,6 +237,9 @@
                     } else if (hongMode) {
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.innerHTML = buildHongSvgChar(ch, font, fs);
+                    } else if (lightTracingMode) {
+                        inner.className = 'cell-inner cell-inner--light-tracing';
+                        inner.textContent = ch;
                     } else {
                         inner.textContent = ch;
                     }

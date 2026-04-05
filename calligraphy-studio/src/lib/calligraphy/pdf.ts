@@ -1,8 +1,34 @@
 import path from "node:path";
 import { access, readFile } from "node:fs/promises";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument, rgb, type PDFPage, type RGB } from "pdf-lib";
 import { FONT_OPTIONS, type FontOption, type LayoutResult } from "@/lib/calligraphy/types";
+
+function drawDashedLine(
+  page: PDFPage,
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  opts: { dash: number; gap: number; thickness: number; color: RGB }
+) {
+  const { dash, gap, thickness, color } = opts;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const len = Math.hypot(dx, dy);
+  if (len < 0.001) return;
+  const ux = dx / len;
+  const uy = dy / len;
+  let pos = 0;
+  while (pos < len) {
+    const dashEnd = Math.min(pos + dash, len);
+    page.drawLine({
+      start: { x: start.x + ux * pos, y: start.y + uy * pos },
+      end: { x: start.x + ux * dashEnd, y: start.y + uy * dashEnd },
+      thickness,
+      color,
+    });
+    pos = dashEnd + gap;
+  }
+}
 
 export type FontAvailability = { availableFontIds: string[]; missingFontIds: string[] };
 export type PdfBuildResult = { buffer: Buffer; usedFontId: string; fallbackFrom?: string };
@@ -93,13 +119,24 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
       });
     }
 
-    if (layout.config.showGuideLines && layout.config.gridType !== "lines") {
+    const guideColor = rgb(0.9, 0.9, 0.9);
+    const dashGuide = { dash: 2.2, gap: 1.8, thickness: 0.35, color: guideColor };
+    const gt = layout.config.gridType;
+    if (layout.config.showGuideLines && gt !== "lines") {
       for (let r = 0; r < layout.config.rows; r += 1) {
         for (let c = 0; c < layout.config.cols; c += 1) {
           const x = margin + c * cellW;
           const y = margin + r * cellH;
-          page.drawLine({ start: { x, y: y + cellH / 2 }, end: { x: x + cellW, y: y + cellH / 2 }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
-          page.drawLine({ start: { x: x + cellW / 2, y }, end: { x: x + cellW / 2, y: y + cellH }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
+          const midY = y + cellH / 2;
+          const midX = x + cellW / 2;
+          if (gt === "tian" || gt === "mizi" || gt === "jiugong") {
+            drawDashedLine(page, { x, y: midY }, { x: x + cellW, y: midY }, dashGuide);
+            drawDashedLine(page, { x: midX, y }, { x: midX, y: y + cellH }, dashGuide);
+          }
+          if (gt === "mizi") {
+            drawDashedLine(page, { x, y }, { x: x + cellW, y: y + cellH }, dashGuide);
+            drawDashedLine(page, { x: x + cellW, y }, { x, y: y + cellH }, dashGuide);
+          }
         }
       }
     }

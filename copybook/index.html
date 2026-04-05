@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -42,9 +42,10 @@
 
             <div class="row row-single">
                 <div class="field">
-                    <label for="copyStyle">字帖版本<span class="label-sub">（標準墨色／描紅）</span></label>
+                    <label for="copyStyle">字帖版本<span class="label-sub">（標準／淺色描紅／紅框鏤空）</span></label>
                     <select id="copyStyle" name="copyStyle" aria-describedby="copyStyleHint">
                         <option value="standard">標準墨色</option>
+                        <option value="lightTracing">淺色描紅</option>
                         <option value="hong">描紅（紅框鏤空）</option>
                     </select>
                     <p class="copy-style-hint" id="copyStyleHint">標準墨色：實心字，適合對照。</p>
@@ -108,6 +109,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
 </body>
 </html>

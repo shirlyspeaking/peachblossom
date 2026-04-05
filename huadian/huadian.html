@@ -353,6 +353,8 @@
         let tangBgList = [];
         let tangBgImages = [];  // 已載入的 Image 物件，與 tangBgList 對應
         let currentBgImageIndex = -1;  // 當前隨機到的背景圖索引
+        /** 已選花鈿但尚未成功抽到一張「已載入」的背景圖時為 true（手機慢網常見） */
+        let tangBgPickPending = false;
         /** 滑鼠懸停在「花鈿・無背景」拍照鈕上時，與手勢懸停同效：預覽隱藏虛擬背景 */
         let mouseOverNoBgCaptureBtn = false;
 
@@ -476,17 +478,13 @@
                     activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
                 }
             }
-            // 每次選取花鈿時，從 images 資料夾隨機選用一張背景圖
+            // 每次選取花鈿時隨機背景圖；若圖檔尚未下載完成，等 onload 後由 tryPickTangBg 補抽（避免手機端永遠只有漸層）
             if (index >= 0) {
-                const loadedIndices = tangBgImages
-                    .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
-                    .filter(i => i >= 0);
-                if (loadedIndices.length > 0) {
-                    currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
-                } else {
-                    currentBgImageIndex = -1;
-                }
+                tangBgPickPending = true;
+                currentBgImageIndex = -1;
+                tryPickTangBg();
             } else {
+                tangBgPickPending = false;
                 currentBgImageIndex = -1; // 卸妝時清除
             }
             
@@ -563,17 +561,35 @@
                 .catch(() => { audioTrackList = []; });
         }
 
+        function getLoadedTangBgIndices() {
+            return tangBgImages
+                .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
+                .filter((i) => i >= 0);
+        }
+
+        /** 在已選花鈿且有待處理時，從已載入完成的背景圖中隨機一張 */
+        function tryPickTangBg() {
+            if (selectedIndex < 0 || !tangBgPickPending) return;
+            const loadedIndices = getLoadedTangBgIndices();
+            if (loadedIndices.length === 0) return;
+            currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            tangBgPickPending = false;
+        }
+
         // 載入唐風背景圖清單並預載圖片（從 images 資料夾）
         function loadTangBackgrounds() {
             fetch('images/list.json')
-                .then(r => r.json())
-                .then(data => {
+                .then((r) => r.json())
+                .then((data) => {
                     if (data.images && Array.isArray(data.images)) {
                         tangBgList = data.images;
                         tangBgImages.length = tangBgList.length;
                         tangBgList.forEach((entry, i) => {
                             const img = new Image();
-                            img.onload = () => { tangBgImages[i] = img; };
+                            img.onload = () => {
+                                tangBgImages[i] = img;
+                                tryPickTangBg();
+                            };
                             img.onerror = () => { /* 略過載入失敗的檔 */ };
                             img.src = 'images/' + entry.file;
                         });
@@ -698,6 +714,8 @@
 
             const w = canvasElement.width;
             const h = canvasElement.height;
+
+            if (tangBgPickPending && selectedIndex >= 0) tryPickTangBg();
 
             // 清空
             canvasCtx.clearRect(0, 0, w, h);
