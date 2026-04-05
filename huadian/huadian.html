@@ -264,9 +264,9 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換花鈿 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 🙏 雙手合十於臉前卸妝（約半秒）</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒）</p>
         <div class="grid-container" id="options-grid"></div>
-        <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或雙手合十置於臉前約半秒">卸妝 / 回歸現世</button>
+        <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或對鏡吐舌並微張嘴維持約半秒">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
         <button type="button" class="reset-btn" id="btn-capture">拍照（試妝＋虛擬背景）</button>
     </div>
@@ -335,13 +335,12 @@
         let isPinching = false;
         let lastClickTime = 0;
         let lastHoveredElement = null;
-        let cheekFistStartTime = 0;  // 卸妝手勢（合十）維持時間
+        let cheekFistStartTime = 0;  // 吐舌卸妝姿勢維持時間
         const cheekFistHoldDuration = 550;
-        let cheekUnmakeupArmed = true;  // 姿勢鬆開後才允許再次觸發卸妝
-        let waveHistory = [];   // { t, y } 手腕垂直位置，用於「向上揮手」偵測
-        let lastWaveNextHuadianTime = 0;
-        const waveNextCooldownMs = 1400;
-        /** 第二種切換：食指在鏡像區內的垂直位置對應花鈿序位（防抖） */
+        let cheekUnmakeupArmed = true;  // 舌頭收回後才允許再次觸發卸妝
+        /** 由人臉網格更新：吐舌／大嘴張開，供垂直選款暫停用 */
+        let tongueUnmakeupPose = false;
+        /** 鏡像區內食指垂直位置對應花鈿序位（防抖） */
         let posPickCandidate = -1;
         let posPickCandidateSince = 0;
         const posPickStableMs = 160;
@@ -588,8 +587,12 @@
                 faceMesh.onResults(results => {
                     if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                         latestFaceLandmarks = results.multiFaceLandmarks;
+                        updateTongueUnmakeupGesture(latestFaceLandmarks[0]);
                     } else {
                         latestFaceLandmarks = [];
+                        tongueUnmakeupPose = false;
+                        cheekFistStartTime = 0;
+                        cheekUnmakeupArmed = true;
                     }
                 });
                 await faceMesh.initialize();
@@ -600,7 +603,7 @@
                 hands.onResults(results => {
                     if(results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                         latestHandLandmarks = results.multiHandLandmarks[0];
-                        processHandGestures(results.multiHandLandmarks); // 傳入雙手，供雙拳貼頰卸妝
+                        processHandGestures(results.multiHandLandmarks);
                     } else {
                         latestHandLandmarks = null;
                         cursor.style.display = 'none';
@@ -958,26 +961,43 @@
         }
 
         /**
-         * 卸妝：雙手合十於臉前（掌心靠攏、指尖朝上區塊靠攏，且落在鼻前）。
-         * 需雙手同時滿足，單手／揮手／捏合選單時不易誤觸。
+         * 吐舌卸妝：用上／下唇內側點（13、14）垂直張開度相對臉寬判斷「明顯張嘴」。
+         * 需略大於一般說話開口，以降低誤觸；閉嘴或微張為 false。
          */
-        function bothHandsPrayerBeforeFace(faceLm, h0, h1) {
-            if (isHandPinchingLm(h0) || isHandPinchingLm(h1)) return false;
-            const nose = faceLm[1];
-            if (!nose) return false;
-            const p0 = h0[9];
-            const p1 = h1[9];
-            if (lmDist2(p0, p1) > 0.095) return false;
-            const midX = (p0.x + p1.x) / 2;
-            const midY = (p0.y + p1.y) / 2;
-            if (lmDist2({ x: midX, y: midY }, nose) > 0.19) return false;
-            const i0 = h0[8];
-            const i1 = h1[8];
-            if (lmDist2(i0, i1) > 0.12) return false;
-            const t0 = h0[4];
-            const t1 = h1[4];
-            if (lmDist2(t0, t1) > 0.14) return false;
+        function isTongueOutForUnmakeup(faceLm) {
+            const upper = faceLm[13];
+            const lower = faceLm[14];
+            if (!upper || !lower) return false;
+            const faceW = lmDist2(faceLm[234], faceLm[454]) + 0.001;
+            const vertOpen = lower.y - upper.y;
+            const ratio = vertOpen / faceW;
+            if (ratio < 0.128 || ratio > 0.42) return false;
+            const mouthW = lmDist2(faceLm[61], faceLm[291]) + 0.001;
+            const wRatio = mouthW / faceW;
+            if (wRatio < 0.24 || wRatio > 0.58) return false;
             return true;
+        }
+
+        function updateTongueUnmakeupGesture(faceLm) {
+            tongueUnmakeupPose = isTongueOutForUnmakeup(faceLm);
+            if (!tongueUnmakeupPose) {
+                cheekFistStartTime = 0;
+                cheekUnmakeupArmed = true;
+                return;
+            }
+            if (selectedIndex < 0) {
+                cheekFistStartTime = 0;
+                return;
+            }
+            if (!cheekUnmakeupArmed) return;
+            if (cheekFistStartTime === 0) cheekFistStartTime = Date.now();
+            if (Date.now() - cheekFistStartTime >= cheekFistHoldDuration) {
+                selectHuadian(-1);
+                posPickCandidate = -1;
+                cheekFistStartTime = 0;
+                cheekUnmakeupArmed = false;
+                lastClickTime = Date.now();
+            }
         }
 
         function isCursorOverStage(cursorX, cursorY) {
@@ -1012,33 +1032,6 @@
             }
         }
 
-        /** 向上揮手：手腕垂直方向來回擺動且整體上移，切換下一款花鈿 */
-        function tryUpWaveNextHuadian(landmarks) {
-            const now = Date.now();
-            if (now - lastWaveNextHuadianTime < waveNextCooldownMs) return;
-            const wy = landmarks[0].y;
-            waveHistory.push({ t: now, y: wy });
-            waveHistory = waveHistory.filter(e => now - e.t < 700);
-            if (waveHistory.length < 10) return;
-            const ys = waveHistory.map(e => e.y);
-            const span = Math.max(...ys) - Math.min(...ys);
-            if (span < 0.1) return;
-            let reversals = 0;
-            for (let i = 2; i < ys.length; i++) {
-                const d1 = ys[i - 1] - ys[i - 2];
-                const d2 = ys[i] - ys[i - 1];
-                if (d1 * d2 < 0 && Math.abs(d1) + Math.abs(d2) > 0.018) reversals++;
-            }
-            if (reversals < 2) return;
-            // 整體向上揮：結束時 y 小於開始（座標愈上愈小）
-            if (ys[ys.length - 1] >= ys[0] - 0.03) return;
-            lastWaveNextHuadianTime = now;
-            waveHistory.length = 0;
-            const n = huadianAssets.length;
-            const next = selectedIndex < 0 ? 0 : (selectedIndex + 1) % n;
-            selectHuadian(next);
-        }
-
         function processHandGestures(multiHands) {
             if (!multiHands || multiHands.length === 0) return;
             const landmarks = multiHands[0];
@@ -1057,41 +1050,9 @@
             const pinchThreshold = 0.05;
             const isPinchingNow = pinchDist < pinchThreshold;
 
-            // 卸妝：雙手合十於臉前（單手無法觸發）
-            const faceLm = latestFaceLandmarks.length > 0 ? latestFaceLandmarks[0] : null;
-            let cheekPose = false;
-            if (multiHands.length === 2 && faceLm) {
-                cheekPose = bothHandsPrayerBeforeFace(faceLm, multiHands[0], multiHands[1]);
-            }
-            const twoHandsPinching = multiHands.length === 2 &&
-                (isHandPinchingLm(multiHands[0]) || isHandPinchingLm(multiHands[1]));
-
-            if (cheekPose && !twoHandsPinching && selectedIndex >= 0) {
-                waveHistory.length = 0;
-                if (cheekUnmakeupArmed) {
-                    if (cheekFistStartTime === 0) cheekFistStartTime = Date.now();
-                    if (Date.now() - cheekFistStartTime >= cheekFistHoldDuration) {
-                        selectHuadian(-1);
-                        posPickCandidate = -1;
-                        cheekFistStartTime = 0;
-                        cheekUnmakeupArmed = false;
-                        lastClickTime = Date.now();
-                    }
-                }
-            } else {
-                cheekFistStartTime = 0;
-                if (!cheekPose) cheekUnmakeupArmed = true;
-            }
-
-            // 向上揮手：捏合或合十卸妝姿勢時暫停
-            if (!isPinchingNow && !cheekPose) {
-                tryUpWaveNextHuadian(landmarks);
-            } else {
-                waveHistory.length = 0;
-            }
-
-            // 垂直選款：捏合、合十卸妝、或單手呈握拳時不用食指 y
-            if (!isPinchingNow && !cheekPose && !isHandFistRelaxed(landmarks) && isCursorOverStage(cursorX, cursorY)) {
+            // 卸妝改由人臉網格偵測吐舌（updateTongueUnmakeupGesture）；此處僅讀 tongueUnmakeupPose 暫停垂直選款
+            // 垂直選款：捏合、吐舌卸妝姿勢、或單手呈握拳時不用食指 y
+            if (!isPinchingNow && !tongueUnmakeupPose && !isHandFistRelaxed(landmarks) && isCursorOverStage(cursorX, cursorY)) {
                 tryVerticalPositionPickHuadian(landmarks);
             } else {
                 posPickCandidate = -1;
