@@ -377,6 +377,22 @@
         /** 滑鼠懸停在「花鈿・無背景」拍照鈕上時，與手勢懸停同效：預覽隱藏虛擬背景 */
         let mouseOverNoBgCaptureBtn = false;
 
+        /** 手機／觸控：不用 Selfie Segmentation 去背（常失敗或極慢），改「全幅場景圖 + 半透明鏡頭」保證能看見背景 */
+        function preferSimpleVirtualBackground() {
+            if (typeof window === 'undefined') return false;
+            if (window.innerWidth <= 768) return true;
+            if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) return true;
+            return false;
+        }
+
+        function assetUrl(relativePath) {
+            try {
+                return new URL(relativePath, window.location.href).href;
+            } catch (e) {
+                return relativePath;
+            }
+        }
+
         // --- 3. 初始化資源 ---
         /** 預載花鈿 SVG（手機 Safari 常在未 complete 時 drawImage 失敗，臉上不顯示） */
         function preloadHuadianImages() {
@@ -639,18 +655,23 @@
                 .filter((i) => i >= 0);
         }
 
-        /** 在已選花鈿且有待處理時，從已載入完成的背景圖中隨機一張 */
+        /** 在已選花鈿且有待處理時，從已載入完成的背景圖中選一張（手機依花鈿序位對應不同場景圖） */
         function tryPickTangBg() {
             if (selectedIndex < 0 || !tangBgPickPending) return;
             const loadedIndices = getLoadedTangBgIndices();
             if (loadedIndices.length === 0) return;
-            currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            if (preferSimpleVirtualBackground()) {
+                const slot = selectedIndex % loadedIndices.length;
+                currentBgImageIndex = loadedIndices[slot];
+            } else {
+                currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            }
             tangBgPickPending = false;
         }
 
-        // 載入唐風背景圖清單並預載圖片（從 images 資料夾）
+        // 載入唐風背景圖清單並預載圖片（從 images 資料夾；絕對 URL 避免部分手機／子路徑下相對路徑錯誤）
         function loadTangBackgrounds() {
-            fetch('images/list.json')
+            fetch(assetUrl('images/list.json'))
                 .then((r) => r.json())
                 .then((data) => {
                     if (data.images && Array.isArray(data.images)) {
@@ -670,7 +691,7 @@
                                 }
                             };
                             img.onerror = () => { /* 略過載入失敗的檔 */ };
-                            img.src = 'images/' + entry.file;
+                            img.src = assetUrl('images/' + entry.file);
                         });
                     }
                 })
@@ -775,11 +796,11 @@
                     hands.send({image: videoElement})
                 ];
                 
-                // 只有在選擇了花鈿時，才開啟背景分割 (節省性能)
-                if (selectedIndex !== -1) {
+                // 選了花鈿才做人像分割；手機改用簡易合成、不送分割以省效能並避免蒙版永遠出不來
+                if (selectedIndex !== -1 && !preferSimpleVirtualBackground()) {
                     sends.push(selfieSegmentation.send({image: videoElement}));
                 } else {
-                    latestSegmentationMask = null; // 卸妝時清除蒙版
+                    latestSegmentationMask = null;
                 }
 
                 await Promise.all(sends);
@@ -813,38 +834,31 @@
             );
 
             // A. 背景與人物繪製
-            if (selectedIndex !== -1 && latestSegmentationMask && !previewNoVirtualBg) {
-                // === 虛擬背景模式 ===
-                
-                // 1. 繪製蒙版
+            const simpleBg = preferSimpleVirtualBackground();
+            if (selectedIndex !== -1 && !previewNoVirtualBg && !simpleBg && latestSegmentationMask) {
+                // === 桌面：人像分割 + 場景圖（高品質去背） ===
                 canvasCtx.save();
                 canvasCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
-                
-                // 2. 應用蒙版：保留蒙版不透明區域(人物)
                 canvasCtx.globalCompositeOperation = 'source-in';
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
-
-                // 3. 繪製背景：每次選取花鈿時已隨機選好一張，有圖則用圖，否則用漸層
                 canvasCtx.globalCompositeOperation = 'destination-over';
                 if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
                     drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
                 } else {
                     drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
                 }
-
-                // 4. 恢復正常繪製模式 (為了之後畫花鈿)
                 canvasCtx.globalCompositeOperation = 'source-over';
                 canvasCtx.restore();
 
             } else if (selectedIndex !== -1 && !previewNoVirtualBg) {
-                // 已選花鈿但人像蒙版尚未回傳（手機上 Selfie Segmentation 首幀常較晚）：先畫場景圖／漸層再疊半透明鏡頭，避免畫面像「完全沒換背景」
+                // === 手機或無蒙版：全幅場景圖／漸層 + 半透明鏡頭（不依賴分割，保證看見背景） ===
                 if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
                     drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
                 } else {
                     drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
                 }
                 canvasCtx.save();
-                canvasCtx.globalAlpha = 0.9;
+                canvasCtx.globalAlpha = simpleBg ? 0.78 : 0.88;
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
                 canvasCtx.restore();
             } else {
