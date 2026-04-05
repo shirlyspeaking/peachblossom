@@ -150,40 +150,6 @@
 
         .huadian-name { font-size: 0.8rem; color: #e0e0e0; pointer-events: none; }
 
-        /* 花鈿進度條（向上揮手切換時同步滾動／填充） */
-        #huadian-progress-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        #huadian-progress-label {
-            font-size: 0.72rem;
-            color: #bcaaa4;
-            letter-spacing: 2px;
-        }
-        #huadian-progress-track {
-            width: 12px;
-            height: 128px;
-            background: rgba(0, 0, 0, 0.35);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #6d4c41;
-        }
-        #huadian-progress-fill {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 0%;
-            background: linear-gradient(to top, #bf360c, #ffcc80);
-            transition: height 0.28s ease;
-            border-radius: 0 0 5px 5px;
-        }
-
         .reset-btn {
             margin-top: auto;
             margin-bottom: 10px;
@@ -279,15 +245,6 @@
             .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
             .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
             h1, .subtitle, #btn-reset { display: none; }
-            #huadian-progress-wrap {
-                flex-direction: row;
-                width: auto;
-                margin-bottom: 0;
-                flex-shrink: 0;
-                align-self: stretch;
-            }
-            #huadian-progress-track { height: 100px; }
-            #huadian-progress-label { writing-mode: vertical-rl; font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -307,15 +264,9 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換進度 &nbsp; 📐 鏡像區內食指上下移對應進度 &nbsp; ✊✊ 須「雙手握拳貼兩頰」才卸妝（單手握拳不會卸妝）</p>
-        <div id="huadian-progress-wrap">
-            <span id="huadian-progress-label">花鈿進度</span>
-            <div id="huadian-progress-track" title="花鈿切換進度">
-                <div id="huadian-progress-fill"></div>
-            </div>
-        </div>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 👆 向上揮手切換花鈿 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 🙏 雙手合十於臉前卸妝（約半秒）</p>
         <div class="grid-container" id="options-grid"></div>
-        <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；亦可雙拳貼雙頰約半秒">卸妝 / 回歸現世</button>
+        <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或雙手合十置於臉前約半秒">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
         <button type="button" class="reset-btn" id="btn-capture">拍照（試妝＋虛擬背景）</button>
     </div>
@@ -384,7 +335,7 @@
         let isPinching = false;
         let lastClickTime = 0;
         let lastHoveredElement = null;
-        let cheekFistStartTime = 0;  // 雙拳貼頰姿勢維持時間
+        let cheekFistStartTime = 0;  // 卸妝手勢（合十）維持時間
         const cheekFistHoldDuration = 550;
         let cheekUnmakeupArmed = true;  // 姿勢鬆開後才允許再次觸發卸妝
         let waveHistory = [];   // { t, y } 手腕垂直位置，用於「向上揮手」偵測
@@ -419,7 +370,6 @@
                 grid.appendChild(btn);
             });
             resetBtn.dataset.action = "reset";
-            updateHuadianProgressBar();
         }
 
         function triggerClick(element) {
@@ -539,22 +489,6 @@
             
             // 切換背景音樂
             playBgMusic(index);
-            updateHuadianProgressBar();
-        }
-
-        function updateHuadianProgressBar() {
-            const fill = document.getElementById('huadian-progress-fill');
-            if (!fill) return;
-            const n = huadianAssets.length;
-            if (n === 0) {
-                fill.style.height = '0%';
-                return;
-            }
-            if (selectedIndex < 0) {
-                fill.style.height = '0%';
-                return;
-            }
-            fill.style.height = ((selectedIndex + 1) / n * 100) + '%';
         }
         
         function getBgMusicPool() {
@@ -998,7 +932,7 @@
         }
 
         // --- 8. 手勢處理 (獨立邏輯) ---
-        /** 貼臉頰握拳用：略放寬，避免偵測不到 */
+        /** 垂直選款時：略呈握拳則不用食指 y（防誤觸） */
         function isHandFistRelaxed(landmarks) {
             const wrist = landmarks[0];
             const middleMcp = landmarks[9];
@@ -1015,13 +949,8 @@
             return thumbToWrist / handLen < 1.12;
         }
 
-        function handFistCenter(landmarks) {
-            let sx = landmarks[0].x, sy = landmarks[0].y;
-            for (const i of [8, 12, 16, 20]) {
-                sx += landmarks[i].x;
-                sy += landmarks[i].y;
-            }
-            return { x: sx / 5, y: sy / 5 };
+        function isHandPinchingLm(lm) {
+            return Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.05;
         }
 
         function lmDist2(a, b) {
@@ -1029,34 +958,26 @@
         }
 
         /**
-         * 僅當「兩隻手」同時為握拳，且拳心與手腕皆靠近臉部左右頰點（234／454）時為 true。
-         * 單手握拳不會滿足此條件，故不會觸發卸妝計時。
+         * 卸妝：雙手合十於臉前（掌心靠攏、指尖朝上區塊靠攏，且落在鼻前）。
+         * 需雙手同時滿足，單手／揮手／捏合選單時不易誤觸。
          */
-        function bothFistsOnCheeks(faceLm, hand0, hand1) {
-            if (!isHandFistRelaxed(hand0) || !isHandFistRelaxed(hand1)) return false;
-            const cheekA = faceLm[234];
-            const cheekB = faceLm[454];
-            if (!cheekA || !cheekB) return false;
-            const fw = lmDist2(cheekA, cheekB) + 0.001;
-            const threshFist = 0.34 * fw;
-            const threshWrist = 0.5 * fw;
-            const cheekLeft = cheekA.x <= cheekB.x ? cheekA : cheekB;
-            const cheekRight = cheekA.x > cheekB.x ? cheekA : cheekB;
-            const fc0 = handFistCenter(hand0);
-            const fc1 = handFistCenter(hand1);
-            const hLeft = fc0.x <= fc1.x ? fc0 : fc1;
-            const hRight = fc0.x > fc1.x ? fc0 : fc1;
-            const wL = fc0.x <= fc1.x ? hand0[0] : hand1[0];
-            const wR = fc0.x > fc1.x ? hand0[0] : hand1[0];
-            if (lmDist2(hLeft, cheekLeft) >= threshFist || lmDist2(hRight, cheekRight) >= threshFist) return false;
-            if (lmDist2(wL, cheekLeft) >= threshWrist || lmDist2(wR, cheekRight) >= threshWrist) return false;
-            const yTol = 0.42;
-            if (Math.abs(wL.y - cheekLeft.y) > yTol || Math.abs(wR.y - cheekRight.y) > yTol) return false;
+        function bothHandsPrayerBeforeFace(faceLm, h0, h1) {
+            if (isHandPinchingLm(h0) || isHandPinchingLm(h1)) return false;
+            const nose = faceLm[1];
+            if (!nose) return false;
+            const p0 = h0[9];
+            const p1 = h1[9];
+            if (lmDist2(p0, p1) > 0.095) return false;
+            const midX = (p0.x + p1.x) / 2;
+            const midY = (p0.y + p1.y) / 2;
+            if (lmDist2({ x: midX, y: midY }, nose) > 0.19) return false;
+            const i0 = h0[8];
+            const i1 = h1[8];
+            if (lmDist2(i0, i1) > 0.12) return false;
+            const t0 = h0[4];
+            const t1 = h1[4];
+            if (lmDist2(t0, t1) > 0.14) return false;
             return true;
-        }
-
-        function isHandPinchingLm(lm) {
-            return Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.05;
         }
 
         function isCursorOverStage(cursorX, cursorY) {
@@ -1066,16 +987,8 @@
             return cursorX >= r.left && cursorX <= r.right && cursorY >= r.top && cursorY <= r.bottom;
         }
 
-        /** 游標在側欄「花鈿進度」區（滾動條 UI）上時，不切換花鈿，避免與揮手／鏡像選款衝突 */
-        function isCursorOverHuadianProgressUi(cursorX, cursorY) {
-            const wrap = document.getElementById('huadian-progress-wrap');
-            if (!wrap) return false;
-            const r = wrap.getBoundingClientRect();
-            return cursorX >= r.left && cursorX <= r.right && cursorY >= r.top && cursorY <= r.bottom;
-        }
-
         /**
-         * 食指指尖 normalized y：畫面上方 → 第一款，愈靠下 → 序位愈後（進度條同步）。
+         * 食指指尖 normalized y：畫面上方 → 第一款，愈靠下 → 序位愈後。
          * 需在鏡像區內、且非捏合／非握拳；同一序位穩定 posPickStableMs 後才 selectHuadian。
          */
         function tryVerticalPositionPickHuadian(landmarks) {
@@ -1099,7 +1012,7 @@
             }
         }
 
-        /** 向上揮手：手腕垂直方向來回擺動且整體上移，切換下一款花鈿並更新進度條 */
+        /** 向上揮手：手腕垂直方向來回擺動且整體上移，切換下一款花鈿 */
         function tryUpWaveNextHuadian(landmarks) {
             const now = Date.now();
             if (now - lastWaveNextHuadianTime < waveNextCooldownMs) return;
@@ -1144,20 +1057,14 @@
             const pinchThreshold = 0.05;
             const isPinchingNow = pinchDist < pinchThreshold;
 
-            // 僅「雙手」握拳貼兩頰為卸妝姿勢（與單手握拳無關；單拳不會觸發卸妝）
+            // 卸妝：雙手合十於臉前（單手無法觸發）
             const faceLm = latestFaceLandmarks.length > 0 ? latestFaceLandmarks[0] : null;
             let cheekPose = false;
             if (multiHands.length === 2 && faceLm) {
-                cheekPose = bothFistsOnCheeks(faceLm, multiHands[0], multiHands[1]);
+                cheekPose = bothHandsPrayerBeforeFace(faceLm, multiHands[0], multiHands[1]);
             }
             const twoHandsPinching = multiHands.length === 2 &&
                 (isHandPinchingLm(multiHands[0]) || isHandPinchingLm(multiHands[1]));
-
-            const overProgressUi = isCursorOverHuadianProgressUi(cursorX, cursorY);
-            if (overProgressUi) {
-                waveHistory.length = 0;
-                posPickCandidate = -1;
-            }
 
             if (cheekPose && !twoHandsPinching && selectedIndex >= 0) {
                 waveHistory.length = 0;
@@ -1176,15 +1083,15 @@
                 if (!cheekPose) cheekUnmakeupArmed = true;
             }
 
-            // 向上揮手：捏合、雙拳貼頰、或游標在進度條區時暫停（避免與滾動條／選款衝突）
-            if (!isPinchingNow && !cheekPose && !overProgressUi) {
+            // 向上揮手：捏合或合十卸妝姿勢時暫停
+            if (!isPinchingNow && !cheekPose) {
                 tryUpWaveNextHuadian(landmarks);
             } else {
                 waveHistory.length = 0;
             }
 
-            // 垂直選款：同上；游標在進度條上時不據食指 y 換款
-            if (!isPinchingNow && !cheekPose && !isHandFistRelaxed(landmarks) && isCursorOverStage(cursorX, cursorY) && !overProgressUi) {
+            // 垂直選款：捏合、合十卸妝、或單手呈握拳時不用食指 y
+            if (!isPinchingNow && !cheekPose && !isHandFistRelaxed(landmarks) && isCursorOverStage(cursorX, cursorY)) {
                 tryVerticalPositionPickHuadian(landmarks);
             } else {
                 posPickCandidate = -1;
