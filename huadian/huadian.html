@@ -238,13 +238,17 @@
                 border-left: none; 
                 border-top: 2px solid #8d6e63;
                 flex-direction: row; 
+                flex-wrap: wrap;
+                align-content: flex-start;
                 overflow-x: auto;
                 padding: 10px;
                 gap: 15px;
             }
             .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
             .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
-            h1, .subtitle, #btn-reset { display: none; }
+            /* 保留標題與操作說明（含吐舌卸妝），僅縮排以適應橫向捲動選款 */
+            h1 { font-size: 1rem; margin: 4px 0; letter-spacing: 2px; }
+            p.subtitle { font-size: 0.65rem; margin-bottom: 8px; padding-bottom: 8px; line-height: 1.35; }
         }
     </style>
 </head>
@@ -264,7 +268,7 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒）</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可）</p>
         <div class="grid-container" id="options-grid"></div>
         <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或對鏡吐舌並微張嘴維持約半秒">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
@@ -336,7 +340,7 @@
         let lastClickTime = 0;
         let lastHoveredElement = null;
         let cheekFistStartTime = 0;  // 吐舌卸妝姿勢維持時間
-        const cheekFistHoldDuration = 550;
+        const cheekFistHoldDuration = 450;
         let cheekUnmakeupArmed = true;  // 舌頭收回後才允許再次觸發卸妝
         /** 由人臉網格更新：吐舌／大嘴張開，供垂直選款暫停用 */
         let tongueUnmakeupPose = false;
@@ -971,10 +975,11 @@
             const faceW = lmDist2(faceLm[234], faceLm[454]) + 0.001;
             const vertOpen = lower.y - upper.y;
             const ratio = vertOpen / faceW;
-            if (ratio < 0.128 || ratio > 0.42) return false;
+            // 略放寬區間，避免實機上「怎麼做都卸不了妝」
+            if (ratio < 0.085 || ratio > 0.5) return false;
             const mouthW = lmDist2(faceLm[61], faceLm[291]) + 0.001;
             const wRatio = mouthW / faceW;
-            if (wRatio < 0.24 || wRatio > 0.58) return false;
+            if (wRatio < 0.19 || wRatio > 0.65) return false;
             return true;
         }
 
