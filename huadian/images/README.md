@@ -29,8 +29,6 @@
 
 ---
 
-## 花鈿精靈圖（妝樣圖示）
+## 花鈿圖樣
 
-- **檔案**：預設使用本資料夾內的 **`origin huadian.png`**（含空格之檔名亦可；若改名請同步修改 [`huadian-sprites.json`](huadian-sprites.json) 的 `sheet`）。
-- **設定**：`huadian-sprites.json` 的 **`cols` / `rows`** 會將整張合圖均分為網格，順序為先左而右、再由上而下，與 [`huadian.html`](../huadian.html) 中 `huadianAssets` 八款一一對應。目前預設為 **4×2**（適用 1920×1080 常見排版）；若你的合圖是橫向一排 8 格，請改為 `"cols": 8, "rows": 1`。
-- 若非均分排列，請在 JSON 中加入 **`frames`** 陣列，每項為 `{ "sx", "sy", "sw", "sh" }`（像素裁切區）。
+目前八款花鈿圖示已**內嵌於** [`huadian.html`](../huadian.html)（SVG data URI），無需自備合圖。若資料夾內仍有 `origin huadian.png`、`huadian-sprites.json`，僅供你自行改版時參考，頁面預設不讀取。
