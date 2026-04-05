@@ -1,7 +1,9 @@
 import {
   CALLIGRAPHY_MODES,
+  COPYBOOK_VARIANTS,
   GRID_TYPES,
   type CalligraphyMode,
+  type CopybookVariant,
   type GridType,
   type PageLayoutConfig,
 } from "@/lib/calligraphy/types";
@@ -44,6 +46,10 @@ export function validateLayoutConfig(input: unknown): ValidationResult<PageLayou
   const rows = asInt(input.rows, 8);
   const cols = asInt(input.cols, 8);
   const showGuideLines = asBool(input.showGuideLines, true);
+  const variantRaw = input.copybookVariant;
+  const copybookVariant: CopybookVariant = COPYBOOK_VARIANTS.includes(variantRaw as CopybookVariant)
+    ? (variantRaw as CopybookVariant)
+    : "standard";
 
   if (!CALLIGRAPHY_MODES.includes(modeRaw as CalligraphyMode)) return { ok: false, message: "mode 僅支援 brush 或 pen" };
   if (!GRID_TYPES.includes(gridTypeRaw as GridType)) return { ok: false, message: "gridType 不合法" };
@@ -52,6 +58,15 @@ export function validateLayoutConfig(input: unknown): ValidationResult<PageLayou
 
   return {
     ok: true,
-    data: { mode: modeRaw as CalligraphyMode, gridType: gridTypeRaw as GridType, fontId, fontSize, rows, cols, showGuideLines },
+    data: {
+      mode: modeRaw as CalligraphyMode,
+      gridType: gridTypeRaw as GridType,
+      fontId,
+      fontSize,
+      rows,
+      cols,
+      showGuideLines,
+      copybookVariant,
+    },
   };
 }

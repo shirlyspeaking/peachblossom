@@ -54,6 +54,8 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
   const outerStroke = 1;
   const innerStroke = 0.6;
   const lineGray = rgb(0.78, 0.78, 0.78);
+  const textColor =
+    layout.config.copybookVariant === "lightTracing" ? rgb(0.976, 0.659, 0.831) : rgb(0.08, 0.08, 0.08);
 
   for (const current of layout.pages) {
     const page = doc.addPage([width, height]);
@@ -116,7 +118,7 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
         y: yBottom + (cellH - size) / 2,
         size,
         font: cjkFont,
-        color: rgb(0.08, 0.08, 0.08),
+        color: textColor,
       });
     }
   }

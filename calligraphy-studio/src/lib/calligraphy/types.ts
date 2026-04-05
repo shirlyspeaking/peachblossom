@@ -4,6 +4,10 @@ export type CalligraphyMode = (typeof CALLIGRAPHY_MODES)[number];
 export const GRID_TYPES = ["tian", "mizi", "jiugong", "lines"] as const;
 export type GridType = (typeof GRID_TYPES)[number];
 
+/** 字帖版本：淺色描紅為練字用淺粉紅字色 */
+export const COPYBOOK_VARIANTS = ["standard", "lightTracing"] as const;
+export type CopybookVariant = (typeof COPYBOOK_VARIANTS)[number];
+
 export const INPUT_SOURCE_TYPES = ["text", "file"] as const;
 export type InputSourceType = (typeof INPUT_SOURCE_TYPES)[number];
 
@@ -28,6 +32,7 @@ export type PageLayoutConfig = {
   rows: number;
   cols: number;
   showGuideLines: boolean;
+  copybookVariant: CopybookVariant;
 };
 
 export type LayoutCell = {

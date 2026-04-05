@@ -5,7 +5,7 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FONT_OPTIONS, type GridType, type PageLayoutConfig } from "@/lib/calligraphy/types";
+import { FONT_OPTIONS, type CopybookVariant, type GridType, type PageLayoutConfig } from "@/lib/calligraphy/types";
 
 type PreviewCell = { char: string; row: number; col: number };
 type PreviewLayout = { pages: Array<{ index: number; cells: PreviewCell[] }>; config: PageLayoutConfig };
@@ -15,6 +15,11 @@ const GRID_OPTIONS: Array<{ value: GridType; label: string }> = [
   { value: "mizi", label: "米字格" },
   { value: "jiugong", label: "九宮格" },
   { value: "lines", label: "橫線" },
+];
+
+const COPYBOOK_VARIANT_OPTIONS: Array<{ value: CopybookVariant; label: string }> = [
+  { value: "standard", label: "標準（黑字）" },
+  { value: "lightTracing", label: "淺色描紅" },
 ];
 
 const SAMPLE_TEXT = `春眠不覺曉，處處聞啼鳥。
@@ -36,6 +41,7 @@ export default function CalligraphyPage() {
     rows: 8,
     cols: 8,
     showGuideLines: true,
+    copybookVariant: "standard",
   });
   const previewRef = useRef<HTMLDivElement | null>(null);
   const activePage = layout?.pages[0];
@@ -172,6 +178,17 @@ export default function CalligraphyPage() {
               <label className="text-sm">字體大小
                 <Input type="number" min={12} max={96} value={config.fontSize} onChange={(e) => setConfig((prev) => ({ ...prev, fontSize: Number(e.target.value) }))} />
               </label>
+              <label className="text-sm sm:col-span-2">字帖版本
+                <select
+                  className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3"
+                  value={config.copybookVariant}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}
+                >
+                  {COPYBOOK_VARIANT_OPTIONS.map((item) => (
+                    <option key={item.value} value={item.value}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button disabled={busy} variant="secondary" onClick={parseInput}><Upload className="mr-2 h-4 w-4" />解析上傳內容</Button>
@@ -208,10 +225,11 @@ export default function CalligraphyPage() {
                         ? "border-b border-slate-300"
                         : ""
                       : [showInnerVertical ? "border-r border-slate-300" : "", showInnerHorizontal ? "border-b border-slate-300" : ""].filter(Boolean).join(" ");
+                  const charTone = config.copybookVariant === "lightTracing" ? "text-pink-300" : "text-slate-900";
                   return (
                     <div
                       key={`${row}-${col}`}
-                      className={`relative flex min-h-0 min-w-0 items-center justify-center text-slate-900 ${cellBorder}`}
+                      className={`relative flex min-h-0 min-w-0 items-center justify-center ${charTone} ${cellBorder}`}
                       style={cellStyle}
                     >
                       {config.showGuideLines && !isLines ? (
