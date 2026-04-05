@@ -151,7 +151,10 @@
         .huadian-btn img {
             width: 60%;
             height: 60%;
+            max-width: 72px;
+            max-height: 72px;
             object-fit: contain;
+            flex: 0 0 auto;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
             margin-bottom: 5px;
             pointer-events: none;
@@ -255,6 +258,13 @@
             }
             .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
             .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
+            /* 橫向 flex 內百分比高度易塌縮，改固定像素以利 SVG 縮圖顯示（iOS/WebKit） */
+            .huadian-btn img {
+                width: 48px;
+                height: 48px;
+                max-width: 48px;
+                max-height: 48px;
+            }
             /* 保留標題與操作說明（含吐舌卸妝），僅縮排以適應橫向捲動選款 */
             h1 { font-size: 1rem; margin: 4px 0; letter-spacing: 2px; }
             p.subtitle { font-size: 0.65rem; margin-bottom: 8px; padding-bottom: 8px; line-height: 1.35; }
@@ -368,23 +378,49 @@
         let mouseOverNoBgCaptureBtn = false;
 
         // --- 3. 初始化資源 ---
-        function initImages() {
+        /** 預載花鈿 SVG（手機 Safari 常在未 complete 時 drawImage 失敗，臉上不顯示） */
+        function preloadHuadianImages() {
+            loadedImages.length = huadianAssets.length;
+            return Promise.all(
+                huadianAssets.map(
+                    (asset, index) =>
+                        new Promise((resolve) => {
+                            const img = new Image();
+                            const finish = () => {
+                                if (typeof img.decode === 'function') {
+                                    img.decode().then(resolve).catch(resolve);
+                                } else {
+                                    resolve();
+                                }
+                            };
+                            img.onload = finish;
+                            img.onerror = finish;
+                            img.src = asset.src;
+                            loadedImages[index] = img;
+                        })
+                )
+            );
+        }
+
+        function buildHuadianButtons() {
             const grid = document.getElementById('options-grid');
             huadianAssets.forEach((asset, index) => {
-                const img = new Image();
-                img.src = asset.src;
-                loadedImages.push(img);
-
                 const btn = document.createElement('div');
                 btn.className = 'huadian-btn';
                 btn.id = `btn-${index}`;
                 btn.dataset.index = index;
                 btn.setAttribute('role', 'button');
                 btn.tabIndex = 0;
-                btn.innerHTML = `<img src="${asset.src}" alt=""><div class="huadian-name">${asset.name}</div>`;
+                btn.innerHTML =
+                    `<img src="${asset.src}" alt="" width="56" height="56" decoding="async"><div class="huadian-name">${asset.name}</div>`;
                 grid.appendChild(btn);
             });
-            resetBtn.dataset.action = "reset";
+            resetBtn.dataset.action = 'reset';
+        }
+
+        async function initHuadianUi() {
+            await preloadHuadianImages();
+            buildHuadianButtons();
         }
 
         function triggerClick(element, opts) {
@@ -966,8 +1002,9 @@
             const config = huadianAssets[index];
             const img = loadedImages[index];
             
-            // 安全檢查：確保圖片已加載且有效
-            if (!img || !img.complete || img.naturalWidth === 0) return;
+            if (!img || !img.complete) return;
+            const iw = img.naturalWidth;
+            const ih = img.naturalHeight;
 
             const pt151 = landmarks[151];
             const cx = pt151.x * cw;
@@ -988,7 +1025,12 @@
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(angle);
-            ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            if (iw > 0 && ih > 0) {
+                ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            } else {
+                /* WebKit 部分情況下 SVG 的 naturalWidth 仍為 0，改用 viewBox 對應的 100×100 來源矩形 */
+                ctx.drawImage(img, 0, 0, 100, 100, -size / 2, -size / 2, size, size);
+            }
             ctx.restore();
         }
 
@@ -1149,11 +1191,15 @@
             }
         }
 
-        initImages();
-        setupMenuTapDelegation();
-        loadTangBackgrounds();
-        loadAudioTracks();
-        initModels();
+        async function startApp() {
+            await initHuadianUi();
+            setupMenuTapDelegation();
+            loadTangBackgrounds();
+            loadAudioTracks();
+            initModels();
+        }
+
+        startApp();
 
     </script>
 </body>
