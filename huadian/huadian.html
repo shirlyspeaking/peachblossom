@@ -377,12 +377,110 @@
         /** 滑鼠懸停在「花鈿・無背景」拍照鈕上時，與手勢懸停同效：預覽隱藏虛擬背景 */
         let mouseOverNoBgCaptureBtn = false;
 
-        /** 手機／觸控：不用 Selfie Segmentation 去背（常失敗或極慢），改「全幅場景圖 + 半透明鏡頭」保證能看見背景 */
+        /**
+         * 手機／觸控：選花鈿時背景圖與「人臉序位對應」用（tryPickTangBg）。
+         * 畫面合成改為：優先 Selfie 蒙版 → 否則 Face Mesh 臉廓蒙版 → 最後才半透明備援。
+         */
         function preferSimpleVirtualBackground() {
             if (typeof window === 'undefined') return false;
             if (window.innerWidth <= 768) return true;
             if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) return true;
             return false;
+        }
+
+        /** MediaPipe Face Mesh 臉型外輪廓（有序），用於無人像分割蒙版時的臨時去背 */
+        const FACE_MESH_OVAL_INDICES = [
+            10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377,
+            152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109
+        ];
+
+        let _ovalMaskCanvas = null;
+
+        function getOvalMaskCanvas(w, h) {
+            if (!_ovalMaskCanvas || _ovalMaskCanvas.width !== w || _ovalMaskCanvas.height !== h) {
+                _ovalMaskCanvas = document.createElement('canvas');
+                _ovalMaskCanvas.width = w;
+                _ovalMaskCanvas.height = h;
+            }
+            return _ovalMaskCanvas;
+        }
+
+        /** 多張臉時合併臉廓蒙版（與 segmentation 相同後續 source-in 流程） */
+        function renderFaceOvalMaskFromFaces(faces, w, h) {
+            if (!faces || faces.length === 0) return null;
+            const c = getOvalMaskCanvas(w, h);
+            const mctx = c.getContext('2d');
+            mctx.clearRect(0, 0, w, h);
+            mctx.fillStyle = '#ffffff';
+            let any = false;
+            const expand = 1.16;
+            for (let fi = 0; fi < faces.length; fi++) {
+                const faceLm = faces[fi];
+                if (!faceLm || !faceLm[168]) continue;
+                let ok = true;
+                for (let k = 0; k < FACE_MESH_OVAL_INDICES.length; k++) {
+                    if (!faceLm[FACE_MESH_OVAL_INDICES[k]]) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) continue;
+                any = true;
+                const cx = faceLm[168].x * w;
+                const cy = faceLm[168].y * h;
+                mctx.beginPath();
+                for (let i = 0; i < FACE_MESH_OVAL_INDICES.length; i++) {
+                    const p = faceLm[FACE_MESH_OVAL_INDICES[i]];
+                    const x = p.x * w;
+                    const y = p.y * h;
+                    const px = cx + (x - cx) * expand;
+                    const py = cy + (y - cy) * expand;
+                    if (i === 0) mctx.moveTo(px, py);
+                    else mctx.lineTo(px, py);
+                }
+                mctx.closePath();
+                mctx.fill();
+            }
+            return any ? c : null;
+        }
+
+        /** 以蒙版（分割圖或臉廓 canvas）把人像扣出並疊在場景圖上 */
+        function compositeMaskedPersonOverBackground(ctx, w, h, maskSource) {
+            ctx.save();
+            ctx.drawImage(maskSource, 0, 0, w, h);
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.drawImage(videoElement, 0, 0, w, h);
+            ctx.globalCompositeOperation = 'destination-over';
+            if (
+                currentBgImageIndex >= 0 &&
+                tangBgImages[currentBgImageIndex] &&
+                tangBgImages[currentBgImageIndex].complete &&
+                tangBgImages[currentBgImageIndex].naturalWidth
+            ) {
+                drawBackgroundImage(ctx, w, h, tangBgImages[currentBgImageIndex]);
+            } else {
+                drawBackground(ctx, w, h, huadianAssets[selectedIndex].bgType);
+            }
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.restore();
+        }
+
+        /** 尚未有臉／蒙版時：場景 + 半透明鏡頭（僅備援） */
+        function drawTranslucentVideoOverBackground(ctx, w, h) {
+            if (
+                currentBgImageIndex >= 0 &&
+                tangBgImages[currentBgImageIndex] &&
+                tangBgImages[currentBgImageIndex].complete &&
+                tangBgImages[currentBgImageIndex].naturalWidth
+            ) {
+                drawBackgroundImage(ctx, w, h, tangBgImages[currentBgImageIndex]);
+            } else {
+                drawBackground(ctx, w, h, huadianAssets[selectedIndex].bgType);
+            }
+            ctx.save();
+            ctx.globalAlpha = preferSimpleVirtualBackground() ? 0.78 : 0.86;
+            ctx.drawImage(videoElement, 0, 0, w, h);
+            ctx.restore();
         }
 
         function assetUrl(relativePath) {
@@ -796,8 +894,8 @@
                     hands.send({image: videoElement})
                 ];
                 
-                // 選了花鈿才做人像分割；手機改用簡易合成、不送分割以省效能並避免蒙版永遠出不來
-                if (selectedIndex !== -1 && !preferSimpleVirtualBackground()) {
+                // 選了花鈿才做人像分割（手機亦送，臉部去背優先使用；失敗時改用人臉網格臉廓蒙版）
+                if (selectedIndex !== -1) {
                     sends.push(selfieSegmentation.send({image: videoElement}));
                 } else {
                     latestSegmentationMask = null;
@@ -833,34 +931,18 @@
                 (lastHoveredElement && lastHoveredElement.id === 'btn-capture-huadian')
             );
 
-            // A. 背景與人物繪製
-            const simpleBg = preferSimpleVirtualBackground();
-            if (selectedIndex !== -1 && !previewNoVirtualBg && !simpleBg && latestSegmentationMask) {
-                // === 桌面：人像分割 + 場景圖（高品質去背） ===
-                canvasCtx.save();
-                canvasCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
-                canvasCtx.globalCompositeOperation = 'source-in';
-                canvasCtx.drawImage(videoElement, 0, 0, w, h);
-                canvasCtx.globalCompositeOperation = 'destination-over';
-                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
-                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
+            // A. 背景與人物繪製：① Selfie 蒙版 ② 臉廓蒙版 ③ 半透明備援（僅尚未偵測到臉時）
+            if (selectedIndex !== -1 && !previewNoVirtualBg && latestSegmentationMask) {
+                compositeMaskedPersonOverBackground(canvasCtx, w, h, latestSegmentationMask);
+            } else if (selectedIndex !== -1 && !previewNoVirtualBg && latestFaceLandmarks.length > 0) {
+                const ovalMask = renderFaceOvalMaskFromFaces(latestFaceLandmarks, w, h);
+                if (ovalMask) {
+                    compositeMaskedPersonOverBackground(canvasCtx, w, h, ovalMask);
                 } else {
-                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                    drawTranslucentVideoOverBackground(canvasCtx, w, h);
                 }
-                canvasCtx.globalCompositeOperation = 'source-over';
-                canvasCtx.restore();
-
             } else if (selectedIndex !== -1 && !previewNoVirtualBg) {
-                // === 手機或無蒙版：全幅場景圖／漸層 + 半透明鏡頭（不依賴分割，保證看見背景） ===
-                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
-                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
-                } else {
-                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
-                }
-                canvasCtx.save();
-                canvasCtx.globalAlpha = simpleBg ? 0.78 : 0.88;
-                canvasCtx.drawImage(videoElement, 0, 0, w, h);
-                canvasCtx.restore();
+                drawTranslucentVideoOverBackground(canvasCtx, w, h);
             } else {
                 // === 完整鏡頭：卸妝，或懸停「花鈿・無背景」預覽 ===
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
