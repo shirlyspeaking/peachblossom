@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=11">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -27,8 +27,8 @@
                     <label for="fontPreset">常用字體</label>
                     <select id="fontPreset">
                         <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
-                        <option id="fontOptZhiMang" value="'Zhi Mang Xing', 'Noto Serif TC', serif">芝芒行體（行書·google/fonts OFL）</option>
-                        <option id="fontOptMaShan" value="'Ma Shan Zheng', 'Noto Serif TC', serif">馬善政（榜書／隸意·google/fonts OFL）</option>
+                        <option id="fontOptYShiPen" value="'YShiPenShutiTC', 'Noto Serif TC', serif">Y式筆書（行書／行楷·OFL）</option>
+                        <option id="fontOptAlimamaLi" value="'AlimamaDaoLiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體（隸意·官方免費商用）</option>
                         <option id="fontOptChenyu" value="'ChenYuluoyan', 'Noto Serif TC', serif">辰宇落雁體（開源）</option>
                         <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
                         <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
@@ -44,8 +44,8 @@
                         套用「辰宇落雁體」— 開源手寫字型（Chenyu Luoyan）
                     </button>
                     <p class="font-hint">
-                        行書／隸意字型來自 <a href="https://github.com/googlefonts/zhimangxing" target="_blank" rel="noopener noreferrer">googlefonts/zhimangxing</a>、
-                        <a href="https://github.com/googlefonts/mashanzheng" target="_blank" rel="noopener noreferrer">googlefonts/mashanzheng</a>（經 Google Fonts 彙編，OFL）。
+                        行書改用 <a href="https://github.com/Steve-Yuu/YshiPen-Shuti" target="_blank" rel="noopener noreferrer">Steve-Yuu/YshiPen-Shuti</a>（OFL，高覆蓋）。
+                        隸書改用阿里媽媽刀隸體，字檔已隨本站部署以提升穩定性。
                         辰宇落雁體見 <a href="https://github.com/Chenyu-otf/chenyuluoyan_thin" target="_blank" rel="noopener noreferrer">Chenyu-otf/chenyuluoyan_thin</a>。
                     </p>
                 </div>

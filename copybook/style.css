@@ -19,25 +19,27 @@
     font-display: swap;
 }
 
-/* 芝芒行體 Zhi Mang Xing — 行書風，OFL，github.com/googlefonts/zhimangxing */
+/* Y式筆書 TC — 高覆蓋行書／行楷風，OFL，來源：github.com/Steve-Yuu/YshiPen-Shuti */
 @font-face {
-    font-family: "Zhi Mang Xing";
+    font-family: "YShiPenShutiTC";
     src:
-        local("Zhi Mang Xing"),
-        local("ZhiMangXing-Regular"),
-        url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/zhimangxing/ZhiMangXing-Regular.ttf") format("truetype");
+        local("YShiPenShutiTC"),
+        local("YshiPenShutiTC-Regular"),
+        url("fonts/YshiPenShutiTC-Regular.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
-/* 馬善政 Ma Shan Zheng — 榜書／楹聯體，厚重近碑刻隸意，OFL，github.com/googlefonts/mashanzheng */
+/* 阿里媽媽刀隸體 — 官方免費商用隸意字體，字檔隨專案部署以避免外部熱鏈失效 */
 @font-face {
-    font-family: "Ma Shan Zheng";
+    font-family: "AlimamaDaoLiTi";
     src:
-        local("Ma Shan Zheng"),
-        local("MaShanZheng-Regular"),
-        url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/mashanzheng/MaShanZheng-Regular.ttf") format("truetype");
+        local("阿里妈妈刀隶体"),
+        local("AlimamaDaoLiTi"),
+        url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.woff2") format("woff2"),
+        url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.woff") format("woff"),
+        url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
