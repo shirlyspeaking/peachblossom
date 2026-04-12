@@ -266,20 +266,26 @@
             display: none;
         }
 
-        /* ---------- 手機／窄螢幕：直向為主，鏡頭區佔主要高度，選單可垂直捲動 ---------- */
+        /* ---------- 手機／窄螢幕：直向為主，鏡頭區吃滿剩餘高度；底部選款橫向左右捲 ---------- */
         @media (max-width: 768px) {
+            html, body {
+                height: 100%;
+                max-height: 100dvh;
+            }
+
             body {
                 flex-direction: column;
+                min-height: 100dvh;
+                height: 100dvh;
                 padding-left: env(safe-area-inset-left, 0px);
                 padding-right: env(safe-area-inset-right, 0px);
                 padding-bottom: env(safe-area-inset-bottom, 0px);
             }
 
             #stage-container {
-                flex: 1 1 auto;
+                flex: 1 1 0;
+                min-height: 0;
                 width: 100%;
-                min-height: min(58dvh, 520px);
-                max-height: 68dvh;
                 margin: 0;
                 padding-top: env(safe-area-inset-top, 0px);
                 border: none;
@@ -292,7 +298,7 @@
                 width: 100%;
                 max-width: none;
                 min-width: 0;
-                max-height: min(44dvh, 400px);
+                max-height: min(46dvh, 420px);
                 border-left: none;
                 border-top: 2px solid #8d6e63;
                 flex-direction: column;
@@ -373,48 +379,12 @@
             }
         }
 
-        /* 極窄螢幕（小屏手機） */
+        /* 極窄螢幕（小屏手機）：略縮選款鈕，仍為直向＋底部橫滑 */
         @media (max-width: 380px) {
-            #stage-container {
-                min-height: min(52dvh, 480px);
-                max-height: 62dvh;
-            }
             .huadian-btn {
                 width: 70px;
                 height: 70px;
                 min-width: 70px;
-            }
-        }
-
-        /* 手機橫向：鏡頭與選單左右分欄，避免擠壓 */
-        @media (max-width: 768px) and (orientation: landscape) {
-            body {
-                flex-direction: row;
-                padding-left: env(safe-area-inset-left, 0px);
-                padding-right: env(safe-area-inset-right, 0px);
-            }
-            #stage-container {
-                flex: 1 1 58%;
-                min-height: 0;
-                max-height: none;
-                height: min(100dvh, 100vh);
-                padding-top: env(safe-area-inset-top, 0px);
-                border-bottom: none;
-                border-right: 2px solid #5d4037;
-            }
-            #menu-container {
-                flex: 0 0 42%;
-                max-width: 44vw;
-                max-height: 100dvh;
-                max-height: 100vh;
-                border-top: none;
-                border-left: 2px solid #8d6e63;
-                overflow-y: auto;
-            }
-            .grid-container {
-                flex-wrap: wrap;
-                overflow-x: hidden;
-                justify-content: center;
             }
         }
     </style>

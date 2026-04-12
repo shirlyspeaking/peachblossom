@@ -19,6 +19,7 @@
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
     var btnTxt = document.getElementById('btnTxt');
+    var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
@@ -413,6 +414,14 @@
         window.print();
     }
 
+    function applyChenyuFont() {
+        var opt = document.getElementById('fontOptChenyu');
+        if (opt && fontPreset) fontPreset.value = opt.value;
+        if (customFont) customFont.value = '';
+        setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
+        renderNow();
+    }
+
     var inputs = [
         textInput, fontPreset, customFont, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
@@ -427,6 +436,7 @@
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnTxt) btnTxt.addEventListener('click', onTxt);
+    if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();
 })();

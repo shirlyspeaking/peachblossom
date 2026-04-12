@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -27,6 +27,7 @@
                     <label for="fontPreset">常用字體</label>
                     <select id="fontPreset">
                         <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
+                        <option id="fontOptChenyu" value="'ChenYuluoyan', 'Noto Serif TC', serif">辰宇落雁體（開源）</option>
                         <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
                         <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
                         <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
@@ -36,7 +37,13 @@
                 </div>
                 <div class="field">
                     <label for="customFont">自訂字體（選填）</label>
-                    <input id="customFont" type="text" placeholder="例如: LXGW WenKai, Noto Serif TC" autocomplete="off">
+                    <input id="customFont" type="text" placeholder="覆寫於「常用字體」前，例如: ChenYuluoyan" autocomplete="off">
+                    <button type="button" class="btn-chenyu" id="btnChenyuFont" title="套用 GitHub 開源辰宇落雁體（OFL 1.1）">
+                        套用「辰宇落雁體」— 開源手寫字型（Chenyu Luoyan）
+                    </button>
+                    <p class="font-hint">
+                        線上載入 <a href="https://github.com/Chenyu-otf/chenyuluoyan_thin" target="_blank" rel="noopener noreferrer">Chenyu-otf/chenyuluoyan_thin</a> · OFL 可商用
+                    </p>
                 </div>
             </div>
 
@@ -109,6 +116,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>

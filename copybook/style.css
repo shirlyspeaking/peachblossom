@@ -7,6 +7,18 @@
     --ink: #4b2a3d;
 }
 
+/* 辰宇落雁體 ChenYuluoyan — 開源 OFL，來源：github.com/Chenyu-otf/chenyuluoyan_thin */
+@font-face {
+    font-family: "ChenYuluoyan";
+    src:
+        local("辰宇落雁體"),
+        local("辰宇落雁體 Thin"),
+        url("https://cdn.jsdelivr.net/gh/Chenyu-otf/chenyuluoyan_thin@main/ChenYuluoyan-2.0-Thin.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -73,6 +85,35 @@ select {
     padding: 8px 10px;
     font-size: 0.95rem;
     background: #fff;
+}
+
+.btn-chenyu {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    border: 1px dashed rgba(142, 33, 87, 0.35);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--berry-dark);
+    cursor: pointer;
+    line-height: 1.35;
+}
+
+.btn-chenyu:hover {
+    background: rgba(142, 33, 87, 0.06);
+    border-color: rgba(142, 33, 87, 0.45);
+}
+
+.font-hint {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: #8a5b73;
+    line-height: 1.4;
+}
+
+.font-hint a {
+    color: var(--berry-mid);
 }
 
 textarea {
