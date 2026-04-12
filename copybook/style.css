@@ -19,6 +19,30 @@
     font-display: swap;
 }
 
+/* 芝芒行體 Zhi Mang Xing — 行書風，OFL，github.com/googlefonts/zhimangxing */
+@font-face {
+    font-family: "Zhi Mang Xing";
+    src:
+        local("Zhi Mang Xing"),
+        local("ZhiMangXing-Regular"),
+        url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/zhimangxing/ZhiMangXing-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 馬善政 Ma Shan Zheng — 榜書／楹聯體，厚重近碑刻隸意，OFL，github.com/googlefonts/mashanzheng */
+@font-face {
+    font-family: "Ma Shan Zheng";
+    src:
+        local("Ma Shan Zheng"),
+        local("MaShanZheng-Regular"),
+        url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/mashanzheng/MaShanZheng-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     box-sizing: border-box;
 }
