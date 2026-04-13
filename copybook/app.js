@@ -60,6 +60,25 @@
         );
     }
 
+    /**
+     * 淺粉色描紅：SVG 實心字（fill + stroke=none），與紅色鏤空描紅區隔；
+     * 列印／html2canvas 與紅色描紅同樣穩定。
+     */
+    function buildLightPinkSolidSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(78, Math.max(44, Math.round(50 + (fs - 24) * 0.72)));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        var attrs =
+            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'text-anchor="middle" dominant-baseline="middle" ' +
+            'fill="rgb(224, 122, 158)" fill-opacity="0.98" stroke="none"';
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<text ' + attrs + '>' + body + '</text></svg>'
+        );
+    }
+
     function getFontFamily() {
         var preset = fontPreset.value.trim();
         var custom = customFont.value.trim();
@@ -171,7 +190,7 @@
         preview.className =
             'preview preview--' +
             psize +
-            (hongMode ? ' preview--hong' : '') +
+            (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '');
 
         if (copyStyleHint) {
@@ -234,10 +253,8 @@
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.innerHTML = buildHongSvgChar(ch, font, fs);
                     } else if (lightPinkHongMode) {
-                        inner.className = 'cell-inner cell-inner--light-pink-hong';
-                        inner.textContent = ch;
-                        /* 與 .preview--light-pink-hong 同色；important 避免舊快取樣式搶字色 */
-                        inner.style.setProperty('color', '#e07a9e', 'important');
+                        inner.className = 'cell-inner cell-inner--hong';
+                        inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
                     } else {
                         inner.textContent = ch;
                     }
