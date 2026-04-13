@@ -192,10 +192,12 @@ button:hover {
     display: grid;
     gap: 0;
     border: 1px solid var(--line-soft);
+    /* 右側邊框改由最後一格繪製，避免寬內容溢出時外框看起來消失 */
+    border-right: none;
     width: max-content;
     max-width: none;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .cell {
@@ -211,7 +213,8 @@ button:hover {
 }
 
 .cell.col-last {
-    border-right: none;
+    /* 保留右側邊框 */
+    border-right: 1px solid var(--line-soft);
 }
 
 .cell.row-last {

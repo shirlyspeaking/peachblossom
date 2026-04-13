@@ -19,8 +19,9 @@
     <main class="layout">
         <aside class="panel">
             <label for="textInput">字帖內容</label>
-            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字，支援換行。">春眠不覺曉，處處聞啼鳥。
+            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字；每個半形空格（Space）佔一格，支援換行。" aria-describedby="textInputHint">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
+            <p class="copy-style-hint" id="textInputHint">每個半形空格（Space）對應字帖中的一個方格；連續空格會排出連續空白格。</p>
 
             <div class="row">
                 <div class="field">
@@ -108,6 +109,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
 </body>
 </html>

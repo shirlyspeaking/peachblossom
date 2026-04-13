@@ -68,17 +68,12 @@
         return preset;
     }
 
-    /** 保留換行；行內連續空白壓成單一空格；移除行尾空白 */
+    /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
     function normalizeText(raw) {
         return String(raw)
             .replace(/\r\n/g, '\n')
             .replace(/\r/g, '\n')
-            .replace(/\t/g, ' ')
-            .split('\n')
-            .map(function (line) {
-                return line.replace(/ +/g, ' ').replace(/\s+$/g, '');
-            })
-            .join('\n');
+            .replace(/\t/g, ' ');
     }
 
     /** 將文字切成排版用「行」，每行最多 cpl 字；空行保留為一列空白行 */
