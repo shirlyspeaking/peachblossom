@@ -5,7 +5,7 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FONT_OPTIONS, type GridType, type PageLayoutConfig } from "@/lib/calligraphy/types";
+import { FONT_OPTIONS, type CopybookVariant, type GridType, type PageLayoutConfig } from "@/lib/calligraphy/types";
 
 type PreviewCell = { char: string; row: number; col: number };
 type PreviewLayout = { pages: Array<{ index: number; cells: PreviewCell[] }>; config: PageLayoutConfig };
@@ -15,6 +15,11 @@ const GRID_OPTIONS: Array<{ value: GridType; label: string }> = [
   { value: "mizi", label: "米字格" },
   { value: "jiugong", label: "九宮格" },
   { value: "lines", label: "橫線" },
+];
+
+const COPYBOOK_VARIANT_OPTIONS: Array<{ value: CopybookVariant; label: string }> = [
+  { value: "standard", label: "標準（黑字）" },
+  { value: "lightTracing", label: "淺色描紅" },
 ];
 
 const SAMPLE_TEXT = `春眠不覺曉，處處聞啼鳥。
@@ -36,6 +41,7 @@ export default function CalligraphyPage() {
     rows: 8,
     cols: 8,
     showGuideLines: true,
+    copybookVariant: "standard",
   });
   const previewRef = useRef<HTMLDivElement | null>(null);
   const activePage = layout?.pages[0];
@@ -172,6 +178,17 @@ export default function CalligraphyPage() {
               <label className="text-sm">字體大小
                 <Input type="number" min={12} max={96} value={config.fontSize} onChange={(e) => setConfig((prev) => ({ ...prev, fontSize: Number(e.target.value) }))} />
               </label>
+              <label className="text-sm sm:col-span-2">字帖版本
+                <select
+                  className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3"
+                  value={config.copybookVariant}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}
+                >
+                  {COPYBOOK_VARIANT_OPTIONS.map((item) => (
+                    <option key={item.value} value={item.value}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button disabled={busy} variant="secondary" onClick={parseInput}><Upload className="mr-2 h-4 w-4" />解析上傳內容</Button>
@@ -186,23 +203,60 @@ export default function CalligraphyPage() {
         <Card ref={previewRef}>
           <CardHeader><CardTitle>字帖預覽（第一頁）</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid w-full overflow-hidden rounded-lg border border-slate-200 bg-white" style={{ gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))` }}>
-              {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
-                const row = Math.floor(idx / config.cols);
-                const col = idx % config.cols;
-                const char = activePage?.cells.find((cell) => cell.row === row && cell.col === col)?.char || "";
-                return (
-                  <div key={`${row}-${col}`} className="relative flex aspect-square items-center justify-center border border-slate-200 text-slate-900" style={cellStyle}>
-                    {config.showGuideLines && config.gridType !== "lines" ? (
-                      <>
-                        <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-slate-200" />
-                        <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-slate-200" />
-                      </>
-                    ) : null}
-                    <span>{char}</span>
-                  </div>
-                );
-              })}
+            {/* 外框單一邊框，左右寬度一致；內格僅用右/下分隔線，避免雙線與欄數變化時外緣粗細不一 */}
+            <div
+              className="w-full overflow-hidden rounded-lg border-2 border-slate-400 bg-white"
+              style={{ aspectRatio: `${config.cols} / ${config.rows}` }}
+            >
+              <div
+                className="grid h-full w-full"
+                style={{ gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${config.rows}, minmax(0, 1fr))` }}
+              >
+                {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
+                  const row = Math.floor(idx / config.cols);
+                  const col = idx % config.cols;
+                  const char = activePage?.cells.find((cell) => cell.row === row && cell.col === col)?.char || "";
+                  const isLines = config.gridType === "lines";
+                  const showInnerVertical = !isLines && col < config.cols - 1;
+                  const showInnerHorizontal = row < config.rows - 1;
+                  const cellBorder =
+                    isLines
+                      ? showInnerHorizontal
+                        ? "border-b border-slate-300"
+                        : ""
+                      : [showInnerVertical ? "border-r border-slate-300" : "", showInnerHorizontal ? "border-b border-slate-300" : ""].filter(Boolean).join(" ");
+                  const charTone = config.copybookVariant === "lightTracing" ? "text-pink-300" : "text-slate-900";
+                  const showCenterGuides =
+                    config.showGuideLines && !isLines && (config.gridType === "tian" || config.gridType === "mizi" || config.gridType === "jiugong");
+                  const showMiziDiagonals = showCenterGuides && config.gridType === "mizi";
+                  return (
+                    <div
+                      key={`${row}-${col}`}
+                      className={`relative flex min-h-0 min-w-0 items-center justify-center ${charTone} ${cellBorder}`}
+                      style={cellStyle}
+                    >
+                      {showCenterGuides ? (
+                        <>
+                          <span className="pointer-events-none absolute left-1/2 top-0 z-0 box-border h-full w-0 -translate-x-1/2 border-l border-dashed border-slate-300" />
+                          <span className="pointer-events-none absolute left-0 top-1/2 z-0 box-border h-0 w-full -translate-y-1/2 border-t border-dashed border-slate-300" />
+                          {showMiziDiagonals ? (
+                            <svg
+                              className="pointer-events-none absolute inset-0 z-0 text-slate-300"
+                              viewBox="0 0 100 100"
+                              preserveAspectRatio="none"
+                              aria-hidden
+                            >
+                              <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1.25" strokeDasharray="4 3.5" />
+                              <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1.25" strokeDasharray="4 3.5" />
+                            </svg>
+                          ) : null}
+                        </>
+                      ) : null}
+                      <span className="relative z-10">{char}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>

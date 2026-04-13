@@ -19,6 +19,7 @@
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
     var btnTxt = document.getElementById('btnTxt');
+    var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
@@ -161,17 +162,28 @@
         var hongMode =
             copyStyle &&
             (copyStyle.value === 'hong' || copyStyle.value === 'trace');
+        var lightTracingMode = copyStyle && copyStyle.value === 'lightTracing';
 
         var rows = buildRows(text, cpl);
         var pages = chunkPages(rows, lpp);
 
         preview.innerHTML = '';
-        preview.className = 'preview preview--' + psize + (hongMode ? ' preview--hong' : '');
+        preview.className =
+            'preview preview--' +
+            psize +
+            (hongMode ? ' preview--hong' : '') +
+            (lightTracingMode ? ' preview--light-tracing' : '');
 
         if (copyStyleHint) {
-            copyStyleHint.textContent = hongMode
-                ? '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。'
-                : '標準墨色：實心字，適合對照。';
+            if (hongMode) {
+                copyStyleHint.textContent =
+                    '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。';
+            } else if (lightTracingMode) {
+                copyStyleHint.textContent =
+                    '淺色描紅：淺粉紅實心字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
+            } else {
+                copyStyleHint.textContent = '標準墨色：實心字，適合對照。';
+            }
         }
 
         for (var p = 0; p < pages.length; p++) {
@@ -221,6 +233,9 @@
                     } else if (hongMode) {
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.innerHTML = buildHongSvgChar(ch, font, fs);
+                    } else if (lightTracingMode) {
+                        inner.className = 'cell-inner cell-inner--light-tracing';
+                        inner.textContent = ch;
                     } else {
                         inner.textContent = ch;
                     }
@@ -394,6 +409,14 @@
         window.print();
     }
 
+    function applyChenyuFont() {
+        var opt = document.getElementById('fontOptChenyu');
+        if (opt && fontPreset) fontPreset.value = opt.value;
+        if (customFont) customFont.value = '';
+        setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
+        renderNow();
+    }
+
     var inputs = [
         textInput, fontPreset, customFont, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
@@ -408,6 +431,7 @@
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnTxt) btnTxt.addEventListener('click', onTxt);
+    if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();
 })();

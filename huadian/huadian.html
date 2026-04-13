@@ -2,7 +2,10 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>唐風花鈿 AR 試妝 (虛擬背景版)</title>
     <!-- 1. 引入 Face Mesh (人臉) -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
@@ -12,17 +15,34 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html {
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
         /* --- 全局樣式 --- */
         body {
             margin: 0;
             padding: 0;
             display: flex;
-            height: 100vh;
+            flex-direction: row;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            max-width: 100vw;
             background: #1a1a1a;
             font-family: "Kaiti", "STKaiti", "Songti TC", "Noto Serif TC", serif;
             overflow: hidden;
+            overflow-x: hidden;
             color: #f0e6d2;
-            cursor: none; /* 隱藏系統鼠標 */
+            cursor: none; /* 桌面手勢模式隱藏鼠標；觸控裝置見下方 media */
+        }
+
+        @media (pointer: coarse) {
+            body { cursor: auto; }
         }
 
         /* --- 手勢光標 --- */
@@ -51,7 +71,9 @@
 
         /* --- 左側：鏡子區域 --- */
         #stage-container {
-            flex: 3;
+            flex: 3 1 0;
+            min-width: 0;
+            min-height: 0;
             position: relative;
             margin: 10px;
             border: 4px solid #5d4037; 
@@ -74,9 +96,10 @@
 
         /* --- 右側：妝奩區域 --- */
         #menu-container {
-            flex: 1;
+            flex: 1 1 0;
             min-width: 250px;
             max-width: 320px;
+            min-height: 0;
             background: #3e2723;
             border-left: 2px solid #8d6e63;
             display: flex;
@@ -84,8 +107,12 @@
             align-items: center;
             padding: 20px;
             overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
             z-index: 20;
             user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 204, 128, 0.2);
         }
 
         h1 {
@@ -104,6 +131,8 @@
             padding-bottom: 10px;
             width: 100%;
             text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .grid-container {
@@ -125,6 +154,9 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 204, 128, 0.25);
         }
         
         .huadian-btn.hover {
@@ -142,7 +174,10 @@
         .huadian-btn img {
             width: 60%;
             height: 60%;
+            max-width: 72px;
+            max-height: 72px;
             object-fit: contain;
+            flex: 0 0 auto;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
             margin-bottom: 5px;
             pointer-events: none;
@@ -165,10 +200,41 @@
         
         .reset-btn.hover { background: #ffcc80; color: #3e2723; }
 
-        /* 覆蓋層 */
+        #btn-capture {
+            margin-top: 8px;
+            margin-bottom: 10px;
+            padding: 10px 30px;
+            background: transparent;
+            border: 1px solid #81c784;
+            color: #a5d6a7;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 50px;
+        }
+        #btn-capture.hover { background: #81c784; color: #1b5e20; }
+
+        #btn-capture-huadian {
+            margin-top: 0;
+            margin-bottom: 10px;
+            padding: 10px 24px;
+            background: transparent;
+            border: 1px solid #ffb74d;
+            color: #ffe0b2;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 50px;
+        }
+        #btn-capture-huadian.hover { background: #ffb74d; color: #4e342e; }
+
+        /* 覆蓋層（fixed 適配手機網址列／旋轉時視窗高度變化） */
         #overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
             background: rgba(0,0,0,0.9);
             display: flex;
             flex-direction: column;
@@ -176,7 +242,7 @@
             align-items: center;
             z-index: 50;
             text-align: center;
-            padding: 20px;
+            padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
         }
 
         #status-text {
@@ -200,23 +266,126 @@
             display: none;
         }
 
+        /* ---------- 手機／窄螢幕：直向為主，鏡頭區吃滿剩餘高度；底部選款橫向左右捲 ---------- */
         @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #stage-container { flex: 2; width: 100%; margin: 0; border: none; border-radius: 0; }
-            #menu-container { 
-                flex: 1; 
-                width: 100%; 
-                max-width: none;
-                border-left: none; 
-                border-top: 2px solid #8d6e63;
-                flex-direction: row; 
-                overflow-x: auto;
-                padding: 10px;
-                gap: 15px;
+            html, body {
+                height: 100%;
+                max-height: 100dvh;
             }
-            .grid-container { display: flex; width: auto; gap: 10px; padding-bottom: 0; }
-            .huadian-btn { width: 80px; height: 80px; flex-shrink: 0; }
-            h1, .subtitle, .reset-btn { display: none; }
+
+            body {
+                flex-direction: column;
+                min-height: 100dvh;
+                height: 100dvh;
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+
+            #stage-container {
+                flex: 1 1 0;
+                min-height: 0;
+                width: 100%;
+                margin: 0;
+                padding-top: env(safe-area-inset-top, 0px);
+                border: none;
+                border-bottom: 2px solid #5d4037;
+                border-radius: 0;
+            }
+
+            #menu-container {
+                flex: 0 1 auto;
+                width: 100%;
+                max-width: none;
+                min-width: 0;
+                max-height: min(46dvh, 420px);
+                border-left: none;
+                border-top: 2px solid #8d6e63;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-content: stretch;
+                align-items: stretch;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px));
+                gap: 8px;
+            }
+
+            .grid-container {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                width: 100%;
+                max-width: 100%;
+                gap: 10px;
+                padding: 4px 2px 8px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+
+            .huadian-btn {
+                width: 76px;
+                height: 76px;
+                min-width: 76px;
+                flex-shrink: 0;
+            }
+
+            .huadian-btn img {
+                width: 48px;
+                height: 48px;
+                max-width: 48px;
+                max-height: 48px;
+            }
+
+            h1 {
+                font-size: clamp(0.95rem, 4vw, 1.15rem);
+                margin: 2px 0 4px;
+                letter-spacing: 2px;
+            }
+
+            p.subtitle {
+                font-size: clamp(0.62rem, 2.8vw, 0.75rem);
+                margin-bottom: 6px;
+                padding-bottom: 8px;
+                line-height: 1.4;
+            }
+
+            .huadian-name { font-size: 0.68rem; }
+
+            .reset-btn,
+            #btn-capture,
+            #btn-capture-huadian {
+                width: 100%;
+                max-width: 100%;
+                min-height: 44px;
+                padding: 12px 14px;
+                font-size: 0.9rem;
+                margin-top: 0;
+                margin-bottom: 6px;
+                touch-action: manipulation;
+            }
+
+            #status-text {
+                font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+                max-width: 96%;
+            }
+
+            #start-btn {
+                min-height: 48px;
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+        }
+
+        /* 極窄螢幕（小屏手機）：略縮選款鈕，仍為直向＋底部橫滑 */
+        @media (max-width: 380px) {
+            .huadian-btn {
+                width: 70px;
+                height: 70px;
+                min-width: 70px;
+            }
         }
     </style>
 </head>
@@ -236,9 +405,11 @@
 
     <div id="menu-container">
         <h1>唐風妝奩</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴 &nbsp; ✋ 張開手掌卸妝</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可） &nbsp; 📱 手機可點按本欄花鈿與按鈕</p>
         <div class="grid-container" id="options-grid"></div>
-        <button class="reset-btn" id="btn-reset">卸妝 / 回歸現世</button>
+        <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或對鏡吐舌並微張嘴維持約半秒">卸妝 / 回歸現世</button>
+        <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
+        <button type="button" class="reset-btn" id="btn-capture">拍照（試妝＋虛擬背景）</button>
     </div>
 
     <!-- 背景音樂（選擇花鈿時切換） -->
@@ -283,6 +454,8 @@
         const startBtn = document.getElementById('start-btn');
         const overlay = document.getElementById('overlay');
         const resetBtn = document.getElementById('btn-reset');
+        const captureHuadianBtn = document.getElementById('btn-capture-huadian');
+        const captureBtn = document.getElementById('btn-capture');
         const bgMusic = document.getElementById('bg-music');
         /** 若 audio/list.json 有填 tracks，隨機僅從此列表抽選；否則用各花鈿預設 bgMusic 路徑合併去重後隨機 */
         let audioTrackList = [];
@@ -303,37 +476,189 @@
         let isPinching = false;
         let lastClickTime = 0;
         let lastHoveredElement = null;
-        let openPalmStartTime = 0;  // 張開手掌開始時間，用於手勢卸妝
-        const openPalmDuration = 400;  // 張開手掌滿 400ms 觸發卸妝
-        const openPalmThreshold = 0.14;  // 拇指與食指距離大於此視為張開
+        let cheekFistStartTime = 0;  // 吐舌卸妝姿勢維持時間
+        const cheekFistHoldDuration = 450;
+        let cheekUnmakeupArmed = true;  // 舌頭收回後才允許再次觸發卸妝
+        /** 由人臉網格更新：吐舌／大嘴張開，供垂直選款暫停用 */
+        let tongueUnmakeupPose = false;
+        /** 鏡像區內食指垂直位置對應花鈿序位（防抖） */
+        let posPickCandidate = -1;
+        let posPickCandidateSince = 0;
+        const posPickStableMs = 160;
 
         // 唐風背景圖（從 images 資料夾隨機選用）
         let tangBgList = [];
         let tangBgImages = [];  // 已載入的 Image 物件，與 tangBgList 對應
         let currentBgImageIndex = -1;  // 當前隨機到的背景圖索引
+        /** 已選花鈿但尚未成功抽到一張「已載入」的背景圖時為 true（手機慢網常見） */
+        let tangBgPickPending = false;
+        /** 滑鼠懸停在「花鈿・無背景」拍照鈕上時，與手勢懸停同效：預覽隱藏虛擬背景 */
+        let mouseOverNoBgCaptureBtn = false;
+
+        /**
+         * 手機／觸控：選花鈿時背景圖與「人臉序位對應」用（tryPickTangBg）。
+         * 畫面合成改為：優先 Selfie 蒙版 → 否則 Face Mesh 臉廓蒙版 → 最後才半透明備援。
+         */
+        function preferSimpleVirtualBackground() {
+            if (typeof window === 'undefined') return false;
+            if (window.innerWidth <= 768) return true;
+            if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) return true;
+            return false;
+        }
+
+        /** MediaPipe Face Mesh 臉型外輪廓（有序），用於無人像分割蒙版時的臨時去背 */
+        const FACE_MESH_OVAL_INDICES = [
+            10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377,
+            152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109
+        ];
+
+        let _ovalMaskCanvas = null;
+
+        function getOvalMaskCanvas(w, h) {
+            if (!_ovalMaskCanvas || _ovalMaskCanvas.width !== w || _ovalMaskCanvas.height !== h) {
+                _ovalMaskCanvas = document.createElement('canvas');
+                _ovalMaskCanvas.width = w;
+                _ovalMaskCanvas.height = h;
+            }
+            return _ovalMaskCanvas;
+        }
+
+        /** 多張臉時合併臉廓蒙版（與 segmentation 相同後續 source-in 流程） */
+        function renderFaceOvalMaskFromFaces(faces, w, h) {
+            if (!faces || faces.length === 0) return null;
+            const c = getOvalMaskCanvas(w, h);
+            const mctx = c.getContext('2d');
+            mctx.clearRect(0, 0, w, h);
+            mctx.fillStyle = '#ffffff';
+            let any = false;
+            const expand = 1.16;
+            for (let fi = 0; fi < faces.length; fi++) {
+                const faceLm = faces[fi];
+                if (!faceLm || !faceLm[168]) continue;
+                let ok = true;
+                for (let k = 0; k < FACE_MESH_OVAL_INDICES.length; k++) {
+                    if (!faceLm[FACE_MESH_OVAL_INDICES[k]]) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) continue;
+                any = true;
+                const cx = faceLm[168].x * w;
+                const cy = faceLm[168].y * h;
+                mctx.beginPath();
+                for (let i = 0; i < FACE_MESH_OVAL_INDICES.length; i++) {
+                    const p = faceLm[FACE_MESH_OVAL_INDICES[i]];
+                    const x = p.x * w;
+                    const y = p.y * h;
+                    const px = cx + (x - cx) * expand;
+                    const py = cy + (y - cy) * expand;
+                    if (i === 0) mctx.moveTo(px, py);
+                    else mctx.lineTo(px, py);
+                }
+                mctx.closePath();
+                mctx.fill();
+            }
+            return any ? c : null;
+        }
+
+        /** 以蒙版（分割圖或臉廓 canvas）把人像扣出並疊在場景圖上 */
+        function compositeMaskedPersonOverBackground(ctx, w, h, maskSource) {
+            ctx.save();
+            ctx.drawImage(maskSource, 0, 0, w, h);
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.drawImage(videoElement, 0, 0, w, h);
+            ctx.globalCompositeOperation = 'destination-over';
+            if (
+                currentBgImageIndex >= 0 &&
+                tangBgImages[currentBgImageIndex] &&
+                tangBgImages[currentBgImageIndex].complete &&
+                tangBgImages[currentBgImageIndex].naturalWidth
+            ) {
+                drawBackgroundImage(ctx, w, h, tangBgImages[currentBgImageIndex]);
+            } else {
+                drawBackground(ctx, w, h, huadianAssets[selectedIndex].bgType);
+            }
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.restore();
+        }
+
+        /** 尚未有臉／蒙版時：場景 + 半透明鏡頭（僅備援） */
+        function drawTranslucentVideoOverBackground(ctx, w, h) {
+            if (
+                currentBgImageIndex >= 0 &&
+                tangBgImages[currentBgImageIndex] &&
+                tangBgImages[currentBgImageIndex].complete &&
+                tangBgImages[currentBgImageIndex].naturalWidth
+            ) {
+                drawBackgroundImage(ctx, w, h, tangBgImages[currentBgImageIndex]);
+            } else {
+                drawBackground(ctx, w, h, huadianAssets[selectedIndex].bgType);
+            }
+            ctx.save();
+            ctx.globalAlpha = preferSimpleVirtualBackground() ? 0.78 : 0.86;
+            ctx.drawImage(videoElement, 0, 0, w, h);
+            ctx.restore();
+        }
+
+        function assetUrl(relativePath) {
+            try {
+                return new URL(relativePath, window.location.href).href;
+            } catch (e) {
+                return relativePath;
+            }
+        }
 
         // --- 3. 初始化資源 ---
-        function initImages() {
+        /** 預載花鈿 SVG（手機 Safari 常在未 complete 時 drawImage 失敗，臉上不顯示） */
+        function preloadHuadianImages() {
+            loadedImages.length = huadianAssets.length;
+            return Promise.all(
+                huadianAssets.map(
+                    (asset, index) =>
+                        new Promise((resolve) => {
+                            const img = new Image();
+                            const finish = () => {
+                                if (typeof img.decode === 'function') {
+                                    img.decode().then(resolve).catch(resolve);
+                                } else {
+                                    resolve();
+                                }
+                            };
+                            img.onload = finish;
+                            img.onerror = finish;
+                            img.src = asset.src;
+                            loadedImages[index] = img;
+                        })
+                )
+            );
+        }
+
+        function buildHuadianButtons() {
             const grid = document.getElementById('options-grid');
             huadianAssets.forEach((asset, index) => {
-                // 載入花鈿圖片（背景圖一律從 images 資料夾隨機選用，見 loadTangBackgrounds / selectHuadian）
-                const img = new Image();
-                img.src = asset.src;
-                loadedImages.push(img);
-
                 const btn = document.createElement('div');
                 btn.className = 'huadian-btn';
                 btn.id = `btn-${index}`;
                 btn.dataset.index = index;
-                btn.innerHTML = `<img src="${asset.src}"><div class="huadian-name">${asset.name}</div>`;
+                btn.setAttribute('role', 'button');
+                btn.tabIndex = 0;
+                btn.innerHTML =
+                    `<img src="${asset.src}" alt="" width="56" height="56" decoding="async"><div class="huadian-name">${asset.name}</div>`;
                 grid.appendChild(btn);
             });
-            resetBtn.dataset.action = "reset";
+            resetBtn.dataset.action = 'reset';
         }
 
-        function triggerClick(element) {
+        async function initHuadianUi() {
+            await preloadHuadianImages();
+            buildHuadianButtons();
+        }
+
+        function triggerClick(element, opts) {
             const now = Date.now();
-            if (now - lastClickTime < 1000) return;
+            const debounceMs = opts && opts.quickTap ? 350 : 1000;
+            if (now - lastClickTime < debounceMs) return;
             lastClickTime = now;
 
             element.classList.add('active');
@@ -344,8 +669,106 @@
                 selectHuadian(index);
             } else if (element.id === 'btn-reset') {
                 selectHuadian(-1);
+            } else if (element.id === 'btn-capture') {
+                capturePhoto();
+            } else if (element.id === 'btn-capture-huadian') {
+                capturePhotoHuadianOnly();
             }
         }
+
+        /** 手機／觸控：點按側欄花鈿格與按鈕（與手勢捏合並存） */
+        function setupMenuTapDelegation() {
+            const menu = document.getElementById('menu-container');
+            if (!menu || menu.dataset.tapBound === '1') return;
+            menu.dataset.tapBound = '1';
+            menu.addEventListener('click', (ev) => {
+                const huadianBtn = ev.target.closest('.huadian-btn');
+                if (huadianBtn) {
+                    triggerClick(huadianBtn, { quickTap: true });
+                    return;
+                }
+                const resetLike = ev.target.closest('.reset-btn');
+                if (resetLike) {
+                    triggerClick(resetLike, { quickTap: true });
+                }
+            });
+            menu.addEventListener('keydown', (ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                const t = ev.target;
+                if (!t || !t.classList.contains('huadian-btn')) return;
+                ev.preventDefault();
+                triggerClick(t, { quickTap: true });
+            });
+        }
+
+        function downloadPngFromCanvas(exportCanvas, filenamePrefix) {
+            try {
+                exportCanvas.toBlob((blob) => {
+                    if (!blob) {
+                        alert('無法產生圖片。若畫布含跨來源圖片，瀏覽器可能禁止匯出。');
+                        return;
+                    }
+                    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = filenamePrefix + '-' + ts + '.png';
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }, 'image/png');
+            } catch (err) {
+                alert('匯出失敗：' + (err.message || String(err)));
+            }
+        }
+
+        /** 完整鏡頭畫面 + 花鈿，不含虛擬背景／人像去背；與螢幕鏡像一致 */
+        function capturePhotoHuadianOnly() {
+            if (!isCameraRunning || !canvasElement.width || !canvasElement.height) return;
+            if (selectedIndex < 0) {
+                alert('請先選擇一種花鈿樣式。');
+                return;
+            }
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const tmp = document.createElement('canvas');
+            tmp.width = w;
+            tmp.height = h;
+            const tctx = tmp.getContext('2d');
+            tctx.drawImage(videoElement, 0, 0, w, h);
+            if (latestFaceLandmarks.length > 0) {
+                for (let i = 0; i < latestFaceLandmarks.length; i++) {
+                    drawHuadian(latestFaceLandmarks[i], selectedIndex, tctx, w, h);
+                }
+            } else {
+                alert('目前未偵測到臉部，儲存的相片將只有鏡頭畫面、沒有花鈿。');
+            }
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = w;
+            exportCanvas.height = h;
+            const ex = exportCanvas.getContext('2d');
+            ex.translate(w, 0);
+            ex.scale(-1, 1);
+            ex.drawImage(tmp, 0, 0);
+            downloadPngFromCanvas(exportCanvas, 'tang-huadian-nobg');
+        }
+
+        /** 將目前畫面上的合成畫面（人臉＋花鈿＋虛擬背景）匯出為 PNG；左右翻轉與螢幕鏡像一致 */
+        function capturePhoto() {
+            if (!isCameraRunning || !canvasElement.width || !canvasElement.height) return;
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = w;
+            exportCanvas.height = h;
+            const ex = exportCanvas.getContext('2d');
+            ex.translate(w, 0);
+            ex.scale(-1, 1);
+            ex.drawImage(canvasElement, 0, 0);
+            downloadPngFromCanvas(exportCanvas, 'tang-huadian-full');
+        }
+
+        captureHuadianBtn.addEventListener('mouseenter', () => { mouseOverNoBgCaptureBtn = true; });
+        captureHuadianBtn.addEventListener('mouseleave', () => { mouseOverNoBgCaptureBtn = false; });
+        // 拍照僅能透過手勢「捏合」觸發（與花鈿、卸妝相同），避免滑鼠／觸控一點就拍
 
         function selectHuadian(index) {
             selectedIndex = index;
@@ -353,17 +776,19 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            // 每次選取花鈿時，從 images 資料夾隨機選用一張背景圖
             if (index >= 0) {
-                const loadedIndices = tangBgImages
-                    .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
-                    .filter(i => i >= 0);
-                if (loadedIndices.length > 0) {
-                    currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
-                } else {
-                    currentBgImageIndex = -1;
+                const activeBtn = document.getElementById(`btn-${index}`);
+                if (activeBtn && activeBtn.scrollIntoView) {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
                 }
+            }
+            // 每次選取花鈿時隨機背景圖；若圖檔尚未下載完成，等 onload 後由 tryPickTangBg 補抽（避免手機端永遠只有漸層）
+            if (index >= 0) {
+                tangBgPickPending = true;
+                currentBgImageIndex = -1;
+                tryPickTangBg();
             } else {
+                tangBgPickPending = false;
                 currentBgImageIndex = -1; // 卸妝時清除
             }
             
@@ -440,19 +865,49 @@
                 .catch(() => { audioTrackList = []; });
         }
 
-        // 載入唐風背景圖清單並預載圖片（從 images 資料夾）
+        function getLoadedTangBgIndices() {
+            return tangBgImages
+                .map((img, i) => (img && img.complete && img.naturalWidth ? i : -1))
+                .filter((i) => i >= 0);
+        }
+
+        /** 在已選花鈿且有待處理時，從已載入完成的背景圖中選一張（手機依花鈿序位對應不同場景圖） */
+        function tryPickTangBg() {
+            if (selectedIndex < 0 || !tangBgPickPending) return;
+            const loadedIndices = getLoadedTangBgIndices();
+            if (loadedIndices.length === 0) return;
+            if (preferSimpleVirtualBackground()) {
+                const slot = selectedIndex % loadedIndices.length;
+                currentBgImageIndex = loadedIndices[slot];
+            } else {
+                currentBgImageIndex = loadedIndices[Math.floor(Math.random() * loadedIndices.length)];
+            }
+            tangBgPickPending = false;
+        }
+
+        // 載入唐風背景圖清單並預載圖片（從 images 資料夾；絕對 URL 避免部分手機／子路徑下相對路徑錯誤）
         function loadTangBackgrounds() {
-            fetch('images/list.json')
-                .then(r => r.json())
-                .then(data => {
+            fetch(assetUrl('images/list.json'))
+                .then((r) => r.json())
+                .then((data) => {
                     if (data.images && Array.isArray(data.images)) {
                         tangBgList = data.images;
                         tangBgImages.length = tangBgList.length;
                         tangBgList.forEach((entry, i) => {
                             const img = new Image();
-                            img.onload = () => { tangBgImages[i] = img; };
+                            const onReady = () => {
+                                tangBgImages[i] = img;
+                                tryPickTangBg();
+                            };
+                            img.onload = () => {
+                                if (typeof img.decode === 'function') {
+                                    img.decode().then(onReady).catch(onReady);
+                                } else {
+                                    onReady();
+                                }
+                            };
                             img.onerror = () => { /* 略過載入失敗的檔 */ };
-                            img.src = 'images/' + entry.file;
+                            img.src = assetUrl('images/' + entry.file);
                         });
                     }
                 })
@@ -468,29 +923,41 @@
                 faceMesh.onResults(results => {
                     if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                         latestFaceLandmarks = results.multiFaceLandmarks;
+                        updateTongueUnmakeupGesture(latestFaceLandmarks[0]);
                     } else {
                         latestFaceLandmarks = [];
+                        tongueUnmakeupPose = false;
+                        cheekFistStartTime = 0;
+                        cheekUnmakeupArmed = true;
                     }
                 });
                 await faceMesh.initialize();
 
                 // B. Hands (手勢)
                 hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-                hands.setOptions({maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
+                hands.setOptions({maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
                 hands.onResults(results => {
                     if(results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                         latestHandLandmarks = results.multiHandLandmarks[0];
-                        processHandGestures(results.multiHandLandmarks[0]); // 立即處理交互
+                        processHandGestures(results.multiHandLandmarks);
                     } else {
                         latestHandLandmarks = null;
                         cursor.style.display = 'none';
+                        posPickCandidate = -1;
+                        if (lastHoveredElement) {
+                            lastHoveredElement.classList.remove('hover');
+                            lastHoveredElement = null;
+                        }
                     }
                 });
                 await hands.initialize();
 
-                // C. Selfie Segmentation (背景替換)
+                // C. Selfie Segmentation（背景替換）
+                // modelSelection: 1 偏橫向場景；手機直向鏡頭用 0 較易穩定產生蒙版，否則 latestSegmentationMask 常空、背景圖永遠畫不出來
                 selfieSegmentation = new SelfieSegmentation({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`});
-                selfieSegmentation.setOptions({modelSelection: 1}); // 1 = landscape (faster?)
+                selfieSegmentation.setOptions({
+                    modelSelection: (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches) ? 0 : 1
+                });
                 selfieSegmentation.onResults(results => {
                     latestSegmentationMask = results.segmentationMask;
                 });
@@ -511,8 +978,13 @@
             statusText.innerText = "正在啟動鏡頭...";
             startBtn.style.display = 'none';
             try {
+                const narrow = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches;
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }
+                    video: {
+                        width: { ideal: narrow ? 720 : 1280 },
+                        height: { ideal: narrow ? 1280 : 720 },
+                        facingMode: 'user'
+                    }
                 });
                 videoElement.srcObject = stream;
                 videoElement.onloadedmetadata = () => {
@@ -540,11 +1012,11 @@
                     hands.send({image: videoElement})
                 ];
                 
-                // 只有在選擇了花鈿時，才開啟背景分割 (節省性能)
+                // 選了花鈿才做人像分割（手機亦送，臉部去背優先使用；失敗時改用人臉網格臉廓蒙版）
                 if (selectedIndex !== -1) {
                     sends.push(selfieSegmentation.send({image: videoElement}));
                 } else {
-                    latestSegmentationMask = null; // 卸妝時清除蒙版
+                    latestSegmentationMask = null;
                 }
 
                 await Promise.all(sends);
@@ -567,35 +1039,30 @@
             const w = canvasElement.width;
             const h = canvasElement.height;
 
+            if (tangBgPickPending && selectedIndex >= 0) tryPickTangBg();
+
             // 清空
             canvasCtx.clearRect(0, 0, w, h);
 
-            // A. 背景與人物繪製
-            if (selectedIndex !== -1 && latestSegmentationMask) {
-                // === 虛擬背景模式 ===
-                
-                // 1. 繪製蒙版
-                canvasCtx.save();
-                canvasCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
-                
-                // 2. 應用蒙版：保留蒙版不透明區域(人物)
-                canvasCtx.globalCompositeOperation = 'source-in';
-                canvasCtx.drawImage(videoElement, 0, 0, w, h);
+            const previewNoVirtualBg = selectedIndex >= 0 && (
+                mouseOverNoBgCaptureBtn ||
+                (lastHoveredElement && lastHoveredElement.id === 'btn-capture-huadian')
+            );
 
-                // 3. 繪製背景：每次選取花鈿時已隨機選好一張，有圖則用圖，否則用漸層
-                canvasCtx.globalCompositeOperation = 'destination-over';
-                if (currentBgImageIndex >= 0 && tangBgImages[currentBgImageIndex] && tangBgImages[currentBgImageIndex].complete && tangBgImages[currentBgImageIndex].naturalWidth) {
-                    drawBackgroundImage(canvasCtx, w, h, tangBgImages[currentBgImageIndex]);
+            // A. 背景與人物繪製：① Selfie 蒙版 ② 臉廓蒙版 ③ 半透明備援（僅尚未偵測到臉時）
+            if (selectedIndex !== -1 && !previewNoVirtualBg && latestSegmentationMask) {
+                compositeMaskedPersonOverBackground(canvasCtx, w, h, latestSegmentationMask);
+            } else if (selectedIndex !== -1 && !previewNoVirtualBg && latestFaceLandmarks.length > 0) {
+                const ovalMask = renderFaceOvalMaskFromFaces(latestFaceLandmarks, w, h);
+                if (ovalMask) {
+                    compositeMaskedPersonOverBackground(canvasCtx, w, h, ovalMask);
                 } else {
-                    drawBackground(canvasCtx, w, h, huadianAssets[selectedIndex].bgType);
+                    drawTranslucentVideoOverBackground(canvasCtx, w, h);
                 }
-
-                // 4. 恢復正常繪製模式 (為了之後畫花鈿)
-                canvasCtx.globalCompositeOperation = 'source-over';
-                canvasCtx.restore();
-
+            } else if (selectedIndex !== -1 && !previewNoVirtualBg) {
+                drawTranslucentVideoOverBackground(canvasCtx, w, h);
             } else {
-                // === 普通模式 (卸妝狀態) ===
+                // === 完整鏡頭：卸妝，或懸停「花鈿・無背景」預覽 ===
                 canvasCtx.drawImage(videoElement, 0, 0, w, h);
             }
 
@@ -767,46 +1234,152 @@
             }
         }
 
-        function drawHuadian(landmarks, index) {
-            const w = canvasElement.width;
-            const h = canvasElement.height;
+        /** ctx / cw / ch 省略時使用主畫布（供拍照到暫存 canvas 時傳入） */
+        function drawHuadian(landmarks, index, ctx, cw, ch) {
+            ctx = ctx || canvasCtx;
+            cw = cw == null ? canvasElement.width : cw;
+            ch = ch == null ? canvasElement.height : ch;
             const config = huadianAssets[index];
             const img = loadedImages[index];
             
-            // 安全檢查：確保圖片已加載且有效
-            if (!img || !img.complete || img.naturalWidth === 0) return;
+            if (!img || !img.complete) return;
+            const iw = img.naturalWidth;
+            const ih = img.naturalHeight;
 
             const pt151 = landmarks[151];
-            const cx = pt151.x * w;
-            const cy = pt151.y * h + config.yOffset;
+            const cx = pt151.x * cw;
+            const cy = pt151.y * ch + config.yOffset;
 
             const ptLeft = landmarks[33];
             const ptRight = landmarks[263];
-            const dx = (ptRight.x - ptLeft.x) * w; 
-            const dy = (ptRight.y - ptLeft.y) * h;
+            const dx = (ptRight.x - ptLeft.x) * cw; 
+            const dy = (ptRight.y - ptLeft.y) * ch;
             const angle = Math.atan2(dy, dx);
 
             const tL = landmarks[127];
             const tR = landmarks[356];
-            const dist = Math.sqrt(Math.pow((tL.x - tR.x)*w, 2) + Math.pow((tL.y - tR.y)*h, 2));
+            const dist = Math.sqrt(Math.pow((tL.x - tR.x) * cw, 2) + Math.pow((tL.y - tR.y) * ch, 2));
             
-            // --- 尺寸優化 ---
-            // 之前的係數是 0.4，現在縮小 30% -> 0.4 * 0.7 = 0.28
             const size = dist * 0.28 * config.scale;
 
-            canvasCtx.save();
-            canvasCtx.translate(cx, cy);
-            canvasCtx.rotate(angle);
-            canvasCtx.drawImage(img, -size/2, -size/2, size, size);
-            canvasCtx.restore();
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            if (iw > 0 && ih > 0) {
+                ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            } else {
+                /* WebKit 部分情況下 SVG 的 naturalWidth 仍為 0，改用 viewBox 對應的 100×100 來源矩形 */
+                ctx.drawImage(img, 0, 0, 100, 100, -size / 2, -size / 2, size, size);
+            }
+            ctx.restore();
         }
 
         // --- 8. 手勢處理 (獨立邏輯) ---
-        function processHandGestures(landmarks) {
+        /** 垂直選款時：略呈握拳則不用食指 y（防誤觸） */
+        function isHandFistRelaxed(landmarks) {
+            const wrist = landmarks[0];
+            const middleMcp = landmarks[9];
+            const handLen = Math.hypot(middleMcp.x - wrist.x, middleMcp.y - wrist.y) + 0.001;
+            const tips = [8, 12, 16, 20];
+            let dSum = 0;
+            for (const i of tips) {
+                dSum += Math.hypot(landmarks[i].x - wrist.x, landmarks[i].y - wrist.y);
+            }
+            const avgTipToWrist = dSum / 4;
+            if (avgTipToWrist / handLen > 0.98) return false;
+            const thumbTip = landmarks[4];
+            const thumbToWrist = Math.hypot(thumbTip.x - wrist.x, thumbTip.y - wrist.y);
+            return thumbToWrist / handLen < 1.12;
+        }
+
+        function isHandPinchingLm(lm) {
+            return Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.05;
+        }
+
+        function lmDist2(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        /**
+         * 吐舌卸妝：用上／下唇內側點（13、14）垂直張開度相對臉寬判斷「明顯張嘴」。
+         * 需略大於一般說話開口，以降低誤觸；閉嘴或微張為 false。
+         */
+        function isTongueOutForUnmakeup(faceLm) {
+            const upper = faceLm[13];
+            const lower = faceLm[14];
+            if (!upper || !lower) return false;
+            const faceW = lmDist2(faceLm[234], faceLm[454]) + 0.001;
+            const vertOpen = lower.y - upper.y;
+            const ratio = vertOpen / faceW;
+            // 略放寬區間，避免實機上「怎麼做都卸不了妝」
+            if (ratio < 0.085 || ratio > 0.5) return false;
+            const mouthW = lmDist2(faceLm[61], faceLm[291]) + 0.001;
+            const wRatio = mouthW / faceW;
+            if (wRatio < 0.19 || wRatio > 0.65) return false;
+            return true;
+        }
+
+        function updateTongueUnmakeupGesture(faceLm) {
+            tongueUnmakeupPose = isTongueOutForUnmakeup(faceLm);
+            if (!tongueUnmakeupPose) {
+                cheekFistStartTime = 0;
+                cheekUnmakeupArmed = true;
+                return;
+            }
+            if (selectedIndex < 0) {
+                cheekFistStartTime = 0;
+                return;
+            }
+            if (!cheekUnmakeupArmed) return;
+            if (cheekFistStartTime === 0) cheekFistStartTime = Date.now();
+            if (Date.now() - cheekFistStartTime >= cheekFistHoldDuration) {
+                selectHuadian(-1);
+                posPickCandidate = -1;
+                cheekFistStartTime = 0;
+                cheekUnmakeupArmed = false;
+                lastClickTime = Date.now();
+            }
+        }
+
+        function isCursorOverStage(cursorX, cursorY) {
+            const stageEl = document.getElementById('stage-container');
+            if (!stageEl) return false;
+            const r = stageEl.getBoundingClientRect();
+            return cursorX >= r.left && cursorX <= r.right && cursorY >= r.top && cursorY <= r.bottom;
+        }
+
+        /**
+         * 食指指尖 normalized y：畫面上方 → 第一款，愈靠下 → 序位愈後。
+         * 需在鏡像區內、且非捏合／非握拳；同一序位穩定 posPickStableMs 後才 selectHuadian。
+         */
+        function tryVerticalPositionPickHuadian(landmarks) {
+            const n = huadianAssets.length;
+            if (n <= 0) return;
+            const ny = landmarks[8].y;
+            const topPad = 0.07;
+            const botPad = 0.07;
+            const usable = 1 - topPad - botPad;
+            const t = usable > 0 ? Math.min(1, Math.max(0, (ny - topPad) / usable)) : 0;
+            let idx = Math.min(n - 1, Math.floor(n * t));
+            if (idx < 0) idx = 0;
+            const now = Date.now();
+            if (idx !== posPickCandidate) {
+                posPickCandidate = idx;
+                posPickCandidateSince = now;
+                return;
+            }
+            if (now - posPickCandidateSince >= posPickStableMs && selectedIndex !== idx) {
+                selectHuadian(idx);
+            }
+        }
+
+        function processHandGestures(multiHands) {
+            if (!multiHands || multiHands.length === 0) return;
+            const landmarks = multiHands[0];
             const indexTip = landmarks[8];
             const thumbTip = landmarks[4];
 
-            // 鏡像座標轉換
+            // 鏡像座標轉換（仍以第一隻偵測到的手為游標）
             const cursorX = (1 - indexTip.x) * window.innerWidth;
             const cursorY = indexTip.y * window.innerHeight;
 
@@ -816,18 +1389,14 @@
 
             const pinchDist = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
             const pinchThreshold = 0.05;
+            const isPinchingNow = pinchDist < pinchThreshold;
 
-            // 張開手掌手勢：拇指與食指距離大，維持一段時間即觸發卸妝（不需對準按鈕）
-            const isOpenPalm = pinchDist > openPalmThreshold;
-            if (isOpenPalm && selectedIndex >= 0) {
-                if (openPalmStartTime === 0) openPalmStartTime = Date.now();
-                if (Date.now() - openPalmStartTime >= openPalmDuration) {
-                    selectHuadian(-1);
-                    openPalmStartTime = 0;
-                    lastClickTime = Date.now();
-                }
+            // 卸妝改由人臉網格偵測吐舌（updateTongueUnmakeupGesture）；此處僅讀 tongueUnmakeupPose 暫停垂直選款
+            // 垂直選款：捏合、吐舌卸妝姿勢、或單手呈握拳時不用食指 y
+            if (!isPinchingNow && !tongueUnmakeupPose && !isHandFistRelaxed(landmarks) && isCursorOverStage(cursorX, cursorY)) {
+                tryVerticalPositionPickHuadian(landmarks);
             } else {
-                openPalmStartTime = 0;
+                posPickCandidate = -1;
             }
 
             // 捏合：點擊光標下的按鈕（花鈿或卸妝）
@@ -846,6 +1415,8 @@
             if (targetBtn) {
                 targetBtn.classList.add('hover');
                 lastHoveredElement = targetBtn;
+            } else {
+                lastHoveredElement = null;
             }
 
             if (pinchDist < pinchThreshold) {
@@ -860,11 +1431,15 @@
             }
         }
 
-        // 啟動
-        initImages();
-        loadTangBackgrounds();
-        loadAudioTracks();
-        initModels();
+        async function startApp() {
+            await initHuadianUi();
+            setupMenuTapDelegation();
+            loadTangBackgrounds();
+            loadAudioTracks();
+            initModels();
+        }
+
+        startApp();
 
     </script>
 </body>

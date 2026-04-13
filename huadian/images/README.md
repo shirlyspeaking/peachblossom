@@ -10,7 +10,7 @@
 | 02-peony.jpg | 牡丹花 |
 | 03-tavern.jpg | 唐朝酒肆 |
 | 04-changan.jpg | 長安城 |
-| 05-daming.jpg | 大明宮 |
+| 05-chunjianghua.jpg | 春江花月 |
 | 06-dunhuang.jpg | 敦煌石窟 |
 | 07-jiangnan.jpg | 江南煙雨 |
 | 08-garden.jpg | 御花園 |
@@ -26,3 +26,9 @@
 | 18-street.jpg | 長安街市 |
 
 將對應的圖片放入此資料夾並使用上列檔名，頁面會從中**隨機**選一張作為虛擬背景。若某檔名不存在，該格會略過，不影響其他張的隨機出現。
+
+---
+
+## 花鈿圖樣
+
+目前八款花鈿圖示已**內嵌於** [`huadian.html`](../huadian.html)（SVG data URI），無需自備合圖。若資料夾內仍有 `origin huadian.png`、`huadian-sprites.json`，僅供你自行改版時參考，頁面預設不讀取。

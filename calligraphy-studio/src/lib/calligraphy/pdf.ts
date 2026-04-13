@@ -1,8 +1,34 @@
 import path from "node:path";
 import { access, readFile } from "node:fs/promises";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument, rgb, type PDFPage, type RGB } from "pdf-lib";
 import { FONT_OPTIONS, type FontOption, type LayoutResult } from "@/lib/calligraphy/types";
+
+function drawDashedLine(
+  page: PDFPage,
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  opts: { dash: number; gap: number; thickness: number; color: RGB }
+) {
+  const { dash, gap, thickness, color } = opts;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const len = Math.hypot(dx, dy);
+  if (len < 0.001) return;
+  const ux = dx / len;
+  const uy = dy / len;
+  let pos = 0;
+  while (pos < len) {
+    const dashEnd = Math.min(pos + dash, len);
+    page.drawLine({
+      start: { x: start.x + ux * pos, y: start.y + uy * pos },
+      end: { x: start.x + ux * dashEnd, y: start.y + uy * dashEnd },
+      thickness,
+      color,
+    });
+    pos = dashEnd + gap;
+  }
+}
 
 export type FontAvailability = { availableFontIds: string[]; missingFontIds: string[] };
 export type PdfBuildResult = { buffer: Buffer; usedFontId: string; fallbackFrom?: string };
@@ -51,24 +77,66 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
   const cellW = gridW / layout.config.cols;
   const cellH = gridH / layout.config.rows;
 
+  const outerStroke = 1;
+  const innerStroke = 0.6;
+  const lineGray = rgb(0.78, 0.78, 0.78);
+  const textColor =
+    layout.config.copybookVariant === "lightTracing" ? rgb(0.976, 0.659, 0.831) : rgb(0.08, 0.08, 0.08);
+
   for (const current of layout.pages) {
     const page = doc.addPage([width, height]);
-    for (let c = 0; c <= layout.config.cols; c += 1) {
-      const x = margin + c * cellW;
-      page.drawLine({ start: { x, y: margin }, end: { x, y: height - margin }, thickness: 0.7, color: rgb(0.86, 0.86, 0.86) });
+    const gridTop = height - margin;
+    const gridBottom = margin;
+
+    // 外框：四邊同粗，左右對稱（不依欄數在邊緣重疊線條）
+    const left = margin;
+    const right = width - margin;
+    page.drawLine({ start: { x: left, y: gridBottom }, end: { x: right, y: gridBottom }, thickness: outerStroke, color: lineGray });
+    page.drawLine({ start: { x: left, y: gridTop }, end: { x: right, y: gridTop }, thickness: outerStroke, color: lineGray });
+    page.drawLine({ start: { x: left, y: gridBottom }, end: { x: left, y: gridTop }, thickness: outerStroke, color: lineGray });
+    page.drawLine({ start: { x: right, y: gridBottom }, end: { x: right, y: gridTop }, thickness: outerStroke, color: lineGray });
+
+    // 內部直線（不含左右外緣）；橫線格僅保留橫向分隔
+    if (layout.config.gridType !== "lines") {
+      for (let c = 1; c < layout.config.cols; c += 1) {
+        const x = margin + c * cellW;
+        page.drawLine({
+          start: { x, y: gridBottom },
+          end: { x, y: gridTop },
+          thickness: innerStroke,
+          color: lineGray,
+        });
+      }
     }
-    for (let r = 0; r <= layout.config.rows; r += 1) {
+    // 內部橫線（不含上下外緣）
+    for (let r = 1; r < layout.config.rows; r += 1) {
       const y = margin + r * cellH;
-      page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.7, color: rgb(0.86, 0.86, 0.86) });
+      page.drawLine({
+        start: { x: margin, y },
+        end: { x: width - margin, y },
+        thickness: innerStroke,
+        color: lineGray,
+      });
     }
 
-    if (layout.config.showGuideLines && layout.config.gridType !== "lines") {
+    const guideColor = rgb(0.9, 0.9, 0.9);
+    const dashGuide = { dash: 2.2, gap: 1.8, thickness: 0.35, color: guideColor };
+    const gt = layout.config.gridType;
+    if (layout.config.showGuideLines && gt !== "lines") {
       for (let r = 0; r < layout.config.rows; r += 1) {
         for (let c = 0; c < layout.config.cols; c += 1) {
           const x = margin + c * cellW;
           const y = margin + r * cellH;
-          page.drawLine({ start: { x, y: y + cellH / 2 }, end: { x: x + cellW, y: y + cellH / 2 }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
-          page.drawLine({ start: { x: x + cellW / 2, y }, end: { x: x + cellW / 2, y: y + cellH }, thickness: 0.35, color: rgb(0.9, 0.9, 0.9) });
+          const midY = y + cellH / 2;
+          const midX = x + cellW / 2;
+          if (gt === "tian" || gt === "mizi" || gt === "jiugong") {
+            drawDashedLine(page, { x, y: midY }, { x: x + cellW, y: midY }, dashGuide);
+            drawDashedLine(page, { x: midX, y }, { x: midX, y: y + cellH }, dashGuide);
+          }
+          if (gt === "mizi") {
+            drawDashedLine(page, { x, y }, { x: x + cellW, y: y + cellH }, dashGuide);
+            drawDashedLine(page, { x: x + cellW, y }, { x, y: y + cellH }, dashGuide);
+          }
         }
       }
     }
@@ -87,7 +155,7 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
         y: yBottom + (cellH - size) / 2,
         size,
         font: cjkFont,
-        color: rgb(0.08, 0.08, 0.08),
+        color: textColor,
       });
     }
   }
