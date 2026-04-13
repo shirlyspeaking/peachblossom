@@ -215,9 +215,13 @@ button:hover {
     --line-soft: rgba(199, 79, 123, 0.22);
 }
 
-/* 淺粉色描紅：格線再柔一點，襯淺粉筆畫 */
+/* 淺粉色描紅（實心）：格線略柔，襯淺粉字 */
 .preview.preview--light-pink-hong {
     --line-soft: rgba(199, 79, 123, 0.18);
+}
+
+.cell-inner--light-pink-hong {
+    color: #f0a8c8;
 }
 
 .copy-style-hint {

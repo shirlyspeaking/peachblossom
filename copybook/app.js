@@ -60,24 +60,6 @@
         );
     }
 
-    /** 淺粉色描紅：同鏤空描紅邏輯，筆畫為柔和淺粉、便於覆寫。 */
-    function buildLightPinkHongSvgChar(ch, fontFamily, fs) {
-        var fontSizeU = Math.min(78, Math.max(44, Math.round(50 + (fs - 24) * 0.72)));
-        var strokeWU = Math.max(0.55, Math.min(2.05, fontSizeU / 42));
-        var ff = escapeSvgAttr(fontFamily);
-        var body = escapeSvgText(ch);
-        var attrs =
-            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
-            'text-anchor="middle" dominant-baseline="middle" ' +
-            'fill="none" stroke="rgb(232, 168, 196)" stroke-opacity="0.9" ' +
-            'stroke-width="' + strokeWU.toFixed(2) + '" stroke-linejoin="round" stroke-linecap="round"';
-        return (
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
-            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
-            '<text ' + attrs + '>' + body + '</text></svg>'
-        );
-    }
-
     function getFontFamily() {
         var preset = fontPreset.value.trim();
         var custom = customFont.value.trim();
@@ -189,7 +171,7 @@
         preview.className =
             'preview preview--' +
             psize +
-            (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
+            (hongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '');
 
         if (copyStyleHint) {
@@ -198,7 +180,7 @@
                     '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。';
             } else if (lightPinkHongMode) {
                 copyStyleHint.textContent =
-                    '淺粉色描紅：淺粉紅字框、中間鏤空，格線可透出；筆畫較標準描紅柔和。';
+                    '淺粉色描紅：實心淺粉紅字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
             } else {
                 copyStyleHint.textContent = '標準墨色：實心字，適合對照。';
             }
@@ -252,8 +234,8 @@
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.innerHTML = buildHongSvgChar(ch, font, fs);
                     } else if (lightPinkHongMode) {
-                        inner.className = 'cell-inner cell-inner--hong';
-                        inner.innerHTML = buildLightPinkHongSvgChar(ch, font, fs);
+                        inner.className = 'cell-inner cell-inner--light-pink-hong';
+                        inner.textContent = ch;
                     } else {
                         inner.textContent = ch;
                     }
