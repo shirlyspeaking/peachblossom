@@ -236,6 +236,8 @@
                     } else if (lightPinkHongMode) {
                         inner.className = 'cell-inner cell-inner--light-pink-hong';
                         inner.textContent = ch;
+                        /* 與 .preview--light-pink-hong 同色；important 避免舊快取樣式搶字色 */
+                        inner.style.setProperty('color', '#e07a9e', 'important');
                     } else {
                         inner.textContent = ch;
                     }

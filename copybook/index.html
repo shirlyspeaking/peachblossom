@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 避免舊版 HTML／靜態資源被強快取，導致看不到字帖頁更新 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=11">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -13,7 +16,7 @@
     <header class="site-header">
         <a href="../index.html" class="back-link">← 返回桃花源</a>
         <h1>書法字帖生成平台</h1>
-        <p>輸入文字即時排版；可切換字型、田字／米字／空白格，並可選<strong>描紅（紅框鏤空）</strong>範字；支援列印與 PDF／PNG／TXT 下載。</p>
+        <p>輸入文字即時排版；可切換字型、田字／米字／空白格；字帖版本含<strong>標準墨色</strong>、<strong>描紅（紅框鏤空）</strong>、<strong>淺粉色描紅（實心）</strong>；支援列印與 PDF／PNG／TXT 下載。</p>
     </header>
 
     <main class="layout">
@@ -110,6 +113,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>

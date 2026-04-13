@@ -220,8 +220,9 @@ button:hover {
     --line-soft: rgba(199, 79, 123, 0.18);
 }
 
-.cell-inner--light-pink-hong {
-    color: #f0a8c8;
+/* 淺粉實心：提高選擇器優先權，避免被 .cell 字色蓋掉 */
+.preview.preview--light-pink-hong .cell-inner--light-pink-hong {
+    color: #e07a9e;
 }
 
 .copy-style-hint {
