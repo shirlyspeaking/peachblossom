@@ -215,14 +215,9 @@ button:hover {
     --line-soft: rgba(199, 79, 123, 0.22);
 }
 
-/* 淺色描紅：格線略柔，與粉紅範字協調 */
-.preview.preview--light-tracing {
-    --line-soft: rgba(199, 79, 123, 0.2);
-}
-
-/* 淺粉紅填色（與 calligraphy-studio 預覽 pink-300 一致） */
-.cell-inner--light-tracing {
-    color: #f9a8d4;
+/* 淺粉色描紅：格線再柔一點，襯淺粉筆畫 */
+.preview.preview--light-pink-hong {
+    --line-soft: rgba(199, 79, 123, 0.18);
 }
 
 .copy-style-hint {
