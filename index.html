@@ -40,73 +40,6 @@
             overflow-x: hidden;
         }
 
-        /* === 背景裝飾 - 落英繽紛 === */
-        .bg-decoration {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .petal {
-            position: absolute;
-            opacity: 0.8;
-            animation: fall linear infinite;
-            filter: drop-shadow(0 2px 3px rgba(142, 33, 87, 0.15));
-        }
-
-        .petal.type-1 { animation-name: fall1; }
-        .petal.type-2 { animation-name: fall2; }
-        .petal.type-3 { animation-name: fall3; }
-
-        @keyframes fall1 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.9; }
-            50% { transform: translateY(50vh) translateX(30px) rotate(180deg) scale(0.9); }
-            90% { opacity: 0.7; }
-            100% {
-                transform: translateY(105vh) translateX(-20px) rotate(360deg) scale(0.8);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fall2 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.85; }
-            30% { transform: translateY(30vh) translateX(-40px) rotate(120deg) scale(0.95); }
-            60% { transform: translateY(60vh) translateX(20px) rotate(240deg) scale(0.85); }
-            90% { opacity: 0.6; }
-            100% {
-                transform: translateY(105vh) translateX(40px) rotate(400deg) scale(0.75);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fall3 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.8; }
-            40% { transform: translateY(40vh) translateX(50px) rotate(200deg) scale(0.9); }
-            70% { transform: translateY(70vh) translateX(-30px) rotate(300deg) scale(0.8); }
-            90% { opacity: 0.5; }
-            100% {
-                transform: translateY(105vh) translateX(10px) rotate(500deg) scale(0.7);
-                opacity: 0;
-            }
-        }
-
         /* === 頭部區域 === */
         header {
             position: relative;
@@ -542,30 +475,9 @@
             }
         }
 
-        /* === 裝飾性花朵 === */
-        .deco-flower {
-            position: fixed;
-            font-size: 3rem;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
-        }
-        .deco-flower.f1 { top: 10%; left: 5%; transform: rotate(-15deg); }
-        .deco-flower.f2 { top: 30%; right: 8%; transform: rotate(20deg); }
-        .deco-flower.f3 { bottom: 20%; left: 10%; transform: rotate(-25deg); }
-        .deco-flower.f4 { bottom: 10%; right: 5%; transform: rotate(10deg); }
     </style>
 </head>
 <body>
-    <!-- 裝飾性大花朵 -->
-    <div class="deco-flower f1">🌺</div>
-    <div class="deco-flower f2">🌸</div>
-    <div class="deco-flower f3">💮</div>
-    <div class="deco-flower f4">🏵️</div>
-
-    <!-- 背景花瓣裝飾 - 落英繽紛 -->
-    <div class="bg-decoration" id="bgDecoration"></div>
-
     <!-- 頭部 -->
     <header>
         <div class="logo">🌸</div>
@@ -683,34 +595,6 @@
     </footer>
 
     <script>
-        // 創建飄落的花瓣效果 - 落英繽紛
-        function createPetals() {
-            const container = document.getElementById('bgDecoration');
-            const petalCount = 40; // 更多花瓣
-            
-            // 各種花瓣樣式
-            const petals = ['🌸', '🏵️', '💮', '🌺', '✿', '❀', '❁'];
-            const sizes = [14, 16, 18, 20, 22, 24, 28];
-            
-            for (let i = 0; i < petalCount; i++) {
-                const petal = document.createElement('div');
-                petal.className = 'petal type-' + (1 + Math.floor(Math.random() * 3));
-                petal.innerHTML = petals[Math.floor(Math.random() * petals.length)];
-                petal.style.left = Math.random() * 100 + '%';
-                petal.style.animationDuration = (10 + Math.random() * 15) + 's';
-                petal.style.animationDelay = Math.random() * 15 + 's';
-                petal.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)] + 'px';
-                
-                // 隨機透明度
-                petal.style.opacity = 0.5 + Math.random() * 0.4;
-                
-                container.appendChild(petal);
-            }
-        }
-
-        // 頁面載入時創建花瓣
-        createPetals();
-
         // 應用卡片的點擊效果
         document.querySelectorAll('.app-card:not(.coming-soon)').forEach(card => {
             card.addEventListener('mouseenter', () => {
