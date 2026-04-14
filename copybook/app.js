@@ -60,6 +60,25 @@
         );
     }
 
+    /**
+     * 淺粉色描紅：SVG 實心字（fill + stroke=none），與紅色鏤空描紅區隔；
+     * 列印／html2canvas 與紅色描紅同樣穩定。
+     */
+    function buildLightPinkSolidSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(78, Math.max(44, Math.round(50 + (fs - 24) * 0.72)));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        var attrs =
+            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'text-anchor="middle" dominant-baseline="middle" ' +
+            'fill="rgb(224, 122, 158)" fill-opacity="0.98" stroke="none"';
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<text ' + attrs + '>' + body + '</text></svg>'
+        );
+    }
+
     function getFontFamily() {
         var preset = fontPreset.value.trim();
         var custom = customFont.value.trim();
@@ -69,17 +88,12 @@
         return preset;
     }
 
-    /** 保留換行；行內連續空白壓成單一空格；移除行尾空白 */
+    /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
     function normalizeText(raw) {
         return String(raw)
             .replace(/\r\n/g, '\n')
             .replace(/\r/g, '\n')
-            .replace(/\t/g, ' ')
-            .split('\n')
-            .map(function (line) {
-                return line.replace(/ +/g, ' ').replace(/\s+$/g, '');
-            })
-            .join('\n');
+            .replace(/\t/g, ' ');
     }
 
     /** 將文字切成排版用「行」，每行最多 cpl 字；空行保留為一列空白行 */
@@ -167,7 +181,7 @@
         var hongMode =
             copyStyle &&
             (copyStyle.value === 'hong' || copyStyle.value === 'trace');
-        var lightTracingMode = copyStyle && copyStyle.value === 'lightTracing';
+        var lightPinkHongMode = copyStyle && copyStyle.value === 'lightPinkHong';
 
         var rows = buildRows(text, cpl);
         var pages = chunkPages(rows, lpp);
@@ -176,16 +190,16 @@
         preview.className =
             'preview preview--' +
             psize +
-            (hongMode ? ' preview--hong' : '') +
-            (lightTracingMode ? ' preview--light-tracing' : '');
+            (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
+            (lightPinkHongMode ? ' preview--light-pink-hong' : '');
 
         if (copyStyleHint) {
             if (hongMode) {
                 copyStyleHint.textContent =
                     '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。';
-            } else if (lightTracingMode) {
+            } else if (lightPinkHongMode) {
                 copyStyleHint.textContent =
-                    '淺色描紅：淺粉紅實心字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
+                    '淺粉色描紅：實心淺粉紅字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
             } else {
                 copyStyleHint.textContent = '標準墨色：實心字，適合對照。';
             }
@@ -238,9 +252,9 @@
                     } else if (hongMode) {
                         inner.className = 'cell-inner cell-inner--hong';
                         inner.innerHTML = buildHongSvgChar(ch, font, fs);
-                    } else if (lightTracingMode) {
-                        inner.className = 'cell-inner cell-inner--light-tracing';
-                        inner.textContent = ch;
+                    } else if (lightPinkHongMode) {
+                        inner.className = 'cell-inner cell-inner--hong';
+                        inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
                     } else {
                         inner.textContent = ch;
                     }

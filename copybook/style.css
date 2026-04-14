@@ -31,7 +31,7 @@
     font-display: swap;
 }
 
-/* 阿里媽媽刀隸體 — 官方免費商用隸意字體，字檔隨專案部署以避免外部熱鏈失效 */
+/* 阿里媽媽刀隸體 — 隸意風格；阿里字體平台免費可商用授權（非 SIL OFL），字檔隨專案部署以避免外部熱鏈失效 */
 @font-face {
     font-family: "AlimamaDaoLiTi";
     src:
@@ -40,6 +40,18 @@
         url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.woff2") format("woff2"),
         url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.woff") format("woff"),
         url("fonts/AlimamaDaoLiTi/AlimamaDaoLiTi.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 全字庫說文解字（ebas927.ttf）— 臺灣全字庫 CNS11643，政府資料開放授權條款第 1 版；字檔隨專案部署。官方：https://www.cns11643.gov.tw/ */
+@font-face {
+    font-family: "全字庫說文解字";
+    src:
+        local("全字庫說文解字"),
+        local("EBAS"),
+        url("fonts/ebas927.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -215,14 +227,9 @@ button:hover {
     --line-soft: rgba(199, 79, 123, 0.22);
 }
 
-/* 淺色描紅：格線略柔，與粉紅範字協調 */
-.preview.preview--light-tracing {
-    --line-soft: rgba(199, 79, 123, 0.2);
-}
-
-/* 淺粉紅填色（與 calligraphy-studio 預覽 pink-300 一致） */
-.cell-inner--light-tracing {
-    color: #f9a8d4;
+/* 淺粉色描紅（實心）：格線略柔，襯淺粉字 */
+.preview.preview--light-pink-hong {
+    --line-soft: rgba(199, 79, 123, 0.18);
 }
 
 .copy-style-hint {
@@ -269,10 +276,12 @@ button:hover {
     display: grid;
     gap: 0;
     border: 1px solid var(--line-soft);
+    /* 右側邊框改由最後一格繪製，避免寬內容溢出時外框看起來消失 */
+    border-right: none;
     width: max-content;
     max-width: none;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .cell {
@@ -288,7 +297,8 @@ button:hover {
 }
 
 .cell.col-last {
-    border-right: none;
+    /* 保留右側邊框 */
+    border-right: 1px solid var(--line-soft);
 }
 
 .cell.row-last {
