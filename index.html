@@ -475,11 +475,11 @@
             }
         }
 
-        /* WebGL 花形游標：全螢幕回授層（screen 混合以透出底層漸層） */
+        /* WebGL 游標：透明疊加，不覆蓋頁面粉色底；置於內容之上、不攔截點擊 */
         .flower-cursor-layer {
             position: fixed;
             inset: 0;
-            z-index: 0;
+            z-index: 50;
             pointer-events: none;
         }
 
@@ -487,7 +487,6 @@
             width: 100%;
             height: 100%;
             display: block;
-            mix-blend-mode: screen;
         }
 
         .flower-cursor-clean {
@@ -575,7 +574,7 @@
             </a>
 
             <!-- Legendary Card Creator -->
-            <a href="legendary-card-creator/" class="app-card" style="text-decoration: none;">
+            <a href="legendary-card-creator/index.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon legendary">🃏</div>
                 <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
                 <p class="app-desc">打造收藏級 Alternate Art 卡牌：可切換 Classic Gold / Holo Silver / Full-Art 邊框，疊加全像閃膜與復古紙紋，並翻面預覽經典藍紫 Orbit 卡背。</p>
