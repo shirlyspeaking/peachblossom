@@ -45,6 +45,18 @@
     font-display: swap;
 }
 
+/* 全字庫說文解字（ebas927.ttf）— 臺灣全字庫 CNS11643，政府資料開放授權條款第 1 版；字檔隨專案部署。官方：https://www.cns11643.gov.tw/ */
+@font-face {
+    font-family: "全字庫說文解字";
+    src:
+        local("全字庫說文解字"),
+        local("EBAS"),
+        url("fonts/ebas927.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     box-sizing: border-box;
 }
