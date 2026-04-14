@@ -31,7 +31,7 @@
     font-display: swap;
 }
 
-/* 阿里媽媽刀隸體 — 官方免費商用隸意字體，字檔隨專案部署以避免外部熱鏈失效 */
+/* 阿里媽媽刀隸體 — 隸意風格；阿里字體平台免費可商用授權（非 SIL OFL），字檔隨專案部署以避免外部熱鏈失效 */
 @font-face {
     font-family: "AlimamaDaoLiTi";
     src:
