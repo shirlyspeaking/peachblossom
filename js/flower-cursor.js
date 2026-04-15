@@ -1,5 +1,6 @@
 /**
- * WebGL 游標：粉色莖線（回授）＋桃花（停留漸深），透明疊加不改頁面粉底。
+ * WebGL 游標：粉色莖線＋桃花（停留花心漸深，紫/桃紅/橙隨機）
+ * 使用 alpha 合成（非乘法遮罩），避免透明底上出現灰色。
  */
 (function () {
     const VERTEX = `
@@ -31,89 +32,85 @@ float noise(vec2 n) {
     return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
 }
 
-float flower_shape(vec2 _point, float _size, float _outline, float _tickniess, float _noise, float _angle_offset) {
-    float random_by_uv = noise(vUv);
-    float petals_thickness = .5;
-    float petals_number = 5.;
-    float angle_animated_offset = .7 * (random_by_uv - .5) / (1. + 30. * u_stop_time);
-    float flower_angle = atan(_point.y, _point.x) - angle_animated_offset;
-    float flower_sectoral_shape = abs(sin(flower_angle * .5 * petals_number + _angle_offset)) + _tickniess * petals_thickness;
-    vec2 flower_size_range = vec2(6., 14.);
-    float flower_radial_shape = length(_point) * (flower_size_range[0] + flower_size_range[1] * u_stop_randomizer[0]);
-    float radius_noise = sin(flower_angle * 13. + 15. * random_by_uv);
-    flower_radial_shape += _noise * radius_noise;
-    float flower_radius_grow = min(20000. * u_stop_time, 1.);
-    flower_radius_grow = 1. / flower_radius_grow;
-    float f = 1. - smoothstep(0., _size * flower_sectoral_shape, _outline * flower_radius_grow * flower_radial_shape);
-    f *= (1. - u_moving);
-    return f;
+float flower_shape(vec2 pt, float _size, float _outline, float _thick, float _noise, float _angle_off) {
+    float rnd = noise(vUv);
+    float petals_n = 5.0;
+    float ang_off = 0.7 * (rnd - 0.5) / (1.0 + 30.0 * u_stop_time);
+    float ang = atan(pt.y, pt.x) - ang_off;
+    float sect = abs(sin(ang * 0.5 * petals_n + _angle_off)) + _thick * 0.5;
+    float rad = length(pt) * (6.0 + 14.0 * u_stop_randomizer.x);
+    rad += _noise * sin(ang * 13.0 + 15.0 * rnd);
+    float grow = 1.0 / min(20000.0 * u_stop_time, 1.0);
+    float f = 1.0 - smoothstep(0.0, _size * sect, _outline * grow * rad);
+    f *= (1.0 - u_moving);
+    return clamp(f, 0.0, 1.0);
 }
 
 void main() {
     vec4 prev = texture2D(u_texture, vUv);
-    vec3 base = prev.rgb;
-    float prevA = prev.a;
+    vec3 base = prev.rgb * 0.94;
+    float baseA = prev.a * 0.94;
 
-    /* 衰減：讓舊軌跡慢慢淡出 */
-    base *= 0.96;
-    prevA *= 0.96;
+    vec2 cur = vUv - u_point.xy;
+    cur.x *= u_ratio;
 
-    vec2 cursor = vUv - u_point.xy;
-    cursor.x *= u_ratio;
-
-    /* —— 粉色莖線（移動時） —— */
+    /* ===== 粉色莖線（移動時）===== */
     if (u_moving > 0.5) {
-        float dist = length(cursor);
-        float sigma = 0.004;
-        float core = exp(-dist * dist / (sigma * sigma));
-        float glow = exp(-dist * dist / (sigma * sigma * 8.0));
+        float d = length(cur);
+        float core = exp(-d * d / 0.000016);
+        float glow = exp(-d * d / 0.000128);
         vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
-        float sparkle = 0.55 + 0.45 * noise(nuv);
-        vec3 pinkA = vec3(1.0, 0.76, 0.84);
-        vec3 pinkB = vec3(0.92, 0.52, 0.68);
-        vec3 trail = mix(pinkA, pinkB, glow + sparkle * 0.3);
-        float strength = core * 0.85 + glow * 0.35;
-        strength *= 0.5 + 0.5 * sparkle;
-        base = mix(base, trail, strength);
-        prevA = max(prevA, strength * 0.85);
+        float sp = 0.55 + 0.45 * noise(nuv);
+
+        vec3 pink = vec3(1.0, 0.72, 0.82);
+        float trailA = (core * 0.9 + glow * 0.35) * (0.45 + 0.55 * sp);
+
+        base = mix(base, pink, trailA);
+        baseA = baseA + (1.0 - baseA) * trailA;
     }
 
-    /* —— 桃花：停住時綻放，停留越久越深 —— */
-    float s0 = flower_shape(cursor, 1., .96, 1., .15, 0.);
-    float s1 = flower_shape(cursor, 1.05, 1.07, 1., .15, 0.);
-    float center_s = flower_shape(cursor, .15, 1., 2., .1, 1.9);
+    /* ===== 桃花（停住時）— 純 alpha 合成，不乘遮罩 ===== */
+    float petal = flower_shape(cur, 1.0, 0.96, 1.0, 0.15, 0.0);
+    float heart = flower_shape(cur, 0.15, 1.0, 2.0, 0.1, 1.9);
 
-    float deepen = smoothstep(0.0, 1.0, u_stop_time);
+    float t = smoothstep(0.0, 1.0, u_stop_time);
 
-    /* 花瓣：淺粉→深桃紅 */
-    vec3 lightPink = vec3(1.0, 0.82, 0.88);
-    vec3 deepPink = vec3(0.82, 0.24, 0.48);
-    vec3 petal_color = mix(lightPink, deepPink, deepen * 0.75);
+    /* 花瓣：淺粉 → 依 randomizer 漸深（紫 / 桃紅 / 橙） */
+    vec3 lightPetal = vec3(1.0, 0.82, 0.88);
+    vec3 deepPurple = vec3(0.62, 0.18, 0.62);
+    vec3 deepRose   = vec3(0.84, 0.16, 0.42);
+    vec3 deepOrange = vec3(0.94, 0.50, 0.18);
+    vec3 deepColor  = mix(deepPurple, mix(deepRose, deepOrange, u_stop_randomizer.y), u_stop_randomizer.x);
+    vec3 petalCol   = mix(lightPetal, deepColor, t * 0.72);
 
-    vec3 flower_new = petal_color * s0;
-    vec3 flower_mask = 1. - vec3(s1);
+    /* 花心：淡黃 → 暖棕 */
+    vec3 lightHeart = vec3(1.0, 0.95, 0.7);
+    vec3 deepHeart  = vec3(0.9, 0.55, 0.3);
+    vec3 heartCol   = mix(lightHeart, deepHeart, t * 0.6);
 
-    /* 花心：淡黃→暖棕 */
-    vec3 lightCenter = vec3(1.0, 0.94, 0.68);
-    vec3 deepCenter = vec3(0.88, 0.58, 0.38);
-    vec3 center_col = mix(lightCenter, deepCenter, deepen * 0.5);
-    vec3 flower_mid = center_col * center_s * 0.7;
+    float petalA = petal * 0.92;
+    float heartA = heart * 0.88;
 
-    vec3 color = base * flower_mask + flower_new + flower_mid;
-    color *= u_clean;
-    color = clamp(color, vec3(0.), vec3(1.));
+    /* alpha-over：花瓣 → 花心，依次疊在 trail 之上 */
+    vec3 col = base;
+    float a   = baseA;
 
-    float flowerVis = max(s0, s1 * 0.85);
-    float alpha = max(prevA * 0.993, flowerVis * clamp(u_stop_time * 1.4, 0., 1.));
-    alpha = min(alpha, 1.0);
+    col = mix(col, petalCol, petalA);
+    a   = a + (1.0 - a) * petalA;
 
-    gl_FragColor = vec4(color, alpha);
+    col = mix(col, heartCol, heartA);
+    a   = a + (1.0 - a) * heartA;
+
+    col *= u_clean;
+    a   *= u_clean;
+
+    gl_FragColor = vec4(col, a);
 }`;
 
     function initFlowerCursor(canvas, cleanBtn) {
         if (!canvas || typeof THREE === "undefined") return;
 
-        const renderer = new THREE.WebGLRenderer({
+        var renderer = new THREE.WebGLRenderer({
             canvas: canvas,
             alpha: true,
             antialias: false,
@@ -122,15 +119,13 @@ void main() {
         });
         renderer.setClearColor(0x000000, 0);
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
+        var scene = new THREE.Scene();
+        var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
         camera.position.z = 1;
 
-        const geometry = new THREE.PlaneGeometry(2, 2);
-
-        const uniforms = {
+        var uniforms = {
             u_ratio: { value: 1 },
             u_moving: { value: 0 },
             u_stop_time: { value: 0 },
@@ -141,7 +136,7 @@ void main() {
             u_time: { value: 0 },
         };
 
-        const material = new THREE.ShaderMaterial({
+        var material = new THREE.ShaderMaterial({
             vertexShader: VERTEX,
             fragmentShader: FRAGMENT,
             uniforms: uniforms,
@@ -150,45 +145,39 @@ void main() {
             depthTest: false,
         });
 
-        const mesh = new THREE.Mesh(geometry, material);
+        var mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
         scene.add(mesh);
 
-        const blitScene = new THREE.Scene();
-        const blitCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
+        var blitScene = new THREE.Scene();
+        var blitCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
         blitCam.position.z = 1;
-        const blitMat = new THREE.MeshBasicMaterial({
+        var blitMat = new THREE.MeshBasicMaterial({
             map: null,
             transparent: true,
             opacity: 1,
             depthWrite: false,
             depthTest: false,
         });
-        const blitMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMat);
-        blitScene.add(blitMesh);
+        blitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMat));
 
-        let w = 0, h = 0;
-        let rtA = null, rtB = null;
-        let read = null, write = null;
+        var w = 0, h = 0;
+        var rtA = null, rtB = null;
+        var read = null, write = null;
 
         function allocTargets() {
             if (rtA) rtA.dispose();
             if (rtB) rtB.dispose();
-            rtA = new THREE.WebGLRenderTarget(w, h, {
+            var opts = {
                 minFilter: THREE.LinearFilter,
                 magFilter: THREE.LinearFilter,
                 format: THREE.RGBAFormat,
                 type: THREE.UnsignedByteType,
-            });
-            rtB = new THREE.WebGLRenderTarget(w, h, {
-                minFilter: THREE.LinearFilter,
-                magFilter: THREE.LinearFilter,
-                format: THREE.RGBAFormat,
-                type: THREE.UnsignedByteType,
-            });
+            };
+            rtA = new THREE.WebGLRenderTarget(w, h, opts);
+            rtB = new THREE.WebGLRenderTarget(w, h, opts);
             rtA.texture.flipY = false;
             rtB.texture.flipY = false;
-            read = rtA;
-            write = rtB;
+            read = rtA; write = rtB;
             clearBoth();
         }
 
@@ -214,15 +203,12 @@ void main() {
         setSize();
         window.addEventListener("resize", setSize);
 
-        const mouse = new THREE.Vector2(0.5, 0.5);
-        const prevMouse = new THREE.Vector2(0.5, 0.5);
-        let prevMoving = 0;
+        var mouse = new THREE.Vector2(0.5, 0.5);
+        var prev = new THREE.Vector2(0.5, 0.5);
+        var prevMoving = 0;
 
         function onPointer(e) {
-            mouse.set(
-                e.clientX / window.innerWidth,
-                1 - e.clientY / window.innerHeight
-            );
+            mouse.set(e.clientX / window.innerWidth, 1 - e.clientY / window.innerHeight);
         }
         window.addEventListener("pointermove", onPointer, { passive: true });
         window.addEventListener("pointerdown", onPointer, { passive: true });
@@ -230,18 +216,17 @@ void main() {
         if (cleanBtn) {
             cleanBtn.addEventListener("click", function (ev) {
                 ev.preventDefault();
-                ev.stopPropagation();
                 clearBoth();
             });
         }
 
-        const clock = new THREE.Clock();
+        var clock = new THREE.Clock();
 
         function tick() {
             var dt = Math.min(clock.getDelta(), 0.1);
             uniforms.u_time.value += dt;
 
-            var dist = mouse.distanceTo(prevMouse);
+            var dist = mouse.distanceTo(prev);
             var moving = dist > 0.0012 ? 1 : 0;
 
             if (moving) {
@@ -257,8 +242,7 @@ void main() {
 
             uniforms.u_moving.value = moving;
             uniforms.u_point.value.copy(mouse);
-            prevMouse.copy(mouse);
-
+            prev.copy(mouse);
             uniforms.u_texture.value = read.texture;
 
             renderer.setRenderTarget(write);
@@ -271,10 +255,7 @@ void main() {
             renderer.clear();
             renderer.render(blitScene, blitCam);
 
-            var tmp = read;
-            read = write;
-            write = tmp;
-
+            var tmp = read; read = write; write = tmp;
             requestAnimationFrame(tick);
         }
 

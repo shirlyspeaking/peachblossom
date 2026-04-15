@@ -185,17 +185,36 @@
       border: 1px solid #fcd34d; color: #fcd34d; background: rgba(31,41,55,.75);
       border-radius: 7px; padding: 3px 6px; font-size: .6rem; letter-spacing: .15em; font-weight: 700;
     }
-    .texture {
-      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .27;
-      background-image:
-        repeating-linear-gradient(120deg, rgba(255,255,255,.13) 0 1px, transparent 1px 5px),
-        repeating-linear-gradient(0deg, rgba(15,23,42,.12) 0 1px, transparent 1px 6px);
+    .frame-texture {
+      position: absolute; inset: 0; pointer-events: none; border-radius: 28px;
     }
-    .vintage {
-      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; opacity: .26;
+    .frame-texture.brushed {
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(255,248,220,.32), transparent 28%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 4px);
+        repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+      opacity: .6;
+    }
+    .frame-texture.carbon {
+      background-image:
+        repeating-conic-gradient(rgba(255,255,255,.12) 0% 25%, transparent 0% 50%) 0 0 / 8px 8px,
+        repeating-conic-gradient(rgba(0,0,0,.16) 0% 25%, transparent 0% 50%) 4px 4px / 8px 8px;
+      mix-blend-mode: overlay;
+      opacity: .7;
+    }
+    .frame-texture.diamond {
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0 2px, transparent 2px 10px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,.15) 0 2px, transparent 2px 10px);
+      mix-blend-mode: overlay;
+      opacity: .55;
+    }
+    .frame-texture.linen {
+      background-image:
+        repeating-linear-gradient(0deg, rgba(210,180,140,.22) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(210,180,140,.18) 0 1px, transparent 1px 4px);
+      mix-blend-mode: color-burn;
+      opacity: .55;
     }
     .back { transform: rotateY(180deg); background:
       radial-gradient(circle at 20% 20%, rgba(96,165,250,.35), transparent 28%),
@@ -319,13 +338,18 @@
               <button class="chip" id="btnModern">現代模式</button>
             </div>
           </div>
-          <div class="toggle">
-            <span>Shadowless（去邊框陰影）</span>
-            <input type="checkbox" id="shadowless" />
+          <div class="field">
+            <label>邊框材質</label>
+            <div class="chip-row" style="grid-template-columns: repeat(4,1fr);">
+              <button class="chip" data-texture="none">無</button>
+              <button class="chip active" data-texture="brushed">拉絲</button>
+              <button class="chip" data-texture="carbon">碳纖維</button>
+              <button class="chip" data-texture="diamond">鑽切</button>
+            </div>
           </div>
-          <div class="toggle">
-            <span>Vintage Filter（紙質感）</span>
-            <input type="checkbox" id="vintageFilter" checked />
+          <div class="field">
+            <label>邊框色調（直接改色）</label>
+            <input id="borderTint" class="input" type="color" value="#ffcb05" />
           </div>
           <div class="field">
             <label>稀有度星級</label>
@@ -396,9 +420,8 @@
                   <div id="vSet">PB-001 / ALT</div>
                 </div>
                 <div class="edition" id="edition">1st Edition</div>
-                <div class="texture" id="texture" style="display:none;"></div>
-                <div class="vintage" id="vintage"></div>
               </div>
+              <div class="frame-texture brushed" id="frameTexture"></div>
             </div>
             <div class="face back">
               <div class="back-bg" id="backBg"></div>
@@ -425,6 +448,7 @@
       energies: ["fire", "electric", "psychic"],
       artUrl: null,
       backArtUrl: null,
+      frameTexture: "brushed",
     };
 
     const refs = {
@@ -454,11 +478,10 @@
       frontShell: document.getElementById("frontShell"),
       cardHeader: document.getElementById("cardHeader"),
       holo: document.getElementById("holo"),
-      texture: document.getElementById("texture"),
-      vintage: document.getElementById("vintage"),
+      frameTexture: document.getElementById("frameTexture"),
       edition: document.getElementById("edition"),
-      shadowless: document.getElementById("shadowless"),
-      vintageFilter: document.getElementById("vintageFilter"),
+      borderTint: document.getElementById("borderTint"),
+      textureBtns: document.querySelectorAll("[data-texture]"),
       btnVintage: document.getElementById("btnVintage"),
       btnModern: document.getElementById("btnModern"),
       btnFlip: document.getElementById("btnFlip"),
@@ -535,18 +558,22 @@
 
       const modern = state.era === "modern";
       refs.cardArt.classList.toggle("full", modern);
-      refs.texture.style.display = modern ? "block" : "none";
       refs.edition.style.display = modern ? "none" : "block";
-      refs.vintage.style.display = refs.vintageFilter.checked ? "block" : "none";
-      refs.cardArt.style.boxShadow = refs.shadowless.checked ? "none" : "0 22px 38px -24px rgba(15,23,42,.95)";
+
+      var tint = refs.borderTint.value;
+      var r = parseInt(tint.slice(1,3),16), g = parseInt(tint.slice(3,5),16), b = parseInt(tint.slice(5,7),16);
+      var bright = `rgb(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)})`;
+      var dark = `rgb(${Math.max(r-60,0)},${Math.max(g-60,0)},${Math.max(b-60,0)})`;
 
       if (modern) {
-        refs.frontShell.style.background = "linear-gradient(145deg, rgba(255,255,255,.35), rgba(148,163,184,.22), rgba(255,255,255,.08))";
-        refs.frontShell.style.boxShadow = "0 40px 120px -52px rgba(56,189,248,.55)";
+        refs.frontShell.style.background = `linear-gradient(145deg, ${bright}90, ${tint}50, ${dark}60)`;
+        refs.frontShell.style.boxShadow = `0 40px 120px -52px ${tint}88`;
       } else {
-        refs.frontShell.style.background = "linear-gradient(145deg,#fff8d4 0%,#ffcb05 18%,#b68d2d 42%,#ffe89a 65%,#8d6518 100%)";
-        refs.frontShell.style.boxShadow = "0 35px 110px -50px rgba(255,203,5,.7)";
+        refs.frontShell.style.background = `linear-gradient(145deg, ${bright} 0%, ${tint} 25%, ${dark} 55%, ${bright} 80%, ${dark} 100%)`;
+        refs.frontShell.style.boxShadow = `0 35px 110px -50px ${tint}bb`;
       }
+
+      refs.frameTexture.className = "frame-texture " + (state.frameTexture || "brushed");
 
       refs.vBackTitle.textContent = refs.backTitle.value || "Legendary";
       refs.vBackSubtitle.textContent = refs.backSubtitle.value || "Classic Orbit";
@@ -595,7 +622,7 @@
     }
 
     refs.tabs.forEach((node) => node.addEventListener("click", () => activateTab(node.dataset.tab)));
-    [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber, refs.backTitle, refs.backSubtitle, refs.backBadgeText, refs.backRingColor, refs.backCoreColor].forEach((node) => node.addEventListener("input", renderCard));
+    [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber, refs.backTitle, refs.backSubtitle, refs.backBadgeText, refs.backRingColor, refs.backCoreColor, refs.borderTint].forEach((node) => node.addEventListener("input", renderCard));
 
     refs.btnVintage.onclick = () => {
       state.era = "vintage";
@@ -610,8 +637,13 @@
       renderCard();
     };
 
-    refs.shadowless.onchange = renderCard;
-    refs.vintageFilter.onchange = renderCard;
+    refs.textureBtns.forEach((button) => {
+      button.onclick = () => {
+        state.frameTexture = button.dataset.texture === "none" ? "" : button.dataset.texture;
+        refs.textureBtns.forEach((b) => b.classList.toggle("active", b === button));
+        renderCard();
+      };
+    });
 
     refs.rarityBtns.forEach((button) => {
       button.onclick = () => {
@@ -671,8 +703,9 @@
       refs.desc.value = "Channel prismatic flames. Draw 2 cards and strike 1 target.";
       refs.illustrator.value = "Shirly Zhang";
       refs.setNumber.value = "PB-001 / ALT";
-      refs.shadowless.checked = false;
-      refs.vintageFilter.checked = true;
+      state.frameTexture = "brushed";
+      refs.textureBtns.forEach((b) => b.classList.toggle("active", b.dataset.texture === "brushed"));
+      refs.borderTint.value = "#ffcb05";
       state.rarity = 3;
       refs.rarityBtns.forEach((b) => b.classList.toggle("active", b.dataset.rarity === "3"));
       state.energies = ["fire", "electric", "psychic"];
