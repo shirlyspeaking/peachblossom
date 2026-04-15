@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>山海經大富翁 · 雛形</title>
+    <style>
+        :root {
+            --bg-1: #ffe8d6;
+            --bg-2: #ffd6ff;
+            --bg-3: #caffbf;
+            --ink: #3f1d38;
+            --panel: rgba(255, 255, 255, 0.85);
+            --chance: #ffbe0b;
+            --fate: #3a86ff;
+            --accent: #ff006e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Serif TC", "Songti TC", "PingFang TC", serif;
+            background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 28px 20px 32px;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .title-wrap h1 {
+            font-size: 2rem;
+            letter-spacing: 0.06em;
+        }
+
+        .title-wrap p {
+            margin-top: 8px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #8338ec, #ff006e);
+            border-radius: 999px;
+            padding: 10px 16px;
+            box-shadow: 0 6px 16px rgba(63, 29, 56, 0.2);
+        }
+
+        .rule-panel {
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 20px rgba(63, 29, 56, 0.12);
+        }
+
+        .rule-panel h2 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .rule-panel ul {
+            padding-left: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .board-section,
+        .cards-section {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(63, 29, 56, 0.14);
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(88px, 1fr));
+            grid-template-rows: repeat(7, 110px);
+            gap: 8px;
+        }
+
+        .tile {
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid rgba(63, 29, 56, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 4px;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .tile input {
+            width: 100%;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            border-radius: 8px;
+            padding: 5px 7px;
+            font-size: 0.83rem;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.75);
+        }
+
+        .tile input + input {
+            margin-top: 6px;
+        }
+
+        .tile-start { background: linear-gradient(145deg, #cdb4db, #ffc8dd); }
+        .tile-land { background: linear-gradient(145deg, #bde0fe, #a2d2ff); }
+        .tile-event { background: linear-gradient(145deg, #ffafcc, #ffc8dd); }
+        .tile-tax { background: linear-gradient(145deg, #fdffb6, #ffd6a5); }
+        .tile-jail { background: linear-gradient(145deg, #ffd6a5, #f4a261); }
+        .tile-free { background: linear-gradient(145deg, #caffbf, #9bf6ff); }
+        .tile-go-jail { background: linear-gradient(145deg, #ffadad, #ff6392); }
+
+        .center-panel {
+            grid-column: 2 / 7;
+            grid-row: 2 / 7;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(58, 134, 255, 0.15), rgba(255, 0, 110, 0.14));
+            border: 2px dashed rgba(63, 29, 56, 0.25);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 18px;
+        }
+
+        .center-panel h3 {
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .center-panel p {
+            line-height: 1.7;
+            max-width: 360px;
+        }
+
+        .draw-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .draw-actions button {
+            border: 0;
+            color: white;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .draw-chance { background: var(--chance); color: #4f3600 !important; }
+        .draw-fate { background: var(--fate); }
+
+        .draw-result {
+            margin-top: 12px;
+            font-size: 0.92rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 8px 10px;
+            min-height: 42px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .card-editor {
+            border-radius: 14px;
+            padding: 10px;
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .card-editor.chance {
+            border-top: 6px solid var(--chance);
+        }
+
+        .card-editor.fate {
+            border-top: 6px solid var(--fate);
+        }
+
+        .card-editor h4 {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .card-editor input,
+        .card-editor textarea {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            padding: 6px 8px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            background: white;
+        }
+
+        .card-editor textarea {
+            margin-top: 6px;
+            resize: vertical;
+            min-height: 58px;
+        }
+
+        .tip {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255, 0, 110, 0.08);
+            border: 1px dashed rgba(255, 0, 110, 0.25);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .board-grid {
+                grid-template-columns: repeat(7, minmax(72px, 1fr));
+                grid-template-rows: repeat(7, 98px);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .board-grid {
+                overflow-x: auto;
+                display: grid;
+                min-width: 700px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="top-bar">
+            <div class="title-wrap">
+                <h1>山海經大富翁（雛形）</h1>
+                <p>先搭建可編輯版面：棋盤每格可輸入、機會卡與命運卡每張可輸入，並保留大富翁基本回合規則說明。</p>
+            </div>
+            <a class="back-link" href="../index.html">回桃花源</a>
+        </div>
+
+        <section class="rule-panel">
+            <h2>基本規則（可再擴充）</h2>
+            <ul>
+                <li>玩家輪流擲骰前進，經過起點可領取獎勵。</li>
+                <li>停在地塊可依你自訂文本執行效果（買地、收租、事件等）。</li>
+                <li>停在「機會」或「命運」格時，抽對應卡片並執行卡面內容。</li>
+                <li>此版為編輯雛形，先用來設計內容與規則文本。</li>
+            </ul>
+        </section>
+
+        <div class="layout">
+            <section class="board-section">
+                <h2 class="section-title">大富翁棋盤（每格都可輸入）</h2>
+                <div class="board-grid" id="board-grid">
+                    <div class="center-panel">
+                        <h3>《山海經》異獸巡遊</h3>
+                        <p>中央留白可後續加入：玩家棋子、資金欄、擲骰動畫、回合紀錄與勝利條件設定。</p>
+                        <div class="draw-actions">
+                            <button class="draw-chance" id="draw-chance">抽機會卡</button>
+                            <button class="draw-fate" id="draw-fate">抽命運卡</button>
+                        </div>
+                        <div class="draw-result" id="draw-result">抽卡結果會顯示在這裡。</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cards-section">
+                <h2 class="section-title">機會卡 / 命運卡（每張可輸入）</h2>
+                <div class="cards-grid" id="cards-grid"></div>
+                <div class="tip">
+                    小提示：你可以把卡片內容寫成「前進/後退、加減金幣、指定角色互動」等，先用這版快速測試故事與規則平衡。
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const boardTiles = [
+            { type: "tile-start", label: "起點", effect: "經過 +200 金幣" },
+            { type: "tile-land", label: "崑崙墟", effect: "可購買地塊" },
+            { type: "tile-event", label: "機會", effect: "抽機會卡" },
+            { type: "tile-land", label: "青丘", effect: "支付過路費" },
+            { type: "tile-tax", label: "貢品稅", effect: "支付 120 金幣" },
+            { type: "tile-land", label: "扶桑木", effect: "可升級領地" },
+            { type: "tile-jail", label: "幽都監", effect: "休息一回合" },
+            { type: "tile-land", label: "流沙國", effect: "支付過路費" },
+            { type: "tile-event", label: "命運", effect: "抽命運卡" },
+            { type: "tile-land", label: "無啟國", effect: "可購買地塊" },
+            { type: "tile-land", label: "羽民國", effect: "支付過路費" },
+            { type: "tile-tax", label: "祭典費", effect: "支付 150 金幣" },
+            { type: "tile-land", label: "北冥", effect: "可升級領地" },
+            { type: "tile-free", label: "神獸集市", effect: "安全休息格" },
+            { type: "tile-land", label: "不周山", effect: "支付過路費" },
+            { type: "tile-event", label: "機會", effect: "抽機會卡" },
+            { type: "tile-land", label: "塗山", effect: "可購買地塊" },
+            { type: "tile-land", label: "丹穴山", effect: "支付過路費" },
+            { type: "tile-tax", label: "修繕費", effect: "支付 180 金幣" },
+            { type: "tile-land", label: "西王母池", effect: "可升級領地" },
+            { type: "tile-go-jail", label: "誤入禁地", effect: "直接前往幽都監" },
+            { type: "tile-land", label: "鐘山", effect: "支付過路費" },
+            { type: "tile-event", label: "命運", effect: "抽命運卡" },
+            { type: "tile-land", label: "東海", effect: "可購買地塊" }
+        ];
+
+        const chanceCards = [
+            { title: "白澤指路", content: "前進到最近的機會格並再抽一張。" },
+            { title: "獲得靈草", content: "領取 150 金幣。" },
+            { title: "畢方來襲", content: "支付 100 金幣修復領地。" },
+            { title: "玄龜庇佑", content: "本回合免租一次。" },
+            { title: "夸父助跑", content: "再前進 3 格。" },
+            { title: "青鳥傳信", content: "指定一位玩家與你交換位置。" }
+        ];
+
+        const fateCards = [
+            { title: "天命加持", content: "所有玩家各支付你 50 金幣。" },
+            { title: "迷霧封路", content: "後退 2 格。" },
+            { title: "共工怒觸", content: "立刻前往起點，不領獎勵。" },
+            { title: "女媧補天", content: "支付 120 金幣，下一輪可擲兩次。" },
+            { title: "燭龍睜眼", content: "可任選前進 1~6 格。" },
+            { title: "饕餮盛宴", content: "支付 200 金幣給銀行。" }
+        ];
+
+        const boardGrid = document.getElementById("board-grid");
+        const cardsGrid = document.getElementById("cards-grid");
+        const drawResult = document.getElementById("draw-result");
+
+        const tilePositionMap = [
+            [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7],
+            [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7],
+            [7, 6], [7, 5], [7, 4], [7, 3], [7, 2], [7, 1],
+            [6, 1], [5, 1], [4, 1], [3, 1], [2, 1]
+        ];
+
+        boardTiles.forEach((tile, index) => {
+            const [row, col] = tilePositionMap[index];
+            const tileEl = document.createElement("div");
+            tileEl.className = `tile ${tile.type}`;
+            tileEl.style.gridRow = row;
+            tileEl.style.gridColumn = col;
+
+            tileEl.innerHTML = `
+                <div class="tile-header">
+                    <span>第${index + 1}格</span>
+                    <span>${tile.label}</span>
+                </div>
+                <input type="text" value="${tile.label}" aria-label="第${index + 1}格名稱">
+                <input type="text" value="${tile.effect}" aria-label="第${index + 1}格效果">
+            `;
+            boardGrid.appendChild(tileEl);
+        });
+
+        function createCardEditor(card, type, index) {
+            const cardEl = document.createElement("article");
+            cardEl.className = `card-editor ${type}`;
+            cardEl.innerHTML = `
+                <h4>${type === "chance" ? "機會卡" : "命運卡"} #${index + 1}</h4>
+                <input type="text" value="${card.title}" aria-label="卡片標題">
+                <textarea aria-label="卡片內容">${card.content}</textarea>
+            `;
+            cardsGrid.appendChild(cardEl);
+        }
+
+        chanceCards.forEach((card, index) => createCardEditor(card, "chance", index));
+        fateCards.forEach((card, index) => createCardEditor(card, "fate", index));
+
+        function drawRandomCard(type) {
+            const editors = Array.from(document.querySelectorAll(`.card-editor.${type}`));
+            const picked = editors[Math.floor(Math.random() * editors.length)];
+            const title = picked.querySelector("input").value.trim() || "（未命名卡）";
+            const content = picked.querySelector("textarea").value.trim() || "（尚未輸入內容）";
+            const deckName = type === "chance" ? "機會卡" : "命運卡";
+            drawResult.textContent = `${deckName}：${title}｜${content}`;
+        }
+
+        document.getElementById("draw-chance").addEventListener("click", () => drawRandomCard("chance"));
+        document.getElementById("draw-fate").addEventListener("click", () => drawRandomCard("fate"));
+    </script>
+</body>
+</html>

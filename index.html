@@ -228,6 +228,10 @@
             background: linear-gradient(135deg, #1e293b 0%, #334155 40%, #ffcb05 100%);
         }
 
+        .app-icon.shanhai {
+            background: linear-gradient(135deg, #3a86ff 0%, #8338ec 50%, #ff006e 100%);
+        }
+
         .app-icon.coming-soon {
             background: linear-gradient(135deg, var(--rose-gold) 0%, #d4a5b9 100%);
             border: 2px dashed rgba(142, 33, 87, 0.3);
@@ -475,11 +479,11 @@
             }
         }
 
-        /* WebGL 游標：透明疊加，不覆蓋頁面粉色底；置於內容之上、不攔截點擊 */
+        /* WebGL 游標：透明疊加，置於內容下方 */
         .flower-cursor-layer {
             position: fixed;
             inset: 0;
-            z-index: 50;
+            z-index: 0;
             pointer-events: none;
         }
 
@@ -532,7 +536,7 @@
         <div class="logo">🌸</div>
         <h1>桃花源</h1>
         <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
-        <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
+        <p class="tagline">數位古風體驗平台</p>
         <a href="enjoyread/app.html" class="header-cta">
             <span class="header-cta-icon">📖</span>
             <span>悅讀 EnjoyRead 中學生閱讀平台</span>
@@ -584,6 +588,19 @@
                     <span class="tag">Alternate Art</span>
                 </div>
                 <span class="app-button primary">開封創作</span>
+            </a>
+
+            <!-- 山海經大富翁 -->
+            <a href="shanhaijing-monopoly/index.html" class="app-card" style="text-decoration: none;">
+                <div class="app-icon shanhai">🐉</div>
+                <h2 class="app-name">山海經大富翁</h2>
+                <p class="app-desc">以《山海經》世界觀打造色彩豐富的大富翁雛形。棋盤每格、機會卡與命運卡都可直接輸入內容，快速設計你的故事規則。</p>
+                <div class="app-tags">
+                    <span class="tag">大富翁</span>
+                    <span class="tag">山海經</span>
+                    <span class="tag">可編輯卡片</span>
+                </div>
+                <span class="app-button primary">進入雛形</span>
             </a>
 
             <!-- 即將推出 - 佔位卡片 -->

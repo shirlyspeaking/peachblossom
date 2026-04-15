@@ -60,41 +60,45 @@ void main() {
     vec2 pc = cursor;
     pc.x *= u_ratio;
 
-    /* —— 金粉虛化莖線（僅移動時累積到 trail） —— */
+    /* —— 粉色莖線（僅移動時累積到 trail） —— */
     if (u_moving > 0.5) {
         float dist = length(pc);
         float spd = clamp(u_speed, 0.5, 60.0);
-        float sigma = 0.0028 + spd * 0.000045;
+        float sigma = 0.003 + spd * 0.00005;
         float core = exp(-dist * dist / (sigma * sigma));
         float glow = exp(-dist * dist / ((sigma * 2.8) * (sigma * 2.8)));
         vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
         float g1 = noise2(nuv);
         float g2 = noise2(nuv * 1.7 + 19.0);
         float sparkle = 0.55 + 0.45 * mix(g1, g2, 0.5);
-        vec3 goldA = mix(vec3(1.0, 0.94, 0.72), vec3(1.0, 0.78, 0.42), sparkle);
-        vec3 goldB = mix(vec3(1.0, 0.85, 0.5), vec3(1.0, 0.65, 0.35), sparkle * 0.8);
-        vec3 gold = mix(goldA, goldB, glow);
-        float strength = core * 0.72 + glow * 0.22;
+        vec3 pinkA = mix(vec3(1.0, 0.78, 0.85), vec3(0.96, 0.6, 0.72), sparkle);
+        vec3 pinkB = mix(vec3(0.95, 0.65, 0.76), vec3(0.88, 0.45, 0.62), sparkle * 0.8);
+        vec3 pinkTrail = mix(pinkA, pinkB, glow);
+        float strength = core * 0.75 + glow * 0.25;
         strength *= 0.55 + 0.45 * sparkle;
-        float alpha = strength * 0.62;
-        vec3 rgb = mix(trail.rgb, gold, alpha);
+        float alpha = strength * 0.65;
+        vec3 rgb = mix(trail.rgb, pinkTrail, alpha);
         float a = trail.a + (1.0 - trail.a) * alpha;
         trail = vec4(rgb, a);
     }
 
-    /* —— 小桃花：僅停住時繪製，不殘留於「移動」狀態 —— */
+    /* —— 桃花：僅停住時繪製，停留越久花色越深 —— */
     vec3 col = trail.rgb;
     float alpha = trail.a;
 
     if (u_moving < 0.5 && u_stop_time > 0.02) {
         float bloom = smoothstep(0.0, 0.92, min(u_stop_time * 1.15, 1.0));
+        float deepen = smoothstep(0.0, 1.0, u_stop_time);
         float b = peach_blossom(pc, bloom);
-        vec3 pink = mix(vec3(1.0, 0.88, 0.91), vec3(1.0, 0.72, 0.78), b);
+        vec3 lightPink = vec3(1.0, 0.82, 0.88);
+        vec3 deepPink = vec3(0.78, 0.22, 0.45);
+        vec3 petalColor = mix(lightPink, deepPink, deepen * 0.7);
+        vec3 pink = mix(petalColor, petalColor * 0.85, b * 0.3);
         float r = length(pc);
         float centerDot = 1.0 - smoothstep(0.0, 0.012, r * 65.0);
-        vec3 center = vec3(1.0, 0.93, 0.62);
-        vec3 fcol = mix(pink, center, centerDot * 0.85);
-        float fa = b * 0.88;
+        vec3 centerCol = mix(vec3(1.0, 0.93, 0.62), vec3(0.85, 0.55, 0.35), deepen * 0.4);
+        vec3 fcol = mix(pink, centerCol, centerDot * 0.85);
+        float fa = b * 0.9;
         col = mix(col, fcol, fa);
         alpha = max(alpha, fa * 0.92);
     }
