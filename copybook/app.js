@@ -22,6 +22,8 @@
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
 
+    function setStatus() {}
+
     function escapeSvgText(s) {
         return String(s)
             .replace(/&/g, '&amp;')
