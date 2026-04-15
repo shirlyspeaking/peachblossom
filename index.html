@@ -228,10 +228,6 @@
             background: linear-gradient(135deg, #1e293b 0%, #334155 40%, #ffcb05 100%);
         }
 
-        .app-icon.shanhai {
-            background: linear-gradient(135deg, #3a86ff 0%, #8338ec 50%, #ff006e 100%);
-        }
-
         .app-icon.coming-soon {
             background: linear-gradient(135deg, var(--rose-gold) 0%, #d4a5b9 100%);
             border: 2px dashed rgba(142, 33, 87, 0.3);
@@ -479,40 +475,61 @@
             }
         }
 
-        /* WebGL 游標：透明疊加，置於內容下方 */
-        .flower-cursor-layer {
+        /* WebGL Flower Cursor：透明疊加保留頁面粉色底；不攔截點擊（除清除鈕） */
+        .flower-cursor-layer.container {
             position: fixed;
             inset: 0;
-            z-index: 0;
+            z-index: 50;
             pointer-events: none;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-start;
         }
 
-        #flower-cursor-canvas {
+        .flower-cursor-layer.container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             display: block;
+            pointer-events: none;
         }
 
-        .flower-cursor-clean {
-            position: fixed;
-            bottom: 22px;
-            right: 22px;
-            z-index: 100;
-            padding: 10px 18px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            color: var(--berry-dark);
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(201, 75, 124, 0.35);
-            border-radius: 999px;
+        .flower-cursor-layer .clean-btn {
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+            font-family: sans-serif;
+            font-size: 15px;
+            color: white;
+            text-shadow: 0 0 10px #000000;
+            user-select: none;
+            padding: 0 0 15px 25px;
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(142, 33, 87, 0.12);
-            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: underline;
+            opacity: 0.5;
         }
 
-        .flower-cursor-clean:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 20px rgba(142, 33, 87, 0.18);
+        .name {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            transform: translate(-50%, -50%);
+            z-index: 51;
+            color: white;
+            text-align: center;
+            font-size: 4vw;
+            text-shadow: 0 0 5px #000000;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        @media all and (min-width: 640px) {
+            .name {
+                font-size: 45px;
+            }
         }
 
         body > header,
@@ -526,17 +543,19 @@
     </style>
 </head>
 <body>
-    <div class="flower-cursor-layer" aria-hidden="true">
-        <canvas id="flower-cursor-canvas"></canvas>
+    <div class="flower-cursor-layer container" aria-hidden="true">
+        <canvas id="canvas"></canvas>
+        <div class="clean-btn" id="flower-cursor-clean" role="button" tabindex="0" title="Clear">clean the screen</div>
     </div>
-    <button type="button" class="flower-cursor-clean" id="flower-cursor-clean" title="清除游標軌跡">清除畫面</button>
+
+    <div class="name">WebGL Flower Cursor</div>
 
     <!-- 頭部 -->
     <header>
         <div class="logo">🌸</div>
         <h1>桃花源</h1>
         <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
-        <p class="tagline">數位古風體驗平台</p>
+        <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
         <a href="enjoyread/app.html" class="header-cta">
             <span class="header-cta-icon">📖</span>
             <span>悅讀 EnjoyRead 中學生閱讀平台</span>
@@ -588,19 +607,6 @@
                     <span class="tag">Alternate Art</span>
                 </div>
                 <span class="app-button primary">開封創作</span>
-            </a>
-
-            <!-- 山海經大富翁 -->
-            <a href="shanhaijing-monopoly/index.html" class="app-card" style="text-decoration: none;">
-                <div class="app-icon shanhai">🐉</div>
-                <h2 class="app-name">山海經大富翁</h2>
-                <p class="app-desc">以《山海經》世界觀打造色彩豐富的大富翁雛形。棋盤每格、機會卡與命運卡都可直接輸入內容，快速設計你的故事規則。</p>
-                <div class="app-tags">
-                    <span class="tag">大富翁</span>
-                    <span class="tag">山海經</span>
-                    <span class="tag">可編輯卡片</span>
-                </div>
-                <span class="app-button primary">進入雛形</span>
             </a>
 
             <!-- 即將推出 - 佔位卡片 -->
@@ -664,7 +670,7 @@
     <script src="js/flower-cursor.js"></script>
     <script>
         (function () {
-            var canvas = document.getElementById("flower-cursor-canvas");
+            var canvas = document.getElementById("canvas");
             var btn = document.getElementById("flower-cursor-clean");
             if (typeof initFlowerCursor === "function" && canvas) {
                 initFlowerCursor(canvas, btn);

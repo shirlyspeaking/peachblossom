@@ -1,12 +1,8 @@
 /**
- * WebGL 游標：金粉虛化莖線（貼圖回授）＋停住時小桃花（每幀繪製，移動即消失）
- * 透明疊加，不改變底層頁面粉色背景
+ * WebGL Flower Cursor：貼圖回授開花（無游標莖線），透明疊加不改頁面粉色底。
  */
 (function () {
     const VERTEX = `
-precision highp float;
-attribute vec3 position;
-attribute vec2 uv;
 varying vec2 vUv;
 void main() {
     vUv = uv;
@@ -20,90 +16,63 @@ precision highp float;
 uniform float u_ratio;
 uniform float u_moving;
 uniform float u_stop_time;
-uniform float u_speed;
+uniform vec2 u_stop_randomizer;
+uniform float u_clean;
 uniform vec2 u_point;
 uniform sampler2D u_texture;
-uniform float u_time;
 varying vec2 vUv;
 
-float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+float rand(vec2 n) {
+    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
-float noise2(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+float noise(vec2 n) {
+    const vec2 d = vec2(0., 1.);
+    vec2 b = floor(n), f = smoothstep(vec2(0.), vec2(1.), fract(n));
+    return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
 }
 
-/* 小桃花：五瓣輪廓＋淡黃花心，隨 u_stop_time 綻放 */
-float peach_blossom(vec2 p, float bloom) {
-    float r = length(p);
-    float ang = atan(p.y, p.x);
-    float petals = 5.0;
-    float radius = 0.018 + 0.006 * sin(ang * petals + 0.9);
-    float petal = 1.0 - smoothstep(radius - 0.004, radius + 0.008, r * 48.0);
-    float center = 1.0 - smoothstep(0.0, 0.0065, r * 48.0);
-    return max(petal * 0.95, center * 0.92) * bloom;
+float flower_shape(vec2 _point, float _size, float _outline, float _tickniess, float _noise, float _angle_offset) {
+    float random_by_uv = noise(vUv);
+    float petals_thickness = .5;
+    float petals_number = 5. + floor(u_stop_randomizer[0] * 4.);
+    float angle_animated_offset = .7 * (random_by_uv - .5) / (1. + 30. * u_stop_time);
+    float flower_angle = atan(_point.y, _point.x) - angle_animated_offset;
+    float flower_sectoral_shape = abs(sin(flower_angle * .5 * petals_number + _angle_offset)) + _tickniess * petals_thickness;
+    vec2 flower_size_range = vec2(4., 18.);
+    float flower_radial_shape = length(_point) * (flower_size_range[0] + flower_size_range[1] * u_stop_randomizer[0]);
+    float radius_noise = sin(flower_angle * 13. + 15. * random_by_uv);
+    flower_radial_shape += _noise * radius_noise;
+    float flower_radius_grow = min(20000. * u_stop_time, 1.);
+    flower_radius_grow = 1. / flower_radius_grow;
+    float f = 1. - smoothstep(0., _size * flower_sectoral_shape, _outline * flower_radius_grow * flower_radial_shape);
+    f *= (1. - u_moving);
+    return f;
 }
 
 void main() {
-    vec4 trail = texture2D(u_texture, vUv);
-    trail.rgb *= 0.93;
-    trail.a *= 0.93;
+    vec4 prev = texture2D(u_texture, vUv);
+    vec3 base = prev.rgb;
+    float prevA = prev.a;
 
     vec2 cursor = vUv - u_point.xy;
-    vec2 pc = cursor;
-    pc.x *= u_ratio;
+    cursor.x *= u_ratio;
 
-    /* —— 粉色莖線（僅移動時累積到 trail） —— */
-    if (u_moving > 0.5) {
-        float dist = length(pc);
-        float spd = clamp(u_speed, 0.5, 60.0);
-        float sigma = 0.003 + spd * 0.00005;
-        float core = exp(-dist * dist / (sigma * sigma));
-        float glow = exp(-dist * dist / ((sigma * 2.8) * (sigma * 2.8)));
-        vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
-        float g1 = noise2(nuv);
-        float g2 = noise2(nuv * 1.7 + 19.0);
-        float sparkle = 0.55 + 0.45 * mix(g1, g2, 0.5);
-        vec3 pinkA = mix(vec3(1.0, 0.78, 0.85), vec3(0.96, 0.6, 0.72), sparkle);
-        vec3 pinkB = mix(vec3(0.95, 0.65, 0.76), vec3(0.88, 0.45, 0.62), sparkle * 0.8);
-        vec3 pinkTrail = mix(pinkA, pinkB, glow);
-        float strength = core * 0.75 + glow * 0.25;
-        strength *= 0.55 + 0.45 * sparkle;
-        float alpha = strength * 0.65;
-        vec3 rgb = mix(trail.rgb, pinkTrail, alpha);
-        float a = trail.a + (1.0 - trail.a) * alpha;
-        trail = vec4(rgb, a);
-    }
+    vec3 flower_color = vec3(.7 + u_stop_randomizer[1], .8 * u_stop_randomizer[1], 2.9 + u_stop_randomizer[0] * .6);
+    float s0 = flower_shape(cursor, 1., .96, 1., .15, 0.);
+    float s1 = flower_shape(cursor, 1.05, 1.07, 1., .15, 0.);
+    vec3 flower_new = flower_color * s0;
+    vec3 flower_mask = 1. - vec3(s1);
+    vec3 flower_mid = vec3(-.6) * flower_shape(cursor, .15, 1., 2., .1, 1.9);
 
-    /* —— 桃花：僅停住時繪製，停留越久花色越深 —— */
-    vec3 col = trail.rgb;
-    float alpha = trail.a;
+    vec3 color = base * flower_mask + (flower_new + flower_mid);
+    color *= u_clean;
+    color = clamp(color, vec3(.0, .0, .15), vec3(1., 1., .4));
 
-    if (u_moving < 0.5 && u_stop_time > 0.02) {
-        float bloom = smoothstep(0.0, 0.92, min(u_stop_time * 1.15, 1.0));
-        float deepen = smoothstep(0.0, 1.0, u_stop_time);
-        float b = peach_blossom(pc, bloom);
-        vec3 lightPink = vec3(1.0, 0.82, 0.88);
-        vec3 deepPink = vec3(0.78, 0.22, 0.45);
-        vec3 petalColor = mix(lightPink, deepPink, deepen * 0.7);
-        vec3 pink = mix(petalColor, petalColor * 0.85, b * 0.3);
-        float r = length(pc);
-        float centerDot = 1.0 - smoothstep(0.0, 0.012, r * 65.0);
-        vec3 centerCol = mix(vec3(1.0, 0.93, 0.62), vec3(0.85, 0.55, 0.35), deepen * 0.4);
-        vec3 fcol = mix(pink, centerCol, centerDot * 0.85);
-        float fa = b * 0.9;
-        col = mix(col, fcol, fa);
-        alpha = max(alpha, fa * 0.92);
-    }
+    float flowerVis = max(s0, s1 * 0.85);
+    float alpha = max(prevA * 0.993, flowerVis * clamp(u_stop_time * 1.4, 0., 1.));
+    alpha = min(alpha, 1.0);
 
-    gl_FragColor = vec4(col, alpha);
+    gl_FragColor = vec4(color, alpha);
 }`;
 
     function initFlowerCursor(canvas, cleanBtn) {
@@ -130,13 +99,13 @@ void main() {
             u_ratio: { value: 1 },
             u_moving: { value: 0 },
             u_stop_time: { value: 0 },
-            u_speed: { value: 0 },
+            u_stop_randomizer: { value: new THREE.Vector2(0.5, 0.5) },
+            u_clean: { value: 1 },
             u_point: { value: new THREE.Vector2(0.5, 0.5) },
             u_texture: { value: null },
-            u_time: { value: 0 },
         };
 
-        const material = new THREE.RawShaderMaterial({
+        const material = new THREE.ShaderMaterial({
             vertexShader: VERTEX,
             fragmentShader: FRAGMENT,
             uniforms: uniforms,
@@ -191,6 +160,7 @@ void main() {
         }
 
         function clearBoth() {
+            uniforms.u_clean.value = 1;
             renderer.setRenderTarget(rtA);
             renderer.setClearColor(0x000000, 0);
             renderer.clear();
@@ -223,32 +193,34 @@ void main() {
         window.addEventListener("pointerdown", onPointer, { passive: true });
 
         if (cleanBtn) {
-            cleanBtn.addEventListener("click", function () {
+            cleanBtn.addEventListener("click", function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
                 clearBoth();
             });
         }
 
         const clock = new THREE.Clock();
+        let prevMoving = 0;
 
         function tick() {
             const dt = Math.min(clock.getDelta(), 0.1);
-            uniforms.u_time.value += dt;
 
             const dist = mouse.distanceTo(prevMouse);
-            let speed = dist * 420 * (dt > 0 ? 1 / dt : 60);
-            speed = Math.min(speed, 80);
 
-            let moving = 0;
-            if (dist > 0.0012) {
-                moving = 1;
+            let moving = dist > 0.0012 ? 1 : 0;
+            if (moving) {
                 uniforms.u_stop_time.value = 0;
             } else {
-                moving = 0;
-                uniforms.u_stop_time.value += dt * 0.5;
-                if (uniforms.u_stop_time.value > 1) uniforms.u_stop_time.value = 1;
+                if (prevMoving === 1) {
+                    uniforms.u_stop_randomizer.value.set(Math.random(), Math.random());
+                }
+                uniforms.u_stop_time.value += dt * 0.45;
+                if (uniforms.u_stop_time.value > 0.98) uniforms.u_stop_time.value = 0.98;
             }
+            prevMoving = moving;
+
             uniforms.u_moving.value = moving;
-            uniforms.u_speed.value = speed;
             uniforms.u_point.value.copy(mouse);
             prevMouse.copy(mouse);
 
