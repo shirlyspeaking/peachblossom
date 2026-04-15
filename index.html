@@ -13,13 +13,6 @@
             box-sizing: border-box;
         }
 
-        /* 原版示範為 html,body overflow:hidden；首頁需捲動瀏覽故僅保留 margin/padding */
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
         :root {
             --berry-dark: #8e2157;
             --berry-mid: #c94b7c;
@@ -45,73 +38,6 @@
             min-height: 100vh;
             color: var(--text-dark);
             overflow-x: hidden;
-        }
-
-        /* === 背景裝飾 - 落英繽紛 === */
-        .bg-decoration {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .petal {
-            position: absolute;
-            opacity: 0.8;
-            animation: fall linear infinite;
-            filter: drop-shadow(0 2px 3px rgba(142, 33, 87, 0.15));
-        }
-
-        .petal.type-1 { animation-name: fall1; }
-        .petal.type-2 { animation-name: fall2; }
-        .petal.type-3 { animation-name: fall3; }
-
-        @keyframes fall1 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.9; }
-            50% { transform: translateY(50vh) translateX(30px) rotate(180deg) scale(0.9); }
-            90% { opacity: 0.7; }
-            100% {
-                transform: translateY(105vh) translateX(-20px) rotate(360deg) scale(0.8);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fall2 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.85; }
-            30% { transform: translateY(30vh) translateX(-40px) rotate(120deg) scale(0.95); }
-            60% { transform: translateY(60vh) translateX(20px) rotate(240deg) scale(0.85); }
-            90% { opacity: 0.6; }
-            100% {
-                transform: translateY(105vh) translateX(40px) rotate(400deg) scale(0.75);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fall3 {
-            0% {
-                transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.8; }
-            40% { transform: translateY(40vh) translateX(50px) rotate(200deg) scale(0.9); }
-            70% { transform: translateY(70vh) translateX(-30px) rotate(300deg) scale(0.8); }
-            90% { opacity: 0.5; }
-            100% {
-                transform: translateY(105vh) translateX(10px) rotate(500deg) scale(0.7);
-                opacity: 0;
-            }
         }
 
         /* === 頭部區域 === */
@@ -296,6 +222,10 @@
 
         .app-icon.copybook {
             background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+        }
+
+        .app-icon.legendary {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 40%, #ffcb05 100%);
         }
 
         .app-icon.coming-soon {
@@ -545,104 +475,57 @@
             }
         }
 
-        /* === 裝飾性花朵 === */
-        .deco-flower {
+        /* WebGL 游標：透明疊加，不覆蓋頁面粉色底；置於內容之上、不攔截點擊 */
+        .flower-cursor-layer {
             position: fixed;
-            font-size: 3rem;
-            opacity: 0.15;
-            z-index: 0;
+            inset: 0;
+            z-index: 50;
             pointer-events: none;
         }
-        .deco-flower.f1 { top: 10%; left: 5%; transform: rotate(-15deg); }
-        .deco-flower.f2 { top: 30%; right: 8%; transform: rotate(20deg); }
-        .deco-flower.f3 { bottom: 20%; left: 10%; transform: rotate(-25deg); }
-        .deco-flower.f4 { bottom: 10%; right: 5%; transform: rotate(10deg); }
 
-        /* === WebGL 點擊生花（樣式對齊原版示範 CSS）=== */
-        .container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: 1;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: start;
-        }
-
-        .container .clean-btn {
-            pointer-events: auto;
-            z-index: 1;
-            font-family: sans-serif;
-            font-size: 15px;
-            color: white;
-            text-shadow: 0 0 10px #000000;
-            user-select: none;
-            padding: 0 0 15px 25px;
-            cursor: pointer;
-            text-decoration: underline;
-            opacity: 0.5;
-        }
-
-        .container canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: block;
+        #flower-cursor-canvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
 
-        .name {
+        .flower-cursor-clean {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            color: white;
-            text-align: center;
-            font-size: 4vw;
-            text-shadow: 0 0 5px #000000;
-            user-select: none;
-            pointer-events: none;
-            transition: opacity 0.6s ease;
+            bottom: 22px;
+            right: 22px;
+            z-index: 100;
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--berry-dark);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(201, 75, 124, 0.35);
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(142, 33, 87, 0.12);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .name.is-dismissed {
-            opacity: 0;
+        .flower-cursor-clean:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(142, 33, 87, 0.18);
         }
 
-        @media all and (min-width: 640px) {
-            .name {
-                font-size: 45px;
-            }
+        body > header,
+        body > main,
+        body > .author-section,
+        body > footer {
+            position: relative;
+            z-index: 1;
         }
+
     </style>
 </head>
 <body>
-    <!-- 裝飾性大花朵 -->
-    <div class="deco-flower f1">🌺</div>
-    <div class="deco-flower f2">🌸</div>
-    <div class="deco-flower f3">💮</div>
-    <div class="deco-flower f4">🏵️</div>
-
-    <!-- 背景花瓣裝飾 - 落英繽紛 -->
-    <div class="bg-decoration" id="bgDecoration"></div>
-
-    <!-- WebGL 點擊生花（置於內容下層；結構對齊原版 container / name） -->
-    <div class="container" aria-hidden="true">
-        <canvas id="canvas"></canvas>
-        <div class="clean-btn" id="flowerClean" role="button" tabindex="0">
-            clean the screen
-        </div>
+    <div class="flower-cursor-layer" aria-hidden="true">
+        <canvas id="flower-cursor-canvas"></canvas>
     </div>
-
-    <div class="name" id="flowerHint">
-        Click To Add Flowers
-    </div>
+    <button type="button" class="flower-cursor-clean" id="flower-cursor-clean" title="清除游標軌跡">清除畫面</button>
 
     <!-- 頭部 -->
     <header>
@@ -688,6 +571,19 @@
                     <span class="tag">PDF 下載</span>
                 </div>
                 <span class="app-button primary">開始生成</span>
+            </a>
+
+            <!-- Legendary Card Creator -->
+            <a href="legendary-card-creator/index.html" class="app-card" style="text-decoration: none;">
+                <div class="app-icon legendary">🃏</div>
+                <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
+                <p class="app-desc">打造收藏級 Alternate Art 卡牌：可切換 Classic Gold / Holo Silver / Full-Art 邊框，疊加全像閃膜與復古紙紋，並翻面預覽經典藍紫 Orbit 卡背。</p>
+                <div class="app-tags">
+                    <span class="tag">1st Edition</span>
+                    <span class="tag">Holo Rare</span>
+                    <span class="tag">Alternate Art</span>
+                </div>
+                <span class="app-button primary">開封創作</span>
             </a>
 
             <!-- 即將推出 - 佔位卡片 -->
@@ -747,364 +643,22 @@
         <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
-    <script type="x-shader/x-fragment" id="fragmentShader">
-    #define PI 3.14159265359
-
-    uniform float u_ratio;
-    uniform vec2 u_cursor;
-    uniform float u_stop_time;
-    uniform float u_clean;
-    uniform vec2 u_stop_randomizer;
-
-    uniform sampler2D u_texture;
-    varying vec2 vUv;
-
-    // --------------------------------
-    // 2D noise
-
-    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
-    float snoise(vec2 v) {
-        const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
-        vec2 i = floor(v + dot(v, C.yy));
-        vec2 x0 = v - i + dot(i, C.xx);
-        vec2 i1;
-        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-        vec4 x12 = x0.xyxy + C.xxzz;
-        x12.xy -= i1;
-        i = mod289(i);
-        vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
-        vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.0);
-        m = m*m;
-        m = m*m;
-        vec3 x = 2.0 * fract(p * C.www) - 1.0;
-        vec3 h = abs(x) - 0.5;
-        vec3 ox = floor(x + 0.5);
-        vec3 a0 = x - ox;
-        m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
-        vec3 g;
-        g.x = a0.x * x0.x + h.x * x0.y;
-        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-        return 130.0 * dot(m, g);
-    }
-
-
-    float get_flower_shape(vec2 _p, float _pet_n, float _angle, float _outline) {
-        _angle *= 3.;
-
-        _p = vec2(_p.x * cos(_angle) - _p.y * sin(_angle),
-        _p.x * sin(_angle) + _p.y * cos(_angle));
-
-        float a = atan(_p.y, _p.x);
-
-        float flower_sectoral_shape = pow(abs(sin(a * _pet_n)), .4) + .25;
-
-        vec2 flower_size_range = vec2(.03, .1);
-        float size = flower_size_range[0] + u_stop_randomizer[0] * flower_size_range[1];
-
-        float flower_radial_shape = pow(length(_p) / size, 2.);
-        flower_radial_shape -= .1 * sin(8. * a); // add noise
-        flower_radial_shape = max(.1, flower_radial_shape);
-        flower_radial_shape += smoothstep(0., 0.03, -_p.y + .2 * abs(_p.x));
-
-        float grow_time = step(.25, u_stop_time) * pow(u_stop_time, .3);
-        float flower_shape = 1. - smoothstep(0., flower_sectoral_shape, _outline * flower_radial_shape / grow_time);
-
-        flower_shape *= (1. - step(1., grow_time));
-
-        return flower_shape;
-    }
-
-    float get_stem_shape(vec2 _p, vec2 _uv, float _w, float _angle) {
-
-		  _w = max(.004, _w);
-		 
-        float x_offset = _p.y * sin(_angle);
-        x_offset *= pow(3. * _uv.y, 2.);
-        _p.x -= x_offset;
-
-        // add horizontal noise to the cursor coordinale
-        float noise_power = .5;
-        float cursor_horizontal_noise = noise_power * snoise(2. * _uv * u_stop_randomizer[0]);
-        cursor_horizontal_noise *= pow(dot(_p.y, _p.y), .6);// moise to be zero at cursor
-        cursor_horizontal_noise *= pow(dot(_uv.y, _uv.y), .3);// moise to be zero at bottom
-        _p.x += cursor_horizontal_noise;
-
-        // vertical line through the cursor point (_p.x)
-        float left = smoothstep(-_w, 0., _p.x);
-        float right = 1. - smoothstep(0., _w, _p.x);
-        float stem_shape = left * right;
-
-        // make it grow + don't go up to the cursor point
-        float grow_time = 1. - smoothstep(0., .2, u_stop_time);
-        float stem_top_mask = smoothstep(0., pow(grow_time, .5), .03 -_p.y);
-        stem_shape *= stem_top_mask;
-
-        // stop drawing once done
-        stem_shape *= (1. - step(.17, u_stop_time));
-
-        return stem_shape;
-    }
-
-    void main() {
-
-        vec3 base = texture2D(u_texture, vUv).xyz;
-
-        vec2 uv = vUv;
-        uv.x *= u_ratio;
-        vec2 cursor = vUv - u_cursor.xy;
-        cursor.x *= u_ratio;
-        
-        vec3 stem_color = vec3(.1 + u_stop_randomizer[0] * .6, .6, .2);
-        vec3 flower_color = vec3(.6 + .5 * u_stop_randomizer[1], .1, .9 - .5 * u_stop_randomizer[1]);
-
-        float angle = .5 * (u_stop_randomizer[0] - .5);
-
-        float stem_shape = get_stem_shape(cursor, uv, .003, angle);
-        stem_shape += get_stem_shape(cursor + vec2(0., .2 + .5 * u_stop_randomizer[0]), uv, .003, angle);
-        float stem_mask = 1. - get_stem_shape(cursor, uv, .004, angle);
-        stem_mask -= get_stem_shape(cursor + vec2(0., .2 + .5 * u_stop_randomizer[0]), uv, .004, angle);
-
-        float petals_back_number = 1. + floor(u_stop_randomizer[0] * 2.);
-        float angle_offset = -(2. * step(0., angle) - 1.) * .1 * u_stop_time;
-        float flower_back_shape = get_flower_shape(cursor, petals_back_number, angle + angle_offset, 1.5);
-        float flower_back_mask = 1. - get_flower_shape(cursor, petals_back_number, angle + angle_offset, 1.6);
-
-        float petals_front_number = 2. + floor(u_stop_randomizer[1] * 2.);
-        float flower_front_shape = get_flower_shape(cursor, petals_front_number, angle, 1.);
-        float flower_front_mask = 1. - get_flower_shape(cursor, petals_front_number, angle, .95);
-
-        vec3 color = base;
-        color *= stem_mask;
-        color *= flower_back_mask;
-        color *= flower_front_mask;
-
-        color += (stem_shape * stem_color);
-
-        color += (flower_back_shape * (flower_color + vec3(0., .8 * u_stop_time, 0.)));
-        color += (flower_front_shape * flower_color);
-
-        color.r *= 1. - (.5 * flower_back_shape * flower_front_shape);
-        color.b *= 1. - (flower_back_shape * flower_front_shape);
-
-
-        color *= u_clean;
-
-        gl_FragColor = vec4(color, 1.);
-    }
-
-    </script>
-    <script type="x-shader/x-vertex" id="vertexShader">
-    varying vec2 vUv;
-    void main() {
-        vUv = uv;
-        gl_Position = vec4(position, 1.);
-    }
-    </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="js/flower-cursor.js"></script>
     <script>
-        // 創建飄落的花瓣效果 - 落英繽紛
-        function createPetals() {
-            const container = document.getElementById('bgDecoration');
-            const petalCount = 40; // 更多花瓣
-            
-            // 各種花瓣樣式
-            const petals = ['🌸', '🏵️', '💮', '🌺', '✿', '❀', '❁'];
-            const sizes = [14, 16, 18, 20, 22, 24, 28];
-            
-            for (let i = 0; i < petalCount; i++) {
-                const petal = document.createElement('div');
-                petal.className = 'petal type-' + (1 + Math.floor(Math.random() * 3));
-                petal.innerHTML = petals[Math.floor(Math.random() * petals.length)];
-                petal.style.left = Math.random() * 100 + '%';
-                petal.style.animationDuration = (10 + Math.random() * 15) + 's';
-                petal.style.animationDelay = Math.random() * 15 + 's';
-                petal.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)] + 'px';
-                
-                // 隨機透明度
-                petal.style.opacity = 0.5 + Math.random() * 0.4;
-                
-                container.appendChild(petal);
+        (function () {
+            var canvas = document.getElementById("flower-cursor-canvas");
+            var btn = document.getElementById("flower-cursor-clean");
+            if (typeof initFlowerCursor === "function" && canvas) {
+                initFlowerCursor(canvas, btn);
             }
-        }
+        })();
 
-        // 頁面載入時創建花瓣
-        createPetals();
-
-        // 應用卡片的點擊效果
         document.querySelectorAll('.app-card:not(.coming-soon)').forEach(card => {
             card.addEventListener('mouseenter', () => {
                 card.style.cursor = 'pointer';
             });
         });
-
-        // WebGL 點擊生花（ping-pong 回饋著色器）
-        (function initFlowerCanvas() {
-            if (typeof THREE === 'undefined') return;
-            const canvas = document.getElementById('canvas');
-            const cleanBtn = document.getElementById('flowerClean');
-            const hint = document.getElementById('flowerHint');
-            const vsEl = document.getElementById('vertexShader');
-            const fsEl = document.getElementById('fragmentShader');
-            if (!canvas || !cleanBtn || !vsEl || !fsEl) return;
-
-            const renderer = new THREE.WebGLRenderer({
-                canvas,
-                alpha: true,
-                antialias: false,
-                premultipliedAlpha: false
-            });
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-            const geom = new THREE.PlaneBufferGeometry(2, 2);
-
-            const feedbackMat = new THREE.ShaderMaterial({
-                uniforms: {
-                    u_ratio: { value: 1 },
-                    u_cursor: { value: new THREE.Vector2(0.5, 0.5) },
-                    u_stop_time: { value: 2 },
-                    u_clean: { value: 1 },
-                    u_stop_randomizer: { value: new THREE.Vector2(0.5, 0.5) },
-                    u_texture: { value: null }
-                },
-                vertexShader: vsEl.textContent.trim(),
-                fragmentShader: fsEl.textContent.trim(),
-                depthWrite: false,
-                depthTest: false
-            });
-
-            const mesh = new THREE.Mesh(geom, feedbackMat);
-            scene.add(mesh);
-
-            const blitScene = new THREE.Scene();
-            const blitMat = new THREE.MeshBasicMaterial({
-                map: null,
-                depthTest: false
-            });
-            blitScene.add(new THREE.Mesh(geom, blitMat));
-
-            let rtA;
-            let rtB;
-            let readBuffer;
-            let writeBuffer;
-
-            function makeTargets() {
-                if (rtA) {
-                    rtA.dispose();
-                    rtB.dispose();
-                }
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                renderer.setPixelRatio(dpr);
-                renderer.setSize(w, h, false);
-
-                const rw = Math.max(1, Math.floor(w * dpr));
-                const rh = Math.max(1, Math.floor(h * dpr));
-                const opts = {
-                    minFilter: THREE.LinearFilter,
-                    magFilter: THREE.LinearFilter,
-                    depthBuffer: false,
-                    stencilBuffer: false
-                };
-                rtA = new THREE.WebGLRenderTarget(rw, rh, opts);
-                rtB = new THREE.WebGLRenderTarget(rw, rh, opts);
-                readBuffer = rtA;
-                writeBuffer = rtB;
-
-                const bg = new THREE.Color(0xfff5f7);
-                renderer.setRenderTarget(readBuffer);
-                renderer.setClearColor(bg, 1);
-                renderer.clear();
-                renderer.setRenderTarget(writeBuffer);
-                renderer.clear();
-                renderer.setRenderTarget(null);
-            }
-
-            makeTargets();
-
-            let growing = false;
-            let stopTime = 2;
-
-            function plantFlower(nx, ny) {
-                feedbackMat.uniforms.u_cursor.value.set(nx, ny);
-                feedbackMat.uniforms.u_stop_randomizer.value.set(Math.random(), Math.random());
-                stopTime = 0;
-                growing = true;
-                if (hint) hint.classList.add('is-dismissed');
-            }
-
-            function clearFlowers() {
-                const bg = new THREE.Color(0xfff5f7);
-                renderer.setRenderTarget(rtA);
-                renderer.setClearColor(bg, 1);
-                renderer.clear();
-                renderer.setRenderTarget(rtB);
-                renderer.clear();
-                renderer.setRenderTarget(null);
-                readBuffer = rtA;
-                writeBuffer = rtB;
-                growing = false;
-                stopTime = 2;
-                feedbackMat.uniforms.u_stop_time.value = stopTime;
-            }
-
-            function onWindowPointerDown(e) {
-                if (e.button !== 0 && e.pointerType !== 'touch') return;
-                if (e.target.closest('a, button, input, textarea, select, label, #flowerClean, .clean-btn')) return;
-                if (e.target.closest('.app-card')) return;
-                const nx = e.clientX / window.innerWidth;
-                const ny = 1 - e.clientY / window.innerHeight;
-                plantFlower(nx, ny);
-            }
-
-            window.addEventListener('pointerdown', onWindowPointerDown, true);
-
-            function onClean(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                clearFlowers();
-            }
-            cleanBtn.addEventListener('click', onClean);
-            cleanBtn.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    clearFlowers();
-                }
-            });
-
-            window.addEventListener('resize', makeTargets);
-
-            function tick() {
-                requestAnimationFrame(tick);
-                if (growing) {
-                    stopTime += 0.022;
-                    if (stopTime >= 1.25) {
-                        growing = false;
-                        stopTime = 2;
-                    }
-                }
-                feedbackMat.uniforms.u_stop_time.value = stopTime;
-                feedbackMat.uniforms.u_ratio.value =
-                    window.innerWidth / Math.max(1, window.innerHeight);
-                feedbackMat.uniforms.u_texture.value = readBuffer.texture;
-
-                renderer.setRenderTarget(writeBuffer);
-                renderer.render(scene, camera);
-                blitMat.map = writeBuffer.texture;
-                renderer.setRenderTarget(null);
-                renderer.render(blitScene, camera);
-
-                const tmp = readBuffer;
-                readBuffer = writeBuffer;
-                writeBuffer = tmp;
-            }
-
-            tick();
-        })();
     </script>
 </body>
 </html>

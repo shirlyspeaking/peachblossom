@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legendary Card Creator</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    .page { max-width: 1600px; margin: 0 auto; padding: 18px; }
+    .topbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .topbar h1 { margin: 0; font-size: 1.45rem; }
+    .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: #e2e8f0;
+      padding: 10px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .btn.primary {
+      background: #ffcb05;
+      color: #0f172a;
+      border-color: #ffcb05;
+      font-weight: 700;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 35% 65%;
+      gap: 14px;
+    }
+    .panel {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 78vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .tab {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px;
+      background: rgba(15,23,42,0.7);
+      color: #cbd5e1;
+      padding: 8px;
+      cursor: pointer;
+    }
+    .tab.active { border-color: rgba(255,203,5,0.7); background: rgba(255,203,5,0.18); color: #fde68a; }
+    .tab-content {
+      overflow-y: auto;
+      padding-right: 2px;
+      display: none;
+      flex: 1;
+    }
+    .tab-content.active { display: block; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: #cbd5e1; }
+    .input, .textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 10px;
+      background: rgba(2,6,23,0.8);
+      color: #f8fafc;
+      padding: 10px 12px;
+    }
+    .textarea { min-height: 95px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .chip-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .chip {
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      background: rgba(2,6,23,0.55);
+      color: #cbd5e1;
+      padding: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .chip.active { border-color: rgba(255,203,5,0.75); color: #fde68a; background: rgba(255,203,5,0.16); }
+    .toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      background: rgba(2,6,23,0.55);
+    }
+    .preview-wrap {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 18px 12px;
+      min-height: 78vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .scene { width: min(460px, 100%); perspective: 1700px; }
+    .card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 63 / 88;
+      transform-style: preserve-3d;
+      transition: transform .18s ease-out;
+    }
+    .face {
+      position: absolute; inset: 0;
+      border-radius: 28px;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+    .front-shell { padding: 6px; }
+    .front-inner {
+      height: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, #020617 0%, #0f172a 45%, #020617 100%);
+    }
+    .card-art {
+      position: absolute;
+      inset: 12% 6% 43%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 234, 176, 0.68);
+      background: linear-gradient(130deg, rgba(255,203,5,.22), rgba(59,130,246,.4), rgba(168,85,247,.46));
+    }
+    .card-art.full { inset: 0; border: none; border-radius: 0; }
+    .holo {
+      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; opacity: .85;
+      background:
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.62) 0%, rgba(255,255,255,.2) 16%, rgba(255,255,255,0) 40%),
+        linear-gradient(115deg, rgba(255,0,153,.16), rgba(255,203,5,.15), rgba(0,220,255,.15), rgba(119,0,255,.18), rgba(255,255,255,.1));
+    }
+    .header {
+      position: absolute; top: 4.8%; left: 5%; right: 5%;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .name { font-weight: 800; font-size: clamp(1.1rem, 2.8vw, 1.5rem); line-height: 1.1; }
+    .hp { text-align: right; color: #fda4af; font-weight: 800; }
+    .hp small { display: block; color: rgba(252,165,165,.85); font-size: .62rem; letter-spacing: .2em; }
+    .infobox {
+      position: absolute; left: 6%; right: 6%; bottom: 11%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.1);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+    }
+    .ability { font-weight: 700; margin-bottom: 6px; }
+    .desc { font-size: .87rem; line-height: 1.5; color: #e2e8f0; }
+    .energy { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; }
+    .orb {
+      width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center;
+      color: white; font-size: .7rem; font-weight: 700;
+    }
+    .footer {
+      position: absolute; left: 6%; right: 6%; bottom: 4.7%;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(248,250,252,.86);
+    }
+    .edition {
+      position: absolute; left: 6.5%; bottom: 7.2%;
+      border: 1px solid #fcd34d; color: #fcd34d; background: rgba(31,41,55,.75);
+      border-radius: 7px; padding: 3px 6px; font-size: .6rem; letter-spacing: .15em; font-weight: 700;
+    }
+    .texture {
+      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .27;
+      background-image:
+        repeating-linear-gradient(120deg, rgba(255,255,255,.13) 0 1px, transparent 1px 5px),
+        repeating-linear-gradient(0deg, rgba(15,23,42,.12) 0 1px, transparent 1px 6px);
+    }
+    .vintage {
+      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; opacity: .26;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,248,220,.32), transparent 28%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 4px);
+    }
+    .back { transform: rotateY(180deg); background:
+      radial-gradient(circle at 20% 20%, rgba(96,165,250,.35), transparent 28%),
+      radial-gradient(circle at 80% 25%, rgba(168,85,247,.38), transparent 24%),
+      linear-gradient(135deg,#060d27 0%,#132257 48%,#1b0f3b 100%); }
+    .ring { position: absolute; left: 50%; top: 50%; border-radius: 999px; transform: translate(-50%,-50%); border: 1px solid rgba(255,255,255,.25); }
+    .ring.r1 { width: 76%; height: 76%; }
+    .ring.r2 { width: 78%; height: 78%; border-color: rgba(186,230,253,.32); animation: spin 16s linear infinite; }
+    .core { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; transform: translate(-50%,-50%); border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,203,5,.95) 0%, rgba(255,203,5,.72) 38%, rgba(255,255,255,.2) 39%, rgba(255,255,255,.05) 60%, transparent 61%); border: 1px solid rgba(255,255,255,.35); }
+    @keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+    .reflection {
+      width: 74%; height: 28px; margin: 8px auto 0;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(203,213,225,.18), rgba(15,23,42,.02)),
+        radial-gradient(circle, rgba(255,255,255,.18) 0%, rgba(15,23,42,0) 72%);
+      filter: blur(2px);
+      transform: perspective(700px) rotateX(70deg);
+    }
+    .status {
+      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      color: #cbd5e1;
+      width: min(460px, 100%);
+      padding: 10px 12px;
+      font-size: .85rem;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel, .preview-wrap { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div>
+        <small style="color:#fcd34d;letter-spacing:.2em;text-transform:uppercase;">Legendary Card Creator</small>
+        <h1>收藏級電子卡牌工坊</h1>
+      </div>
+      <div class="btns">
+        <a class="btn" href="../index.html">返回桃花源</a>
+        <button class="btn" id="btnFlip">翻到背面</button>
+        <button class="btn primary" id="btnExport">匯出 PNG</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="panel">
+        <div class="tabs">
+          <button class="tab active" data-tab="basic">基礎</button>
+          <button class="tab" data-tab="visual">視覺</button>
+          <button class="tab" data-tab="upload">上傳</button>
+        </div>
+
+        <section class="tab-content active" id="tab-basic">
+          <div class="field"><label>卡牌名稱</label><input id="name" class="input" value="Celestial Emberfox" /></div>
+          <div class="field"><label>HP / Power</label><input id="hp" class="input" value="320" /></div>
+          <div class="field"><label>能力名稱</label><input id="ability" class="input" value="Astral Burst" /></div>
+          <div class="field"><label>能力敘述</label><textarea id="desc" class="textarea">Channel prismatic flames. Draw 2 cards and strike 1 target.</textarea></div>
+          <div class="field row">
+            <div><label>繪師</label><input id="illustrator" class="input" value="Shirly Zhang" /></div>
+            <div><label>卡號</label><input id="setNumber" class="input" value="PB-001 / ALT" /></div>
+          </div>
+        </section>
+
+        <section class="tab-content" id="tab-visual">
+          <div class="field">
+            <label>一鍵風格切換</label>
+            <div class="row">
+              <button class="chip active" id="btnVintage">復古模式</button>
+              <button class="chip" id="btnModern">現代模式</button>
+            </div>
+          </div>
+          <div class="toggle">
+            <span>Shadowless（去邊框陰影）</span>
+            <input type="checkbox" id="shadowless" />
+          </div>
+          <div class="toggle">
+            <span>Vintage Filter（紙質感）</span>
+            <input type="checkbox" id="vintageFilter" checked />
+          </div>
+          <div class="field">
+            <label>稀有度星級</label>
+            <div class="chip-row">
+              <button class="chip" data-rarity="1">★</button>
+              <button class="chip" data-rarity="2">★★</button>
+              <button class="chip active" data-rarity="3">★★★</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-content" id="tab-upload">
+          <div class="field">
+            <label>上傳插畫</label>
+            <input id="artUpload" type="file" class="input" accept="image/*" />
+            <small id="uploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳插畫</small>
+          </div>
+          <div class="field">
+            <label>能量符號</label>
+            <div class="chip-row" id="energyWrap"></div>
+          </div>
+          <button class="btn" id="btnReset" style="width:100%;">一鍵重置</button>
+        </section>
+      </aside>
+
+      <section class="preview-wrap">
+        <div class="scene" id="scene">
+          <div class="card" id="card3d">
+            <div class="face front-shell" id="frontShell">
+              <div class="front-inner" id="frontInner">
+                <div class="card-art" id="cardArt"></div>
+                <div class="holo" id="holo"></div>
+                <div class="header" id="cardHeader">
+                  <div class="name" id="vName">Celestial Emberfox</div>
+                  <div class="hp"><small>HP</small><span id="vHp">320</span></div>
+                </div>
+                <div class="infobox">
+                  <div class="ability" id="vAbility">Astral Burst</div>
+                  <div class="desc" id="vDesc">Channel prismatic flames. Draw 2 cards and strike 1 target.</div>
+                  <div class="energy" id="vEnergy"></div>
+                </div>
+                <div class="footer">
+                  <div id="vRarity">★ ★ ★</div>
+                  <div id="vIllustrator">Illus. Shirly Zhang</div>
+                  <div id="vSet">PB-001 / ALT</div>
+                </div>
+                <div class="edition" id="edition">1st Edition</div>
+                <div class="texture" id="texture" style="display:none;"></div>
+                <div class="vintage" id="vintage"></div>
+              </div>
+            </div>
+            <div class="face back">
+              <div class="ring r1"></div>
+              <div class="ring r2"></div>
+              <div class="core"></div>
+            </div>
+          </div>
+          <div class="reflection"></div>
+        </div>
+        <div class="status" id="status">已修復入口：現在點擊主頁卡片會直接進入本程序。</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      era: "vintage",
+      showBack: false,
+      rarity: 3,
+      energies: ["fire", "electric", "psychic"],
+      artUrl: null,
+    };
+
+    const refs = {
+      tabs: document.querySelectorAll(".tab"),
+      contents: {
+        basic: document.getElementById("tab-basic"),
+        visual: document.getElementById("tab-visual"),
+        upload: document.getElementById("tab-upload"),
+      },
+      name: document.getElementById("name"),
+      hp: document.getElementById("hp"),
+      ability: document.getElementById("ability"),
+      desc: document.getElementById("desc"),
+      illustrator: document.getElementById("illustrator"),
+      setNumber: document.getElementById("setNumber"),
+      vName: document.getElementById("vName"),
+      vHp: document.getElementById("vHp"),
+      vAbility: document.getElementById("vAbility"),
+      vDesc: document.getElementById("vDesc"),
+      vIllustrator: document.getElementById("vIllustrator"),
+      vSet: document.getElementById("vSet"),
+      vEnergy: document.getElementById("vEnergy"),
+      vRarity: document.getElementById("vRarity"),
+      card3d: document.getElementById("card3d"),
+      scene: document.getElementById("scene"),
+      cardArt: document.getElementById("cardArt"),
+      frontShell: document.getElementById("frontShell"),
+      cardHeader: document.getElementById("cardHeader"),
+      holo: document.getElementById("holo"),
+      texture: document.getElementById("texture"),
+      vintage: document.getElementById("vintage"),
+      edition: document.getElementById("edition"),
+      shadowless: document.getElementById("shadowless"),
+      vintageFilter: document.getElementById("vintageFilter"),
+      btnVintage: document.getElementById("btnVintage"),
+      btnModern: document.getElementById("btnModern"),
+      btnFlip: document.getElementById("btnFlip"),
+      btnExport: document.getElementById("btnExport"),
+      artUpload: document.getElementById("artUpload"),
+      uploadName: document.getElementById("uploadName"),
+      energyWrap: document.getElementById("energyWrap"),
+      status: document.getElementById("status"),
+      rarityBtns: document.querySelectorAll("[data-rarity]"),
+    };
+
+    const ENERGY_META = {
+      fire: { symbol: "F", gradient: "linear-gradient(135deg,#fb923c,#f43f5e)" },
+      water: { symbol: "W", gradient: "linear-gradient(135deg,#22d3ee,#2563eb)" },
+      electric: { symbol: "L", gradient: "linear-gradient(135deg,#fde047,#f97316)" },
+      grass: { symbol: "G", gradient: "linear-gradient(135deg,#a3e635,#16a34a)" },
+      psychic: { symbol: "P", gradient: "linear-gradient(135deg,#e879f9,#7c3aed)" },
+      dark: { symbol: "D", gradient: "linear-gradient(135deg,#64748b,#0f172a)" },
+    };
+
+    function setStatus(text) { refs.status.textContent = text; }
+
+    function renderEnergyButtons() {
+      refs.energyWrap.innerHTML = "";
+      Object.keys(ENERGY_META).forEach((key) => {
+        const b = document.createElement("button");
+        b.className = "chip" + (state.energies.includes(key) ? " active" : "");
+        b.textContent = ENERGY_META[key].symbol;
+        b.onclick = () => {
+          const has = state.energies.includes(key);
+          if (has) state.energies = state.energies.filter((v) => v !== key);
+          else state.energies.push(key);
+          if (!state.energies.length) state.energies = [key];
+          renderEnergyButtons();
+          renderCard();
+        };
+        refs.energyWrap.appendChild(b);
+      });
+    }
+
+    function renderCardEnergy() {
+      refs.vEnergy.innerHTML = "";
+      state.energies.forEach((key) => {
+        const orb = document.createElement("div");
+        orb.className = "orb";
+        orb.textContent = ENERGY_META[key].symbol;
+        orb.style.background = ENERGY_META[key].gradient;
+        refs.vEnergy.appendChild(orb);
+      });
+    }
+
+    function renderCard() {
+      refs.vName.textContent = refs.name.value || "Unnamed";
+      refs.vHp.textContent = refs.hp.value || "0";
+      refs.vAbility.textContent = refs.ability.value || "Ability";
+      refs.vDesc.textContent = refs.desc.value || "";
+      refs.vIllustrator.textContent = "Illus. " + (refs.illustrator.value || "-");
+      refs.vSet.textContent = refs.setNumber.value || "-";
+      refs.vRarity.textContent = Array.from({ length: state.rarity }).map(() => "★").join(" ");
+      renderCardEnergy();
+
+      const modern = state.era === "modern";
+      refs.cardArt.classList.toggle("full", modern);
+      refs.texture.style.display = modern ? "block" : "none";
+      refs.edition.style.display = modern ? "none" : "block";
+      refs.vintage.style.display = refs.vintageFilter.checked ? "block" : "none";
+      refs.cardArt.style.boxShadow = refs.shadowless.checked ? "none" : "0 22px 38px -24px rgba(15,23,42,.95)";
+
+      if (modern) {
+        refs.frontShell.style.background = "linear-gradient(145deg, rgba(255,255,255,.35), rgba(148,163,184,.22), rgba(255,255,255,.08))";
+        refs.frontShell.style.boxShadow = "0 40px 120px -52px rgba(56,189,248,.55)";
+      } else {
+        refs.frontShell.style.background = "linear-gradient(145deg,#fff8d4 0%,#ffcb05 18%,#b68d2d 42%,#ffe89a 65%,#8d6518 100%)";
+        refs.frontShell.style.boxShadow = "0 35px 110px -50px rgba(255,203,5,.7)";
+      }
+    }
+
+    function activateTab(tab) {
+      refs.tabs.forEach((node) => node.classList.toggle("active", node.dataset.tab === tab));
+      Object.keys(refs.contents).forEach((key) => refs.contents[key].classList.toggle("active", key === tab));
+    }
+
+    async function applySmartHeaderColor(file) {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const i = new Image();
+          i.onload = () => resolve(i);
+          i.onerror = reject;
+          i.src = url;
+        });
+        const c = document.createElement("canvas");
+        c.width = 48; c.height = 48;
+        const x = c.getContext("2d");
+        x.drawImage(img, 0, 0, 48, 48);
+        const data = x.getImageData(0, 0, 48, 48).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const rr = data[i], gg = data[i+1], bb = data[i+2];
+          const sat = Math.max(rr, gg, bb) - Math.min(rr, gg, bb);
+          if (sat < 14) continue;
+          r += rr; g += gg; b += bb; count += 1;
+        }
+        if (!count) return;
+        r = Math.round(r / count); g = Math.round(g / count); b = Math.round(b / count);
+        const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+        refs.cardHeader.style.background = `rgb(${r},${g},${b})`;
+        refs.cardHeader.style.color = lum > 0.62 ? "#0f172a" : "#f8fafc";
+        setStatus("已根據上傳圖片主色調自動更新標題欄。");
+      } catch (_) {
+        setStatus("圖片已載入，但智能配色失敗。");
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    refs.tabs.forEach((node) => node.addEventListener("click", () => activateTab(node.dataset.tab)));
+    [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber].forEach((node) => node.addEventListener("input", renderCard));
+
+    refs.btnVintage.onclick = () => {
+      state.era = "vintage";
+      refs.btnVintage.classList.add("active");
+      refs.btnModern.classList.remove("active");
+      renderCard();
+    };
+    refs.btnModern.onclick = () => {
+      state.era = "modern";
+      refs.btnModern.classList.add("active");
+      refs.btnVintage.classList.remove("active");
+      renderCard();
+    };
+
+    refs.shadowless.onchange = renderCard;
+    refs.vintageFilter.onchange = renderCard;
+
+    refs.rarityBtns.forEach((button) => {
+      button.onclick = () => {
+        state.rarity = Number(button.dataset.rarity);
+        refs.rarityBtns.forEach((b) => b.classList.toggle("active", b === button));
+        renderCard();
+      };
+    });
+
+    refs.btnFlip.onclick = () => {
+      state.showBack = !state.showBack;
+      refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
+      refs.btnFlip.textContent = state.showBack ? "顯示正面" : "翻到背面";
+    };
+
+    refs.scene.addEventListener("mousemove", (event) => {
+      if (state.showBack) return;
+      const rect = refs.scene.getBoundingClientRect();
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = (event.clientY - rect.top) / rect.height;
+      const rx = (0.5 - ny) * 9;
+      const ry = (nx - 0.5) * 12;
+      refs.card3d.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      refs.holo.style.setProperty("--mx", `${nx * 100}%`);
+      refs.holo.style.setProperty("--my", `${ny * 100}%`);
+    });
+    refs.scene.addEventListener("mouseleave", () => {
+      refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
+      refs.holo.style.setProperty("--mx", "50%");
+      refs.holo.style.setProperty("--my", "50%");
+    });
+
+    refs.artUpload.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (state.artUrl) URL.revokeObjectURL(state.artUrl);
+      state.artUrl = URL.createObjectURL(file);
+      refs.uploadName.textContent = file.name;
+      refs.cardArt.style.background = `url("${state.artUrl}") center / cover`;
+      await applySmartHeaderColor(file);
+    };
+
+    refs.btnReset.onclick = () => {
+      refs.name.value = "Celestial Emberfox";
+      refs.hp.value = "320";
+      refs.ability.value = "Astral Burst";
+      refs.desc.value = "Channel prismatic flames. Draw 2 cards and strike 1 target.";
+      refs.illustrator.value = "Shirly Zhang";
+      refs.setNumber.value = "PB-001 / ALT";
+      refs.shadowless.checked = false;
+      refs.vintageFilter.checked = true;
+      state.rarity = 3;
+      refs.rarityBtns.forEach((b) => b.classList.toggle("active", b.dataset.rarity === "3"));
+      state.energies = ["fire", "electric", "psychic"];
+      state.era = "vintage";
+      refs.btnVintage.classList.add("active");
+      refs.btnModern.classList.remove("active");
+      refs.cardHeader.style.background = "rgb(51,65,85)";
+      refs.cardHeader.style.color = "#f8fafc";
+      renderEnergyButtons();
+      renderCard();
+      setStatus("已重置為預設收藏版樣式。");
+    };
+
+    refs.btnExport.onclick = async () => {
+      const target = document.querySelector(".scene");
+      if (!window.html2canvas || !target) {
+        setStatus("html2canvas 未載入完成，請稍後。");
+        return;
+      }
+      setStatus("正在輸出 PNG...");
+      const canvas = await window.html2canvas(target, { backgroundColor: null, scale: 3, useCORS: true });
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = (refs.name.value || "legendary-card").toLowerCase().replace(/\s+/g, "-") + ".png";
+      link.click();
+      setStatus("PNG 匯出完成。");
+    };
+
+    renderEnergyButtons();
+    renderCard();
+  </script>
+</body>
+</html>
