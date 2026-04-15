@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=16">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -16,15 +16,13 @@
     <header class="site-header">
         <a href="../index.html" class="back-link">← 返回桃花源</a>
         <h1>書法字帖生成平台</h1>
-        <p>輸入文字即時排版；可切換字型、田字／米字／空白格；字帖版本含<strong>標準墨色</strong>、<strong>描紅（紅框鏤空）</strong>、<strong>淺粉色描紅（實心）</strong>；支援列印與 PDF／PNG／TXT 下載。</p>
     </header>
 
     <main class="layout">
         <aside class="panel">
             <label for="textInput">字帖內容</label>
-            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字；每個半形空格（Space）佔一格，支援換行。" aria-describedby="textInputHint">春眠不覺曉，處處聞啼鳥。
+            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
-            <p class="copy-style-hint" id="textInputHint">每個半形空格（Space）對應字帖中的一個方格；連續空格會排出連續空白格。</p>
 
             <div class="row">
                 <div class="field">
@@ -32,9 +30,9 @@
                     <select id="fontPreset">
                         <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
                         <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                        <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">行書（Y式筆書 TC｜OFL）</option>
-                        <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">隸書（阿里媽媽刀隸體｜免費商用）</option>
-                        <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字（開放資料授權）</option>
+                        <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
+                        <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
+                        <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
                         <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
                         <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
                         <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
@@ -43,20 +41,19 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="customFont">自訂字體（選填）</label>
+                    <label for="customFont">自訂字體</label>
                     <input id="customFont" type="text" placeholder="例如: LXGW WenKai, Noto Serif TC" autocomplete="off">
                 </div>
             </div>
 
             <div class="row row-single">
                 <div class="field">
-                    <label for="copyStyle">字帖版本<span class="label-sub">（標準墨色／描紅）</span></label>
-                    <select id="copyStyle" name="copyStyle" aria-describedby="copyStyleHint">
+                    <label for="copyStyle">字帖版本</label>
+                    <select id="copyStyle" name="copyStyle">
                         <option value="standard">標準墨色</option>
                         <option value="hong">描紅（紅框鏤空）</option>
                         <option value="lightPinkHong">淺粉色描紅</option>
                     </select>
-                    <p class="copy-style-hint" id="copyStyleHint">標準墨色：實心字，適合對照。</p>
                 </div>
             </div>
 
@@ -70,14 +67,14 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="fontSize">字體大小（px）</label>
+                    <label for="fontSize">字體大小</label>
                     <input id="fontSize" type="number" min="18" max="72" step="1" value="36">
                 </div>
             </div>
 
             <div class="row">
                 <div class="field">
-                    <label for="lineHeight">行高倍率<span class="label-sub">（方格寬高一併變化）</span></label>
+                    <label for="lineHeight">行高倍率</label>
                     <input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.15">
                 </div>
                 <div class="field">
@@ -109,7 +106,6 @@
                 <button id="btnTxt" type="button">下載 TXT</button>
             </div>
 
-            <p id="status" class="status">準備就緒</p>
         </aside>
 
         <section class="preview-wrap">
@@ -117,6 +113,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=15"></script>
+    <script src="app.js?v=16"></script>
 </body>
 </html>

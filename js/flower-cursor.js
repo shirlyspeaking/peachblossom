@@ -1,5 +1,5 @@
 /**
- * WebGL Flower Cursor：貼圖回授開花（無游標莖線），透明疊加不改頁面粉色底。
+ * WebGL 游標：粉色莖線（回授）＋桃花（停留漸深），透明疊加不改頁面粉底。
  */
 (function () {
     const VERTEX = `
@@ -10,7 +10,6 @@ void main() {
 }`;
 
     const FRAGMENT = `
-#define PI 3.14159265359
 precision highp float;
 
 uniform float u_ratio;
@@ -19,6 +18,7 @@ uniform float u_stop_time;
 uniform vec2 u_stop_randomizer;
 uniform float u_clean;
 uniform vec2 u_point;
+uniform float u_time;
 uniform sampler2D u_texture;
 varying vec2 vUv;
 
@@ -34,11 +34,11 @@ float noise(vec2 n) {
 float flower_shape(vec2 _point, float _size, float _outline, float _tickniess, float _noise, float _angle_offset) {
     float random_by_uv = noise(vUv);
     float petals_thickness = .5;
-    float petals_number = 5. + floor(u_stop_randomizer[0] * 4.);
+    float petals_number = 5.;
     float angle_animated_offset = .7 * (random_by_uv - .5) / (1. + 30. * u_stop_time);
     float flower_angle = atan(_point.y, _point.x) - angle_animated_offset;
     float flower_sectoral_shape = abs(sin(flower_angle * .5 * petals_number + _angle_offset)) + _tickniess * petals_thickness;
-    vec2 flower_size_range = vec2(4., 18.);
+    vec2 flower_size_range = vec2(6., 14.);
     float flower_radial_shape = length(_point) * (flower_size_range[0] + flower_size_range[1] * u_stop_randomizer[0]);
     float radius_noise = sin(flower_angle * 13. + 15. * random_by_uv);
     flower_radial_shape += _noise * radius_noise;
@@ -54,19 +54,54 @@ void main() {
     vec3 base = prev.rgb;
     float prevA = prev.a;
 
+    /* 衰減：讓舊軌跡慢慢淡出 */
+    base *= 0.96;
+    prevA *= 0.96;
+
     vec2 cursor = vUv - u_point.xy;
     cursor.x *= u_ratio;
 
-    vec3 flower_color = vec3(.7 + u_stop_randomizer[1], .8 * u_stop_randomizer[1], 2.9 + u_stop_randomizer[0] * .6);
+    /* —— 粉色莖線（移動時） —— */
+    if (u_moving > 0.5) {
+        float dist = length(cursor);
+        float sigma = 0.004;
+        float core = exp(-dist * dist / (sigma * sigma));
+        float glow = exp(-dist * dist / (sigma * sigma * 8.0));
+        vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
+        float sparkle = 0.55 + 0.45 * noise(nuv);
+        vec3 pinkA = vec3(1.0, 0.76, 0.84);
+        vec3 pinkB = vec3(0.92, 0.52, 0.68);
+        vec3 trail = mix(pinkA, pinkB, glow + sparkle * 0.3);
+        float strength = core * 0.85 + glow * 0.35;
+        strength *= 0.5 + 0.5 * sparkle;
+        base = mix(base, trail, strength);
+        prevA = max(prevA, strength * 0.85);
+    }
+
+    /* —— 桃花：停住時綻放，停留越久越深 —— */
     float s0 = flower_shape(cursor, 1., .96, 1., .15, 0.);
     float s1 = flower_shape(cursor, 1.05, 1.07, 1., .15, 0.);
-    vec3 flower_new = flower_color * s0;
-    vec3 flower_mask = 1. - vec3(s1);
-    vec3 flower_mid = vec3(-.6) * flower_shape(cursor, .15, 1., 2., .1, 1.9);
+    float center_s = flower_shape(cursor, .15, 1., 2., .1, 1.9);
 
-    vec3 color = base * flower_mask + (flower_new + flower_mid);
+    float deepen = smoothstep(0.0, 1.0, u_stop_time);
+
+    /* 花瓣：淺粉→深桃紅 */
+    vec3 lightPink = vec3(1.0, 0.82, 0.88);
+    vec3 deepPink = vec3(0.82, 0.24, 0.48);
+    vec3 petal_color = mix(lightPink, deepPink, deepen * 0.75);
+
+    vec3 flower_new = petal_color * s0;
+    vec3 flower_mask = 1. - vec3(s1);
+
+    /* 花心：淡黃→暖棕 */
+    vec3 lightCenter = vec3(1.0, 0.94, 0.68);
+    vec3 deepCenter = vec3(0.88, 0.58, 0.38);
+    vec3 center_col = mix(lightCenter, deepCenter, deepen * 0.5);
+    vec3 flower_mid = center_col * center_s * 0.7;
+
+    vec3 color = base * flower_mask + flower_new + flower_mid;
     color *= u_clean;
-    color = clamp(color, vec3(.0, .0, .15), vec3(1., 1., .4));
+    color = clamp(color, vec3(0.), vec3(1.));
 
     float flowerVis = max(s0, s1 * 0.85);
     float alpha = max(prevA * 0.993, flowerVis * clamp(u_stop_time * 1.4, 0., 1.));
@@ -103,6 +138,7 @@ void main() {
             u_clean: { value: 1 },
             u_point: { value: new THREE.Vector2(0.5, 0.5) },
             u_texture: { value: null },
+            u_time: { value: 0 },
         };
 
         const material = new THREE.ShaderMaterial({
@@ -130,12 +166,9 @@ void main() {
         const blitMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMat);
         blitScene.add(blitMesh);
 
-        let w = 0;
-        let h = 0;
-        let rtA = null;
-        let rtB = null;
-        let read = null;
-        let write = null;
+        let w = 0, h = 0;
+        let rtA = null, rtB = null;
+        let read = null, write = null;
 
         function allocTargets() {
             if (rtA) rtA.dispose();
@@ -183,11 +216,13 @@ void main() {
 
         const mouse = new THREE.Vector2(0.5, 0.5);
         const prevMouse = new THREE.Vector2(0.5, 0.5);
+        let prevMoving = 0;
 
         function onPointer(e) {
-            const x = e.clientX / window.innerWidth;
-            const y = 1 - e.clientY / window.innerHeight;
-            mouse.set(x, y);
+            mouse.set(
+                e.clientX / window.innerWidth,
+                1 - e.clientY / window.innerHeight
+            );
         }
         window.addEventListener("pointermove", onPointer, { passive: true });
         window.addEventListener("pointerdown", onPointer, { passive: true });
@@ -201,14 +236,14 @@ void main() {
         }
 
         const clock = new THREE.Clock();
-        let prevMoving = 0;
 
         function tick() {
-            const dt = Math.min(clock.getDelta(), 0.1);
+            var dt = Math.min(clock.getDelta(), 0.1);
+            uniforms.u_time.value += dt;
 
-            const dist = mouse.distanceTo(prevMouse);
+            var dist = mouse.distanceTo(prevMouse);
+            var moving = dist > 0.0012 ? 1 : 0;
 
-            let moving = dist > 0.0012 ? 1 : 0;
             if (moving) {
                 uniforms.u_stop_time.value = 0;
             } else {
@@ -236,7 +271,7 @@ void main() {
             renderer.clear();
             renderer.render(blitScene, blitCam);
 
-            const tmp = read;
+            var tmp = read;
             read = write;
             write = tmp;
 

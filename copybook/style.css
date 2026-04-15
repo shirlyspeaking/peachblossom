@@ -79,11 +79,6 @@ body {
     margin: 8px 0 6px;
 }
 
-.site-header p {
-    margin: 0;
-    color: #7c4761;
-}
-
 .back-link {
     color: var(--berry-dark);
     text-decoration: none;
@@ -143,17 +138,6 @@ select {
     border-color: rgba(142, 33, 87, 0.45);
 }
 
-.font-hint {
-    margin: 6px 0 0;
-    font-size: 0.78rem;
-    color: #8a5b73;
-    line-height: 1.4;
-}
-
-.font-hint a {
-    color: var(--berry-mid);
-}
-
 textarea {
     resize: vertical;
     min-height: 160px;
@@ -167,12 +151,6 @@ textarea {
 
 .row.row-single {
     grid-template-columns: 1fr;
-}
-
-.label-sub {
-    font-weight: 400;
-    color: #8a5b73;
-    font-size: 0.88em;
 }
 
 .actions {
@@ -206,12 +184,6 @@ button:hover {
     filter: brightness(1.05);
 }
 
-.status {
-    margin: 10px 0 0;
-    font-size: 0.85rem;
-    color: #70455d;
-}
-
 .preview-wrap {
     min-width: 0;
 }
@@ -230,13 +202,6 @@ button:hover {
 /* 淺粉色描紅（實心）：格線略柔，襯淺粉字 */
 .preview.preview--light-pink-hong {
     --line-soft: rgba(199, 79, 123, 0.18);
-}
-
-.copy-style-hint {
-    font-size: 0.85rem;
-    color: #7c4761;
-    line-height: 1.45;
-    margin: 0.45rem 0 0;
 }
 
 .preview--a4 .page {
