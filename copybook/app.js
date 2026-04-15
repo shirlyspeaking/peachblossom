@@ -6,14 +6,12 @@
     var customFont = document.getElementById('customFont');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
-    var copyStyleHint = document.getElementById('copyStyleHint');
     var fontSize = document.getElementById('fontSize');
     var lineHeight = document.getElementById('lineHeight');
     var pageSize = document.getElementById('pageSize');
     var charsPerLine = document.getElementById('charsPerLine');
     var linesPerPage = document.getElementById('linesPerPage');
     var preview = document.getElementById('preview');
-    var statusEl = document.getElementById('status');
     var btnRegenerate = document.getElementById('btnRegenerate');
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
@@ -23,10 +21,6 @@
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
-
-    function setStatus(msg) {
-        if (statusEl) statusEl.textContent = msg;
-    }
 
     function escapeSvgText(s) {
         return String(s)
@@ -192,18 +186,6 @@
             psize +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '');
-
-        if (copyStyleHint) {
-            if (hongMode) {
-                copyStyleHint.textContent =
-                    '描紅：紅色字框、中間鏤空，可透見格線；列印與匯出皆適用。';
-            } else if (lightPinkHongMode) {
-                copyStyleHint.textContent =
-                    '淺粉色描紅：實心淺粉紅字，可覆寫練字；列印與 PDF／PNG 匯出皆為此色。';
-            } else {
-                copyStyleHint.textContent = '標準墨色：實心字，適合對照。';
-            }
-        }
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
