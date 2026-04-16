@@ -113,11 +113,9 @@
 
         /* ===== Layout ===== */
         .layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-            gap: 18px;
+            display: block;
         }
-        .board-section, .cards-section {
+        .board-section {
             background: var(--panel); border-radius: var(--radius-lg);
             padding: 18px; box-shadow: var(--shadow-card);
         }
@@ -233,7 +231,79 @@
         .draw-result.chance-result { border-color: var(--chance); background: rgba(255,190,11,0.12); }
         .draw-result.fate-result   { border-color: var(--fate);   background: rgba(58,134,255,0.1); }
 
-        /* ===== Cards Section ===== */
+        /* ===== Cards Drawer ===== */
+        .cards-drawer {
+            position: fixed;
+            top: 16px;
+            right: 0;
+            height: calc(100vh - 32px);
+            width: min(460px, calc(100vw - 20px));
+            z-index: 700;
+            display: flex;
+            align-items: stretch;
+            transform: translateX(0);
+            transition: transform var(--transition);
+            pointer-events: none;
+        }
+
+        .cards-drawer.is-collapsed {
+            transform: translateX(calc(100% - 48px));
+        }
+
+        .drawer-handle {
+            width: 48px;
+            border: 0;
+            border-radius: 14px 0 0 14px;
+            background: linear-gradient(180deg, #8338ec 0%, #3a86ff 100%);
+            color: white;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: -4px 8px 18px rgba(63, 29, 56, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 0.08em;
+            padding: 8px 0;
+            pointer-events: auto;
+        }
+
+        .drawer-handle span {
+            transform: rotate(180deg);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .drawer-panel {
+            flex: 1;
+            background: var(--panel);
+            border-radius: 0 16px 16px 0;
+            box-shadow: -10px 0 30px rgba(63, 29, 56, 0.18);
+            padding: 14px;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+
+        .drawer-panel .section-header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.92);
+            z-index: 2;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .drawer-close {
+            border: 1px solid rgba(63,29,56,0.15);
+            background: white;
+            border-radius: 999px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
         .cards-tabs {
             display: flex; gap: 0; margin-bottom: 14px;
             border-radius: var(--radius-sm); overflow: hidden;
@@ -320,16 +390,44 @@
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         /* ===== Responsive ===== */
-        @media (max-width: 1200px) {
-            .layout { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1200px) {}
         @media (max-width: 768px) {
             .title-wrap h1 { font-size: 1.6rem; }
             .top-bar { flex-direction: column; align-items: flex-start; }
+
+            .cards-drawer {
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                width: 100%;
+                height: min(76vh, 620px);
+                transform: translateY(0);
+            }
+
+            .cards-drawer.is-collapsed {
+                transform: translateY(calc(100% - 40px));
+            }
+
+            .drawer-handle {
+                width: 100%;
+                height: 40px;
+                border-radius: 14px 14px 0 0;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+            }
+
+            .drawer-handle span {
+                transform: none;
+            }
+
+            .drawer-panel {
+                border-radius: 0;
+            }
         }
         @media (max-width: 480px) {
             .page { padding: 16px 12px 32px; }
-            .board-section, .cards-section { padding: 12px; }
+            .board-section { padding: 12px; }
         }
     </style>
 </head>
@@ -384,23 +482,30 @@
                 </div>
             </section>
 
-            <section class="cards-section">
-                <div class="section-header">
-                    <h2 class="section-title">🃏 機會卡 / 命運卡</h2>
-                </div>
-                <div class="cards-tabs">
-                    <button id="tab-chance" class="active-chance">機會卡 (<span id="chance-count">0</span>)</button>
-                    <button id="tab-fate">命運卡 (<span id="fate-count">0</span>)</button>
-                </div>
-                <div class="cards-grid" id="cards-chance"></div>
-                <div class="cards-grid" id="cards-fate" style="display:none"></div>
-                <button class="add-card-btn" id="add-card">＋ 新增一張卡片</button>
-                <div class="tip">
-                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
-                </div>
-            </section>
         </div>
     </div>
+
+    <aside class="cards-drawer" id="cards-drawer" aria-label="卡片編輯側欄">
+        <button class="drawer-handle" id="drawer-toggle" type="button" aria-expanded="true" aria-controls="drawer-panel">
+            <span>收合卡片</span>
+        </button>
+        <section class="drawer-panel" id="drawer-panel">
+            <div class="section-header">
+                <h2 class="section-title">🃏 機會卡 / 命運卡</h2>
+                <button class="drawer-close" id="drawer-close" type="button" title="收合">✕</button>
+            </div>
+            <div class="cards-tabs">
+                <button id="tab-chance" class="active-chance">機會卡 (<span id="chance-count">0</span>)</button>
+                <button id="tab-fate">命運卡 (<span id="fate-count">0</span>)</button>
+            </div>
+            <div class="cards-grid" id="cards-chance"></div>
+            <div class="cards-grid" id="cards-fate" style="display:none"></div>
+            <button class="add-card-btn" id="add-card">＋ 新增一張卡片</button>
+            <div class="tip">
+                小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+            </div>
+        </section>
+    </aside>
 
     <div class="toast" id="toast"></div>
 
@@ -435,7 +540,7 @@
             { type: "tile-land",    label: "崑崙墟",   effect: "可購買地塊" },
             { type: "tile-event",   label: "機會",     effect: "抽機會卡" },
             { type: "tile-land",    label: "青丘",     effect: "支付過路費" },
-            { type: "tile-tax",     label: "貢品稅",   effect: "支付 120 金幣" },
+            { type: "tile-land",    label: "玄圃",     effect: "可購買地塊" },
             { type: "tile-land",    label: "扶桑木",   effect: "可升級領地" },
             { type: "tile-jail",    label: "幽都監",   effect: "休息一回合" },
             { type: "tile-land",    label: "流沙國",   effect: "支付過路費" },
@@ -518,6 +623,10 @@
         const chanceCount = document.getElementById("chance-count");
         const fateCount = document.getElementById("fate-count");
         const toastEl = document.getElementById("toast");
+        const cardsDrawer = document.getElementById("cards-drawer");
+        const drawerToggle = document.getElementById("drawer-toggle");
+        const drawerClose = document.getElementById("drawer-close");
+        const drawerToggleText = drawerToggle.querySelector("span");
 
         /* ---------- Legend ---------- */
         (function buildLegend() {
@@ -634,6 +743,22 @@
         tabChance.addEventListener("click", () => { activeTab = "chance"; showTabs(); });
         tabFate.addEventListener("click", () => { activeTab = "fate"; showTabs(); });
 
+        /* ---------- Drawer ---------- */
+        function setDrawerCollapsed(collapsed) {
+            cardsDrawer.classList.toggle("is-collapsed", collapsed);
+            drawerToggle.setAttribute("aria-expanded", String(!collapsed));
+            drawerToggleText.textContent = collapsed ? "展開卡片" : "收合卡片";
+            localStorage.setItem(`${STORAGE_KEY}-drawer-collapsed`, collapsed ? "1" : "0");
+        }
+
+        drawerToggle.addEventListener("click", () => {
+            setDrawerCollapsed(!cardsDrawer.classList.contains("is-collapsed"));
+        });
+
+        drawerClose.addEventListener("click", () => {
+            setDrawerCollapsed(true);
+        });
+
         /* ---------- Add card ---------- */
         document.getElementById("add-card").addEventListener("click", () => {
             state[activeTab].push({ title: "", content: "" });
@@ -730,6 +855,7 @@
         renderBoard();
         renderCards();
         showTabs();
+        setDrawerCollapsed(localStorage.getItem(`${STORAGE_KEY}-drawer-collapsed`) === "1");
     })();
     </script>
 </body>

@@ -50,142 +50,84 @@
         }
 
         .logo {
-            width: 120px;
-            height: 128px;
-            margin: 0 auto 18px;
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 16px;
             position: relative;
             animation: float 4s ease-in-out infinite;
-            cursor: pointer;
             user-select: none;
         }
 
-        .logo .out {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .logo .fade-in {
+        .logo .out,
+        .logo .fade-in,
+        .logo .container {
             position: absolute;
             inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
 
         .logo .container {
-            position: relative;
-            width: 92px;
-            height: 92px;
-            filter: drop-shadow(0 8px 22px rgba(142, 33, 87, 0.24));
+            filter: drop-shadow(0 8px 20px rgba(201, 75, 124, 0.22));
         }
 
-        .logo .common {
+        .logo .container i {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 19px;
-            height: 33px;
-            border-radius: 65% 65% 58% 58%;
-            transform-origin: 50% 100%;
-            background: linear-gradient(180deg, #fff8fd 0%, #ffd8ea 38%, #f2a8ca 70%, #d97da7 100%);
+            left: 18px;
+            top: 18px;
+            width: 60px;
+            height: 60px;
+            border-radius: 80% 80% 22% 80%;
+            transform-origin: 12px 12px;
+            mix-blend-mode: plus-lighter;
+            background: linear-gradient(160deg, rgba(255, 242, 249, 0.34), rgba(255, 182, 220, 0.22) 55%, rgba(255, 202, 132, 0.2));
             box-shadow:
-                inset 0 2px 8px rgba(255,255,255,0.8),
-                inset 0 -3px 6px rgba(207, 111, 156, 0.2),
-                0 0 8px rgba(255, 206, 227, 0.55);
-            opacity: 0.95;
-            transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+                13px 13px 5px var(--petal-color) inset,
+                0 0 18px var(--petal-color),
+                0 0 30px var(--spark-color);
+            animation: peach-spin var(--duration) var(--delay) infinite linear;
         }
 
-        /* 花苞狀態：5大瓣(1~5) + 3小瓣(6~8) 收束 */
-        .logo .one   { transform: translate(-50%, -50%) rotate(-10deg) scale(0.62); }
-        .logo .two   { transform: translate(-50%, -50%) rotate(34deg) scale(0.6); }
-        .logo .three { transform: translate(-50%, -50%) rotate(92deg) scale(0.62); }
-        .logo .four  { transform: translate(-50%, -50%) rotate(154deg) scale(0.6); }
-        .logo .five  { transform: translate(-50%, -50%) rotate(216deg) scale(0.62); }
-        .logo .six   { transform: translate(-50%, -50%) rotate(266deg) scale(0.44); }
-        .logo .seven { transform: translate(-50%, -50%) rotate(308deg) scale(0.46); }
-        .logo .eight { transform: translate(-50%, -50%) rotate(346deg) scale(0.45); }
+        .logo .container i:nth-child(odd) { animation-direction: reverse; }
 
-        .logo .bud-core {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 18px;
-            height: 28px;
-            transform: translate(-50%, -48%);
-            border-radius: 55% 55% 48% 48%;
-            background: linear-gradient(180deg, #ffe6f1 0%, #f6b7d2 55%, #cc6d9a 100%);
-            box-shadow: inset 0 2px 8px rgba(255,255,255,0.62);
-            z-index: 3;
-            transition: transform 0.65s ease, opacity 0.45s ease;
+        .logo .container i:nth-child(3n) {
+            border-radius: 82% 72% 24% 86%;
+            width: 58px;
+            height: 58px;
         }
 
-        .logo .stamen {
+        .logo .container i:nth-child(1)  { --petal-color: rgba(255, 159, 210, 0.3); --spark-color: rgba(255, 210, 140, 0.2); --delay: -0.21s; --duration: 5.4s; }
+        .logo .container i:nth-child(2)  { --petal-color: rgba(255, 145, 197, 0.3); --spark-color: rgba(255, 196, 120, 0.2); --delay: -1.17s; --duration: 6.1s; }
+        .logo .container i:nth-child(3)  { --petal-color: rgba(245, 126, 186, 0.28); --spark-color: rgba(255, 210, 138, 0.2); --delay: -0.67s; --duration: 6.9s; }
+        .logo .container i:nth-child(4)  { --petal-color: rgba(235, 116, 178, 0.28); --spark-color: rgba(255, 184, 108, 0.22); --delay: -2.04s; --duration: 7.4s; }
+        .logo .container i:nth-child(5)  { --petal-color: rgba(255, 175, 220, 0.29); --spark-color: rgba(255, 220, 154, 0.18); --delay: -1.82s; --duration: 5.9s; }
+        .logo .container i:nth-child(6)  { --petal-color: rgba(255, 140, 202, 0.29); --spark-color: rgba(255, 205, 132, 0.2); --delay: -0.95s; --duration: 6.6s; }
+        .logo .container i:nth-child(7)  { --petal-color: rgba(241, 128, 191, 0.3); --spark-color: rgba(255, 189, 114, 0.2); --delay: -2.54s; --duration: 7.2s; }
+        .logo .container i:nth-child(8)  { --petal-color: rgba(255, 168, 214, 0.28); --spark-color: rgba(255, 213, 144, 0.2); --delay: -1.25s; --duration: 5.5s; }
+        .logo .container i:nth-child(9)  { --petal-color: rgba(242, 119, 184, 0.28); --spark-color: rgba(255, 182, 96, 0.22); --delay: -3.04s; --duration: 7.8s; }
+        .logo .container i:nth-child(10) { --petal-color: rgba(255, 152, 206, 0.29); --spark-color: rgba(255, 205, 128, 0.2); --delay: -0.41s; --duration: 5.8s; }
+        .logo .container i:nth-child(11) { --petal-color: rgba(250, 133, 192, 0.3); --spark-color: rgba(255, 198, 116, 0.22); --delay: -1.58s; --duration: 6.4s; }
+        .logo .container i:nth-child(12) { --petal-color: rgba(255, 180, 222, 0.27); --spark-color: rgba(255, 223, 164, 0.18); --delay: -2.2s; --duration: 7.1s; }
+        .logo .container i:nth-child(13) { --petal-color: rgba(236, 114, 176, 0.29); --spark-color: rgba(255, 179, 102, 0.2); --delay: -0.75s; --duration: 6.7s; }
+        .logo .container i:nth-child(14) { --petal-color: rgba(255, 162, 210, 0.28); --spark-color: rgba(255, 207, 136, 0.2); --delay: -2.75s; --duration: 7.5s; }
+        .logo .container i:nth-child(15) { --petal-color: rgba(247, 124, 188, 0.3); --spark-color: rgba(255, 191, 110, 0.22); --delay: -1.06s; --duration: 5.6s; }
+        .logo .container i:nth-child(16) { --petal-color: rgba(255, 174, 218, 0.27); --spark-color: rgba(255, 220, 158, 0.19); --delay: -3.12s; --duration: 8.0s; }
+
+        .logo .core {
             position: absolute;
             left: 50%;
             top: 50%;
             width: 12px;
             height: 12px;
-            transform: translate(-50%, -50%) scale(0.2);
+            transform: translate(-50%, -50%);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #fff9df 0%, #ffd481 42%, #f0a946 100%);
-            box-shadow: 0 0 0 0 rgba(255, 215, 140, 0.0);
-            opacity: 0;
-            transition: transform 0.55s ease 0.35s, opacity 0.45s ease 0.35s, box-shadow 0.6s ease 0.35s;
-            z-index: 4;
-        }
-
-        .logo .bar {
-            width: 70px;
-            height: 6px;
-            margin-top: 7px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(201, 75, 124, 0.2);
-            overflow: hidden;
-            opacity: 0.9;
-        }
-
-        .logo .progress {
-            width: 0%;
-            height: 100%;
-            border-radius: inherit;
-            background: linear-gradient(90deg, #f9bfd9 0%, #f28ec1 50%, #d15794 100%);
-            transition: width 0.52s linear;
-        }
-
-        .logo.is-opening .progress,
-        .logo.is-blooming .progress {
-            width: 100%;
-        }
-
-        .logo.is-opening .common {
-            opacity: 1;
-        }
-
-        /* 綻放狀態：5大瓣主體 + 3小瓣填隙，做出桃花不對稱感 */
-        .logo.is-blooming .one   { transform: translate(-52%, -102%) rotate(-8deg) scale(1.08); }
-        .logo.is-blooming .two   { transform: translate(-18%, -88%) rotate(38deg) scale(1.0); }
-        .logo.is-blooming .three { transform: translate(3%, -51%) rotate(95deg) scale(1.05); }
-        .logo.is-blooming .four  { transform: translate(-14%, -16%) rotate(156deg) scale(0.98); }
-        .logo.is-blooming .five  { transform: translate(-56%, -2%) rotate(214deg) scale(1.06); }
-        .logo.is-blooming .six   { transform: translate(-92%, -26%) rotate(262deg) scale(0.78); }
-        .logo.is-blooming .seven { transform: translate(-103%, -62%) rotate(304deg) scale(0.8); }
-        .logo.is-blooming .eight { transform: translate(-82%, -92%) rotate(346deg) scale(0.76); }
-
-        .logo.is-blooming .bud-core {
-            opacity: 0.06;
-            transform: translate(-50%, -43%) scale(0.55);
-        }
-
-        .logo.is-blooming .stamen {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            background: radial-gradient(circle at 30% 30%, #fffde8 0%, #ffd46f 45%, #f0ab42 100%);
             box-shadow:
-                0 0 12px rgba(255, 213, 144, 0.85),
-                0 0 26px rgba(255, 196, 120, 0.45);
+                0 0 10px rgba(255, 214, 120, 0.85),
+                0 0 22px rgba(255, 196, 108, 0.45);
+            z-index: 2;
+        }
+
+        @keyframes peach-spin {
+            to { transform: rotate(1turn); }
         }
 
         @keyframes float {
@@ -671,19 +613,11 @@
             <div class="out">
                 <div class="fade-in">
                     <div class="container">
-                        <div class="one common"></div>
-                        <div class="two common"></div>
-                        <div class="three common"></div>
-                        <div class="four common"></div>
-                        <div class="five common"></div>
-                        <div class="six common"></div>
-                        <div class="seven common"></div>
-                        <div class="eight common"></div>
-                        <div class="bud-core"></div>
-                        <div class="stamen"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="progress"></div>
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                        <div class="core"></div>
                     </div>
                 </div>
             </div>
@@ -823,39 +757,6 @@
             if (typeof initFlowerCursor === "function" && canvas) {
                 initFlowerCursor(canvas, btn);
             }
-        })();
-
-        (function () {
-            var logo = document.getElementById("peachLogo");
-            if (!logo) return;
-
-            var openingTimer = null;
-
-            function openBloom() {
-                if (logo.classList.contains("is-blooming") || logo.classList.contains("is-opening")) return;
-                logo.classList.add("is-opening");
-                openingTimer = window.setTimeout(function () {
-                    logo.classList.remove("is-opening");
-                    logo.classList.add("is-blooming");
-                }, 480);
-            }
-
-            function closeBloom() {
-                window.clearTimeout(openingTimer);
-                openingTimer = null;
-                logo.classList.remove("is-opening");
-                logo.classList.remove("is-blooming");
-            }
-
-            logo.addEventListener("click", openBloom);
-            logo.addEventListener("mouseleave", closeBloom);
-            logo.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    openBloom();
-                }
-            });
-            logo.addEventListener("blur", closeBloom);
         })();
 
         document.querySelectorAll('.app-card:not(.coming-soon)').forEach(card => {
