@@ -1,6 +1,6 @@
 /**
- * WebGL 游標：即時粉色桃花效果。
- * 不保留任何前一幀殘影，避免移動、停留或花開後留下灰灰的痕跡。
+ * WebGL 游標：停住時顯示即時桃花。
+ * 不保留任何前一幀殘影，也不在移動時留下任何痕跡。
  */
 (function () {
     const VERTEX = `
@@ -51,22 +51,7 @@ void main() {
     vec2 cur = vUv - u_point.xy;
     cur.x *= u_ratio;
 
-    /* ===== 粉色移動花影：只出現在當前游標附近，不留下殘影 ===== */
-    if (u_moving > 0.5) {
-        float d = length(cur);
-        float core = exp(-d * d / 0.000022);
-        float glow = exp(-d * d / 0.00018);
-        vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
-        float sp = 0.55 + 0.45 * noise(nuv);
-
-        vec3 pink = vec3(1.0, 0.72, 0.82);
-        float trailA = (core * 0.95 + glow * 0.28) * (0.45 + 0.55 * sp);
-
-        base = mix(base, pink, trailA);
-        baseA = max(baseA, trailA);
-    }
-
-    /* ===== 桃花（停住時）— 純 alpha 合成，不乘遮罩 ===== */
+    /* ===== 桃花（只在停住時顯示）— 純 alpha 合成，不乘遮罩 ===== */
     float petal = flower_shape(cur, 1.0, 0.96, 1.0, 0.15, 0.0);
     float heart = flower_shape(cur, 0.15, 1.0, 2.0, 0.1, 1.9);
 
@@ -92,11 +77,13 @@ void main() {
     vec3 col = base;
     float a   = baseA;
 
-    col = mix(col, petalCol, petalA);
-    a   = a + (1.0 - a) * petalA;
+    if (u_moving < 0.5) {
+        col = mix(col, petalCol, petalA);
+        a   = a + (1.0 - a) * petalA;
 
-    col = mix(col, heartCol, heartA);
-    a   = a + (1.0 - a) * heartA;
+        col = mix(col, heartCol, heartA);
+        a   = a + (1.0 - a) * heartA;
+    }
 
     gl_FragColor = vec4(col, a);
 }`;
