@@ -51,7 +51,7 @@
 
         .logo {
             width: 120px;
-            height: 120px;
+            height: 128px;
             margin: 0 auto 18px;
             position: relative;
             animation: float 4s ease-in-out infinite;
@@ -59,182 +59,133 @@
             user-select: none;
         }
 
-        .logo-bloom {
+        .logo .out {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .logo .fade-in {
             position: absolute;
             inset: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            filter: drop-shadow(0 8px 24px rgba(142, 33, 87, 0.22));
         }
 
-        .logo-stem {
-            position: absolute;
-            bottom: 10px;
-            width: 8px;
-            height: 36px;
-            border-radius: 10px;
-            background: linear-gradient(180deg, #8dbf86 0%, #5f8f60 100%);
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.25);
-            z-index: 0;
+        .logo .container {
+            position: relative;
+            width: 92px;
+            height: 92px;
+            filter: drop-shadow(0 8px 22px rgba(142, 33, 87, 0.24));
         }
 
-        .logo-calyx {
+        .logo .common {
             position: absolute;
-            width: 28px;
-            height: 20px;
-            bottom: 34px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, #84b784 0%, #5d8f63 100%);
-            z-index: 2;
-        }
-
-        .logo-bud-base {
-            position: absolute;
-            width: 38px;
-            height: 56px;
-            border-radius: 52% 52% 46% 46%;
-            background: linear-gradient(180deg, #ffe5ef 0%, #f7b8d2 52%, #cf6e9e 100%);
+            left: 50%;
+            top: 50%;
+            width: 19px;
+            height: 33px;
+            border-radius: 65% 65% 58% 58%;
+            transform-origin: 50% 100%;
+            background: linear-gradient(180deg, #fff8fd 0%, #ffd8ea 38%, #f2a8ca 70%, #d97da7 100%);
             box-shadow:
-                inset 0 2px 8px rgba(255, 255, 255, 0.55),
-                0 8px 18px rgba(201, 75, 124, 0.2);
-            transform: translateY(2px) scale(0.96);
-            transition: transform 0.5s ease, opacity 0.35s ease;
-            z-index: 3;
+                inset 0 2px 8px rgba(255,255,255,0.8),
+                inset 0 -3px 6px rgba(207, 111, 156, 0.2),
+                0 0 8px rgba(255, 206, 227, 0.55);
+            opacity: 0.95;
+            transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
         }
 
-        .logo-bud-base::before,
-        .logo-bud-base::after {
-            content: "";
+        /* 花苞狀態：5大瓣(1~5) + 3小瓣(6~8) 收束 */
+        .logo .one   { transform: translate(-50%, -50%) rotate(-10deg) scale(0.62); }
+        .logo .two   { transform: translate(-50%, -50%) rotate(34deg) scale(0.6); }
+        .logo .three { transform: translate(-50%, -50%) rotate(92deg) scale(0.62); }
+        .logo .four  { transform: translate(-50%, -50%) rotate(154deg) scale(0.6); }
+        .logo .five  { transform: translate(-50%, -50%) rotate(216deg) scale(0.62); }
+        .logo .six   { transform: translate(-50%, -50%) rotate(266deg) scale(0.44); }
+        .logo .seven { transform: translate(-50%, -50%) rotate(308deg) scale(0.46); }
+        .logo .eight { transform: translate(-50%, -50%) rotate(346deg) scale(0.45); }
+
+        .logo .bud-core {
             position: absolute;
-            bottom: 4px;
+            left: 50%;
+            top: 50%;
+            width: 18px;
+            height: 28px;
+            transform: translate(-50%, -48%);
+            border-radius: 55% 55% 48% 48%;
+            background: linear-gradient(180deg, #ffe6f1 0%, #f6b7d2 55%, #cc6d9a 100%);
+            box-shadow: inset 0 2px 8px rgba(255,255,255,0.62);
+            z-index: 3;
+            transition: transform 0.65s ease, opacity 0.45s ease;
+        }
+
+        .logo .stamen {
+            position: absolute;
+            left: 50%;
+            top: 50%;
             width: 12px;
-            height: 22px;
-            background: linear-gradient(180deg, #84b784 0%, #5d8f63 100%);
-            border-radius: 12px 12px 6px 6px;
+            height: 12px;
+            transform: translate(-50%, -50%) scale(0.2);
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff9df 0%, #ffd481 42%, #f0a946 100%);
+            box-shadow: 0 0 0 0 rgba(255, 215, 140, 0.0);
+            opacity: 0;
+            transition: transform 0.55s ease 0.35s, opacity 0.45s ease 0.35s, box-shadow 0.6s ease 0.35s;
+            z-index: 4;
+        }
+
+        .logo .bar {
+            width: 70px;
+            height: 6px;
+            margin-top: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(201, 75, 124, 0.2);
+            overflow: hidden;
             opacity: 0.9;
         }
 
-        .logo-bud-base::before {
-            left: -7px;
-            transform: rotate(-28deg);
+        .logo .progress {
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #f9bfd9 0%, #f28ec1 50%, #d15794 100%);
+            transition: width 0.52s linear;
         }
 
-        .logo-bud-base::after {
-            right: -7px;
-            transform: rotate(28deg);
+        .logo.is-opening .progress,
+        .logo.is-blooming .progress {
+            width: 100%;
         }
 
-        .logo-bud-seam {
-            position: absolute;
-            width: 2px;
-            height: 38px;
-            top: 30px;
-            border-radius: 999px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
-            opacity: 0.55;
-            z-index: 4;
-            transform: translateY(0);
-            transition: transform 0.45s ease, opacity 0.3s ease;
+        .logo.is-opening .common {
+            opacity: 1;
         }
 
-        .logo-petal {
-            position: absolute;
-            width: 34px;
-            height: 48px;
-            border-radius: 60% 60% 52% 52%;
-            background: linear-gradient(180deg, #fff6fb 0%, #ffd5e8 28%, #f4a7ca 65%, #e5bad0 100%);
+        /* 綻放狀態：5大瓣主體 + 3小瓣填隙，做出桃花不對稱感 */
+        .logo.is-blooming .one   { transform: translate(-52%, -102%) rotate(-8deg) scale(1.08); }
+        .logo.is-blooming .two   { transform: translate(-18%, -88%) rotate(38deg) scale(1.0); }
+        .logo.is-blooming .three { transform: translate(3%, -51%) rotate(95deg) scale(1.05); }
+        .logo.is-blooming .four  { transform: translate(-14%, -16%) rotate(156deg) scale(0.98); }
+        .logo.is-blooming .five  { transform: translate(-56%, -2%) rotate(214deg) scale(1.06); }
+        .logo.is-blooming .six   { transform: translate(-92%, -26%) rotate(262deg) scale(0.78); }
+        .logo.is-blooming .seven { transform: translate(-103%, -62%) rotate(304deg) scale(0.8); }
+        .logo.is-blooming .eight { transform: translate(-82%, -92%) rotate(346deg) scale(0.76); }
+
+        .logo.is-blooming .bud-core {
+            opacity: 0.06;
+            transform: translate(-50%, -43%) scale(0.55);
+        }
+
+        .logo.is-blooming .stamen {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
             box-shadow:
-                inset 0 2px 10px rgba(255, 255, 255, 0.8),
-                inset 0 -4px 10px rgba(240, 176, 197, 0.45),
-                0 0 14px rgba(255, 214, 233, 0.55);
-            opacity: 0;
-            transform-origin: bottom center;
-            transition:
-                transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-                opacity 0.45s ease;
-        }
-
-        .logo-inner-petal {
-            position: absolute;
-            width: 24px;
-            height: 34px;
-            border-radius: 60% 60% 50% 50%;
-            background: linear-gradient(180deg, #fff7fc 0%, #ffd9ea 45%, #e7a5c5 100%);
-            box-shadow: inset 0 1px 7px rgba(255,255,255,0.8);
-            opacity: 0;
-            transform-origin: bottom center;
-            transition: transform 0.55s ease, opacity 0.35s ease;
-            z-index: 2;
-        }
-
-        .logo-inner-petal.i1 { transform: translateY(10px) rotate(18deg) scale(0.2); }
-        .logo-inner-petal.i2 { transform: translateY(10px) rotate(-18deg) scale(0.2); }
-
-        .logo-petal::after {
-            content: "";
-            position: absolute;
-            inset: 4px 8px 14px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0));
-            pointer-events: none;
-        }
-
-        .logo-petal.p1 { transform: translateY(8px) rotate(0deg) scale(0.2); }
-        .logo-petal.p2 { transform: translateY(8px) rotate(72deg) scale(0.2); }
-        .logo-petal.p3 { transform: translateY(8px) rotate(144deg) scale(0.2); }
-        .logo-petal.p4 { transform: translateY(8px) rotate(216deg) scale(0.2); }
-        .logo-petal.p5 { transform: translateY(8px) rotate(288deg) scale(0.2); }
-
-        .logo-core {
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #fff9df 0%, #ffd782 45%, #f3a53e 100%);
-            box-shadow:
-                0 0 14px rgba(255, 216, 130, 0.75),
-                0 0 26px rgba(255, 215, 153, 0.42);
-            opacity: 0;
-            transform: scale(0.2);
-            transition: transform 0.6s ease, opacity 0.45s ease;
-            z-index: 4;
-        }
-
-        .logo.is-opening .logo-bud-base {
-            opacity: 0.5;
-            transform: translateY(4px) scale(0.85);
-        }
-
-        .logo.is-opening .logo-bud-seam {
-            opacity: 0.2;
-            transform: translateY(8px);
-        }
-
-        .logo.is-blooming .logo-bud-base {
-            opacity: 0.1;
-            transform: translateY(6px) scale(0.68);
-        }
-
-        .logo.is-blooming .logo-petal {
-            opacity: 1;
-        }
-
-        .logo.is-blooming .logo-inner-petal {
-            opacity: 1;
-        }
-
-        .logo.is-blooming .logo-petal.p1 { transform: translateY(-16px) rotate(0deg) scale(1); }
-        .logo.is-blooming .logo-petal.p2 { transform: translate(21px, -3px) rotate(72deg) scale(1); }
-        .logo.is-blooming .logo-petal.p3 { transform: translate(13px, 24px) rotate(144deg) scale(1); }
-        .logo.is-blooming .logo-petal.p4 { transform: translate(-13px, 24px) rotate(216deg) scale(1); }
-        .logo.is-blooming .logo-petal.p5 { transform: translate(-21px, -3px) rotate(288deg) scale(1); }
-        .logo.is-blooming .logo-inner-petal.i1 { transform: translate(-8px, 10px) rotate(26deg) scale(1); }
-        .logo.is-blooming .logo-inner-petal.i2 { transform: translate(8px, 10px) rotate(-26deg) scale(1); }
-
-        .logo.is-blooming .logo-core {
-            opacity: 1;
-            transform: scale(1);
+                0 0 12px rgba(255, 213, 144, 0.85),
+                0 0 26px rgba(255, 196, 120, 0.45);
         }
 
         @keyframes float {
@@ -717,19 +668,24 @@
     <!-- 頭部 -->
     <header>
         <div class="logo" id="peachLogo" aria-label="桃花花苞" tabindex="0">
-            <div class="logo-bloom">
-                <div class="logo-stem"></div>
-                <div class="logo-calyx"></div>
-                <div class="logo-bud-base"></div>
-                <div class="logo-bud-seam"></div>
-                <span class="logo-petal p1"></span>
-                <span class="logo-petal p2"></span>
-                <span class="logo-petal p3"></span>
-                <span class="logo-petal p4"></span>
-                <span class="logo-petal p5"></span>
-                <span class="logo-inner-petal i1"></span>
-                <span class="logo-inner-petal i2"></span>
-                <div class="logo-core"></div>
+            <div class="out">
+                <div class="fade-in">
+                    <div class="container">
+                        <div class="one common"></div>
+                        <div class="two common"></div>
+                        <div class="three common"></div>
+                        <div class="four common"></div>
+                        <div class="five common"></div>
+                        <div class="six common"></div>
+                        <div class="seven common"></div>
+                        <div class="eight common"></div>
+                        <div class="bud-core"></div>
+                        <div class="stamen"></div>
+                    </div>
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <h1>桃花源</h1>
