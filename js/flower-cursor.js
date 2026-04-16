@@ -1,6 +1,6 @@
 /**
- * WebGL 游標：粉色莖線＋桃花（停留花心漸深，紫/桃紅/橙隨機）
- * 使用 alpha 合成（非乘法遮罩），避免透明底上出現灰色。
+ * WebGL 游標：即時粉色桃花效果。
+ * 不保留任何前一幀殘影，避免移動、停留或花開後留下灰灰的痕跡。
  */
 (function () {
     const VERTEX = `
@@ -17,10 +17,8 @@ uniform float u_ratio;
 uniform float u_moving;
 uniform float u_stop_time;
 uniform vec2 u_stop_randomizer;
-uniform float u_clean;
 uniform vec2 u_point;
 uniform float u_time;
-uniform sampler2D u_texture;
 varying vec2 vUv;
 
 float rand(vec2 n) {
@@ -47,26 +45,25 @@ float flower_shape(vec2 pt, float _size, float _outline, float _thick, float _no
 }
 
 void main() {
-    vec4 prev = texture2D(u_texture, vUv);
-    vec3 base = prev.rgb * 0.94;
-    float baseA = prev.a * 0.94;
+    vec3 base = vec3(0.0);
+    float baseA = 0.0;
 
     vec2 cur = vUv - u_point.xy;
     cur.x *= u_ratio;
 
-    /* ===== 粉色莖線（移動時）===== */
+    /* ===== 粉色移動花影：只出現在當前游標附近，不留下殘影 ===== */
     if (u_moving > 0.5) {
         float d = length(cur);
-        float core = exp(-d * d / 0.000016);
-        float glow = exp(-d * d / 0.000128);
+        float core = exp(-d * d / 0.000022);
+        float glow = exp(-d * d / 0.00018);
         vec2 nuv = vUv * 1400.0 + u_point * 40.0 + u_time * 2.0;
         float sp = 0.55 + 0.45 * noise(nuv);
 
         vec3 pink = vec3(1.0, 0.72, 0.82);
-        float trailA = (core * 0.9 + glow * 0.35) * (0.45 + 0.55 * sp);
+        float trailA = (core * 0.95 + glow * 0.28) * (0.45 + 0.55 * sp);
 
         base = mix(base, pink, trailA);
-        baseA = baseA + (1.0 - baseA) * trailA;
+        baseA = max(baseA, trailA);
     }
 
     /* ===== 桃花（停住時）— 純 alpha 合成，不乘遮罩 ===== */
@@ -101,9 +98,6 @@ void main() {
     col = mix(col, heartCol, heartA);
     a   = a + (1.0 - a) * heartA;
 
-    col *= u_clean;
-    a   *= u_clean;
-
     gl_FragColor = vec4(col, a);
 }`;
 
@@ -130,9 +124,7 @@ void main() {
             u_moving: { value: 0 },
             u_stop_time: { value: 0 },
             u_stop_randomizer: { value: new THREE.Vector2(0.5, 0.5) },
-            u_clean: { value: 1 },
             u_point: { value: new THREE.Vector2(0.5, 0.5) },
-            u_texture: { value: null },
             u_time: { value: 0 },
         };
 
@@ -148,56 +140,10 @@ void main() {
         var mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
         scene.add(mesh);
 
-        var blitScene = new THREE.Scene();
-        var blitCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
-        blitCam.position.z = 1;
-        var blitMat = new THREE.MeshBasicMaterial({
-            map: null,
-            transparent: true,
-            opacity: 1,
-            depthWrite: false,
-            depthTest: false,
-        });
-        blitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMat));
-
-        var w = 0, h = 0;
-        var rtA = null, rtB = null;
-        var read = null, write = null;
-
-        function allocTargets() {
-            if (rtA) rtA.dispose();
-            if (rtB) rtB.dispose();
-            var opts = {
-                minFilter: THREE.LinearFilter,
-                magFilter: THREE.LinearFilter,
-                format: THREE.RGBAFormat,
-                type: THREE.UnsignedByteType,
-            };
-            rtA = new THREE.WebGLRenderTarget(w, h, opts);
-            rtB = new THREE.WebGLRenderTarget(w, h, opts);
-            rtA.texture.flipY = false;
-            rtB.texture.flipY = false;
-            read = rtA; write = rtB;
-            clearBoth();
-        }
-
-        function clearBoth() {
-            uniforms.u_clean.value = 1;
-            renderer.setRenderTarget(rtA);
-            renderer.setClearColor(0x000000, 0);
-            renderer.clear();
-            renderer.setRenderTarget(rtB);
-            renderer.clear();
-            renderer.setRenderTarget(null);
-        }
-
         function setSize() {
-            w = Math.max(2, Math.floor(window.innerWidth * dpr));
-            h = Math.max(2, Math.floor(window.innerHeight * dpr));
             renderer.setPixelRatio(dpr);
             renderer.setSize(window.innerWidth, window.innerHeight, false);
             uniforms.u_ratio.value = window.innerWidth / window.innerHeight;
-            allocTargets();
         }
 
         setSize();
@@ -216,7 +162,6 @@ void main() {
         if (cleanBtn) {
             cleanBtn.addEventListener("click", function (ev) {
                 ev.preventDefault();
-                clearBoth();
             });
         }
 
@@ -243,19 +188,11 @@ void main() {
             uniforms.u_moving.value = moving;
             uniforms.u_point.value.copy(mouse);
             prev.copy(mouse);
-            uniforms.u_texture.value = read.texture;
 
-            renderer.setRenderTarget(write);
-            renderer.render(scene, camera);
-
-            blitMat.map = write.texture;
-            blitMat.needsUpdate = true;
             renderer.setRenderTarget(null);
             renderer.setClearColor(0x000000, 0);
             renderer.clear();
-            renderer.render(blitScene, blitCam);
-
-            var tmp = read; read = write; write = tmp;
+            renderer.render(scene, camera);
             requestAnimationFrame(tick);
         }
 

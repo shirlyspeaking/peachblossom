@@ -8,14 +8,23 @@
     <meta http-equiv="Pragma" content="no-cache">
     <title>桃花源 · 書法字帖生成</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=17">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
     <header class="site-header">
-        <a href="../index.html" class="back-link">← 返回桃花源</a>
-        <h1>書法字帖生成平台</h1>
+        <div class="header-left">
+            <a href="../index.html" class="back-link">← 返回桃花源</a>
+            <h1>書法字帖生成平台</h1>
+        </div>
+        <div class="theme-picker">
+            <span class="theme-label">配色</span>
+            <button type="button" class="theme-dot theme-dot--pink active" data-theme="pink" title="桃花"></button>
+            <button type="button" class="theme-dot theme-dot--green" data-theme="green" title="青瓷"></button>
+            <button type="button" class="theme-dot theme-dot--blue" data-theme="blue" title="汝窯"></button>
+            <button type="button" class="theme-dot theme-dot--silver" data-theme="silver" title="月白"></button>
+        </div>
     </header>
 
     <main class="layout">
@@ -113,6 +122,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=17"></script>
 </body>
 </html>

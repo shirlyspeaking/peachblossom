@@ -1,6 +1,31 @@
 (function () {
     'use strict';
 
+    /* ---- Theme Picker ---- */
+    var themeDots = document.querySelectorAll('.theme-dot');
+    var THEME_KEY = 'copybook-theme';
+
+    function applyTheme(name) {
+        document.body.setAttribute('data-theme', name);
+        themeDots.forEach(function (dot) {
+            dot.classList.toggle('active', dot.getAttribute('data-theme') === name);
+        });
+        try { localStorage.setItem(THEME_KEY, name); } catch (_) {}
+    }
+
+    (function initTheme() {
+        var saved = null;
+        try { saved = localStorage.getItem(THEME_KEY); } catch (_) {}
+        applyTheme(saved || 'pink');
+    })();
+
+    themeDots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+            applyTheme(dot.getAttribute('data-theme'));
+        });
+    });
+
+    /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
     var fontPreset = document.getElementById('fontPreset');
     var customFont = document.getElementById('customFont');
