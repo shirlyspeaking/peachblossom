@@ -68,17 +68,38 @@
             filter: drop-shadow(0 8px 24px rgba(142, 33, 87, 0.22));
         }
 
+        .logo-stem {
+            position: absolute;
+            bottom: 10px;
+            width: 8px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #8dbf86 0%, #5f8f60 100%);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.25);
+            z-index: 0;
+        }
+
+        .logo-calyx {
+            position: absolute;
+            width: 28px;
+            height: 20px;
+            bottom: 34px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #84b784 0%, #5d8f63 100%);
+            z-index: 2;
+        }
+
         .logo-bud-base {
             position: absolute;
-            width: 42px;
-            height: 54px;
-            border-radius: 55% 55% 48% 48%;
-            background: linear-gradient(180deg, #ffd8e8 0%, #f3a8c9 55%, #cf5f93 100%);
+            width: 38px;
+            height: 56px;
+            border-radius: 52% 52% 46% 46%;
+            background: linear-gradient(180deg, #ffe5ef 0%, #f7b8d2 52%, #cf6e9e 100%);
             box-shadow:
                 inset 0 2px 8px rgba(255, 255, 255, 0.55),
                 0 8px 18px rgba(201, 75, 124, 0.2);
-            transform: translateY(4px) scale(0.98);
-            transition: transform 0.55s ease, opacity 0.45s ease;
+            transform: translateY(2px) scale(0.96);
+            transition: transform 0.5s ease, opacity 0.35s ease;
             z-index: 3;
         }
 
@@ -104,6 +125,19 @@
             transform: rotate(28deg);
         }
 
+        .logo-bud-seam {
+            position: absolute;
+            width: 2px;
+            height: 38px;
+            top: 30px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
+            opacity: 0.55;
+            z-index: 4;
+            transform: translateY(0);
+            transition: transform 0.45s ease, opacity 0.3s ease;
+        }
+
         .logo-petal {
             position: absolute;
             width: 34px;
@@ -120,6 +154,22 @@
                 transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
                 opacity 0.45s ease;
         }
+
+        .logo-inner-petal {
+            position: absolute;
+            width: 24px;
+            height: 34px;
+            border-radius: 60% 60% 50% 50%;
+            background: linear-gradient(180deg, #fff7fc 0%, #ffd9ea 45%, #e7a5c5 100%);
+            box-shadow: inset 0 1px 7px rgba(255,255,255,0.8);
+            opacity: 0;
+            transform-origin: bottom center;
+            transition: transform 0.55s ease, opacity 0.35s ease;
+            z-index: 2;
+        }
+
+        .logo-inner-petal.i1 { transform: translateY(10px) rotate(18deg) scale(0.2); }
+        .logo-inner-petal.i2 { transform: translateY(10px) rotate(-18deg) scale(0.2); }
 
         .logo-petal::after {
             content: "";
@@ -151,6 +201,16 @@
             z-index: 4;
         }
 
+        .logo.is-opening .logo-bud-base {
+            opacity: 0.5;
+            transform: translateY(4px) scale(0.85);
+        }
+
+        .logo.is-opening .logo-bud-seam {
+            opacity: 0.2;
+            transform: translateY(8px);
+        }
+
         .logo.is-blooming .logo-bud-base {
             opacity: 0.1;
             transform: translateY(6px) scale(0.68);
@@ -160,11 +220,17 @@
             opacity: 1;
         }
 
+        .logo.is-blooming .logo-inner-petal {
+            opacity: 1;
+        }
+
         .logo.is-blooming .logo-petal.p1 { transform: translateY(-16px) rotate(0deg) scale(1); }
         .logo.is-blooming .logo-petal.p2 { transform: translate(21px, -3px) rotate(72deg) scale(1); }
         .logo.is-blooming .logo-petal.p3 { transform: translate(13px, 24px) rotate(144deg) scale(1); }
         .logo.is-blooming .logo-petal.p4 { transform: translate(-13px, 24px) rotate(216deg) scale(1); }
         .logo.is-blooming .logo-petal.p5 { transform: translate(-21px, -3px) rotate(288deg) scale(1); }
+        .logo.is-blooming .logo-inner-petal.i1 { transform: translate(-8px, 10px) rotate(26deg) scale(1); }
+        .logo.is-blooming .logo-inner-petal.i2 { transform: translate(8px, 10px) rotate(-26deg) scale(1); }
 
         .logo.is-blooming .logo-core {
             opacity: 1;
@@ -652,12 +718,17 @@
     <header>
         <div class="logo" id="peachLogo" aria-label="桃花花苞" tabindex="0">
             <div class="logo-bloom">
+                <div class="logo-stem"></div>
+                <div class="logo-calyx"></div>
                 <div class="logo-bud-base"></div>
+                <div class="logo-bud-seam"></div>
                 <span class="logo-petal p1"></span>
                 <span class="logo-petal p2"></span>
                 <span class="logo-petal p3"></span>
                 <span class="logo-petal p4"></span>
                 <span class="logo-petal p5"></span>
+                <span class="logo-inner-petal i1"></span>
+                <span class="logo-inner-petal i2"></span>
                 <div class="logo-core"></div>
             </div>
         </div>
@@ -802,25 +873,32 @@
             var logo = document.getElementById("peachLogo");
             if (!logo) return;
 
-            var bloomTimer = null;
+            var openingTimer = null;
 
             function openBloom() {
-                bloomTimer = window.setTimeout(function () {
+                if (logo.classList.contains("is-blooming") || logo.classList.contains("is-opening")) return;
+                logo.classList.add("is-opening");
+                openingTimer = window.setTimeout(function () {
+                    logo.classList.remove("is-opening");
                     logo.classList.add("is-blooming");
-                }, 500);
+                }, 480);
             }
 
             function closeBloom() {
-                if (bloomTimer) {
-                    window.clearTimeout(bloomTimer);
-                    bloomTimer = null;
-                }
+                window.clearTimeout(openingTimer);
+                openingTimer = null;
+                logo.classList.remove("is-opening");
                 logo.classList.remove("is-blooming");
             }
 
-            logo.addEventListener("mouseenter", openBloom);
+            logo.addEventListener("click", openBloom);
             logo.addEventListener("mouseleave", closeBloom);
-            logo.addEventListener("focus", openBloom);
+            logo.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openBloom();
+                }
+            });
             logo.addEventListener("blur", closeBloom);
         })();
 

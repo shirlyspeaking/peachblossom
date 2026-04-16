@@ -95,7 +95,7 @@ void main() {
             canvas: canvas,
             alpha: true,
             antialias: false,
-            premultipliedAlpha: false,
+            premultipliedAlpha: true,
             powerPreference: "high-performance",
         });
         renderer.setClearColor(0x000000, 0);
@@ -179,7 +179,11 @@ void main() {
             renderer.setRenderTarget(null);
             renderer.setClearColor(0x000000, 0);
             renderer.clear();
-            renderer.render(scene, camera);
+
+            /* 移動時完全不渲染，避免任何灰黑殘影或邊緣痕跡 */
+            if (!moving) {
+                renderer.render(scene, camera);
+            }
             requestAnimationFrame(tick);
         }
 
