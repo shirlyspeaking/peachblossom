@@ -147,20 +147,6 @@
             text-shadow: none;
         }
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--text-mid);
-            font-style: italic;
-            margin-bottom: 10px;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-        }
-
-        .tagline {
-            font-size: 1rem;
-            color: var(--berry-dark);
-            opacity: 0.8;
-        }
-
         /* 橫條：淺紫紅偏粉，呼應 --berry-light / --peach-pink；填色不透明度 70% */
         .header-cta {
             display: inline-flex;
@@ -317,13 +303,6 @@
             color: var(--berry-dark);
         }
 
-        .app-desc {
-            font-size: 0.95rem;
-            color: var(--text-mid);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
         .app-tags {
             display: flex;
             flex-wrap: wrap;
@@ -407,13 +386,6 @@
             margin: 5px 0;
         }
 
-        .footer-poem {
-            font-style: italic;
-            color: var(--berry-dark);
-            opacity: 0.8;
-            margin-bottom: 15px;
-        }
-
         /* === 響應式設計 === */
         @media (max-width: 768px) {
             header {
@@ -427,10 +399,6 @@
             h1 {
                 font-size: 2.5rem;
                 letter-spacing: 0.15em;
-            }
-
-            .subtitle {
-                font-size: 1rem;
             }
 
             .apps-grid {
@@ -623,8 +591,6 @@
             </div>
         </div>
         <h1>桃花源</h1>
-        <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
-        <p class="tagline">數位古風體驗平台</p>
         <a href="enjoyread/app.html" class="header-cta">
             <span class="header-cta-icon">📖</span>
             <span>悅讀 EnjoyRead 中學生閱讀平台</span>
@@ -643,7 +609,6 @@
             <a href="huadian/huadian.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon huadian">💮</div>
                 <h2 class="app-name">唐風花鈿</h2>
-                <p class="app-desc">AR 即時試妝體驗，感受唐代仕女的精緻妝容。支援手勢互動，六款經典花鈿任君選擇，配有絕美古風虛擬背景。</p>
                 <div class="app-tags">
                     <span class="tag">AR 試妝</span>
                     <span class="tag">手勢控制</span>
@@ -656,7 +621,6 @@
             <a href="copybook/" class="app-card" style="text-decoration: none;">
                 <div class="app-icon copybook">🖌️</div>
                 <h2 class="app-name">書法字帖生成平台</h2>
-                <p class="app-desc">輸入詩文或任意文字，即時生成田字／米字／空白格字帖，並可選描紅（紅框鏤空）範字；可切換字型、列印或下載 PDF／PNG／TXT。</p>
                 <div class="app-tags">
                     <span class="tag">毛筆字帖</span>
                     <span class="tag">硬筆字帖</span>
@@ -669,7 +633,6 @@
             <a href="legendary-card-creator/index.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon legendary">🃏</div>
                 <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
-                <p class="app-desc">打造收藏級 Alternate Art 卡牌：可切換 Classic Gold / Holo Silver / Full-Art 邊框，疊加全像閃膜與復古紙紋，並翻面預覽經典藍紫 Orbit 卡背。</p>
                 <div class="app-tags">
                     <span class="tag">1st Edition</span>
                     <span class="tag">Holo Rare</span>
@@ -682,7 +645,6 @@
             <a href="shanhaijing-monopoly/index.html" class="app-card" style="text-decoration: none;">
                 <div class="app-icon shanhai">🐉</div>
                 <h2 class="app-name">山海經大富翁</h2>
-                <p class="app-desc">以《山海經》世界觀打造的大富翁棋盤遊戲。棋盤每格、機會卡與命運卡皆可自由編輯內容，支援自動儲存與匯出設定。</p>
                 <div class="app-tags">
                     <span class="tag">大富翁</span>
                     <span class="tag">山海經</span>
@@ -696,7 +658,6 @@
                 <span class="coming-badge">即將推出</span>
                 <div class="app-icon coming-soon">🎨</div>
                 <h2 class="app-name">水墨丹青</h2>
-                <p class="app-desc">數位水墨畫創作工具，體驗傳統書畫的意境之美。</p>
                 <div class="app-tags">
                     <span class="tag">繪畫</span>
                     <span class="tag">創作</span>
@@ -708,7 +669,6 @@
                 <span class="coming-badge">即將推出</span>
                 <div class="app-icon coming-soon">🎭</div>
                 <h2 class="app-name">臉譜變裝</h2>
-                <p class="app-desc">京劇臉譜 AR 體驗，一秒化身戲曲角色，感受國粹藝術的魅力。</p>
                 <div class="app-tags">
                     <span class="tag">京劇</span>
                     <span class="tag">臉譜</span>
@@ -720,7 +680,6 @@
                 <span class="coming-badge">即將推出</span>
                 <div class="app-icon coming-soon">🏮</div>
                 <h2 class="app-name">燈謎雅集</h2>
-                <p class="app-desc">傳統燈謎遊戲，猜燈謎、學文化，體驗古人的智慧與雅趣。</p>
                 <div class="app-tags">
                     <span class="tag">燈謎</span>
                     <span class="tag">益智</span>
@@ -744,7 +703,6 @@
 
     <!-- 底部 -->
     <footer>
-        <p class="footer-poem">「林盡水源，便得一山，山有小口，彷彿若有光。」</p>
         <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
     </footer>
 
