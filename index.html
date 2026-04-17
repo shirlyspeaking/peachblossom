@@ -35,37 +35,6 @@
             overflow-x: hidden;
         }
 
-        .petal-orb {
-            position: absolute;
-            border-radius: 999px;
-            pointer-events: none;
-            filter: blur(2px);
-            opacity: 0.6;
-            animation: drift 12s ease-in-out infinite;
-        }
-
-        .petal-orb.orb-a {
-            top: 110px;
-            left: 7%;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, rgba(248, 165, 194, 0.34) 0%, rgba(248, 165, 194, 0) 72%);
-        }
-
-        .petal-orb.orb-b {
-            top: 240px;
-            right: 8%;
-            width: 160px;
-            height: 160px;
-            background: radial-gradient(circle, rgba(201, 75, 124, 0.18) 0%, rgba(201, 75, 124, 0) 72%);
-            animation-delay: -4s;
-        }
-
-        @keyframes drift {
-            0%, 100% { transform: translate3d(0, 0, 0); }
-            50% { transform: translate3d(0, -10px, 0); }
-        }
-
         body > header,
         body > main,
         body > .author-section,
@@ -178,7 +147,7 @@
 
         .app-card:nth-child(1) { animation-delay: 0.08s; }
         .app-card:nth-child(2) { animation-delay: 0.14s; }
-        .app-card:nth-child(3) { animation-delay: 0.2s; }
+        .app-card:nth-child(3) { animation-delay: 0.20s; }
         .app-card:nth-child(4) { animation-delay: 0.26s; }
         .app-card:nth-child(5) { animation-delay: 0.32s; }
 
@@ -228,6 +197,9 @@
             width: 84px;
             height: 84px;
             stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
             color: var(--berry-mid);
             filter: drop-shadow(0 10px 22px rgba(201, 75, 124, 0.16));
             transition: transform 0.28s ease, color 0.28s ease, filter 0.28s ease;
@@ -501,106 +473,127 @@
                 gap: 15px;
             }
         }
-+    </style>
-+</head>
-+<body>
-+    <div class="petal-orb orb-a" aria-hidden="true"></div>
-+    <div class="petal-orb orb-b" aria-hidden="true"></div>
-+
-+    <div class="auth-bar-wrap" aria-live="polite">
-+        <div id="peachblossom-auth-bar"></div>
-+    </div>
-+
-+    <header>
-+        <div class="hero-shell">
-+            <div class="logo">
-+                <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-+                    <path d="M32 9c4.4 0 8 8.1 8 14.2 0 1.5-.2 2.8-.6 4 1.3-.4 2.6-.6 4-.6C49.9 26.6 58 30.2 58 34.6S49.9 42.6 43.8 42.6c-1.4 0-2.7-.2-4-.6.4 1.2.6 2.5.6 4 0 6.1-3.6 14.2-8 14.2s-8-8.1-8-14.2c0-1.5.2-2.8.6-4-1.3.4-2.6.6-4 .6C14.1 42.6 6 39 6 34.6s8.1-8 14.2-8c1.4 0 2.7.2 4 .6-.4-1.2-.6-2.5-.6-4C24 17.1 27.6 9 32 9Z" fill="currentColor" opacity="0.16"></path>
-+                    <path d="M32 12c3.3 0 6 6.3 6 11.2 0 2-.4 3.7-1.1 5.1 1.4-.7 3.1-1.1 5.1-1.1 4.9 0 11.2 2.7 11.2 6s-6.3 6-11.2 6c-2 0-3.7-.4-5.1-1.1.7 1.4 1.1 3.1 1.1 5.1 0 4.9-2.7 11.2-6 11.2s-6-6.3-6-11.2c0-2 .4-3.7 1.1-5.1-1.4.7-3.1 1.1-5.1 1.1-4.9 0-11.2-2.7-11.2-6s6.3-6 11.2-6c2 0 3.7.4 5.1 1.1-.7-1.4-1.1-3.1-1.1-5.1C26 18.3 28.7 12 32 12Z" fill="currentColor"></path>
-+                    <circle cx="32" cy="33" r="5" fill="white"></circle>
-+                    <circle cx="32" cy="33" r="2.4" fill="currentColor"></circle>
-+                </svg>
-+            </div>
-+            <h1>桃花源</h1>
-+            <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
-+            <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
-+        </div>
-+    </header>
-+
-+    <main>
-+        <div class="section-title">
-+            <span>探索應用</span>
-+        </div>
-+
-+        <div class="apps-grid">
-+            <a href="enjoyread/app.html" class="app-card" aria-label="悅讀 EnjoyRead 中學生閱讀平台">
-+                <div class="app-icon-shell">
-+                    <i data-lucide="book-open-text" class="app-icon"></i>
-+                </div>
-+                <h2 class="app-name">悅讀 EnjoyRead</h2>
-+                <span class="app-tooltip">中學生閱讀平台，協助閱讀、整理與延伸學習。</span>
-+            </a>
-+
-+            <a href="huadian/huadian.html" class="app-card" aria-label="唐風花鈿">
-+                <div class="app-icon-shell">
-+                    <i data-lucide="sparkles" class="app-icon"></i>
-+                </div>
-+                <h2 class="app-name">唐風花鈿</h2>
-+                <span class="app-tooltip">AR 即時試妝體驗，感受唐代仕女妝容，支援手勢互動與古風背景。</span>
-+            </a>
-+
-+            <a href="copybook/" class="app-card" aria-label="書法字帖生成平台">
-+                <div class="app-icon-shell">
-+                    <i data-lucide="pen-tool" class="app-icon"></i>
-+                </div>
-+                <h2 class="app-name">書法字帖生成平台</h2>
-+                <span class="app-tooltip">輸入詩文或任意文字，即時生成多種格線字帖，並支援列印與下載。</span>
-+            </a>
-+
-+            <a href="legendary-card-creator/index.html" class="app-card" aria-label="Legendary Card Creator">
-+                <div class="app-icon-shell">
-+                    <i data-lucide="badge-cent" class="app-icon"></i>
-+                </div>
-+                <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
-+                <span class="app-tooltip">打造收藏級 Alternate Art 卡牌，可切換邊框、疊加閃膜與紙紋效果。</span>
-+            </a>
-+
-+            <a href="shanhaijing-monopoly/index.html" class="app-card" aria-label="山海經大富翁">
-+                <div class="app-icon-shell">
-+                    <i data-lucide="map" class="app-icon"></i>
-+                </div>
-+                <h2 class="app-name">山海經大富翁</h2>
-+                <span class="app-tooltip">以《山海經》為靈感的大富翁棋盤遊戲，支援自訂格子內容與匯出設定。</span>
-+            </a>
-+        </div>
-+    </main>
-+
-+    <section class="author-section">
-+        <a href="about.html" class="author-card">
-+            <div class="author-avatar">
-+                <svg viewBox="0 0 64 64" fill="none" width="48" height="48" aria-hidden="true">
-+                    <circle cx="32" cy="22" r="10" fill="currentColor" opacity="0.16"></circle>
-+                    <path d="M20 46c2.7-5.8 7.1-8.7 12-8.7 4.9 0 9.3 2.9 12 8.7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></path>
-+                    <circle cx="32" cy="22" r="7.6" stroke="currentColor" stroke-width="3.2"></circle>
-+                </svg>
-+            </div>
-+            <div class="author-info">
-+                <h3>張老師</h3>
-+                <p>桃花源 創作者</p>
-+            </div>
-+            <span class="author-link">了解更多 →</span>
-+        </a>
-+    </section>
-+
-+    <footer>
-+        <p class="footer-poem">「林盡水源，便得一山，山有小口，彷彿若有光。」</p>
-+        <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
-+    </footer>
-+
-+    <script src="https://unpkg.com/lucide@latest"></script>
-+    <script src="js/peachblossom-auth.js"></script>
-+    <script>
-+        lucide.createIcons();
-+    </script>
-+</body>
-+</html>
+    </style>
+</head>
+<body>
+    <div class="auth-bar-wrap" aria-live="polite">
+        <div id="peachblossom-auth-bar"></div>
+    </div>
+
+    <header>
+        <div class="hero-shell">
+            <div class="logo">
+                <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                    <path d="M32 9c4.4 0 8 8.1 8 14.2 0 1.5-.2 2.8-.6 4 1.3-.4 2.6-.6 4-.6C49.9 26.6 58 30.2 58 34.6S49.9 42.6 43.8 42.6c-1.4 0-2.7-.2-4-.6.4 1.2.6 2.5.6 4 0 6.1-3.6 14.2-8 14.2s-8-8.1-8-14.2c0-1.5.2-2.8.6-4-1.3.4-2.6.6-4 .6C14.1 42.6 6 39 6 34.6s8.1-8 14.2-8c1.4 0 2.7.2 4 .6-.4-1.2-.6-2.5-.6-4C24 17.1 27.6 9 32 9Z" fill="currentColor" opacity="0.16"></path>
+                    <path d="M32 12c3.3 0 6 6.3 6 11.2 0 2-.4 3.7-1.1 5.1 1.4-.7 3.1-1.1 5.1-1.1 4.9 0 11.2 2.7 11.2 6s-6.3 6-11.2 6c-2 0-3.7-.4-5.1-1.1.7 1.4 1.1 3.1 1.1 5.1 0 4.9-2.7 11.2-6 11.2s-6-6.3-6-11.2c0-2 .4-3.7 1.1-5.1-1.4.7-3.1 1.1-5.1 1.1-4.9 0-11.2-2.7-11.2-6s6.3-6 11.2-6c2 0 3.7.4 5.1 1.1-.7-1.4-1.1-3.1-1.1-5.1C26 18.3 28.7 12 32 12Z" fill="currentColor"></path>
+                    <circle cx="32" cy="33" r="5" fill="white"></circle>
+                    <circle cx="32" cy="33" r="2.4" fill="currentColor"></circle>
+                </svg>
+            </div>
+            <h1>桃花源</h1>
+            <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
+            <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-title">
+            <span>探索應用</span>
+        </div>
+
+        <div class="apps-grid">
+            <a href="enjoyread/app.html" class="app-card" aria-label="悅讀 EnjoyRead 中學生閱讀平台">
+                <div class="app-icon-shell">
+                    <svg viewBox="0 0 24 24" class="app-icon" aria-hidden="true">
+                        <path d="M12 7v14"></path>
+                        <path d="M3 18h6a3 3 0 0 1 3 3 3 3 0 0 1 3-3h6V4h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3H3z"></path>
+                        <path d="M7 8h2"></path>
+                        <path d="M15 8h2"></path>
+                        <path d="M7 12h2"></path>
+                        <path d="M15 12h2"></path>
+                    </svg>
+                </div>
+                <h2 class="app-name">悅讀 EnjoyRead</h2>
+                <span class="app-tooltip">中學生閱讀平台，協助閱讀、整理與延伸學習。</span>
+            </a>
+
+            <a href="huadian/huadian.html" class="app-card" aria-label="唐風花鈿">
+                <div class="app-icon-shell">
+                    <svg viewBox="0 0 24 24" class="app-icon" aria-hidden="true">
+                        <path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-2.57-.64a.5.5 0 0 1 0-.96l2.57-.64A2 2 0 0 0 9.94 10.5l.64-2.57a.5.5 0 0 1 .96 0l.64 2.57A2 2 0 0 0 13.62 11.82l2.57.64a.5.5 0 0 1 0 .96l-2.57.64a2 2 0 0 0-1.44 1.44l-.64 2.57a.5.5 0 0 1-.96 0z"></path>
+                        <path d="M18 3v4"></path>
+                        <path d="M20 5h-4"></path>
+                        <path d="M17 18v3"></path>
+                        <path d="M18.5 19.5h-3"></path>
+                    </svg>
+                </div>
+                <h2 class="app-name">唐風花鈿</h2>
+                <span class="app-tooltip">AR 即時試妝體驗，感受唐代仕女妝容，支援手勢互動與古風背景。</span>
+            </a>
+
+            <a href="copybook/" class="app-card" aria-label="書法字帖生成平台">
+                <div class="app-icon-shell">
+                    <svg viewBox="0 0 24 24" class="app-icon" aria-hidden="true">
+                        <path d="m12 19 7-7 3 3-7 7-3.5 1.5z"></path>
+                        <path d="m18 13 1.5-1.5a2.12 2.12 0 0 0-3-3L15 10"></path>
+                        <path d="m2 22 5-5"></path>
+                        <path d="m4 17 3 3"></path>
+                    </svg>
+                </div>
+                <h2 class="app-name">書法字帖生成平台</h2>
+                <span class="app-tooltip">輸入詩文或任意文字，即時生成多種格線字帖，並支援列印與下載。</span>
+            </a>
+
+            <a href="legendary-card-creator/index.html" class="app-card" aria-label="Legendary Card Creator">
+                <div class="app-icon-shell">
+                    <svg viewBox="0 0 24 24" class="app-icon" aria-hidden="true">
+                        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+                        <path d="M8 7h8"></path>
+                        <path d="M8 11h8"></path>
+                        <path d="M8 15h5"></path>
+                        <path d="M16.5 14.5 18 16l2.5-3"></path>
+                    </svg>
+                </div>
+                <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
+                <span class="app-tooltip">打造收藏級 Alternate Art 卡牌，可切換邊框、疊加閃膜與紙紋效果。</span>
+            </a>
+
+            <a href="shanhaijing-monopoly/index.html" class="app-card" aria-label="山海經大富翁">
+                <div class="app-icon-shell">
+                    <svg viewBox="0 0 24 24" class="app-icon" aria-hidden="true">
+                        <path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z"></path>
+                        <path d="M9 4v14"></path>
+                        <path d="M15 6v14"></path>
+                    </svg>
+                </div>
+                <h2 class="app-name">山海經大富翁</h2>
+                <span class="app-tooltip">以《山海經》為靈感的大富翁棋盤遊戲，支援自訂格子內容與匯出設定。</span>
+            </a>
+        </div>
+    </main>
+
+    <section class="author-section">
+        <a href="about.html" class="author-card">
+            <div class="author-avatar">
+                <svg viewBox="0 0 64 64" fill="none" width="48" height="48" aria-hidden="true">
+                    <circle cx="32" cy="22" r="10" fill="currentColor" opacity="0.16"></circle>
+                    <path d="M20 46c2.7-5.8 7.1-8.7 12-8.7 4.9 0 9.3 2.9 12 8.7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></path>
+                    <circle cx="32" cy="22" r="7.6" stroke="currentColor" stroke-width="3.2"></circle>
+                </svg>
+            </div>
+            <div class="author-info">
+                <h3>張老師</h3>
+                <p>桃花源 創作者</p>
+            </div>
+            <span class="author-link">了解更多 →</span>
+        </a>
+    </section>
+
+    <footer>
+        <p class="footer-poem">「林盡水源，便得一山，山有小口，彷彿若有光。」</p>
+        <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
+    </footer>
+
+    <script src="js/peachblossom-auth.js"></script>
+</body>
+</html>
