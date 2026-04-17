@@ -16,8 +16,21 @@
 ```bash
 cd font-admin
 npm install
-# 建議設定管理金鑰
-export FONT_ADMIN_KEY="your-secure-key"
+```
+
+**授權方式（擇一或並存）：**
+
+1. **桃花源中央 Google 登入**（建議）：部署 [`workers/auth/`](../workers/auth/) 後設定：
+   - `PEACHBLOSSOM_AUTH_URL` — 例如 `https://auth.peachspring.cc`
+   - `NEXT_PUBLIC_PEACHBLOSSOM_AUTH_URL` — 與上相同（供瀏覽器）
+   - 並在 Auth Worker 設定 `AUTH_ADMIN_EMAILS`（或 D1 `user_roles`）以授權你的 Google 信箱使用本後台。
+
+2. **管理金鑰（可選後備）：**
+   ```bash
+   export FONT_ADMIN_KEY="your-secure-key"
+   ```
+
+```bash
 npm run dev
 ```
 

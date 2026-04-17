@@ -1,0 +1,33 @@
+# 桃花源中央 Google 登入 Worker
+# 憑證請用 wrangler secret put，勿寫入 git
+
+name = "peachblossom-auth"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# 保留 *.workers.dev 方便除錯；正式流量以 auth.peachspring.cc 為主
+workers_dev = true
+
+# 將 auth.peachspring.cc 指到此 Worker（網域須在 Cloudflare 託管）
+routes = [
+  { pattern = "auth.peachspring.cc/*", zone_name = "peachspring.cc" }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "peachblossom-auth"
+database_id = "03e6ae07-db56-417f-bd2f-d998565082c6"
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "c8ccb845f0c84d60ad9cc44de97cf50a"
+
+# 非機密；GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET 使用 wrangler secret
+[vars]
+GOOGLE_REDIRECT_URI = "https://auth.peachspring.cc/auth/google/callback"
+COOKIE_DOMAIN = ".peachspring.cc"
+SESSION_DAYS = "14"
+ALLOWED_ORIGINS = "https://peachspring.cc,https://www.peachspring.cc"
+ALLOWED_RETURN_PREFIXES = "https://peachspring.cc,https://www.peachspring.cc"
+# 可存取 font-admin；請依實際用於 Google 登入的信箱增刪（Dashboard 可改）
+AUTH_ADMIN_EMAILS = "shirlyspeaking@hotmail.com"

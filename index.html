@@ -540,6 +540,75 @@
             z-index: 1;
         }
 
+        /* === 全站 Google 登入（中央 Auth Worker）=== */
+        .auth-bar-wrap {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            min-height: 44px;
+        }
+
+        #peachblossom-auth-bar {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            justify-content: center;
+        }
+
+        .auth-status {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+        }
+
+        .auth-warn {
+            color: #a33;
+        }
+
+        .auth-user {
+            font-size: 0.95rem;
+            color: var(--berry-dark);
+            max-width: min(90vw, 280px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auth-btn {
+            font-family: inherit;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid rgba(201, 75, 124, 0.45);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.85) 0%,
+                rgba(255, 240, 248, 0.75) 100%
+            );
+            color: var(--berry-dark);
+            box-shadow: 0 4px 16px rgba(142, 33, 87, 0.12);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(142, 33, 87, 0.18);
+        }
+
+        .auth-btn-in {
+            border-color: rgba(201, 75, 124, 0.5);
+        }
+
+        .auth-btn-out {
+            background: rgba(255, 255, 255, 0.55);
+            font-weight: 500;
+        }
+
     </style>
 </head>
 <body>
@@ -556,6 +625,9 @@
         <h1>桃花源</h1>
         <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
         <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
+        <div class="auth-bar-wrap" aria-live="polite">
+            <div id="peachblossom-auth-bar"></div>
+        </div>
         <a href="enjoyread/app.html" class="header-cta">
             <span class="header-cta-icon">📖</span>
             <span>悅讀 EnjoyRead 中學生閱讀平台</span>
@@ -667,6 +739,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="js/peachblossom-auth.js"></script>
     <script src="js/flower-cursor.js"></script>
     <script>
         (function () {

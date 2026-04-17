@@ -1,0 +1,17 @@
+# 複製為 .dev.vars 後填入（勿提交 .dev.vars）
+# wrangler dev 預設 https://localhost:8787，Google Console 須新增 redirect：
+#   http://localhost:8787/auth/google/callback
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8787/auth/google/callback
+
+COOKIE_DOMAIN=localhost
+SESSION_DAYS=14
+
+# 逗號分隔；本機開發請含前端來源
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3101,http://127.0.0.1:3101
+ALLOWED_RETURN_PREFIXES=http://localhost:3000,http://localhost:3101,https://peachspring.cc,https://www.peachspring.cc
+
+# 可存取 font-admin 的 Google 信箱（逗號分隔）
+AUTH_ADMIN_EMAILS=you@gmail.com
