@@ -32,7 +32,14 @@ export function buildSetSessionCookie(
 }
 
 export function buildClearSessionCookie(domain: string, secure: boolean): string {
-  const attrs = [`${SESSION_COOKIE_NAME}=`, "Path=/", "Max-Age=0", "HttpOnly", "SameSite=Lax"];
+  const attrs = [
+    `${SESSION_COOKIE_NAME}=`,
+    "Path=/",
+    "Max-Age=0",
+    "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    "HttpOnly",
+    "SameSite=Lax",
+  ];
   if (secure) attrs.push("Secure");
   if (domain && domain !== "localhost") attrs.push(`Domain=${domain}`);
   return attrs.join("; ");

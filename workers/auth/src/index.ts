@@ -43,6 +43,10 @@ function redirect(url: string, headers?: HeadersInit): Response {
   return new Response(null, { status: 302, headers: { Location: url, ...headers } });
 }
 
+function denyInlineJson(error: string, status = 403, corsOrigin: string | null = null): Response {
+  return json({ ok: false, error }, status, corsOrigin);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
@@ -154,6 +158,19 @@ async function handleAppAccess(
   appId: string,
   corsOrigin: string | null
 ): Promise<Response> {
+  if (appId === "peachspring-home") {
+    const sid = readSessionCookie(request);
+    if (!sid) {
+      return json({ allowed: false, reason: "no_session" }, 200, corsOrigin);
+    }
+    const now = Math.floor(Date.now() / 1000);
+    const row = await findSessionWithUser(env.DB, sid, now);
+    if (!row) {
+      return json({ allowed: false, reason: "invalid_session" }, 200, corsOrigin);
+    }
+    return json({ allowed: true, appId }, 200, corsOrigin);
+  }
+
   const sid = readSessionCookie(request);
   if (!sid) {
     return json({ allowed: false, reason: "no_session" }, 200, corsOrigin);
@@ -186,6 +203,11 @@ async function handleLogin(request: Request, env: Env, appId: string): Promise<R
   const prefixes = parseCommaList(env.ALLOWED_RETURN_PREFIXES);
   if (!isAllowedReturnTo(returnTo, prefixes)) {
     return json({ ok: false, error: "invalid_return_to" }, 400, null);
+  }
+
+  // 僅允許已知 appId 走中央登入，避免任意字串濫用 auth 端點。
+  if (appId !== "font-admin" && appId !== "peachspring-home") {
+    return json({ ok: false, error: "unknown_app_id" }, 404, null);
   }
 
   const codeVerifier = randomBytesUrlSafe(32);
@@ -270,6 +292,10 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
   const info = await fetchGoogleUserInfo(token.access_token);
   if (!info.email) {
     return json({ ok: false, error: "email_required" }, 400, null);
+  }
+  // 僅接受 Google 已驗證的信箱，避免未驗證郵箱進站。
+  if ((info as { email_verified?: boolean }).email_verified === false) {
+    return denyInlineJson("email_not_verified", 403, null);
   }
 
   const now = Math.floor(Date.now() / 1000);

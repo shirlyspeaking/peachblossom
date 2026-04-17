@@ -45,7 +45,7 @@
             position: relative;
             z-index: 1;
             text-align: center;
-            padding: 60px 20px 40px;
+            padding: 90px 20px 36px;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
         }
 
@@ -87,55 +87,13 @@
             opacity: 0.8;
         }
 
-        /* 橫條：淺紫紅偏粉，呼應 --berry-light / --peach-pink；填色不透明度 70% */
-        .header-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 24px;
-            padding: 14px 28px;
-            background: linear-gradient(
-                135deg,
-                rgba(232, 188, 226, 0.7) 0%,
-                rgba(242, 172, 200, 0.7) 48%,
-                rgba(238, 160, 190, 0.7) 100%
-            );
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: var(--berry-dark);
-            text-decoration: none;
-            border-radius: 30px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            border: 1px solid rgba(201, 75, 124, 0.38);
-            box-shadow: 0 6px 22px rgba(142, 33, 87, 0.16),
-                inset 0 1px 0 rgba(255, 255, 255, 0.22);
-            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-        }
-
-        .header-cta:hover {
-            transform: scale(1.05);
-            border-color: rgba(201, 75, 124, 0.5);
-            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.22),
-                inset 0 1px 0 rgba(255, 255, 255, 0.28);
-        }
-
-        .header-cta-icon {
-            font-size: 1.4rem;
-        }
-
-        .header-cta-arrow {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
         /* === 主內容區 === */
         main {
             position: relative;
             z-index: 1;
-            max-width: 1200px;
+            max-width: 980px;
             margin: 0 auto;
-            padding: 40px 20px 80px;
+            padding: 24px 20px 80px;
         }
 
         .section-title {
@@ -158,8 +116,8 @@
         /* === 應用網格 === */
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 28px;
         }
 
         /* === 應用卡片 === */
@@ -168,14 +126,21 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 30px;
+            padding: 28px 18px 22px;
             border: 1px solid rgba(255, 255, 255, 0.8);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 8px 32px rgba(142, 33, 87, 0.1),
                         inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            text-decoration: none;
         }
 
         .app-card::before {
@@ -192,7 +157,7 @@
         }
 
         .app-card:hover {
-            transform: translateY(-12px) scale(1.02);
+            transform: translateY(-10px) scale(1.02);
             border-color: var(--berry-light);
             box-shadow: 0 20px 50px rgba(142, 33, 87, 0.2),
                         0 0 0 1px rgba(255, 184, 208, 0.5),
@@ -204,14 +169,14 @@
         }
 
         .app-icon {
-            width: 80px;
-            height: 80px;
+            width: 88px;
+            height: 88px;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 2.6rem;
+            margin-bottom: 18px;
             position: relative;
             box-shadow: 0 8px 20px rgba(142, 33, 87, 0.2);
         }
@@ -228,90 +193,51 @@
             background: linear-gradient(135deg, #1e293b 0%, #334155 40%, #ffcb05 100%);
         }
 
-        .app-icon.coming-soon {
-            background: linear-gradient(135deg, var(--rose-gold) 0%, #d4a5b9 100%);
-            border: 2px dashed rgba(142, 33, 87, 0.3);
+        .app-icon.enjoyread {
+            background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
         }
 
         .app-name {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
+            font-size: 1.18rem;
+            margin-bottom: 0;
             color: var(--berry-dark);
+            line-height: 1.35;
         }
 
-        .app-desc {
-            font-size: 0.95rem;
-            color: var(--text-mid);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .app-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 5px 12px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(201, 75, 124, 0.15) 0%, rgba(248, 165, 194, 0.2) 100%);
-            color: var(--berry-dark);
-            border: 1px solid rgba(201, 75, 124, 0.3);
-        }
-
-        .app-button {
-            display: inline-block;
-            padding: 12px 28px;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-
-        .app-button.primary {
-            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(142, 33, 87, 0.35);
-        }
-
-        .app-button.primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 25px rgba(142, 33, 87, 0.5);
-        }
-
-        .app-button.disabled {
-            background: rgba(142, 33, 87, 0.1);
-            color: var(--text-mid);
-            cursor: not-allowed;
-            border: 1px solid rgba(142, 33, 87, 0.2);
-        }
-
-        /* === 即將推出卡片 === */
-        .app-card.coming-soon {
-            opacity: 0.85;
-        }
-
-        .app-card.coming-soon:hover {
-            transform: translateY(-8px);
-            opacity: 1;
-        }
-
-        .coming-badge {
+        .app-tooltip {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 0.7rem;
-            padding: 5px 12px;
-            background: linear-gradient(135deg, var(--berry-light) 0%, var(--peach-pink) 100%);
-            color: var(--berry-dark);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 8px rgba(142, 33, 87, 0.15);
+            left: 50%;
+            bottom: calc(100% + 14px);
+            transform: translateX(-50%) translateY(6px);
+            width: min(260px, calc(100vw - 40px));
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(92, 26, 61, 0.94);
+            color: #fff5f7;
+            font-size: 0.9rem;
+            line-height: 1.55;
+            box-shadow: 0 12px 30px rgba(92, 26, 61, 0.28);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 5;
+        }
+
+        .app-tooltip::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            border-width: 8px 7px 0 7px;
+            border-style: solid;
+            border-color: rgba(92, 26, 61, 0.94) transparent transparent transparent;
+        }
+
+        .app-card:hover .app-tooltip,
+        .app-card:focus-visible .app-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         /* === 底部 === */
@@ -356,12 +282,12 @@
             }
 
             .apps-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 20px;
             }
 
             .app-card {
-                padding: 25px;
+                min-height: 170px;
             }
         }
 
@@ -370,10 +296,19 @@
                 font-size: 2rem;
             }
 
+            .apps-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+
             .app-icon {
-                width: 65px;
-                height: 65px;
+                width: 72px;
+                height: 72px;
                 font-size: 2rem;
+            }
+
+            .app-name {
+                font-size: 1rem;
             }
         }
 
@@ -387,7 +322,6 @@
         .app-card:nth-child(2) { animation-delay: 0.2s; }
         .app-card:nth-child(3) { animation-delay: 0.3s; }
         .app-card:nth-child(4) { animation-delay: 0.4s; }
-        .app-card:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             from {
@@ -398,10 +332,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .app-card.coming-soon {
-            animation: fadeInUp 0.6s ease-out forwards;
         }
 
         /* === 作者區塊 === */
@@ -475,63 +405,6 @@
             }
         }
 
-        /* WebGL Flower Cursor：透明疊加保留頁面粉色底；不攔截點擊（除清除鈕） */
-        .flower-cursor-layer.container {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: flex-start;
-        }
-
-        .flower-cursor-layer.container canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            pointer-events: none;
-        }
-
-        .flower-cursor-layer .clean-btn {
-            pointer-events: auto;
-            position: relative;
-            z-index: 1;
-            font-family: sans-serif;
-            font-size: 15px;
-            color: white;
-            text-shadow: 0 0 10px #000000;
-            user-select: none;
-            padding: 0 0 15px 25px;
-            cursor: pointer;
-            text-decoration: underline;
-            opacity: 0.5;
-        }
-
-        .name {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            transform: translate(-50%, -50%);
-            z-index: 51;
-            color: white;
-            text-align: center;
-            font-size: 4vw;
-            text-shadow: 0 0 5px #000000;
-            user-select: none;
-            pointer-events: none;
-        }
-
-        @media all and (min-width: 640px) {
-            .name {
-                font-size: 45px;
-            }
-        }
-
         body > header,
         body > main,
         body > .author-section,
@@ -542,13 +415,17 @@
 
         /* === 全站 Google 登入（中央 Auth Worker）=== */
         .auth-bar-wrap {
-            margin-top: 20px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px 16px;
+            gap: 10px 12px;
             min-height: 44px;
+            max-width: min(92vw, 520px);
         }
 
         #peachblossom-auth-bar {
@@ -556,7 +433,13 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px 14px;
-            justify-content: center;
+            justify-content: flex-end;
+            padding: 10px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.52);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 26px rgba(142, 33, 87, 0.1);
         }
 
         .auth-status {
@@ -571,7 +454,7 @@
         .auth-user {
             font-size: 0.95rem;
             color: var(--berry-dark);
-            max-width: min(90vw, 280px);
+            max-width: min(56vw, 280px);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -609,15 +492,25 @@
             font-weight: 500;
         }
 
+        @media (max-width: 768px) {
+            .auth-bar-wrap {
+                top: 14px;
+                right: 14px;
+                left: 14px;
+                justify-content: center;
+            }
+
+            #peachblossom-auth-bar {
+                justify-content: center;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <div class="flower-cursor-layer container" aria-hidden="true">
-        <canvas id="canvas"></canvas>
-        <div class="clean-btn" id="flower-cursor-clean" role="button" tabindex="0" title="Clear">clean the screen</div>
+    <div class="auth-bar-wrap" aria-live="polite">
+        <div id="peachblossom-auth-bar"></div>
     </div>
-
-    <div class="name">WebGL Flower Cursor</div>
 
     <!-- 頭部 -->
     <header>
@@ -625,14 +518,6 @@
         <h1>桃花源</h1>
         <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
         <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
-        <div class="auth-bar-wrap" aria-live="polite">
-            <div id="peachblossom-auth-bar"></div>
-        </div>
-        <a href="enjoyread/app.html" class="header-cta">
-            <span class="header-cta-icon">📖</span>
-            <span>悅讀 EnjoyRead 中學生閱讀平台</span>
-            <span class="header-cta-arrow">→</span>
-        </a>
     </header>
 
     <!-- 主內容 -->
@@ -642,81 +527,32 @@
         </div>
 
         <div class="apps-grid">
+            <a href="enjoyread/app.html" class="app-card" aria-label="悅讀 EnjoyRead 中學生閱讀平台">
+                <div class="app-icon enjoyread">📚</div>
+                <h2 class="app-name">悅讀 EnjoyRead</h2>
+                <span class="app-tooltip">中學生閱讀平台，協助閱讀、整理與延伸學習。</span>
+            </a>
+
             <!-- 花鈿試妝 - 已上線 -->
-            <a href="huadian/huadian.html" class="app-card" style="text-decoration: none;">
+            <a href="huadian/huadian.html" class="app-card" aria-label="唐風花鈿">
                 <div class="app-icon huadian">💮</div>
                 <h2 class="app-name">唐風花鈿</h2>
-                <p class="app-desc">AR 即時試妝體驗，感受唐代仕女的精緻妝容。支援手勢互動，六款經典花鈿任君選擇，配有絕美古風虛擬背景。</p>
-                <div class="app-tags">
-                    <span class="tag">AR 試妝</span>
-                    <span class="tag">手勢控制</span>
-                    <span class="tag">唐風美學</span>
-                </div>
-                <span class="app-button primary">立即體驗</span>
+                <span class="app-tooltip">AR 即時試妝體驗，感受唐代仕女妝容，支援手勢互動與古風背景。</span>
             </a>
 
             <!-- 書法字帖生成平台 -->
-            <a href="copybook/" class="app-card" style="text-decoration: none;">
+            <a href="copybook/" class="app-card" aria-label="書法字帖生成平台">
                 <div class="app-icon copybook">🖌️</div>
                 <h2 class="app-name">書法字帖生成平台</h2>
-                <p class="app-desc">輸入詩文或任意文字，即時生成田字／米字／空白格字帖，並可選描紅（紅框鏤空）範字；可切換字型、列印或下載 PDF／PNG／TXT。</p>
-                <div class="app-tags">
-                    <span class="tag">毛筆字帖</span>
-                    <span class="tag">硬筆字帖</span>
-                    <span class="tag">PDF 下載</span>
-                </div>
-                <span class="app-button primary">開始生成</span>
+                <span class="app-tooltip">輸入詩文或任意文字，即時生成多種格線字帖，並支援列印與下載。</span>
             </a>
 
             <!-- Legendary Card Creator -->
-            <a href="legendary-card-creator/index.html" class="app-card" style="text-decoration: none;">
+            <a href="legendary-card-creator/index.html" class="app-card" aria-label="Legendary Card Creator">
                 <div class="app-icon legendary">🃏</div>
                 <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
-                <p class="app-desc">打造收藏級 Alternate Art 卡牌：可切換 Classic Gold / Holo Silver / Full-Art 邊框，疊加全像閃膜與復古紙紋，並翻面預覽經典藍紫 Orbit 卡背。</p>
-                <div class="app-tags">
-                    <span class="tag">1st Edition</span>
-                    <span class="tag">Holo Rare</span>
-                    <span class="tag">Alternate Art</span>
-                </div>
-                <span class="app-button primary">開封創作</span>
+                <span class="app-tooltip">打造收藏級 Alternate Art 卡牌，可切換邊框、疊加閃膜與紙紋效果。</span>
             </a>
-
-            <!-- 即將推出 - 佔位卡片 -->
-            <div class="app-card coming-soon">
-                <span class="coming-badge">即將推出</span>
-                <div class="app-icon coming-soon">🎨</div>
-                <h2 class="app-name">水墨丹青</h2>
-                <p class="app-desc">數位水墨畫創作工具，體驗傳統書畫的意境之美。</p>
-                <div class="app-tags">
-                    <span class="tag">繪畫</span>
-                    <span class="tag">創作</span>
-                </div>
-                <span class="app-button disabled">敬請期待</span>
-            </div>
-
-            <div class="app-card coming-soon">
-                <span class="coming-badge">即將推出</span>
-                <div class="app-icon coming-soon">🎭</div>
-                <h2 class="app-name">臉譜變裝</h2>
-                <p class="app-desc">京劇臉譜 AR 體驗，一秒化身戲曲角色，感受國粹藝術的魅力。</p>
-                <div class="app-tags">
-                    <span class="tag">京劇</span>
-                    <span class="tag">臉譜</span>
-                </div>
-                <span class="app-button disabled">敬請期待</span>
-            </div>
-
-            <div class="app-card coming-soon">
-                <span class="coming-badge">即將推出</span>
-                <div class="app-icon coming-soon">🏮</div>
-                <h2 class="app-name">燈謎雅集</h2>
-                <p class="app-desc">傳統燈謎遊戲，猜燈謎、學文化，體驗古人的智慧與雅趣。</p>
-                <div class="app-tags">
-                    <span class="tag">燈謎</span>
-                    <span class="tag">益智</span>
-                </div>
-                <span class="app-button disabled">敬請期待</span>
-            </div>
         </div>
     </main>
 
@@ -738,19 +574,9 @@
         <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="js/peachblossom-auth.js"></script>
-    <script src="js/flower-cursor.js"></script>
     <script>
-        (function () {
-            var canvas = document.getElementById("canvas");
-            var btn = document.getElementById("flower-cursor-clean");
-            if (typeof initFlowerCursor === "function" && canvas) {
-                initFlowerCursor(canvas, btn);
-            }
-        })();
-
-        document.querySelectorAll('.app-card:not(.coming-soon)').forEach(card => {
+        document.querySelectorAll('.app-card').forEach(card => {
             card.addEventListener('mouseenter', () => {
                 card.style.cursor = 'pointer';
             });
