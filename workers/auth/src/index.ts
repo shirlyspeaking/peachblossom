@@ -61,14 +61,16 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
   if (method === "OPTIONS") {
     const origin = corsAllowOrigin(request, parseCommaList(env.ALLOWED_ORIGINS));
-    if (!origin) return new Response(null, { status: 204 });
+    if (!origin) return new Response(null, { status: 403 });
+    const allowHeaders =
+      request.headers.get("Access-Control-Request-Headers") || "Content-Type, Cookie";
     return new Response(null, {
       status: 204,
       headers: {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Cookie",
+        "Access-Control-Allow-Headers": allowHeaders,
         "Access-Control-Max-Age": "86400",
         Vary: "Origin",
       },

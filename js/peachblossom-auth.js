@@ -59,6 +59,9 @@
 
     fetch(base + "/auth/session", { credentials: "include", cache: "no-store" })
       .then(function (res) {
+        if (!res.ok) {
+          throw new Error("session_http_" + res.status);
+        }
         return res.json();
       })
       .then(function (data) {
@@ -82,9 +85,12 @@
           if (loginBtn) loginBtn.addEventListener("click", login);
         }
       })
-      .catch(function () {
+      .catch(function (err) {
+        var detail = err && err.message ? String(err.message) : "連線失敗";
         setBar(
-          '<span class="auth-status auth-warn">無法連線至登入服務（請確認 Auth Worker 已部署且 CORS 已設定）</span>' +
+          '<span class="auth-status auth-warn">無法連線至登入服務（' +
+            detail +
+            "）。請確認 <strong>auth.peachspring.cc</strong> 可開啟，並重新整理本頁。</span>" +
             '<button type="button" class="auth-btn auth-btn-in" id="peachblossom-auth-login-retry">重試</button>'
         );
         var retry = el("peachblossom-auth-login-retry");
