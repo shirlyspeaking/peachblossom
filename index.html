@@ -205,6 +205,19 @@
             transition: transform 0.28s ease, color 0.28s ease, filter 0.28s ease;
         }
 
+        .app-icon path,
+        .app-icon rect,
+        .app-icon circle,
+        .app-icon line,
+        .app-icon polyline,
+        .app-icon polygon {
+            stroke: currentColor;
+            fill: none;
+            stroke-width: inherit;
+            stroke-linecap: inherit;
+            stroke-linejoin: inherit;
+        }
+
         .app-card:hover .app-icon,
         .app-card:focus-visible .app-icon {
             transform: scale(1.06);
