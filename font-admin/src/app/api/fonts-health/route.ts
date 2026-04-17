@@ -1,7 +1,7 @@
 import path from "node:path";
 import { stat, readFile } from "node:fs/promises";
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { isFontAdminAuthorized } from "../../../lib/peachblossom-auth";
 
 type ManifestFont = {
   id: string;
@@ -21,9 +21,7 @@ async function readManifest(targetDir: string): Promise<ManifestFont[]> {
 }
 
 export async function GET(request: Request) {
-  const adminKey = process.env.FONT_ADMIN_KEY;
-  const providedKey = headers().get("x-font-admin-key");
-  if (adminKey && providedKey !== adminKey) {
+  if (!(await isFontAdminAuthorized(request))) {
     return NextResponse.json({ ok: false, message: "未授權存取管理 API" }, { status: 401 });
   }
 
