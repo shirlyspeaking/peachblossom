@@ -185,27 +185,92 @@
       border: 1px solid #fcd34d; color: #fcd34d; background: rgba(31,41,55,.75);
       border-radius: 7px; padding: 3px 6px; font-size: .6rem; letter-spacing: .15em; font-weight: 700;
     }
-    .texture {
-      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .27;
-      background-image:
-        repeating-linear-gradient(120deg, rgba(255,255,255,.13) 0 1px, transparent 1px 5px),
-        repeating-linear-gradient(0deg, rgba(15,23,42,.12) 0 1px, transparent 1px 6px);
+    .frame-texture {
+      position: absolute; inset: 0; pointer-events: none; border-radius: 28px;
     }
-    .vintage {
-      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; opacity: .26;
+    .frame-texture.brushed {
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(255,248,220,.32), transparent 28%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 4px);
+        repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+      opacity: .6;
+    }
+    .frame-texture.carbon {
+      background-image:
+        repeating-conic-gradient(rgba(255,255,255,.12) 0% 25%, transparent 0% 50%) 0 0 / 8px 8px,
+        repeating-conic-gradient(rgba(0,0,0,.16) 0% 25%, transparent 0% 50%) 4px 4px / 8px 8px;
+      mix-blend-mode: overlay;
+      opacity: .7;
+    }
+    .frame-texture.diamond {
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0 2px, transparent 2px 10px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,.15) 0 2px, transparent 2px 10px);
+      mix-blend-mode: overlay;
+      opacity: .55;
+    }
+    .frame-texture.linen {
+      background-image:
+        repeating-linear-gradient(0deg, rgba(210,180,140,.22) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(210,180,140,.18) 0 1px, transparent 1px 4px);
+      mix-blend-mode: color-burn;
+      opacity: .55;
     }
     .back { transform: rotateY(180deg); background:
       radial-gradient(circle at 20% 20%, rgba(96,165,250,.35), transparent 28%),
       radial-gradient(circle at 80% 25%, rgba(168,85,247,.38), transparent 24%),
       linear-gradient(135deg,#060d27 0%,#132257 48%,#1b0f3b 100%); }
+    .back-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: .45;
+      pointer-events: none;
+    }
     .ring { position: absolute; left: 50%; top: 50%; border-radius: 999px; transform: translate(-50%,-50%); border: 1px solid rgba(255,255,255,.25); }
     .ring.r1 { width: 76%; height: 76%; }
     .ring.r2 { width: 78%; height: 78%; border-color: rgba(186,230,253,.32); animation: spin 16s linear infinite; }
     .core { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; transform: translate(-50%,-50%); border-radius: 999px;
       background: radial-gradient(circle, rgba(255,203,5,.95) 0%, rgba(255,203,5,.72) 38%, rgba(255,255,255,.2) 39%, rgba(255,255,255,.05) 60%, transparent 61%); border: 1px solid rgba(255,255,255,.35); }
+    .back-title {
+      position: absolute;
+      top: 11%;
+      left: 8%;
+      right: 8%;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(248,250,252,.95);
+      text-shadow: 0 2px 12px rgba(2,6,23,.8);
+    }
+    .back-subtitle {
+      position: absolute;
+      top: 17%;
+      left: 10%;
+      right: 10%;
+      text-align: center;
+      font-size: .68rem;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,.78);
+    }
+    .back-badge {
+      position: absolute;
+      left: 50%;
+      bottom: 12%;
+      transform: translateX(-50%);
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(15,23,42,.4);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .65rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,.9);
+      backdrop-filter: blur(6px);
+    }
     @keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
     .reflection {
       width: 74%; height: 28px; margin: 8px auto 0;
@@ -273,13 +338,18 @@
               <button class="chip" id="btnModern">現代模式</button>
             </div>
           </div>
-          <div class="toggle">
-            <span>Shadowless（去邊框陰影）</span>
-            <input type="checkbox" id="shadowless" />
+          <div class="field">
+            <label>邊框材質</label>
+            <div class="chip-row" style="grid-template-columns: repeat(4,1fr);">
+              <button class="chip" data-texture="none">無</button>
+              <button class="chip active" data-texture="brushed">拉絲</button>
+              <button class="chip" data-texture="carbon">碳纖維</button>
+              <button class="chip" data-texture="diamond">鑽切</button>
+            </div>
           </div>
-          <div class="toggle">
-            <span>Vintage Filter（紙質感）</span>
-            <input type="checkbox" id="vintageFilter" checked />
+          <div class="field">
+            <label>邊框色調（直接改色）</label>
+            <input id="borderTint" class="input" type="color" value="#ffcb05" />
           </div>
           <div class="field">
             <label>稀有度星級</label>
@@ -288,6 +358,24 @@
               <button class="chip" data-rarity="2">★★</button>
               <button class="chip active" data-rarity="3">★★★</button>
             </div>
+          </div>
+          <div class="field">
+            <label>卡背標題 / 副標</label>
+            <div class="row">
+              <input id="backTitle" class="input" value="Legendary" />
+              <input id="backSubtitle" class="input" value="Classic Orbit" />
+            </div>
+          </div>
+          <div class="field">
+            <label>卡背配色（環 / 核心）</label>
+            <div class="row">
+              <input id="backRingColor" class="input" type="color" value="#bae6fd" />
+              <input id="backCoreColor" class="input" type="color" value="#ffcb05" />
+            </div>
+          </div>
+          <div class="field">
+            <label>卡背徽章文字</label>
+            <input id="backBadgeText" class="input" value="Collector Edition" />
           </div>
         </section>
 
@@ -300,6 +388,11 @@
           <div class="field">
             <label>能量符號</label>
             <div class="chip-row" id="energyWrap"></div>
+          </div>
+          <div class="field">
+            <label>上傳卡背背景（可選）</label>
+            <input id="backUpload" type="file" class="input" accept="image/*" />
+            <small id="backUploadName" style="display:block;margin-top:6px;color:#94a3b8;">未設定卡背背景</small>
           </div>
           <button class="btn" id="btnReset" style="width:100%;">一鍵重置</button>
         </section>
@@ -327,14 +420,17 @@
                   <div id="vSet">PB-001 / ALT</div>
                 </div>
                 <div class="edition" id="edition">1st Edition</div>
-                <div class="texture" id="texture" style="display:none;"></div>
-                <div class="vintage" id="vintage"></div>
               </div>
+              <div class="frame-texture brushed" id="frameTexture"></div>
             </div>
             <div class="face back">
+              <div class="back-bg" id="backBg"></div>
               <div class="ring r1"></div>
-              <div class="ring r2"></div>
-              <div class="core"></div>
+              <div class="ring r2" id="backRing"></div>
+              <div class="core" id="backCore"></div>
+              <div class="back-title" id="vBackTitle">Legendary</div>
+              <div class="back-subtitle" id="vBackSubtitle">Classic Orbit</div>
+              <div class="back-badge" id="vBackBadge">Collector Edition</div>
             </div>
           </div>
           <div class="reflection"></div>
@@ -351,6 +447,8 @@
       rarity: 3,
       energies: ["fire", "electric", "psychic"],
       artUrl: null,
+      backArtUrl: null,
+      frameTexture: "brushed",
     };
 
     const refs = {
@@ -380,20 +478,32 @@
       frontShell: document.getElementById("frontShell"),
       cardHeader: document.getElementById("cardHeader"),
       holo: document.getElementById("holo"),
-      texture: document.getElementById("texture"),
-      vintage: document.getElementById("vintage"),
+      frameTexture: document.getElementById("frameTexture"),
       edition: document.getElementById("edition"),
-      shadowless: document.getElementById("shadowless"),
-      vintageFilter: document.getElementById("vintageFilter"),
+      borderTint: document.getElementById("borderTint"),
+      textureBtns: document.querySelectorAll("[data-texture]"),
       btnVintage: document.getElementById("btnVintage"),
       btnModern: document.getElementById("btnModern"),
       btnFlip: document.getElementById("btnFlip"),
       btnExport: document.getElementById("btnExport"),
       artUpload: document.getElementById("artUpload"),
       uploadName: document.getElementById("uploadName"),
+      backUpload: document.getElementById("backUpload"),
+      backUploadName: document.getElementById("backUploadName"),
       energyWrap: document.getElementById("energyWrap"),
       status: document.getElementById("status"),
       rarityBtns: document.querySelectorAll("[data-rarity]"),
+      backTitle: document.getElementById("backTitle"),
+      backSubtitle: document.getElementById("backSubtitle"),
+      backBadgeText: document.getElementById("backBadgeText"),
+      backRingColor: document.getElementById("backRingColor"),
+      backCoreColor: document.getElementById("backCoreColor"),
+      vBackTitle: document.getElementById("vBackTitle"),
+      vBackSubtitle: document.getElementById("vBackSubtitle"),
+      vBackBadge: document.getElementById("vBackBadge"),
+      backRing: document.getElementById("backRing"),
+      backCore: document.getElementById("backCore"),
+      backBg: document.getElementById("backBg"),
     };
 
     const ENERGY_META = {
@@ -448,18 +558,28 @@
 
       const modern = state.era === "modern";
       refs.cardArt.classList.toggle("full", modern);
-      refs.texture.style.display = modern ? "block" : "none";
       refs.edition.style.display = modern ? "none" : "block";
-      refs.vintage.style.display = refs.vintageFilter.checked ? "block" : "none";
-      refs.cardArt.style.boxShadow = refs.shadowless.checked ? "none" : "0 22px 38px -24px rgba(15,23,42,.95)";
+
+      var tint = refs.borderTint.value;
+      var r = parseInt(tint.slice(1,3),16), g = parseInt(tint.slice(3,5),16), b = parseInt(tint.slice(5,7),16);
+      var bright = `rgb(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)})`;
+      var dark = `rgb(${Math.max(r-60,0)},${Math.max(g-60,0)},${Math.max(b-60,0)})`;
 
       if (modern) {
-        refs.frontShell.style.background = "linear-gradient(145deg, rgba(255,255,255,.35), rgba(148,163,184,.22), rgba(255,255,255,.08))";
-        refs.frontShell.style.boxShadow = "0 40px 120px -52px rgba(56,189,248,.55)";
+        refs.frontShell.style.background = `linear-gradient(145deg, ${bright}90, ${tint}50, ${dark}60)`;
+        refs.frontShell.style.boxShadow = `0 40px 120px -52px ${tint}88`;
       } else {
-        refs.frontShell.style.background = "linear-gradient(145deg,#fff8d4 0%,#ffcb05 18%,#b68d2d 42%,#ffe89a 65%,#8d6518 100%)";
-        refs.frontShell.style.boxShadow = "0 35px 110px -50px rgba(255,203,5,.7)";
+        refs.frontShell.style.background = `linear-gradient(145deg, ${bright} 0%, ${tint} 25%, ${dark} 55%, ${bright} 80%, ${dark} 100%)`;
+        refs.frontShell.style.boxShadow = `0 35px 110px -50px ${tint}bb`;
       }
+
+      refs.frameTexture.className = "frame-texture " + (state.frameTexture || "brushed");
+
+      refs.vBackTitle.textContent = refs.backTitle.value || "Legendary";
+      refs.vBackSubtitle.textContent = refs.backSubtitle.value || "Classic Orbit";
+      refs.vBackBadge.textContent = refs.backBadgeText.value || "Collector Edition";
+      refs.backRing.style.borderColor = refs.backRingColor.value;
+      refs.backCore.style.background = `radial-gradient(circle, ${refs.backCoreColor.value} 0%, ${refs.backCoreColor.value}cc 38%, rgba(255,255,255,.2) 39%, rgba(255,255,255,.05) 60%, transparent 61%)`;
     }
 
     function activateTab(tab) {
@@ -502,7 +622,7 @@
     }
 
     refs.tabs.forEach((node) => node.addEventListener("click", () => activateTab(node.dataset.tab)));
-    [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber].forEach((node) => node.addEventListener("input", renderCard));
+    [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber, refs.backTitle, refs.backSubtitle, refs.backBadgeText, refs.backRingColor, refs.backCoreColor, refs.borderTint].forEach((node) => node.addEventListener("input", renderCard));
 
     refs.btnVintage.onclick = () => {
       state.era = "vintage";
@@ -517,8 +637,13 @@
       renderCard();
     };
 
-    refs.shadowless.onchange = renderCard;
-    refs.vintageFilter.onchange = renderCard;
+    refs.textureBtns.forEach((button) => {
+      button.onclick = () => {
+        state.frameTexture = button.dataset.texture === "none" ? "" : button.dataset.texture;
+        refs.textureBtns.forEach((b) => b.classList.toggle("active", b === button));
+        renderCard();
+      };
+    });
 
     refs.rarityBtns.forEach((button) => {
       button.onclick = () => {
@@ -561,6 +686,16 @@
       await applySmartHeaderColor(file);
     };
 
+    refs.backUpload.onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (state.backArtUrl) URL.revokeObjectURL(state.backArtUrl);
+      state.backArtUrl = URL.createObjectURL(file);
+      refs.backUploadName.textContent = file.name;
+      refs.backBg.style.backgroundImage = `url("${state.backArtUrl}")`;
+      setStatus("已更新卡背背景圖。");
+    };
+
     refs.btnReset.onclick = () => {
       refs.name.value = "Celestial Emberfox";
       refs.hp.value = "320";
@@ -568,8 +703,9 @@
       refs.desc.value = "Channel prismatic flames. Draw 2 cards and strike 1 target.";
       refs.illustrator.value = "Shirly Zhang";
       refs.setNumber.value = "PB-001 / ALT";
-      refs.shadowless.checked = false;
-      refs.vintageFilter.checked = true;
+      state.frameTexture = "brushed";
+      refs.textureBtns.forEach((b) => b.classList.toggle("active", b.dataset.texture === "brushed"));
+      refs.borderTint.value = "#ffcb05";
       state.rarity = 3;
       refs.rarityBtns.forEach((b) => b.classList.toggle("active", b.dataset.rarity === "3"));
       state.energies = ["fire", "electric", "psychic"];
@@ -578,6 +714,15 @@
       refs.btnModern.classList.remove("active");
       refs.cardHeader.style.background = "rgb(51,65,85)";
       refs.cardHeader.style.color = "#f8fafc";
+      refs.backTitle.value = "Legendary";
+      refs.backSubtitle.value = "Classic Orbit";
+      refs.backBadgeText.value = "Collector Edition";
+      refs.backRingColor.value = "#bae6fd";
+      refs.backCoreColor.value = "#ffcb05";
+      if (state.backArtUrl) URL.revokeObjectURL(state.backArtUrl);
+      state.backArtUrl = null;
+      refs.backBg.style.backgroundImage = "none";
+      refs.backUploadName.textContent = "未設定卡背背景";
       renderEnergyButtons();
       renderCard();
       setStatus("已重置為預設收藏版樣式。");
@@ -589,13 +734,42 @@
         setStatus("html2canvas 未載入完成，請稍後。");
         return;
       }
+      const previousTransform = refs.card3d.style.transform;
+      refs.btnExport.disabled = true;
+      refs.btnExport.textContent = "匯出中...";
       setStatus("正在輸出 PNG...");
-      const canvas = await window.html2canvas(target, { backgroundColor: null, scale: 3, useCORS: true });
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = (refs.name.value || "legendary-card").toLowerCase().replace(/\s+/g, "-") + ".png";
-      link.click();
-      setStatus("PNG 匯出完成。");
+      try {
+        refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
+        const canvas = await window.html2canvas(target, {
+          backgroundColor: null,
+          scale: 3,
+          useCORS: true,
+          logging: false,
+        });
+        await new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("無法建立 PNG 檔案"));
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = (refs.name.value || "legendary-card").toLowerCase().replace(/\s+/g, "-") + ".png";
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1200);
+            resolve();
+          }, "image/png");
+        });
+        setStatus("PNG 匯出完成。");
+      } catch (error) {
+        setStatus("PNG 匯出失敗，請檢查瀏覽器下載權限或稍後重試。");
+        console.error(error);
+      } finally {
+        refs.card3d.style.transform = previousTransform;
+        refs.btnExport.disabled = false;
+        refs.btnExport.textContent = "匯出 PNG";
+      }
     };
 
     renderEnergyButtons();

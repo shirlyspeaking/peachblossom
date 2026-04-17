@@ -1,13 +1,5 @@
-:root {
-    --berry-dark: #8e2157;
-    --berry-mid: #c94b7c;
-    --paper: #fffdf8;
-    --line: #c74f7b;
-    --line-soft: rgba(199, 79, 123, 0.35);
-    --ink: #4b2a3d;
-}
+/* ===== Web Fonts ===== */
 
-/* 辰宇落雁體 ChenYuluoyan — 開源 OFL，來源：github.com/Chenyu-otf/chenyuluoyan_thin */
 @font-face {
     font-family: "ChenYuluoyan";
     src:
@@ -19,7 +11,6 @@
     font-display: swap;
 }
 
-/* Y式筆書 TC — 高覆蓋行書／行楷風，OFL，來源：github.com/Steve-Yuu/YshiPen-Shuti */
 @font-face {
     font-family: "YShiPenShutiTC";
     src:
@@ -31,7 +22,6 @@
     font-display: swap;
 }
 
-/* 阿里媽媽刀隸體 — 隸意風格；阿里字體平台免費可商用授權（非 SIL OFL），字檔隨專案部署以避免外部熱鏈失效 */
 @font-face {
     font-family: "AlimamaDaoLiTi";
     src:
@@ -45,7 +35,6 @@
     font-display: swap;
 }
 
-/* 全字庫說文解字（ebas927.ttf）— 臺灣全字庫 CNS11643，政府資料開放授權條款第 1 版；字檔隨專案部署。官方：https://www.cns11643.gov.tw/ */
 @font-face {
     font-family: "全字庫說文解字";
     src:
@@ -57,6 +46,84 @@
     font-display: swap;
 }
 
+/* ===== Theme: 桃花 (default) ===== */
+:root {
+    --accent-dark: #8e2157;
+    --accent-mid: #c94b7c;
+    --paper: #fffdf8;
+    --line-soft: rgba(199, 79, 123, 0.35);
+    --line-soft-hong: rgba(199, 79, 123, 0.22);
+    --line-soft-light: rgba(199, 79, 123, 0.18);
+    --ink: #4b2a3d;
+    --bg: linear-gradient(135deg, #ffeef2, #ffd8e5 35%, #ffeaf2);
+    --ui-border: rgba(142, 33, 87, 0.15);
+    --input-border: rgba(142, 33, 87, 0.25);
+    --label-color: #6a3f55;
+    --page-title-color: #8a5b73;
+    --page-shadow: rgba(142, 33, 87, 0.12);
+    --cell-text: #3d2130;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+}
+
+/* ===== Theme: 青瓷 — 龍泉窯青瓷 ===== */
+body[data-theme="green"] {
+    --accent-dark: #2e6b45;
+    --accent-mid: #5a9a72;
+    --paper: #fafdf7;
+    --line-soft: rgba(90, 154, 114, 0.35);
+    --line-soft-hong: rgba(90, 154, 114, 0.22);
+    --line-soft-light: rgba(90, 154, 114, 0.18);
+    --ink: #2a3d30;
+    --bg: linear-gradient(135deg, #f2f7f3, #dbeadc 35%, #edf5ee);
+    --ui-border: rgba(46, 107, 69, 0.15);
+    --input-border: rgba(46, 107, 69, 0.25);
+    --label-color: #3f6a50;
+    --page-title-color: #5b8a68;
+    --page-shadow: rgba(46, 107, 69, 0.12);
+    --cell-text: #1e3026;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+}
+
+/* ===== Theme: 汝窯 — 天青色等煙雨 ===== */
+body[data-theme="blue"] {
+    --accent-dark: #2e4a70;
+    --accent-mid: #5a80b0;
+    --paper: #f8fafd;
+    --line-soft: rgba(90, 128, 176, 0.35);
+    --line-soft-hong: rgba(90, 128, 176, 0.22);
+    --line-soft-light: rgba(90, 128, 176, 0.18);
+    --ink: #2a3040;
+    --bg: linear-gradient(135deg, #eff4f9, #d8e4f0 35%, #e9f0f7);
+    --ui-border: rgba(46, 74, 112, 0.15);
+    --input-border: rgba(46, 74, 112, 0.25);
+    --label-color: #3f5570;
+    --page-title-color: #5b7a98;
+    --page-shadow: rgba(46, 74, 112, 0.12);
+    --cell-text: #1e2a38;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%235a80b0' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%235a80b0' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+}
+
+/* ===== Theme: 月白 — 素淨如月 ===== */
+body[data-theme="silver"] {
+    --accent-dark: #505058;
+    --accent-mid: #7a7a88;
+    --paper: #fafafc;
+    --line-soft: rgba(122, 122, 136, 0.35);
+    --line-soft-hong: rgba(122, 122, 136, 0.22);
+    --line-soft-light: rgba(122, 122, 136, 0.18);
+    --ink: #333340;
+    --bg: linear-gradient(135deg, #f3f3f5, #e2e2e8 35%, #ececf0);
+    --ui-border: rgba(80, 80, 88, 0.15);
+    --input-border: rgba(80, 80, 88, 0.25);
+    --label-color: #555568;
+    --page-title-color: #6a6a80;
+    --page-shadow: rgba(80, 80, 88, 0.12);
+    --cell-text: #2a2a35;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%237a7a88' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%237a7a88' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+}
+
+/* ===== Reset ===== */
+
 * {
     box-sizing: border-box;
 }
@@ -65,30 +132,83 @@ body {
     margin: 0;
     font-family: "Kaiti TC", "STKaiti", "Songti TC", "Noto Serif TC", serif;
     color: var(--ink);
-    background: linear-gradient(135deg, #ffeef2, #ffd8e5 35%, #ffeaf2);
+    background: var(--bg);
+    transition: background 0.4s ease, color 0.3s ease;
 }
+
+/* ===== Header ===== */
 
 .site-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid rgba(142, 33, 87, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--ui-border);
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(6px);
+    transition: border-color 0.3s;
 }
 
-.site-header h1 {
-    margin: 8px 0 6px;
-}
-
-.site-header p {
-    margin: 0;
-    color: #7c4761;
+.header-left h1 {
+    margin: 4px 0 0;
+    font-size: 1.35rem;
 }
 
 .back-link {
-    color: var(--berry-dark);
+    color: var(--accent-dark);
     text-decoration: none;
     font-size: 0.95rem;
+    transition: color 0.3s;
 }
+
+/* ===== Theme Picker ===== */
+
+.theme-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-label {
+    font-size: 0.82rem;
+    color: var(--label-color);
+    margin-right: 2px;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+
+.theme-dot {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    filter: none;
+    color: transparent;
+    font-size: 0;
+}
+
+.theme-dot:hover {
+    transform: scale(1.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.theme-dot.active {
+    border-color: var(--accent-dark);
+    transform: scale(1.15);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.theme-dot--pink   { background: linear-gradient(135deg, #f5c6d6, #c94b7c); }
+.theme-dot--green  { background: linear-gradient(135deg, #c5dfca, #5a9a72); }
+.theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
+.theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
+
+/* ===== Layout ===== */
 
 .layout {
     display: grid;
@@ -99,59 +219,35 @@ body {
 
 .panel {
     background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(142, 33, 87, 0.15);
+    border: 1px solid var(--ui-border);
     border-radius: 14px;
     padding: 14px;
     position: sticky;
     top: 12px;
     height: fit-content;
+    transition: border-color 0.3s;
 }
+
+/* ===== Form Elements ===== */
 
 label {
     display: block;
     font-size: 0.9rem;
     margin: 10px 0 6px;
-    color: #6a3f55;
+    color: var(--label-color);
+    transition: color 0.3s;
 }
 
 textarea,
 input,
 select {
     width: 100%;
-    border: 1px solid rgba(142, 33, 87, 0.25);
+    border: 1px solid var(--input-border);
     border-radius: 10px;
     padding: 8px 10px;
     font-size: 0.95rem;
     background: #fff;
-}
-
-.btn-chenyu {
-    margin-top: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 0.88rem;
-    border-radius: 10px;
-    border: 1px dashed rgba(142, 33, 87, 0.35);
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--berry-dark);
-    cursor: pointer;
-    line-height: 1.35;
-}
-
-.btn-chenyu:hover {
-    background: rgba(142, 33, 87, 0.06);
-    border-color: rgba(142, 33, 87, 0.45);
-}
-
-.font-hint {
-    margin: 6px 0 0;
-    font-size: 0.78rem;
-    color: #8a5b73;
-    line-height: 1.4;
-}
-
-.font-hint a {
-    color: var(--berry-mid);
+    transition: border-color 0.3s;
 }
 
 textarea {
@@ -169,11 +265,7 @@ textarea {
     grid-template-columns: 1fr;
 }
 
-.label-sub {
-    font-weight: 400;
-    color: #8a5b73;
-    font-size: 0.88em;
-}
+/* ===== Action Buttons ===== */
 
 .actions {
     display: grid;
@@ -198,19 +290,16 @@ button {
     padding: 10px;
     font-size: 0.92rem;
     cursor: pointer;
-    background: linear-gradient(135deg, var(--berry-mid), var(--berry-dark));
+    background: linear-gradient(135deg, var(--accent-mid), var(--accent-dark));
     color: #fff;
+    transition: background 0.3s;
 }
 
 button:hover {
     filter: brightness(1.05);
 }
 
-.status {
-    margin: 10px 0 0;
-    font-size: 0.85rem;
-    color: #70455d;
-}
+/* ===== Preview ===== */
 
 .preview-wrap {
     min-width: 0;
@@ -221,22 +310,13 @@ button:hover {
     gap: 16px;
 }
 
-/* 描紅版：格線略淡，與範字協調 */
 .preview.preview--hong,
 .preview.preview--trace {
-    --line-soft: rgba(199, 79, 123, 0.22);
+    --line-soft: var(--line-soft-hong);
 }
 
-/* 淺粉色描紅（實心）：格線略柔，襯淺粉字 */
 .preview.preview--light-pink-hong {
-    --line-soft: rgba(199, 79, 123, 0.18);
-}
-
-.copy-style-hint {
-    font-size: 0.85rem;
-    color: #7c4761;
-    line-height: 1.45;
-    margin: 0.45rem 0 0;
+    --line-soft: var(--line-soft-light);
 }
 
 .preview--a4 .page {
@@ -257,31 +337,37 @@ button:hover {
     margin-right: auto;
 }
 
+/* ===== Page Card ===== */
+
 .page {
     background: var(--paper);
     border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(142, 33, 87, 0.12);
+    box-shadow: 0 8px 30px var(--page-shadow);
     padding: 18px;
-    border: 1px solid rgba(142, 33, 87, 0.1);
+    border: 1px solid var(--ui-border);
     overflow-x: auto;
+    transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
 }
 
 .page-title {
     font-size: 0.85rem;
-    color: #8a5b73;
+    color: var(--page-title-color);
     margin-bottom: 10px;
+    transition: color 0.3s;
 }
+
+/* ===== Grid & Cells ===== */
 
 .grid {
     display: grid;
     gap: 0;
     border: 1px solid var(--line-soft);
-    /* 右側邊框改由最後一格繪製，避免寬內容溢出時外框看起來消失 */
     border-right: none;
     width: max-content;
     max-width: none;
     margin-left: 0;
     margin-right: 0;
+    transition: border-color 0.3s;
 }
 
 .cell {
@@ -291,13 +377,13 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3d2130;
+    color: var(--cell-text);
     background: #fff;
     overflow: hidden;
+    transition: border-color 0.3s, color 0.3s;
 }
 
 .cell.col-last {
-    /* 保留右側邊框 */
     border-right: 1px solid var(--line-soft);
 }
 
@@ -333,6 +419,8 @@ button:hover {
     overflow: visible;
 }
 
+/* Tian / Mi guide lines */
+
 .cell.tian::before,
 .cell.mi::before,
 .cell.mi::after {
@@ -342,7 +430,6 @@ button:hover {
     pointer-events: none;
 }
 
-/* 田字／米字中心十字：虛線（repeating 漸層置於中央 1px 帶內） */
 .cell.tian::before,
 .cell.mi::before {
     background-image:
@@ -361,13 +448,14 @@ button:hover {
     background-repeat: no-repeat;
 }
 
-/* 米字格對角線：SVG 虛線，隨格縮放 */
 .cell.mi::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+    background-image: var(--mi-diag);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
 }
+
+/* ===== Responsive ===== */
 
 @media (max-width: 980px) {
     .layout {
@@ -378,6 +466,8 @@ button:hover {
         position: static;
     }
 }
+
+/* ===== Print ===== */
 
 @media print {
     body {
