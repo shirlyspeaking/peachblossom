@@ -28,7 +28,6 @@
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
     var fontPreset = document.getElementById('fontPreset');
-    var customFont = document.getElementById('customFont');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
@@ -99,12 +98,7 @@
     }
 
     function getFontFamily() {
-        var preset = fontPreset.value.trim();
-        var custom = customFont.value.trim();
-        if (custom) {
-            return custom + ', ' + preset;
-        }
-        return preset;
+        return fontPreset.value.trim();
     }
 
     /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
@@ -428,13 +422,12 @@
     function applyChenyuFont() {
         var opt = document.getElementById('fontOptChenyu');
         if (opt && fontPreset) fontPreset.value = opt.value;
-        if (customFont) customFont.value = '';
         setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
         renderNow();
     }
 
     var inputs = [
-        textInput, fontPreset, customFont, gridType, copyStyle, fontSize, lineHeight,
+        textInput, fontPreset, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {

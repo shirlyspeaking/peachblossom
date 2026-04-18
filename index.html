@@ -222,6 +222,25 @@
             gap: var(--space-md);
         }
 
+        /* 「桃花源」標題以上：黑色底特效區（不影響全站 body 捲動） */
+        .hero-title-wrap > .container {
+            width: 100%;
+            margin: 0;
+            padding: clamp(20px, 4vw, 36px) clamp(16px, 3vw, 28px);
+            background-color: #000000;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: clamp(112px, 22vw, 160px);
+            box-sizing: border-box;
+        }
+
+        .hero-title-wrap > .container .hero-logo {
+            color: oklch(0.93 0.04 12);
+            filter: drop-shadow(0 12px 28px oklch(0.55 0.14 12 / 0.45));
+        }
+
         .hero-logo {
             width: 74px;
             height: 74px;
@@ -768,13 +787,15 @@
         <header class="hero">
             <div class="hero-copy">
                 <div class="hero-title-wrap">
-                    <div class="hero-logo" aria-hidden="true">
-                        <svg viewBox="0 0 64 64" fill="none">
-                            <path d="M32 9c4.4 0 8 8.1 8 14.2 0 1.5-.2 2.8-.6 4 1.3-.4 2.6-.6 4-.6C49.9 26.6 58 30.2 58 34.6S49.9 42.6 43.8 42.6c-1.4 0-2.7-.2-4-.6.4 1.2.6 2.5.6 4 0 6.1-3.6 14.2-8 14.2s-8-8.1-8-14.2c0-1.5.2-2.8.6-4-1.3.4-2.6.6-4 .6C14.1 42.6 6 39 6 34.6s8.1-8 14.2-8c1.4 0 2.7.2 4 .6-.4-1.2-.6-2.5-.6-4C24 17.1 27.6 9 32 9Z" fill="currentColor" opacity="0.16"></path>
-                            <path d="M32 12c3.3 0 6 6.3 6 11.2 0 2-.4 3.7-1.1 5.1 1.4-.7 3.1-1.1 5.1-1.1 4.9 0 11.2 2.7 11.2 6s-6.3 6-11.2 6c-2 0-3.7-.4-5.1-1.1.7 1.4 1.1 3.1 1.1 5.1 0 4.9-2.7 11.2-6 11.2s-6-6.3-6-11.2c0-2 .4-3.7 1.1-5.1-1.4.7-3.1 1.1-5.1 1.1-4.9 0-11.2-2.7-11.2-6s6.3-6 11.2-6c2 0 3.7.4 5.1 1.1-.7-1.4-1.1-3.1-1.1-5.1C26 18.3 28.7 12 32 12Z" fill="currentColor"></path>
-                            <circle cx="32" cy="33" r="5" fill="oklch(0.99 0.008 10)"></circle>
-                            <circle cx="32" cy="33" r="2.4" fill="currentColor"></circle>
-                        </svg>
+                    <div class="container" aria-hidden="true">
+                        <div class="hero-logo">
+                            <svg viewBox="0 0 64 64" fill="none">
+                                <path d="M32 9c4.4 0 8 8.1 8 14.2 0 1.5-.2 2.8-.6 4 1.3-.4 2.6-.6 4-.6C49.9 26.6 58 30.2 58 34.6S49.9 42.6 43.8 42.6c-1.4 0-2.7-.2-4-.6.4 1.2.6 2.5.6 4 0 6.1-3.6 14.2-8 14.2s-8-8.1-8-14.2c0-1.5.2-2.8.6-4-1.3.4-2.6.6-4 .6C14.1 42.6 6 39 6 34.6s8.1-8 14.2-8c1.4 0 2.7.2 4 .6-.4-1.2-.6-2.5-.6-4C24 17.1 27.6 9 32 9Z" fill="currentColor" opacity="0.16"></path>
+                                <path d="M32 12c3.3 0 6 6.3 6 11.2 0 2-.4 3.7-1.1 5.1 1.4-.7 3.1-1.1 5.1-1.1 4.9 0 11.2 2.7 11.2 6s-6.3 6-11.2 6c-2 0-3.7-.4-5.1-1.1.7 1.4 1.1 3.1 1.1 5.1 0 4.9-2.7 11.2-6 11.2s-6-6.3-6-11.2c0-2 .4-3.7 1.1-5.1-1.4.7-3.1 1.1-5.1 1.1-4.9 0-11.2-2.7-11.2-6s6.3-6 11.2-6c2 0 3.7.4 5.1 1.1-.7-1.4-1.1-3.1-1.1-5.1C26 18.3 28.7 12 32 12Z" fill="currentColor"></path>
+                                <circle cx="32" cy="33" r="5" fill="oklch(0.99 0.008 10)"></circle>
+                                <circle cx="32" cy="33" r="2.4" fill="currentColor"></circle>
+                            </svg>
+                        </div>
                     </div>
                     <h1>桃花源</h1>
                 </div>

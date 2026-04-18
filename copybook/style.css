@@ -71,23 +71,23 @@
     --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23a8556f' stroke-opacity='0.38' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23a8556f' stroke-opacity='0.38' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
-/* ===== Theme: 青瓷 — 龍泉窯青瓷 ===== */
+/* ===== Theme: 藕綠 — 淺灰綠、偏藕荷調，輕柔不搶眼 ===== */
 body[data-theme="green"] {
-    --accent-dark: #2e6b45;
-    --accent-mid: #5a9a72;
-    --paper: #fafdf7;
-    --line-soft: rgba(90, 154, 114, 0.35);
-    --line-soft-hong: rgba(90, 154, 114, 0.22);
-    --line-soft-light: rgba(90, 154, 114, 0.18);
-    --ink: #2a3d30;
-    --bg: linear-gradient(135deg, #f2f7f3, #dbeadc 35%, #edf5ee);
-    --ui-border: rgba(46, 107, 69, 0.15);
-    --input-border: rgba(46, 107, 69, 0.25);
-    --label-color: #3f6a50;
-    --page-title-color: #5b8a68;
-    --page-shadow: rgba(46, 107, 69, 0.12);
-    --cell-text: #1e3026;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+    --accent-dark: #5a6d5c;
+    --accent-mid: #9bb5a0;
+    --paper: #fbfcfa;
+    --line-soft: rgba(145, 168, 152, 0.3);
+    --line-soft-hong: rgba(145, 168, 152, 0.2);
+    --line-soft-light: rgba(145, 168, 152, 0.14);
+    --ink: #3a423e;
+    --bg: linear-gradient(135deg, #f9faf8, #eef3ef 38%, #f5f8f5);
+    --ui-border: rgba(100, 118, 105, 0.14);
+    --input-border: rgba(100, 118, 105, 0.22);
+    --label-color: #5c6d61;
+    --page-title-color: #758a7c;
+    --page-shadow: rgba(90, 109, 95, 0.09);
+    --cell-text: #2e3530;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%239bb5a0' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%239bb5a0' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
 /* ===== Theme: 汝窯 — 天青色等煙雨 ===== */
@@ -217,7 +217,7 @@ body {
 }
 
 .theme-dot--pink   { background: linear-gradient(135deg, #f5c6d6, #c94b7c); }
-.theme-dot--green  { background: linear-gradient(135deg, #c5dfca, #5a9a72); }
+.theme-dot--green  { background: linear-gradient(135deg, #e2ebe3, #9bb5a0); }
 .theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
 .theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
 
@@ -277,16 +277,6 @@ textarea {
 
 .row.row-single {
     grid-template-columns: 1fr;
-}
-
-/* 字體選擇：預設字族 + 選填自訂名稱，單欄直排 */
-.field-font select {
-    margin-bottom: 0;
-}
-
-.field-font .field-font-custom {
-    margin-top: 8px;
-    font-size: 0.88rem;
 }
 
 /* ===== Action Buttons ===== */
