@@ -225,8 +225,8 @@ body {
 
 .layout {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 20px;
+    grid-template-columns: minmax(220px, 270px) 1fr;
+    gap: 16px;
     padding: 20px;
 }
 
@@ -234,7 +234,7 @@ body {
     background: color-mix(in oklch, oklch(0.988 0.01 8) 90%, transparent);
     border: 1px solid var(--ui-border);
     border-radius: 22px;
-    padding: 16px;
+    padding: 12px 12px 14px;
     position: sticky;
     top: 12px;
     height: fit-content;
