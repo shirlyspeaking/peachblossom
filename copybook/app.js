@@ -37,11 +37,9 @@
     var charsPerLine = document.getElementById('charsPerLine');
     var linesPerPage = document.getElementById('linesPerPage');
     var preview = document.getElementById('preview');
-    var btnRegenerate = document.getElementById('btnRegenerate');
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
-    var btnTxt = document.getElementById('btnTxt');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
@@ -320,16 +318,6 @@
         }, 2000);
     }
 
-    function buildTxtContent() {
-        return normalizeText(textInput.value);
-    }
-
-    function onTxt() {
-        var blob = new Blob([buildTxtContent()], { type: 'text/plain;charset=utf-8' });
-        downloadBlob('字帖內容.txt', blob);
-        setStatus('已下載 TXT');
-    }
-
     function canvasToBlob(canvas) {
         return new Promise(function (resolve, reject) {
             canvas.toBlob(function (b) {
@@ -454,11 +442,9 @@
         el.addEventListener('input', scheduleRender);
         el.addEventListener('change', scheduleRender);
     });
-    if (btnRegenerate) btnRegenerate.addEventListener('click', renderNow);
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
-    if (btnTxt) btnTxt.addEventListener('click', onTxt);
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();
