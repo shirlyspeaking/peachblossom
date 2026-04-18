@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桃花源 - 數位古風體驗平台</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
+        /* === 基礎設置 === */
         * {
             margin: 0;
             padding: 0;
@@ -17,640 +14,409 @@
         }
 
         :root {
-            color-scheme: light;
-            --bg: oklch(0.975 0.014 8);
-            --bg-soft: oklch(0.953 0.018 8);
-            --surface: oklch(0.988 0.01 8 / 0.9);
-            --surface-strong: oklch(0.955 0.018 8 / 0.92);
-            --line: oklch(0.852 0.03 10 / 0.7);
-            --line-strong: oklch(0.72 0.06 10 / 0.55);
-            --text: oklch(0.305 0.06 8);
-            --text-soft: oklch(0.49 0.04 10);
-            --accent: oklch(0.61 0.17 10);
-            --accent-deep: oklch(0.42 0.11 8);
-            --accent-soft: oklch(0.84 0.06 12);
-            --shadow-soft: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
-            --shadow-float: 0 18px 40px oklch(0.48 0.08 8 / 0.12);
-            --space-2xs: 4px;
-            --space-xs: 8px;
-            --space-sm: 12px;
-            --space-md: 16px;
-            --space-lg: 24px;
-            --space-xl: 32px;
-            --space-2xl: 48px;
-            --space-3xl: 64px;
-            --space-4xl: 96px;
-            --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-            --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        html {
-            scroll-behavior: smooth;
+            --berry-dark: #8e2157;
+            --berry-mid: #c94b7c;
+            --berry-light: #f8a5c2;
+            --peach-pink: #ffb8d0;
+            --cream: #fff5f7;
+            --rose-gold: #e8b4bc;
+            --text-dark: #5c1a3d;
+            --text-mid: #8e4a6d;
+            --card-bg: rgba(255, 255, 255, 0.75);
         }
 
         body {
-            position: relative;
+            font-family: "Kaiti", "STKaiti", "Songti TC", "Noto Serif TC", "Microsoft YaHei", serif;
+            background: linear-gradient(135deg, 
+                #ffeef2 0%, 
+                #ffd6e0 20%, 
+                #ffb8d0 40%, 
+                #f8a5c2 60%, 
+                #e8b4bc 80%, 
+                #d4a5b9 100%);
+            background-attachment: fixed;
             min-height: 100vh;
+            color: var(--text-dark);
             overflow-x: hidden;
-            background:
-                radial-gradient(circle at 12% 14%, oklch(0.99 0.012 10) 0%, transparent 28%),
-                radial-gradient(circle at 86% 10%, oklch(0.92 0.045 8 / 0.55) 0%, transparent 24%),
-                radial-gradient(circle at 78% 64%, oklch(0.94 0.026 30 / 0.42) 0%, transparent 22%),
-                linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 54%, oklch(0.965 0.018 16) 100%);
-            color: var(--text);
-            font-family: "Noto Sans TC", sans-serif;
         }
 
-        body::before,
-        body::after {
-            content: "";
-            position: fixed;
-            inset: auto;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(18px);
-            opacity: 0.65;
-            animation: drift 15s var(--ease-out-quint) infinite alternate;
-        }
-
-        body::before {
-            top: 14vh;
-            left: -32px;
-            width: 180px;
-            height: 88px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, oklch(0.91 0.07 12 / 0.7), oklch(0.96 0.025 20 / 0.14));
-            transform: rotate(-18deg);
-        }
-
-        body::after {
-            right: -46px;
-            bottom: 14vh;
-            width: 220px;
-            height: 110px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, oklch(0.9 0.055 8 / 0.56), oklch(0.97 0.02 24 / 0.1));
-            transform: rotate(22deg);
-            animation-duration: 18s;
-        }
-
-        a {
-            color: inherit;
-        }
-
-        .site-shell {
+        /* === 頭部區域 === */
+        header {
             position: relative;
             z-index: 1;
-            width: min(1180px, calc(100vw - 40px));
-            margin: 0 auto;
-            padding: 22px 0 42px;
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
         }
 
-        .auth-bar-wrap {
-            position: fixed;
-            top: 18px;
-            right: 20px;
-            z-index: 20;
-            display: flex;
-            justify-content: flex-end;
-            max-width: min(92vw, 560px);
+        /* 櫻花瓣 canvas：僅在「桃花源」上方區塊，不影響既有排版層級 */
+        .title-petal-slot {
+            position: relative;
         }
 
-        #peachblossom-auth-bar {
-            display: inline-flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: var(--space-xs) var(--space-sm);
-            min-height: 48px;
-            padding: 9px 10px 9px 14px;
-            border: 1px solid color-mix(in oklch, var(--line-strong) 54%, transparent);
-            border-radius: 999px;
-            background: color-mix(in oklch, var(--surface) 92%, transparent);
-            box-shadow: 0 10px 30px oklch(0.48 0.08 8 / 0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .auth-status,
-        .auth-user {
-            font-size: 0.93rem;
-            color: var(--text-soft);
-        }
-
-        .auth-user {
-            max-width: min(52vw, 280px);
+        #jsi-cherry-container {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            pointer-events: none;
         }
 
-        .auth-warn {
-            color: oklch(0.46 0.16 24);
+        #jsi-cherry-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
-        .auth-btn {
-            cursor: pointer;
-            border: none;
-            border-radius: 999px;
-            padding: 10px 18px;
-            font: inherit;
-            font-size: 0.94rem;
-            font-weight: 600;
-            color: var(--accent-deep);
-            background: linear-gradient(
-                135deg,
-                color-mix(in oklch, var(--surface) 90%, var(--accent-soft) 10%) 0%,
-                color-mix(in oklch, var(--surface-strong) 78%, var(--accent-soft) 22%) 100%
-            );
-            box-shadow: 0 10px 20px oklch(0.5 0.09 10 / 0.08);
-            transition:
-                transform 180ms var(--ease-out-quart),
-                box-shadow 180ms var(--ease-out-quart),
-                background-color 180ms var(--ease-out-quart);
+        .title-petal-slot .logo {
+            position: relative;
+            z-index: 1;
         }
 
-        .auth-btn:hover,
-        .auth-btn:focus-visible {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 28px oklch(0.48 0.09 8 / 0.12);
-            outline: none;
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 20px rgba(142, 33, 87, 0.3);
+            animation: float 4s ease-in-out infinite;
         }
 
-        .auth-btn:active {
-            transform: translateY(1px);
-        }
-
-        .auth-btn-out {
-            background: color-mix(in oklch, var(--surface) 94%, transparent);
-        }
-
-        .hero {
-            display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.8fr);
-            gap: clamp(28px, 4vw, 72px);
-            align-items: end;
-            padding: clamp(96px, 12vw, 140px) 0 clamp(36px, 5vw, 56px);
-        }
-
-        .hero-copy {
-            display: grid;
-            gap: var(--space-lg);
-        }
-
-        .hero-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-sm);
-            width: fit-content;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.24em;
-            text-transform: uppercase;
-            color: var(--text-soft);
-        }
-
-        .hero-kicker::before {
-            content: "";
-            width: 42px;
-            height: 1px;
-            background: color-mix(in oklch, var(--line-strong) 74%, transparent);
-        }
-
-        .hero-title-wrap {
-            display: grid;
-            gap: var(--space-md);
-        }
-
-        .hero-logo {
-            width: 74px;
-            height: 74px;
-            color: var(--accent);
-            filter: drop-shadow(0 18px 24px oklch(0.65 0.12 10 / 0.16));
-            animation: blossomFloat 8s var(--ease-out-quint) infinite;
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
         }
 
         h1 {
-            font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
-            font-size: clamp(3.8rem, 11vw, 6.9rem);
-            font-weight: 400;
-            line-height: 0.96;
-            letter-spacing: 0.08em;
-            color: var(--accent-deep);
+            font-size: 3.5rem;
+            font-weight: normal;
+            background: linear-gradient(135deg, var(--berry-dark) 0%, var(--berry-mid) 50%, var(--berry-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 0.3em;
+            text-shadow: none;
         }
 
-        .hero-summary {
-            max-width: 32ch;
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-mid);
+            font-style: italic;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: var(--berry-dark);
+            opacity: 0.8;
+        }
+
+        /* 橫條：淺紫紅偏粉，呼應 --berry-light / --peach-pink；填色不透明度 70% */
+        .header-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 24px;
+            padding: 14px 28px;
+            background: linear-gradient(
+                135deg,
+                rgba(232, 188, 226, 0.7) 0%,
+                rgba(242, 172, 200, 0.7) 48%,
+                rgba(238, 160, 190, 0.7) 100%
+            );
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--berry-dark);
+            text-decoration: none;
+            border-radius: 30px;
             font-size: 1.05rem;
-            line-height: 1.85;
-            color: var(--text-soft);
+            font-weight: 600;
+            border: 1px solid rgba(201, 75, 124, 0.38);
+            box-shadow: 0 6px 22px rgba(142, 33, 87, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
 
-        .hero-note {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-sm) var(--space-lg);
-            font-size: 0.92rem;
-            color: var(--text-soft);
+        .header-cta:hover {
+            transform: scale(1.05);
+            border-color: rgba(201, 75, 124, 0.5);
+            box-shadow: 0 10px 32px rgba(142, 33, 87, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
 
-        .hero-note span {
-            position: relative;
-            padding-left: var(--space-md);
+        .header-cta-icon {
+            font-size: 1.4rem;
         }
 
-        .hero-note span::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0.72em;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: color-mix(in oklch, var(--accent) 78%, var(--surface) 22%);
+        .header-cta-arrow {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
 
-        .hero-aside {
-            display: grid;
-            gap: var(--space-lg);
-            justify-items: end;
-            text-align: right;
-        }
-
-        .aside-panel {
-            width: min(100%, 320px);
-            display: grid;
-            gap: var(--space-md);
-            padding: var(--space-xl) 0 0;
-            border-top: 1px solid color-mix(in oklch, var(--line-strong) 76%, transparent);
-        }
-
-        .aside-label {
-            font-size: 0.78rem;
-            letter-spacing: 0.24em;
-            text-transform: uppercase;
-            color: var(--text-soft);
-        }
-
-        .aside-poem {
-            font-family: "Noto Serif TC", serif;
-            font-size: 1.1rem;
-            line-height: 1.85;
-            color: var(--text);
-        }
-
-        .aside-desc {
-            font-size: 0.95rem;
-            line-height: 1.8;
-            color: var(--text-soft);
-        }
-
+        /* === 主內容區 === */
         main {
-            display: grid;
-            gap: clamp(40px, 6vw, 72px);
-        }
-
-        .section-head {
-            display: flex;
-            align-items: end;
-            justify-content: space-between;
-            gap: var(--space-xl);
-            padding: 0 0 var(--space-lg);
-            border-bottom: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
         }
 
         .section-title {
-            display: grid;
-            gap: var(--space-xs);
-        }
-
-        .section-title small {
-            font-size: 0.78rem;
-            letter-spacing: 0.24em;
-            text-transform: uppercase;
-            color: var(--text-soft);
-        }
-
-        .section-title h2 {
-            font-family: "Noto Serif TC", serif;
-            font-size: clamp(1.7rem, 4vw, 2.5rem);
-            font-weight: 500;
-            color: var(--accent-deep);
-        }
-
-        .section-copy {
-            max-width: 34ch;
-            font-size: 0.96rem;
-            line-height: 1.75;
-            color: var(--text-soft);
-            text-align: right;
-        }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: clamp(20px, 2.6vw, 30px);
-            padding: var(--space-sm) 0 0;
-        }
-
-        .app-card {
-            --app-accent: oklch(0.7 0.11 10);
-            position: relative;
-            display: grid;
-            justify-items: center;
-            align-content: start;
-            gap: var(--space-md);
-            padding: var(--space-sm) var(--space-xs) var(--space-xl);
-            text-align: center;
-            text-decoration: none;
-            color: inherit;
-            border-radius: 28px;
-            outline: none;
-            opacity: 0;
-            transform: translateY(18px);
-            animation: cardReveal 700ms var(--ease-out-quint) forwards;
-        }
-
-        .app-card:nth-child(1) { animation-delay: 80ms; }
-        .app-card:nth-child(2) { animation-delay: 150ms; }
-        .app-card:nth-child(3) { animation-delay: 220ms; }
-        .app-card:nth-child(4) { animation-delay: 290ms; }
-        .app-card:nth-child(5) { animation-delay: 360ms; }
-
-        .app-card::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            width: 44px;
-            height: 1px;
-            transform: translateX(-50%);
-            background: color-mix(in oklch, var(--app-accent) 38%, var(--line) 62%);
-            opacity: 0.56;
-            transition:
-                width 240ms var(--ease-out-quart),
-                opacity 240ms var(--ease-out-quart);
-        }
-
-        .app-card:hover,
-        .app-card:focus-visible {
-            transform: translateY(-6px);
-        }
-
-        .app-card:hover::after,
-        .app-card:focus-visible::after {
-            width: 76px;
-            opacity: 1;
-        }
-
-        .app-card:focus-visible {
-            box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--app-accent) 38%, transparent);
-        }
-
-        .app-icon-shell {
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 122px;
-            height: 122px;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle at 30% 24%, color-mix(in oklch, var(--app-accent) 16%, var(--surface) 84%) 0%, transparent 38%),
-                radial-gradient(circle at 50% 50%, color-mix(in oklch, var(--surface-strong) 90%, var(--app-accent) 10%) 0%, transparent 72%);
-            box-shadow:
-                inset 0 0 0 1px color-mix(in oklch, var(--app-accent) 18%, var(--line) 82%),
-                var(--shadow-soft);
-            transition:
-                transform 240ms var(--ease-out-quart),
-                box-shadow 240ms var(--ease-out-quart),
-                background 240ms var(--ease-out-quart);
-            overflow: hidden;
+            gap: 15px;
+            margin-bottom: 40px;
+            font-size: 1.5rem;
+            color: var(--berry-dark);
         }
 
-        .app-icon-shell::before,
-        .app-icon-shell::after {
+        .section-title::before,
+        .section-title::after {
+            content: "✿";
+            color: var(--berry-mid);
+            font-size: 1.2rem;
+        }
+
+        /* === 應用網格 === */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* === 應用卡片 === */
+        .app-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(142, 33, 87, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .app-card::before {
             content: "";
             position: absolute;
-            border-radius: 999px;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 184, 208, 0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
             pointer-events: none;
-            transition:
-                opacity 240ms var(--ease-out-quart),
-                transform 240ms var(--ease-out-quart);
         }
 
-        .app-icon-shell::before {
-            width: 72%;
-            height: 72%;
-            background: radial-gradient(circle, color-mix(in oklch, var(--app-accent) 18%, transparent) 0%, transparent 72%);
-            opacity: 0.72;
-            animation: haloPulse 8s ease-in-out infinite;
+        .app-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            border-color: var(--berry-light);
+            box-shadow: 0 20px 50px rgba(142, 33, 87, 0.2),
+                        0 0 0 1px rgba(255, 184, 208, 0.5),
+                        inset 0 1px 0 rgba(255, 255, 255, 1);
         }
 
-        .app-icon-shell::after {
-            width: 34px;
-            height: 96px;
-            top: 12px;
-            left: 16px;
-            background: linear-gradient(180deg, oklch(0.99 0.01 8 / 0.7), transparent);
-            transform: rotate(24deg);
-            opacity: 0.65;
-        }
-
-        .app-card:hover .app-icon-shell,
-        .app-card:focus-visible .app-icon-shell {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow:
-                inset 0 0 0 1px color-mix(in oklch, var(--app-accent) 34%, var(--line) 66%),
-                var(--shadow-float);
-        }
-
-        .app-card:hover .app-icon-shell::after,
-        .app-card:focus-visible .app-icon-shell::after {
-            transform: translateX(8px) rotate(24deg);
-            opacity: 0.88;
+        .app-card:hover::before {
+            opacity: 1;
         }
 
         .app-icon {
-            position: relative;
-            z-index: 1;
-            font-size: 3.6rem;
-            color: color-mix(in oklch, var(--app-accent) 62%, var(--accent-deep) 38%);
-            transition:
-                transform 240ms var(--ease-out-quart),
-                color 240ms var(--ease-out-quart),
-                filter 240ms var(--ease-out-quart);
-            filter: drop-shadow(0 14px 20px color-mix(in oklch, var(--app-accent) 14%, transparent));
-        }
-
-        .app-card:hover .app-icon,
-        .app-card:focus-visible .app-icon {
-            transform: scale(1.06);
-            color: color-mix(in oklch, var(--app-accent) 78%, var(--accent-deep) 22%);
-            filter: drop-shadow(0 16px 22px color-mix(in oklch, var(--app-accent) 22%, transparent));
-        }
-
-        .app-name {
-            max-width: 15ch;
-            font-family: "Noto Serif TC", serif;
-            font-size: 1.08rem;
-            font-weight: 500;
-            line-height: 1.45;
-            color: var(--accent-deep);
-        }
-
-        .app-tooltip {
-            position: absolute;
-            left: 50%;
-            bottom: calc(100% + 18px);
-            width: min(270px, calc(100vw - 40px));
-            padding: 14px 16px;
-            border: 1px solid color-mix(in oklch, var(--line-strong) 64%, transparent);
-            border-radius: 18px;
-            background: color-mix(in oklch, oklch(0.985 0.008 8) 94%, transparent);
-            color: var(--text);
-            font-size: 0.92rem;
-            line-height: 1.7;
-            box-shadow: 0 18px 42px oklch(0.48 0.08 8 / 0.12);
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(-50%) translateY(8px);
-            transition:
-                opacity 200ms var(--ease-out-quart),
-                transform 200ms var(--ease-out-quart);
-            z-index: 8;
-        }
-
-        .app-tooltip::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            width: 14px;
-            height: 14px;
-            border-right: 1px solid color-mix(in oklch, var(--line-strong) 64%, transparent);
-            border-bottom: 1px solid color-mix(in oklch, var(--line-strong) 64%, transparent);
-            background: color-mix(in oklch, oklch(0.985 0.008 8) 94%, transparent);
-            transform: translateX(-50%) rotate(45deg);
-        }
-
-        .app-card:hover .app-tooltip,
-        .app-card:focus-visible .app-tooltip {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .author-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: var(--space-xl);
-            margin-top: var(--space-2xl);
-            padding-top: var(--space-xl);
-            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
-        }
-
-        .author-card {
-            display: flex;
-            align-items: center;
-            gap: var(--space-lg);
-            text-decoration: none;
-        }
-
-        .author-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            color: var(--accent);
-            background: radial-gradient(circle at 30% 30%, color-mix(in oklch, var(--accent-soft) 30%, var(--surface) 70%) 0%, transparent 72%);
-            box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--line) 88%, transparent);
-            transition: transform 220ms var(--ease-out-quart), box-shadow 220ms var(--ease-out-quart);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(142, 33, 87, 0.2);
         }
 
-        .author-card:hover .author-avatar,
-        .author-card:focus-visible .author-avatar {
-            transform: translateY(-2px);
-            box-shadow:
-                inset 0 0 0 1px color-mix(in oklch, var(--line-strong) 64%, transparent),
-                0 14px 26px oklch(0.5 0.08 8 / 0.1);
+        .app-icon.huadian {
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
         }
 
-        .author-info {
-            display: grid;
-            gap: var(--space-2xs);
+        .app-icon.copybook {
+            background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
         }
 
-        .author-info h3 {
-            font-family: "Noto Serif TC", serif;
-            font-size: 1.18rem;
-            font-weight: 500;
-            color: var(--accent-deep);
+        .app-icon.legendary {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 40%, #ffcb05 100%);
         }
 
-        .author-info p,
-        .author-link {
+        .app-icon.coming-soon {
+            background: linear-gradient(135deg, var(--rose-gold) 0%, #d4a5b9 100%);
+            border: 2px dashed rgba(142, 33, 87, 0.3);
+        }
+
+        .app-name {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--berry-dark);
+        }
+
+        .app-desc {
             font-size: 0.95rem;
-            color: var(--text-soft);
+            color: var(--text-mid);
+            line-height: 1.6;
+            margin-bottom: 20px;
         }
 
+        .app-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(201, 75, 124, 0.15) 0%, rgba(248, 165, 194, 0.2) 100%);
+            color: var(--berry-dark);
+            border: 1px solid rgba(201, 75, 124, 0.3);
+        }
+
+        .app-button {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .app-button.primary {
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(142, 33, 87, 0.35);
+        }
+
+        .app-button.primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(142, 33, 87, 0.5);
+        }
+
+        .app-button.disabled {
+            background: rgba(142, 33, 87, 0.1);
+            color: var(--text-mid);
+            cursor: not-allowed;
+            border: 1px solid rgba(142, 33, 87, 0.2);
+        }
+
+        /* === 即將推出卡片 === */
+        .app-card.coming-soon {
+            opacity: 0.85;
+        }
+
+        .app-card.coming-soon:hover {
+            transform: translateY(-8px);
+            opacity: 1;
+        }
+
+        .coming-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.7rem;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, var(--berry-light) 0%, var(--peach-pink) 100%);
+            color: var(--berry-dark);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 8px rgba(142, 33, 87, 0.15);
+        }
+
+        /* === 底部 === */
         footer {
-            margin-top: var(--space-2xl);
-            padding: var(--space-xl) 0 var(--space-sm);
-            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
-            display: grid;
-            gap: var(--space-sm);
-            color: var(--text-soft);
-            font-size: 0.93rem;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-mid);
+            font-size: 0.9rem;
+            background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+        }
+
+        footer p {
+            margin: 5px 0;
         }
 
         .footer-poem {
-            font-family: "Noto Serif TC", serif;
-            font-size: 1rem;
-            line-height: 1.8;
-            color: var(--text);
+            font-style: italic;
+            color: var(--berry-dark);
+            opacity: 0.8;
+            margin-bottom: 15px;
         }
 
-        .footer-meta a {
-            color: var(--accent-deep);
-            text-decoration: none;
-        }
+        /* === 響應式設計 === */
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 15px 30px;
+            }
 
-        @keyframes blossomFloat {
-            0%, 100% {
-                transform: translateY(0);
+            .logo {
+                font-size: 4rem;
             }
-            50% {
-                transform: translateY(-6px);
-            }
-        }
 
-        @keyframes drift {
-            from {
-                transform: translate3d(0, 0, 0) rotate(-12deg);
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.15em;
             }
-            to {
-                transform: translate3d(10px, 16px, 0) rotate(10deg);
-            }
-        }
 
-        @keyframes haloPulse {
-            0%, 100% {
-                transform: scale(0.94);
-                opacity: 0.52;
+            .subtitle {
+                font-size: 1rem;
             }
-            50% {
-                transform: scale(1.03);
-                opacity: 0.82;
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .app-card {
+                padding: 25px;
             }
         }
 
-        @keyframes cardReveal {
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .app-icon {
+                width: 65px;
+                height: 65px;
+                font-size: 2rem;
+            }
+        }
+
+        /* === 動畫效果 === */
+        .app-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .app-card:nth-child(1) { animation-delay: 0.1s; }
+        .app-card:nth-child(2) { animation-delay: 0.2s; }
+        .app-card:nth-child(3) { animation-delay: 0.3s; }
+        .app-card:nth-child(4) { animation-delay: 0.4s; }
+        .app-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(18px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -658,202 +424,366 @@
             }
         }
 
-        @media (max-width: 900px) {
-            .hero {
-                grid-template-columns: 1fr;
-            }
+        .app-card.coming-soon {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
 
-            .hero-aside {
-                justify-items: start;
-                text-align: left;
-            }
+        /* === 作者區塊 === */
+        .author-section {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+        }
 
-            .section-head {
+        .author-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px 30px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 40px rgba(142, 33, 87, 0.1);
+            text-decoration: none;
+            transition: all 0.4s;
+        }
+
+        .author-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(142, 33, 87, 0.2);
+            border-color: var(--berry-light);
+        }
+
+        .author-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--berry-mid) 0%, var(--berry-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(142, 33, 87, 0.25);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-info h3 {
+            font-size: 1.3rem;
+            color: var(--berry-dark);
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+        }
+
+        .author-link {
+            font-size: 0.9rem;
+            color: var(--berry-mid);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .author-card {
                 flex-direction: column;
-                align-items: start;
-            }
-
-            .section-copy {
-                text-align: left;
-            }
-
-            .author-section {
-                flex-direction: column;
-                align-items: flex-start;
+                text-align: center;
+                gap: 15px;
             }
         }
 
-        @media (max-width: 720px) {
-            .site-shell {
-                width: min(100vw - 28px, 1180px);
-                padding-top: 16px;
-            }
+        /* WebGL Flower Cursor：透明疊加保留頁面粉色底；不攔截點擊（除清除鈕） */
+        .flower-cursor-layer.container {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-start;
+        }
 
-            .auth-bar-wrap {
-                top: 12px;
-                left: 14px;
-                right: 14px;
-                justify-content: center;
-            }
+        .flower-cursor-layer.container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
 
-            #peachblossom-auth-bar {
-                justify-content: center;
-            }
+        .flower-cursor-layer .clean-btn {
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+            font-family: sans-serif;
+            font-size: 15px;
+            color: white;
+            text-shadow: 0 0 10px #000000;
+            user-select: none;
+            padding: 0 0 15px 25px;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: 0.5;
+        }
 
-            .hero {
-                padding-top: 104px;
-            }
+        .name {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            transform: translate(-50%, -50%);
+            z-index: 51;
+            color: white;
+            text-align: center;
+            font-size: 4vw;
+            text-shadow: 0 0 5px #000000;
+            user-select: none;
+            pointer-events: none;
+        }
 
-            .apps-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+        @media all and (min-width: 640px) {
+            .name {
+                font-size: 45px;
             }
         }
 
-        @media (max-width: 560px) {
-            h1 {
-                font-size: clamp(3rem, 20vw, 4.4rem);
-            }
-
-            .hero-summary {
-                max-width: 100%;
-            }
-
-            .apps-grid {
-                gap: 18px 14px;
-            }
-
-            .app-card {
-                padding-bottom: var(--space-lg);
-            }
-
-            .app-icon-shell {
-                width: 104px;
-                height: 104px;
-            }
-
-            .app-icon {
-                font-size: 3rem;
-            }
-
-            .app-name {
-                font-size: 1rem;
-            }
-
-            .app-tooltip {
-                font-size: 0.88rem;
-            }
+        body > header,
+        body > main,
+        body > .author-section,
+        body > footer {
+            position: relative;
+            z-index: 1;
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            html {
-                scroll-behavior: auto;
-            }
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+        /* === 全站 Google 登入（中央 Auth Worker）=== */
+        .auth-bar-wrap {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            min-height: 44px;
         }
+
+        #peachblossom-auth-bar {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            justify-content: center;
+        }
+
+        .auth-status {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+        }
+
+        .auth-warn {
+            color: #a33;
+        }
+
+        .auth-user {
+            font-size: 0.95rem;
+            color: var(--berry-dark);
+            max-width: min(90vw, 280px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auth-btn {
+            font-family: inherit;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid rgba(201, 75, 124, 0.45);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.85) 0%,
+                rgba(255, 240, 248, 0.75) 100%
+            );
+            color: var(--berry-dark);
+            box-shadow: 0 4px 16px rgba(142, 33, 87, 0.12);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(142, 33, 87, 0.18);
+        }
+
+        .auth-btn-in {
+            border-color: rgba(201, 75, 124, 0.5);
+        }
+
+        .auth-btn-out {
+            background: rgba(255, 255, 255, 0.55);
+            font-weight: 500;
+        }
+
     </style>
 </head>
 <body>
-    <div class="auth-bar-wrap" aria-live="polite">
-        <div id="peachblossom-auth-bar"></div>
+    <div class="flower-cursor-layer container" aria-hidden="true">
+        <canvas id="canvas"></canvas>
+        <div class="clean-btn" id="flower-cursor-clean" role="button" tabindex="0" title="Clear">clean the screen</div>
     </div>
 
-    <div class="site-shell">
-        <header class="hero">
-            <div class="hero-copy">
-                <div class="hero-title-wrap">
-                    <div class="hero-logo" aria-hidden="true">
-                        <svg viewBox="0 0 64 64" fill="none">
-                            <path d="M32 9c4.4 0 8 8.1 8 14.2 0 1.5-.2 2.8-.6 4 1.3-.4 2.6-.6 4-.6C49.9 26.6 58 30.2 58 34.6S49.9 42.6 43.8 42.6c-1.4 0-2.7-.2-4-.6.4 1.2.6 2.5.6 4 0 6.1-3.6 14.2-8 14.2s-8-8.1-8-14.2c0-1.5.2-2.8.6-4-1.3.4-2.6.6-4 .6C14.1 42.6 6 39 6 34.6s8.1-8 14.2-8c1.4 0 2.7.2 4 .6-.4-1.2-.6-2.5-.6-4C24 17.1 27.6 9 32 9Z" fill="currentColor" opacity="0.16"></path>
-                            <path d="M32 12c3.3 0 6 6.3 6 11.2 0 2-.4 3.7-1.1 5.1 1.4-.7 3.1-1.1 5.1-1.1 4.9 0 11.2 2.7 11.2 6s-6.3 6-11.2 6c-2 0-3.7-.4-5.1-1.1.7 1.4 1.1 3.1 1.1 5.1 0 4.9-2.7 11.2-6 11.2s-6-6.3-6-11.2c0-2 .4-3.7 1.1-5.1-1.4.7-3.1 1.1-5.1 1.1-4.9 0-11.2-2.7-11.2-6s6.3-6 11.2-6c2 0 3.7.4 5.1 1.1-.7-1.4-1.1-3.1-1.1-5.1C26 18.3 28.7 12 32 12Z" fill="currentColor"></path>
-                            <circle cx="32" cy="33" r="5" fill="oklch(0.99 0.008 10)"></circle>
-                            <circle cx="32" cy="33" r="2.4" fill="currentColor"></circle>
-                        </svg>
-                    </div>
-                    <h1>桃花源</h1>
+    <div class="name">WebGL Flower Cursor</div>
+
+    <!-- 頭部 -->
+    <header>
+        <div class="title-petal-slot">
+            <div id="jsi-cherry-container" aria-hidden="true"></div>
+            <div class="logo">🌸</div>
+        </div>
+        <h1>桃花源</h1>
+        <p class="subtitle">「忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」</p>
+        <p class="tagline">數位古風體驗平台 · Digital Traditional Experience</p>
+        <div class="auth-bar-wrap" aria-live="polite">
+            <div id="peachblossom-auth-bar"></div>
+        </div>
+        <a href="enjoyread/app.html" class="header-cta">
+            <span class="header-cta-icon">📖</span>
+            <span>悅讀 EnjoyRead 中學生閱讀平台</span>
+            <span class="header-cta-arrow">→</span>
+        </a>
+    </header>
+
+    <!-- 主內容 -->
+    <main>
+        <div class="section-title">
+            <span>探索應用</span>
+        </div>
+
+        <div class="apps-grid">
+            <!-- 花鈿試妝 - 已上線 -->
+            <a href="huadian/huadian.html" class="app-card" style="text-decoration: none;">
+                <div class="app-icon huadian">💮</div>
+                <h2 class="app-name">唐風花鈿</h2>
+                <p class="app-desc">AR 即時試妝體驗，感受唐代仕女的精緻妝容。支援手勢互動，六款經典花鈿任君選擇，配有絕美古風虛擬背景。</p>
+                <div class="app-tags">
+                    <span class="tag">AR 試妝</span>
+                    <span class="tag">手勢控制</span>
+                    <span class="tag">唐風美學</span>
                 </div>
+                <span class="app-button primary">立即體驗</span>
+            </a>
+
+            <!-- 書法字帖生成平台 -->
+            <a href="copybook/" class="app-card" style="text-decoration: none;">
+                <div class="app-icon copybook">🖌️</div>
+                <h2 class="app-name">書法字帖生成平台</h2>
+                <p class="app-desc">輸入詩文或任意文字，即時生成田字／米字／空白格字帖，並可選描紅（紅框鏤空）範字；可切換字型、列印或下載 PDF／PNG／TXT。</p>
+                <div class="app-tags">
+                    <span class="tag">毛筆字帖</span>
+                    <span class="tag">硬筆字帖</span>
+                    <span class="tag">PDF 下載</span>
+                </div>
+                <span class="app-button primary">開始生成</span>
+            </a>
+
+            <!-- Legendary Card Creator -->
+            <a href="legendary-card-creator/index.html" class="app-card" style="text-decoration: none;">
+                <div class="app-icon legendary">🃏</div>
+                <h2 class="app-name">Legendary Card Creator · 1st Edition</h2>
+                <p class="app-desc">打造收藏級 Alternate Art 卡牌：可切換 Classic Gold / Holo Silver / Full-Art 邊框，疊加全像閃膜與復古紙紋，並翻面預覽經典藍紫 Orbit 卡背。</p>
+                <div class="app-tags">
+                    <span class="tag">1st Edition</span>
+                    <span class="tag">Holo Rare</span>
+                    <span class="tag">Alternate Art</span>
+                </div>
+                <span class="app-button primary">開封創作</span>
+            </a>
+
+            <!-- 即將推出 - 佔位卡片 -->
+            <div class="app-card coming-soon">
+                <span class="coming-badge">即將推出</span>
+                <div class="app-icon coming-soon">🎨</div>
+                <h2 class="app-name">水墨丹青</h2>
+                <p class="app-desc">數位水墨畫創作工具，體驗傳統書畫的意境之美。</p>
+                <div class="app-tags">
+                    <span class="tag">繪畫</span>
+                    <span class="tag">創作</span>
+                </div>
+                <span class="app-button disabled">敬請期待</span>
             </div>
 
-            <aside class="hero-aside">
-                <div class="aside-panel">
+            <div class="app-card coming-soon">
+                <span class="coming-badge">即將推出</span>
+                <div class="app-icon coming-soon">🎭</div>
+                <h2 class="app-name">臉譜變裝</h2>
+                <p class="app-desc">京劇臉譜 AR 體驗，一秒化身戲曲角色，感受國粹藝術的魅力。</p>
+                <div class="app-tags">
+                    <span class="tag">京劇</span>
+                    <span class="tag">臉譜</span>
                 </div>
-            </aside>
-        </header>
+                <span class="app-button disabled">敬請期待</span>
+            </div>
 
-        <main>
-            <section aria-labelledby="apps-heading">
-                <div class="section-head">
-                    <div class="section-title">
-                        <small>Explore Apps</small>
-                        <h2 id="apps-heading">探索應用</h2>
-                    </div>
+            <div class="app-card coming-soon">
+                <span class="coming-badge">即將推出</span>
+                <div class="app-icon coming-soon">🏮</div>
+                <h2 class="app-name">燈謎雅集</h2>
+                <p class="app-desc">傳統燈謎遊戲，猜燈謎、學文化，體驗古人的智慧與雅趣。</p>
+                <div class="app-tags">
+                    <span class="tag">燈謎</span>
+                    <span class="tag">益智</span>
                 </div>
+                <span class="app-button disabled">敬請期待</span>
+            </div>
+        </div>
+    </main>
 
-                <div class="apps-grid">
-                    <a href="enjoyread/app.html" class="app-card" style="--app-accent: oklch(0.7 0.12 48);" aria-label="悅讀 EnjoyRead 中學生閱讀平台">
-                        <div class="app-icon-shell">
-                            <i class="fa-solid fa-book-open app-icon" aria-hidden="true"></i>
-                        </div>
-                        <h3 class="app-name">悅讀 EnjoyRead</h3>
-                    </a>
+    <!-- 作者區塊 -->
+    <section class="author-section">
+        <a href="about.html" class="author-card">
+            <div class="author-avatar">👩‍🏫</div>
+            <div class="author-info">
+                <h3>張老師</h3>
+                <p>桃花源 創作者</p>
+            </div>
+            <span class="author-link">了解更多 →</span>
+        </a>
+    </section>
 
-                    <a href="huadian/huadian.html" class="app-card" style="--app-accent: oklch(0.69 0.14 8);" aria-label="唐風花鈿">
-                        <div class="app-icon-shell">
-                            <i class="fa-solid fa-spa app-icon" aria-hidden="true"></i>
-                        </div>
-                        <h3 class="app-name">唐風花鈿</h3>
-                    </a>
+    <!-- 底部 -->
+    <footer>
+        <p class="footer-poem">「林盡水源，便得一山，山有小口，彷彿若有光。」</p>
+        <p>© 2026 <a href="about.html" style="color: var(--berry-dark); text-decoration: none;">張老師</a> · 桃花源 Peachblossom · Made with ❤️</p>
+    </footer>
 
-                    <a href="copybook/" class="app-card" style="--app-accent: oklch(0.63 0.1 24);" aria-label="書法字帖生成平台">
-                        <div class="app-icon-shell">
-                            <i class="fa-solid fa-pen-nib app-icon" aria-hidden="true"></i>
-                        </div>
-                        <h3 class="app-name">書法字帖生成平台</h3>
-                    </a>
-
-                    <a href="legendary-card-creator/index.html" class="app-card" style="--app-accent: oklch(0.65 0.08 330);" aria-label="Legendary Card Creator">
-                        <div class="app-icon-shell">
-                            <i class="fa-solid fa-id-card app-icon" aria-hidden="true"></i>
-                        </div>
-                        <h3 class="app-name">Legendary Card Creator</h3>
-                    </a>
-
-                    <a href="shanhaijing-monopoly/index.html" class="app-card" style="--app-accent: oklch(0.62 0.08 170);" aria-label="山海經大富翁">
-                        <div class="app-icon-shell">
-                            <i class="fa-solid fa-map app-icon" aria-hidden="true"></i>
-                        </div>
-                        <h3 class="app-name">山海經大富翁</h3>
-                    </a>
-                </div>
-            </section>
-
-            <section class="author-section" aria-label="關於創作者">
-                <a href="about.html" class="author-card">
-                    <span class="author-avatar" aria-hidden="true">
-                        <svg viewBox="0 0 64 64" fill="none" width="42" height="42">
-                            <circle cx="32" cy="22" r="10" fill="currentColor" opacity="0.16"></circle>
-                            <path d="M20 46c2.7-5.8 7.1-8.7 12-8.7 4.9 0 9.3 2.9 12 8.7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></path>
-                            <circle cx="32" cy="22" r="7.6" stroke="currentColor" stroke-width="3.2"></circle>
-                        </svg>
-                    </span>
-                    <span class="author-info">
-                        <strong>張老師</strong>
-                    </span>
-                </a>
-            </section>
-        </main>
-
-        <footer>
-            <p class="footer-meta">© 2026 <a href="about.html">張老師</a> · 桃花源 Peachblossom</p>
-        </footer>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="js/petal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="js/peachblossom-auth.js"></script>
+    <script src="js/flower-cursor.js"></script>
+    <script>
+        (function () {
+            var canvas = document.getElementById("canvas");
+            var btn = document.getElementById("flower-cursor-clean");
+            if (typeof initFlowerCursor === "function" && canvas) {
+                initFlowerCursor(canvas, btn);
+            }
+        })();
+
+        document.querySelectorAll('.app-card:not(.coming-soon)').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.cursor = 'pointer';
+            });
+        });
+    </script>
 </body>
 </html>
