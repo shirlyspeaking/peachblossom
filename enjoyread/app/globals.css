@@ -2,50 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 與桃花源 index.html 主畫面一致的色票（HSL 供 Tailwind / shadcn 使用） */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --background: 20 28% 97%;
+    --foreground: 8 22% 22%;
+    --card: 24 22% 99%;
+    --card-foreground: 8 22% 22%;
+    --popover: 24 22% 99%;
+    --popover-foreground: 8 22% 22%;
+    --primary: 349 32% 40%;
+    --primary-foreground: 40 40% 98%;
+    --secondary: 18 24% 94%;
+    --secondary-foreground: 8 22% 22%;
+    --muted: 16 18% 94%;
+    --muted-foreground: 12 12% 42%;
+    --accent: 18 32% 94%;
+    --accent-foreground: 8 22% 22%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 199 89% 48%;
-    --radius: 0.5rem;
+    --border: 12 18% 88%;
+    --input: 12 18% 88%;
+    --ring: 349 32% 40%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 8 18% 12%;
+    --foreground: 24 22% 96%;
+    --card: 8 16% 14%;
+    --card-foreground: 24 22% 96%;
+    --popover: 8 16% 14%;
+    --popover-foreground: 24 22% 96%;
+    --primary: 350 28% 58%;
+    --primary-foreground: 8 18% 12%;
+    --secondary: 10 14% 20%;
+    --secondary-foreground: 24 22% 96%;
+    --muted: 10 14% 20%;
+    --muted-foreground: 18 12% 68%;
+    --accent: 10 14% 20%;
+    --accent-foreground: 24 22% 96%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 199 89% 48%;
+    --border: 10 14% 22%;
+    --input: 10 14% 22%;
+    --ring: 350 28% 58%;
   }
 }
 
@@ -54,6 +55,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply min-h-screen text-foreground antialiased;
+    background:
+      radial-gradient(circle at 12% 14%, oklch(0.99 0.012 10) 0%, transparent 28%),
+      radial-gradient(circle at 86% 10%, oklch(0.92 0.045 8 / 0.55) 0%, transparent 24%),
+      radial-gradient(circle at 78% 64%, oklch(0.94 0.026 30 / 0.42) 0%, transparent 22%),
+      linear-gradient(180deg, oklch(0.975 0.014 8) 0%, oklch(0.953 0.018 8) 54%, oklch(0.965 0.018 16) 100%);
+    background-attachment: fixed;
   }
 }

@@ -9,6 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "sans-serif"],
+        serif: ["var(--font-serif)", "Noto Serif TC", "Songti TC", "serif"],
+        display: ["var(--font-display)", "ZCOOL XiaoWei", "Noto Serif TC", "serif"],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -20,16 +25,16 @@ const config: Config = {
         input: "hsl(var(--input))",
         border: "hsl(var(--border))",
         primary: {
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
+          50: "#fdf5f7",
+          100: "#fce8ed",
+          200: "#f5ccd8",
+          300: "#e8a3b8",
+          400: "#d47292",
+          500: "#b84d6f",
+          600: "#9a3e5c",
+          700: "#7f334c",
+          800: "#5f2639",
+          900: "#451c2a",
         },
       },
     },
