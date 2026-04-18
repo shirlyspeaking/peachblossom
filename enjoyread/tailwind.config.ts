@@ -12,7 +12,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "sans-serif"],
         serif: ["var(--font-serif)", "Noto Serif TC", "Songti TC", "serif"],
-        display: ["var(--font-display)", "ZCOOL XiaoWei", "Noto Serif TC", "serif"],
+        display: ["ZCOOL XiaoWei", "Noto Serif TC", "serif"],
       },
       colors: {
         background: "hsl(var(--background))",

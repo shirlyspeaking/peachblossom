@@ -15,7 +15,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const encodedTitle = encodeURIComponent(article.title);
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg hover:border-primary-500/30">
+    <Card className="flex flex-col overflow-hidden rounded-2xl border-primary-200/50 bg-card/95 shadow-[0_24px_60px_oklch(0.53_0.09_8_/_0.06)] backdrop-blur-sm transition-all hover:border-primary-400/35 hover:shadow-lg">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900/50 dark:text-primary-200">
@@ -25,7 +25,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <span className="text-xs text-muted-foreground">{article.category}</span>
           )}
         </div>
-        <h3 className="mt-2 line-clamp-2 text-lg font-semibold leading-tight">
+        <h3 className="mt-2 line-clamp-2 font-serif text-lg font-semibold leading-tight text-primary-900 dark:text-primary-100">
           {article.title}
         </h3>
       </CardHeader>

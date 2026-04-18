@@ -18,9 +18,9 @@ export function ReadingProgress({
   const scorePercent = totalQuizzes > 0 ? averageScore : 0;
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-primary-200/50 bg-card/95 shadow-[0_24px_60px_oklch(0.53_0.09_8_/_0.06)] backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 font-serif text-base text-primary-900 dark:text-primary-100">
           <BookOpen className="h-4 w-4" />
           我的閱讀進度
         </CardTitle>
