@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -36,26 +36,21 @@
             <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
 
-            <div class="row">
-                <div class="field">
-                    <label for="fontPreset">常用字體</label>
-                    <select id="fontPreset">
-                        <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
-                        <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                        <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
-                        <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
-                        <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
-                        <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
-                        <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
-                        <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
-                        <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
-                        <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="customFont">自訂字體</label>
-                    <input id="customFont" type="text" placeholder="例如: LXGW WenKai, Noto Serif TC" autocomplete="off">
-                </div>
+            <div class="field field-font">
+                <label for="fontPreset">字體選擇</label>
+                <select id="fontPreset">
+                    <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
+                    <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
+                    <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
+                    <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
+                    <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
+                    <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
+                    <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
+                    <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
+                    <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
+                    <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
+                </select>
+                <input id="customFont" class="field-font-custom" type="text" placeholder="自訂字體（選填），例如 LXGW WenKai" autocomplete="off" aria-label="自訂字體名稱">
             </div>
 
             <div class="row row-single">
