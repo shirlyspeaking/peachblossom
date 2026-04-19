@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Legendary Card Creator · 傳奇卡牌工坊</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -345,6 +346,20 @@
       font-size: .85rem;
     }
     .frame-texture.none { opacity: 0; pointer-events: none; }
+    /* 匯出 PNG 時暫時弱化會讓截圖引擎卡住或空白的樣式（backdrop / blend） */
+    body.export-snapshot #scene { perspective: none !important; }
+    body.export-snapshot .infobox {
+      backdrop-filter: none !important;
+      background: rgba(15, 23, 42, 0.94) !important;
+    }
+    body.export-snapshot .holo {
+      mix-blend-mode: normal !important;
+      opacity: 0.7 !important;
+    }
+    body.export-snapshot .frame-texture {
+      mix-blend-mode: normal !important;
+      opacity: 0.5 !important;
+    }
     @media (max-width: 1100px) {
       .layout { grid-template-columns: 1fr; }
       .panel, .preview-wrap { min-height: auto; }
@@ -836,48 +851,108 @@
         .replace(/^-|-$/g, "") || "legendary-card";
     }
 
+    function withTimeout(promise, ms, message) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(message || "操作逾時")), ms)
+        ),
+      ]);
+    }
+
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 2500);
+    }
+
     refs.btnExport.onclick = async () => {
       const target = refs.card3d;
-      if (!window.html2canvas || !target) {
-        setStatus("html2canvas 未載入完成，請稍後。");
+      if (!target) {
+        setStatus("找不到卡牌節點。");
         return;
       }
+      const hasH2c = typeof window.html2canvas === "function";
+      const hasHti =
+        window.htmlToImage && typeof window.htmlToImage.toBlob === "function";
+      if (!hasH2c && !hasHti) {
+        setStatus("圖片匯出程式庫未載入（請確認網路可連 CDN）。");
+        return;
+      }
+
       const previousTransform = refs.card3d.style.transform;
       refs.btnExport.disabled = true;
       refs.btnExport.textContent = "匯出中...";
       setStatus("正在輸出 PNG...");
+      document.body.classList.add("export-snapshot");
+
       try {
         refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const canvas = await window.html2canvas(target, {
-          backgroundColor: null,
-          scale: 3,
-          useCORS: true,
-          logging: false,
-        });
-        await new Promise((resolve, reject) => {
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              reject(new Error("無法建立 PNG 檔案"));
-              return;
-            }
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = sanitizeFilenameBase(refs.name.value) + ".png";
-            link.rel = "noopener";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
-            resolve();
-          }, "image/png");
-        });
+
+        let blob = null;
+        if (hasHti) {
+          try {
+            blob = await withTimeout(
+              window.htmlToImage.toBlob(target, {
+                pixelRatio: 3,
+                cacheBust: true,
+                skipFonts: true,
+              }),
+              45000,
+              "html-to-image 逾時"
+            );
+          } catch (e) {
+            console.warn("html-to-image:", e);
+          }
+        }
+
+        if (!blob && hasH2c) {
+          const canvas = await withTimeout(
+            window.html2canvas(target, {
+              backgroundColor: null,
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              onclone: (clonedDoc) => {
+                const scene = clonedDoc.getElementById("scene");
+                if (scene) scene.style.perspective = "none";
+                const card = clonedDoc.getElementById("card3d");
+                if (card) {
+                  card.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
+                  card.style.transformStyle = "flat";
+                }
+                const inf = clonedDoc.querySelector(".infobox");
+                if (inf) inf.style.backdropFilter = "none";
+              },
+            }),
+            45000,
+            "html2canvas 逾時"
+          );
+          blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => {
+              if (!b) reject(new Error("無法建立 PNG 檔案"));
+              else resolve(b);
+            }, "image/png");
+          });
+        }
+
+        if (!blob) throw new Error("無法產生圖檔");
+
+        triggerDownload(blob, sanitizeFilenameBase(refs.name.value) + ".png");
         setStatus("PNG 匯出完成。");
       } catch (error) {
-        setStatus("PNG 匯出失敗，請檢查瀏覽器下載權限或稍後重試。");
+        const msg = error && error.message ? error.message : String(error);
+        setStatus("PNG 匯出失敗：" + msg);
         console.error(error);
       } finally {
+        document.body.classList.remove("export-snapshot");
         refs.card3d.style.transform = previousTransform;
         refs.btnExport.disabled = false;
         refs.btnExport.textContent = "匯出 PNG";
