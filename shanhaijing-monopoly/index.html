@@ -592,13 +592,33 @@
             align-items: center;
             text-align: center;
             padding: 12px 14px;
-            gap: clamp(6px, 1.2vh, 10px);
+            gap: clamp(12px, 2.2vh, 20px);
             overflow: hidden;
             min-height: 0;
         }
-        .center-panel > * {
+        .center-block {
             width: 100%;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            padding: 10px 10px 12px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.38);
+            border: 1px solid rgba(63, 29, 56, 0.11);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.65),
+                0 2px 8px rgba(63, 29, 56, 0.06);
+        }
+        .center-block--players {
+            gap: 6px;
+        }
+        .center-block--dice {
+            gap: 6px;
+        }
+        .center-block--cards {
+            gap: 10px;
         }
         .center-game-meta {
             font-size: 0.75rem;
@@ -631,7 +651,7 @@
             justify-content: center;
             align-items: flex-end;
             align-content: center;
-            padding: 4px 2px;
+            padding: 2px 0 4px;
             flex-shrink: 0;
         }
         .center-piece-wrap {
@@ -1056,35 +1076,40 @@
                     <div class="board-scroll">
                         <div class="board-grid" id="board-grid">
                             <div class="center-panel">
-                                <div class="center-settings">
-                                    <label>
-                                        遊玩人數
-                                        <select id="player-count" aria-label="遊玩人數">
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4" selected>4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                        </select>
-                                    </label>
-                                </div>
-
-                                <div class="center-players-row" id="center-players-host" aria-live="polite"></div>
-
-                                <div class="dice-row">
-                                    <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
-                                    <div class="dice-shell">
-                                        <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                <div class="center-block center-block--players" aria-label="玩家與人數">
+                                    <div class="center-settings">
+                                        <label>
+                                            遊玩人數
+                                            <select id="player-count" aria-label="遊玩人數">
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4" selected>4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                            </select>
+                                        </label>
                                     </div>
+                                    <div class="center-players-row" id="center-players-host" aria-live="polite"></div>
                                 </div>
-                                <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
 
-                                <div class="draw-actions">
-                                    <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
-                                    <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
+                                <div class="center-block center-block--dice" aria-label="擲骰">
+                                    <div class="dice-row">
+                                        <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
+                                        <div class="dice-shell">
+                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                        </div>
+                                    </div>
+                                    <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
                                 </div>
-                                <div class="draw-result-area">
-                                    <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
+
+                                <div class="center-block center-block--cards" aria-label="抽牌">
+                                    <div class="draw-actions">
+                                        <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
+                                        <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
+                                    </div>
+                                    <div class="draw-result-area">
+                                        <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

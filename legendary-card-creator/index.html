@@ -827,8 +827,17 @@
       setStatus("已重置為預設範例與樣式。");
     };
 
+    function sanitizeFilenameBase(name) {
+      const base = (name || "legendary-card").trim() || "legendary-card";
+      return base
+        .replace(/[/\\?%*:|"<>]/g, "-")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "legendary-card";
+    }
+
     refs.btnExport.onclick = async () => {
-      const target = document.querySelector(".scene");
+      const target = refs.card3d;
       if (!window.html2canvas || !target) {
         setStatus("html2canvas 未載入完成，請稍後。");
         return;
@@ -839,6 +848,7 @@
       setStatus("正在輸出 PNG...");
       try {
         refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
         const canvas = await window.html2canvas(target, {
           backgroundColor: null,
           scale: 3,
@@ -854,9 +864,12 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = (refs.name.value || "legendary-card").toLowerCase().replace(/\s+/g, "-") + ".png";
+            link.download = sanitizeFilenameBase(refs.name.value) + ".png";
+            link.rel = "noopener";
+            document.body.appendChild(link);
             link.click();
-            setTimeout(() => URL.revokeObjectURL(url), 1200);
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
             resolve();
           }, "image/png");
         });
