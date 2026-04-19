@@ -14,6 +14,7 @@ import {
   upsertUserAndLinkGoogle,
 } from "./db";
 import { exchangeAuthorizationCode, fetchGoogleUserInfo } from "./google";
+import { tryMonopolyRooms } from "./monopoly-rooms";
 import type { Env, OAuthStatePayload } from "./types";
 
 const APP_ID_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
@@ -73,7 +74,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
       headers: {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
         "Access-Control-Allow-Headers": allowHeaders,
         "Access-Control-Max-Age": "86400",
         Vary: "Origin",
@@ -87,6 +88,9 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
   const allowedOrigins = parseCommaList(env.ALLOWED_ORIGINS);
   const corsOrigin = corsAllowOrigin(request, allowedOrigins);
+
+  const monopolyRes = await tryMonopolyRooms(request, env, path, method);
+  if (monopolyRes) return monopolyRes;
 
   if (path === "/auth/session" && method === "GET") {
     return handleSession(request, env, corsOrigin);
@@ -187,6 +191,10 @@ async function handleAppAccess(
     return json({ allowed, appId }, 200, corsOrigin);
   }
 
+  if (appId === "shanhaijing-monopoly") {
+    return json({ allowed: true, appId }, 200, corsOrigin);
+  }
+
   return json({ allowed: false, reason: "unknown_app", appId }, 200, corsOrigin);
 }
 
@@ -206,7 +214,11 @@ async function handleLogin(request: Request, env: Env, appId: string): Promise<R
   }
 
   // 僅允許已知 appId 走中央登入，避免任意字串濫用 auth 端點。
-  if (appId !== "font-admin" && appId !== "peachspring-home") {
+  if (
+    appId !== "font-admin" &&
+    appId !== "peachspring-home" &&
+    appId !== "shanhaijing-monopoly"
+  ) {
     return json({ ok: false, error: "unknown_app_id" }, 404, null);
   }
 

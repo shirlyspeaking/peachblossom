@@ -114,6 +114,128 @@
         .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
         .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        #peachblossom-auth-bar {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            border-radius: 999px;
+            background: var(--panel);
+            box-shadow: var(--shadow-card);
+            font-size: 0.88rem;
+        }
+        #peachblossom-auth-bar .auth-status,
+        #peachblossom-auth-bar .auth-user {
+            color: var(--ink-light);
+            max-width: min(48vw, 220px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #peachblossom-auth-bar .auth-warn { color: #c0392b; }
+        #peachblossom-auth-bar .auth-btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.12), rgba(255, 0, 110, 0.08));
+            box-shadow: 0 4px 12px rgba(63, 29, 56, 0.1);
+        }
+        #peachblossom-auth-bar .auth-btn:hover { filter: brightness(1.05); }
+        #peachblossom-auth-bar .auth-btn-out {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(63, 29, 56, 0.15);
+        }
+
+        .online-panel {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
+            background: var(--panel);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(63, 29, 56, 0.1);
+        }
+        .online-panel h3 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            letter-spacing: 0.04em;
+        }
+        .online-panel .online-tip {
+            font-size: 0.86rem;
+            color: var(--ink-light);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .online-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .online-actions label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+        }
+        .online-actions input[type="text"] {
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            padding: 8px 10px;
+            font-family: inherit;
+            width: 8.5rem;
+            text-transform: uppercase;
+        }
+        .online-actions button {
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .online-actions button:hover:not(:disabled) {
+            border-color: #8338ec;
+            background: rgba(131, 56, 236, 0.08);
+        }
+        .online-actions button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .online-actions button.btn-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.35);
+        }
+        .online-status {
+            margin-top: 12px;
+            font-size: 0.86rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+        .online-status strong { color: var(--ink); }
+        .room-code-display {
+            font-family: ui-monospace, monospace;
+            letter-spacing: 0.12em;
+            font-size: 1.05rem;
+            color: #8338ec;
+        }
+
         .left-rail-top {
             display: flex;
             flex-direction: column;
@@ -466,18 +588,22 @@
                 rgba(58, 134, 255, 0.08));
             border: 2px dashed rgba(63, 29, 56, 0.18);
             display: flex; flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            padding: 10px 12px 12px;
-            gap: 8px;
+            padding: 12px 14px;
+            gap: clamp(6px, 1.2vh, 10px);
             overflow: hidden;
             min-height: 0;
+        }
+        .center-panel > * {
+            width: 100%;
+            box-sizing: border-box;
         }
         .center-game-meta {
             font-size: 0.75rem;
             color: var(--ink-light);
-            margin-bottom: 4px;
+            margin: 0;
         }
         .center-settings {
             display: flex;
@@ -504,7 +630,8 @@
             gap: 12px 14px;
             justify-content: center;
             align-items: flex-end;
-            padding: 6px 4px;
+            align-content: center;
+            padding: 4px 2px;
             flex-shrink: 0;
         }
         .center-piece-wrap {
@@ -592,9 +719,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: clamp(10px, 2.5vw, 18px);
             flex-wrap: wrap;
-            margin: 4px 0;
+            margin: 0;
             flex-shrink: 0;
         }
         .btn-roll {
@@ -687,7 +814,7 @@
         }
 
         .draw-actions {
-            display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; justify-content: center;
+            display: flex; gap: 10px; margin: 0; flex-wrap: wrap; justify-content: center;
         }
         .draw-actions button {
             border: 0; border-radius: 999px; padding: 10px 20px;
@@ -700,7 +827,12 @@
         .draw-chance { background: var(--chance); color: #4f3600; }
         .draw-fate   { background: var(--fate); color: white; }
 
-        .draw-result-area { perspective: 600px; margin-top: 14px; width: 100%; max-width: 440px; }
+        .draw-result-area {
+            perspective: 600px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: min(440px, 100%);
+        }
 
         .draw-result {
             font-size: 0.92rem; background: rgba(255,255,255,0.9);
@@ -884,7 +1016,10 @@
                 <div class="title-wrap">
                     <h1>🐉 山海經大富翁</h1>
                 </div>
-                <a class="back-link" href="../index.html">← 回桃花源</a>
+                <div class="top-bar-right">
+                    <div id="peachblossom-auth-bar" aria-live="polite"></div>
+                    <a class="back-link" href="../index.html">← 回桃花源</a>
+                </div>
             </div>
 
             <div class="toolbar">
@@ -893,6 +1028,23 @@
                 <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
                 <input type="file" id="file-import" accept=".json" hidden>
             </div>
+
+            <section class="online-panel" id="online-panel" aria-labelledby="online-panel-title">
+                <h3 id="online-panel-title">🌐 線上對戰（Google 登入）</h3>
+                <p class="online-tip">
+                    請先於右上方完成 Google 登入。房主建立房間後，將<strong>房間代碼</strong>或分享連結傳給其他玩家；每位玩家對應棋盤上的一個「玩家」座位。
+                    遊戲須架設在 <strong>peachspring.cc</strong> 網域下，瀏覽器才能帶上登入 Cookie 與伺服器同步。
+                </p>
+                <div class="online-actions">
+                    <button type="button" id="btn-online-create">建立線上房間</button>
+                    <label>加入代碼
+                        <input type="text" id="room-code-input" maxlength="8" placeholder="ABCDEF" autocomplete="off" spellcheck="false" />
+                    </label>
+                    <button type="button" id="btn-online-join">加入房間</button>
+                    <button type="button" id="btn-online-leave" class="btn-danger" disabled>離開線上模式</button>
+                </div>
+                <div class="online-status" id="online-status"></div>
+            </section>
 
             <div class="legend" id="legend"></div>
 
@@ -925,7 +1077,7 @@
                                         <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
                                     </div>
                                 </div>
-                                <p class="center-game-meta" id="turn-indicator" style="margin:0;">輪到：玩家 1</p>
+                                <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
 
                                 <div class="draw-actions">
                                     <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
@@ -993,10 +1145,244 @@
     </div>
 
     <script>
+        window.PEACHBLOSSOM_AUTH_APP_ID = "shanhaijing-monopoly";
+        window.PEACHBLOSSOM_AUTH_LOGIN_LABEL = "Google 登入";
+    </script>
+    <script src="../js/peachblossom-auth.js"></script>
+    <script>
     (function () {
         "use strict";
 
         const STORAGE_KEY = "shanhaijing-monopoly-v1";
+
+        let onlineMode = false;
+        let onlineRoomCode = "";
+        let onlineVersion = 0;
+        /** @type {{ hostUserId: string, members: Array<{userId: string, playerIndex: number, name: string|null, email: string, picture: string|null}> } | null} */
+        let onlineMeta = null;
+        let myUserId = null;
+        let pollTimer = null;
+        let onlineSaveTimer = null;
+
+        function getAuthBase() {
+            if (typeof window.PEACHBLOSSOM_AUTH_BASE === "string" && window.PEACHBLOSSOM_AUTH_BASE.trim()) {
+                return window.PEACHBLOSSOM_AUTH_BASE.replace(/\/$/, "");
+            }
+            var h = window.location.hostname;
+            if (h === "localhost" || h === "127.0.0.1") {
+                return "http://localhost:8787";
+            }
+            return "https://auth.peachspring.cc";
+        }
+
+        function roomsBaseUrl() {
+            return getAuthBase() + "/auth/apps/shanhaijing-monopoly/rooms";
+        }
+
+        function setOnlineStatus(html) {
+            var el = document.getElementById("online-status");
+            if (el) el.innerHTML = html;
+        }
+
+        function refreshMyUser(cb) {
+            fetch(getAuthBase() + "/auth/session", { credentials: "include", cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    myUserId = data && data.user && data.user.id ? data.user.id : null;
+                    if (cb) cb(data);
+                })
+                .catch(function () {
+                    myUserId = null;
+                    if (cb) cb(null);
+                });
+        }
+
+        function lobbyFull() {
+            if (!onlineMeta || !state.game) return false;
+            var members = onlineMeta.members || [];
+            return members.length >= state.game.playerCount;
+        }
+
+        function memberAtPlayerIndex(idx) {
+            if (!onlineMeta || !onlineMeta.members) return null;
+            var list = onlineMeta.members;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].playerIndex === idx) return list[i];
+            }
+            return null;
+        }
+
+        function isOnlineHost() {
+            return !!(onlineMode && onlineMeta && myUserId && onlineMeta.hostUserId === myUserId);
+        }
+
+        function buildServerSnapshot() {
+            return {
+                hostUserId: onlineMeta.hostUserId,
+                members: onlineMeta.members.slice(),
+                tiles: state.tiles,
+                chance: state.chance,
+                fate: state.fate,
+                rulesText: state.rulesText,
+                game: state.game
+            };
+        }
+
+        function stopOnlinePoll() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        function applyServerPayload(data, silentToast) {
+            if (!data || !data.snapshot) return;
+            onlineVersion = data.version;
+            onlineMeta = {
+                hostUserId: data.snapshot.hostUserId,
+                members: data.snapshot.members || []
+            };
+            state = normalizeState({
+                tiles: data.snapshot.tiles,
+                chance: data.snapshot.chance,
+                fate: data.snapshot.fate,
+                rulesText: data.snapshot.rulesText,
+                game: data.snapshot.game
+            });
+            syncRulesTextarea();
+            renderBoard();
+            renderCards();
+            renderCenterGameUI();
+            renderPawnsOnBoard();
+            if (onlineMode) refreshOnlineStatusBanner();
+            if (!silentToast) showToast("已同步房間狀態");
+        }
+
+        function pollRoom() {
+            if (!onlineMode || !onlineRoomCode) return;
+            fetch(roomsBaseUrl() + "/" + encodeURIComponent(onlineRoomCode), {
+                credentials: "include",
+                cache: "no-store"
+            })
+                .then(function (res) {
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data || !data.ok) return;
+                    if (data.version !== onlineVersion) {
+                        applyServerPayload(data, true);
+                    }
+                })
+                .catch(function () { /* ignore */ });
+        }
+
+        function startOnlinePoll() {
+            stopOnlinePoll();
+            pollTimer = setInterval(pollRoom, 2600);
+        }
+
+        function pushOnlineSnapshot(cb) {
+            if (!onlineMode || !onlineRoomCode) {
+                if (cb) cb(true);
+                return;
+            }
+            fetch(roomsBaseUrl() + "/" + encodeURIComponent(onlineRoomCode), {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    version: onlineVersion,
+                    snapshot: buildServerSnapshot()
+                })
+            })
+                .then(function (res) {
+                    return res.json().then(function (j) {
+                        return { ok: res.ok, status: res.status, j: j };
+                    });
+                })
+                .then(function (x) {
+                    if (x.ok && x.j && x.j.ok) {
+                        onlineVersion = x.j.version;
+                        if (x.j.snapshot) {
+                            applyServerPayload({ version: x.j.version, snapshot: x.j.snapshot }, true);
+                        }
+                        if (cb) cb(true);
+                        return;
+                    }
+                    if (x.j && x.j.error === "version_conflict" && x.j.snapshot) {
+                        applyServerPayload({
+                            version: x.j.serverVersion != null ? x.j.serverVersion : onlineVersion,
+                            snapshot: x.j.snapshot
+                        }, true);
+                        showToast("與伺服器同步後已合併狀態");
+                        if (cb) cb(false);
+                        return;
+                    }
+                    showToast("同步失敗，請重試");
+                    if (cb) cb(false);
+                })
+                .catch(function () {
+                    showToast("網路錯誤");
+                    if (cb) cb(false);
+                });
+        }
+
+        function enterOnlineMode(roomCode, data) {
+            onlineMode = true;
+            onlineRoomCode = roomCode;
+            document.getElementById("btn-online-leave").disabled = false;
+            document.getElementById("player-count").disabled = true;
+            applyServerPayload(data, true);
+            startOnlinePoll();
+            refreshOnlineStatusBanner();
+            showToast("已進入線上房間");
+        }
+
+        function leaveOnlineMode() {
+            stopOnlinePoll();
+            onlineMode = false;
+            onlineRoomCode = "";
+            onlineVersion = 0;
+            onlineMeta = null;
+            document.getElementById("btn-online-leave").disabled = true;
+            document.getElementById("player-count").disabled = false;
+            setOnlineStatus("");
+            updateEditorLocks();
+            renderCenterGameUI();
+            showToast("已返回本機模式（未寫入雲端）");
+        }
+
+        function refreshOnlineStatusBanner() {
+            if (!onlineMode || !onlineRoomCode) return;
+            var share =
+                window.location.origin +
+                window.location.pathname +
+                "?room=" +
+                encodeURIComponent(onlineRoomCode);
+            setOnlineStatus(
+                "<div>房間代碼：<span class=\"room-code-display\">" +
+                    String(onlineRoomCode).replace(/</g, "") +
+                    "</span></div>" +
+                    "<div style=\"margin-top:6px;\">分享連結：<a href=\"" +
+                    esc(share) +
+                    "\">" +
+                    esc(share) +
+                    "</a>（房主與已加入玩家可同步棋局）</div>" +
+                    "<div style=\"margin-top:8px;\">已加入玩家：<strong>" +
+                    (onlineMeta && onlineMeta.members ? onlineMeta.members.length : 0) +
+                    "</strong> / <strong>" +
+                    state.game.playerCount +
+                    "</strong></div>"
+            );
+        }
+
+        function scheduleOnlinePushAfterEdit() {
+            if (!onlineMode) return;
+            clearTimeout(onlineSaveTimer);
+            onlineSaveTimer = setTimeout(function () {
+                pushOnlineSnapshot(null);
+            }, 900);
+        }
 
         const TILE_META = {
             "tile-start":   { icon: "🏁", legend: "起點" },
@@ -1155,12 +1541,22 @@
             return defaultState();
         }
 
-        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+        function saveState() {
+            if (onlineMode) return;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
 
         let saveTimer = null;
         function debouncedSave() {
             clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => { saveState(); showToast("已自動儲存 ✓"); }, 600);
+            saveTimer = setTimeout(function () {
+                if (onlineMode) {
+                    scheduleOnlinePushAfterEdit();
+                    return;
+                }
+                saveState();
+                showToast("已自動儲存 ✓");
+            }, 600);
         }
 
         /* ---------- DOM refs ---------- */
@@ -1305,8 +1701,32 @@
         })();
 
         /* ---------- Board ---------- */
+        function canEditBoardAndCards() {
+            return !onlineMode || isOnlineHost();
+        }
+
+        function updateEditorLocks() {
+            var can = canEditBoardAndCards();
+            var rules = document.getElementById("rules-text");
+            if (rules) rules.disabled = !can;
+            document.querySelectorAll("#board-grid .tile input").forEach(function (inp) {
+                inp.disabled = !can;
+            });
+            document.querySelectorAll(".card-editor input, .card-editor textarea").forEach(function (inp) {
+                inp.disabled = !can;
+            });
+            document.querySelectorAll(".card-delete").forEach(function (btn) {
+                btn.disabled = !can;
+            });
+            var ac1 = document.getElementById("add-card-chance");
+            var ac2 = document.getElementById("add-card-fate");
+            if (ac1) ac1.disabled = !can;
+            if (ac2) ac2.disabled = !can;
+        }
+
         function renderBoard() {
             boardGrid.querySelectorAll(".tile").forEach(el => el.remove());
+            var disAttr = canEditBoardAndCards() ? "" : " disabled";
             state.tiles.forEach((tile, i) => {
                 const [row, col] = POS[i];
                 const meta = TILE_META[tile.type] || { icon: "❓" };
@@ -1320,12 +1740,13 @@
                         `<span class="tile-label">${tile.label}</span>` +
                         `<span class="tile-num">${i + 1}</span>` +
                     `</div>` +
-                    `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label">` +
-                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect">` +
+                    `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label"${disAttr}>` +
+                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect"${disAttr}>` +
                     `<div class="tile-pawns" data-tile-idx="${i}"></div>`;
                 boardGrid.appendChild(el);
             });
             renderPawnsOnBoard();
+            updateEditorLocks();
         }
 
         function renderPawnsOnBoard() {
@@ -1368,17 +1789,38 @@
                 const wrap = document.createElement("div");
                 wrap.className = "center-piece-wrap" + (i === g.currentPlayerIndex ? " center-piece-wrap--active" : "");
                 const col = PLAYER_COLORS[i % PLAYER_COLORS.length];
+                const mem = onlineMode ? memberAtPlayerIndex(i) : null;
+                const label =
+                    mem && (mem.name || mem.email)
+                        ? "玩家 " + (i + 1) + "（" + (mem.name || mem.email) + "）"
+                        : "玩家 " + (i + 1) + (onlineMode ? "（等待加入）" : "");
+                const readOnlyMoney =
+                    onlineMode &&
+                    (!mem || !myUserId || mem.userId !== myUserId);
+                const roAttr = readOnlyMoney ? " readonly" : "";
                 wrap.innerHTML =
                     `<div class="center-piece-figure">` +
                         `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
-                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金" /></div>` +
+                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金"${roAttr} /></div>` +
                     `</div>` +
-                    `<span class="center-piece-label">玩家 ${i + 1}</span>`;
+                    `<span class="center-piece-label">${esc(label)}</span>`;
                 host.appendChild(wrap);
             });
 
-            document.getElementById("turn-indicator").textContent =
-                "輪到：玩家 " + (g.currentPlayerIndex + 1) + "（共 " + g.playerCount + " 人）";
+            var curMem = onlineMode ? memberAtPlayerIndex(g.currentPlayerIndex) : null;
+            var turnLine =
+                "輪到：玩家 " +
+                (g.currentPlayerIndex + 1) +
+                (curMem && (curMem.name || curMem.email)
+                    ? "（" + (curMem.name || curMem.email) + "）"
+                    : "") +
+                "（共 " +
+                g.playerCount +
+                " 人）";
+            if (onlineMode && !lobbyFull()) {
+                turnLine += " — 等待玩家加入中，尚不可擲骰";
+            }
+            document.getElementById("turn-indicator").textContent = turnLine;
 
             const logEl = document.getElementById("turn-log");
             logEl.innerHTML = "";
@@ -1413,6 +1855,11 @@
         });
 
         document.getElementById("player-count").addEventListener("change", function () {
+            if (onlineMode) {
+                showToast("線上房間無法變更人數");
+                this.value = String(state.game.playerCount);
+                return;
+            }
             const n = Math.max(2, Math.min(6, parseInt(this.value, 10)));
             state.game.playerCount = n;
             state.game.players = buildDefaultPlayers(n);
@@ -1429,6 +1876,17 @@
             const diceEl = document.getElementById("dice-display");
             const btn = this;
             if (btn.disabled) return;
+            if (onlineMode) {
+                if (!lobbyFull()) {
+                    showToast("請等待所有玩家加入房間");
+                    return;
+                }
+                const cur = memberAtPlayerIndex(g.currentPlayerIndex);
+                if (!cur || !myUserId || cur.userId !== myUserId) {
+                    showToast("目前輪到座位「玩家 " + (g.currentPlayerIndex + 1) + "」，請由該位玩家操作");
+                    return;
+                }
+            }
             btn.disabled = true;
             diceEl.classList.add("dice--rolling");
             const tick = setInterval(function () {
@@ -1460,10 +1918,18 @@
                 pushTurnLog(msg);
 
                 g.currentPlayerIndex = nextIdx;
-                saveState();
-                renderPawnsOnBoard();
-                renderCenterGameUI();
-                btn.disabled = false;
+                if (onlineMode) {
+                    pushOnlineSnapshot(function () {
+                        renderPawnsOnBoard();
+                        renderCenterGameUI();
+                        btn.disabled = false;
+                    });
+                } else {
+                    saveState();
+                    renderPawnsOnBoard();
+                    renderCenterGameUI();
+                    btn.disabled = false;
+                }
             }, 720);
         });
 
@@ -1474,6 +1940,7 @@
             state.chance.forEach((c, i) => cardsChance.appendChild(makeCardEl("chance", c, i)));
             state.fate.forEach((f, i) => cardsFate.appendChild(makeCardEl("fate", f, i)));
             updateCounts();
+            updateEditorLocks();
         }
 
         function makeCardEl(type, card, index) {
@@ -1568,7 +2035,13 @@
         });
 
         const fileInput = document.getElementById("file-import");
-        document.getElementById("btn-import").addEventListener("click", () => fileInput.click());
+        document.getElementById("btn-import").addEventListener("click", () => {
+            if (onlineMode) {
+                showToast("請先離開線上模式再匯入");
+                return;
+            }
+            fileInput.click();
+        });
         fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1596,6 +2069,10 @@
         });
 
         document.getElementById("btn-reset").addEventListener("click", () => {
+            if (onlineMode) {
+                showToast("請先離開線上模式再重設");
+                return;
+            }
             if (!confirm("確定要重設為預設內容？所有修改將清除。")) return;
             state = defaultState();
             saveState();
@@ -1620,11 +2097,104 @@
             return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
+        document.getElementById("btn-online-create").addEventListener("click", function () {
+            refreshMyUser(function (data) {
+                if (!data || !data.authenticated || !data.user) {
+                    showToast("請先完成 Google 登入");
+                    return;
+                }
+                var sel = document.getElementById("player-count");
+                var n = Math.max(2, Math.min(6, parseInt(sel.value, 10)));
+                fetch(roomsBaseUrl(), {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        playerCount: n,
+                        state: state
+                    })
+                })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (j) {
+                        if (!j || !j.ok) {
+                            showToast(j && j.error ? String(j.error) : "建立失敗");
+                            return;
+                        }
+                        enterOnlineMode(j.roomCode, { version: j.version, snapshot: j.snapshot });
+                    })
+                    .catch(function () {
+                        showToast("建立失敗");
+                    });
+            });
+        });
+
+        document.getElementById("btn-online-join").addEventListener("click", function () {
+            var raw = document.getElementById("room-code-input").value;
+            var code = String(raw || "")
+                .trim()
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, "");
+            if (code.length < 4) {
+                showToast("請輸入有效房間代碼");
+                return;
+            }
+            refreshMyUser(function (data) {
+                if (!data || !data.authenticated || !data.user) {
+                    showToast("請先完成 Google 登入");
+                    return;
+                }
+                fetch(roomsBaseUrl() + "/join", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: code })
+                })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (j) {
+                        if (!j || !j.ok) {
+                            var msg = "加入失敗";
+                            if (j && j.error === "room_full") msg = "房間已滿";
+                            else if (j && j.error === "room_not_found") msg = "找不到房間";
+                            showToast(msg);
+                            return;
+                        }
+                        enterOnlineMode(j.roomCode, { version: j.version, snapshot: j.snapshot });
+                    })
+                    .catch(function () {
+                        showToast("加入失敗");
+                    });
+            });
+        });
+
+        document.getElementById("btn-online-leave").addEventListener("click", function () {
+            if (!onlineMode) return;
+            leaveOnlineMode();
+        });
+
+        (function fillRoomFromQuery() {
+            var sp = new URLSearchParams(window.location.search);
+            var r = sp.get("room");
+            if (r) {
+                var input = document.getElementById("room-code-input");
+                if (input) {
+                    input.value = String(r)
+                        .trim()
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, "");
+                }
+            }
+        })();
+
         /* ---------- Init ---------- */
         syncRulesTextarea();
         renderBoard();
         renderCards();
         renderCenterGameUI();
+        updateEditorLocks();
     })();
     </script>
 </body>
