@@ -52,7 +52,6 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .title-wrap p { margin-top: 6px; color: var(--ink-light); font-size: 0.95rem; }
 
         .back-link {
             display: inline-flex; align-items: center; gap: 6px;
@@ -78,24 +77,108 @@
         .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
         .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
-        /* ===== Rule Panel ===== */
-        .rule-panel {
-            background: var(--panel); border-radius: var(--radius-lg);
-            padding: 16px 20px; margin-bottom: 16px;
-            box-shadow: var(--shadow-card);
-            border-left: 5px solid #8338ec;
+        /* ===== 基本規則：標籤 + 上層面板 ===== */
+        .rules-tag-row { margin-bottom: 16px; }
+
+        .rules-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.78rem; padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            background: rgba(255, 255, 255, 0.75);
+            font-family: inherit; color: var(--ink);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(63, 29, 56, 0.08);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
         }
-        .rule-panel summary {
-            font-size: 1.05rem; font-weight: 700; cursor: pointer;
-            list-style: none; display: flex; align-items: center; gap: 8px;
+        .rules-tag:hover {
+            border-color: rgba(131, 56, 236, 0.45);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 14px rgba(131, 56, 236, 0.18);
         }
-        .rule-panel summary::before { content: "📜"; }
-        .rule-panel summary::after {
-            content: "▸"; margin-left: auto;
-            transition: transform var(--transition);
+        .rules-tag:active { transform: scale(0.98); }
+
+        .rules-overlay {
+            position: fixed; inset: 0; z-index: 900;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            opacity: 0; visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .rule-panel[open] summary::after { transform: rotate(90deg); }
-        .rule-panel ul { padding: 12px 0 0 1.4rem; line-height: 2; color: var(--ink-light); }
+        .rules-overlay.is-open {
+            opacity: 1; visibility: visible; pointer-events: auto;
+        }
+
+        .rules-overlay-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(63, 29, 56, 0.28);
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
+        }
+
+        .rules-overlay-panel {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 520px;
+            max-height: min(82vh, 640px);
+            display: flex; flex-direction: column;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 24px 60px rgba(63, 29, 56, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+
+        .rules-overlay-header {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(63, 29, 56, 0.1);
+            background: rgba(255, 255, 255, 0.45);
+        }
+        .rules-overlay-header h2 {
+            font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em;
+        }
+        .rules-overlay-close {
+            flex-shrink: 0;
+            width: 34px; height: 34px;
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            font-size: 1rem; line-height: 1; cursor: pointer;
+            color: var(--ink);
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .rules-overlay-close:hover {
+            background: rgba(131, 56, 236, 0.12);
+            border-color: rgba(131, 56, 236, 0.35);
+        }
+
+        .rules-overlay-body {
+            padding: 14px 16px 18px;
+            flex: 1; min-height: 0;
+            display: flex; flex-direction: column;
+        }
+
+        .rules-textarea {
+            width: 100%; flex: 1; min-height: 200px;
+            padding: 12px 14px; border-radius: var(--radius-md);
+            border: 1px solid rgba(63, 29, 56, 0.18);
+            font-family: inherit; font-size: 0.92rem; line-height: 1.75;
+            color: var(--ink); background: rgba(255, 255, 255, 0.88);
+            resize: vertical;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .rules-textarea::placeholder { color: #baa5b0; }
+        .rules-textarea:focus {
+            outline: none; border-color: #8338ec;
+            box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.15);
+        }
+
+        body.rules-modal-open { overflow: hidden; }
 
         /* ===== Legend ===== */
         .legend {
@@ -270,7 +353,6 @@
         }
 
         .drawer-handle span {
-            transform: rotate(180deg);
             font-size: 0.82rem;
             font-weight: 700;
         }
@@ -436,7 +518,6 @@
         <div class="top-bar">
             <div class="title-wrap">
                 <h1>🐉 山海經大富翁</h1>
-                <p>棋盤每格可編輯、機會卡與命運卡可自由增刪——所有修改自動儲存。</p>
             </div>
             <a class="back-link" href="../index.html">← 回桃花源</a>
         </div>
@@ -448,15 +529,11 @@
             <input type="file" id="file-import" accept=".json" hidden>
         </div>
 
-        <details class="rule-panel" open>
-            <summary>基本規則（點此收合）</summary>
-            <ul>
-                <li>玩家輪流擲骰前進，經過<strong>起點</strong>可領取獎勵金幣。</li>
-                <li>停在地塊可依你自訂文本執行效果（買地、收租、事件等）。</li>
-                <li>停在「<strong>機會</strong>」或「<strong>命運</strong>」格時，抽對應卡片並執行卡面內容。</li>
-                <li>此版為<strong>可編輯雛形</strong>，可先設計內容與規則文本，所有改動自動儲存。</li>
-            </ul>
-        </details>
+        <div class="rules-tag-row">
+            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel">
+                📜 基本規則
+            </button>
+        </div>
 
         <div class="legend" id="legend"></div>
 
@@ -508,6 +585,19 @@
     </aside>
 
     <div class="toast" id="toast"></div>
+
+    <div class="rules-overlay" id="rules-overlay" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title" aria-hidden="true">
+        <div class="rules-overlay-backdrop" id="rules-overlay-backdrop"></div>
+        <div class="rules-overlay-panel" id="rules-overlay-panel">
+            <div class="rules-overlay-header">
+                <h2 id="rules-dialog-title">基本規則</h2>
+                <button type="button" class="rules-overlay-close" id="rules-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="rules-overlay-body">
+                <textarea id="rules-text" class="rules-textarea" rows="12" aria-label="自訂遊戲規則" placeholder="請輸入你們約定的遊戲規則，例如：人數、起始金幣、勝利條件、特殊約定等……"></textarea>
+            </div>
+        </div>
+    </div>
 
     <script>
     (function () {
@@ -587,6 +677,12 @@
             [6,1],[5,1],[4,1],[3,1],[2,1]
         ];
 
+        const DEFAULT_RULES_TEXT =
+            "玩家輪流擲骰前進，經過起點可領取獎勵金幣。\n" +
+            "停在地塊可依你自訂文本執行效果（買地、收租、事件等）。\n" +
+            "停在「機會」或「命運」格時，抽對應卡片並執行卡面內容。\n" +
+            "此版為可編輯雛形，可先設計內容與規則文本，所有改動自動儲存。";
+
         /* ---------- State ---------- */
         let state = loadState();
         let activeTab = "chance";
@@ -595,14 +691,23 @@
             return {
                 tiles: DEFAULT_TILES.map(t => ({ ...t })),
                 chance: DEFAULT_CHANCE.map(c => ({ ...c })),
-                fate: DEFAULT_FATE.map(f => ({ ...f }))
+                fate: DEFAULT_FATE.map(f => ({ ...f })),
+                rulesText: DEFAULT_RULES_TEXT
             };
+        }
+
+        function normalizeState(raw) {
+            if (!raw || typeof raw !== "object") return defaultState();
+            if (!raw.rulesText || typeof raw.rulesText !== "string") {
+                raw.rulesText = DEFAULT_RULES_TEXT;
+            }
+            return raw;
         }
 
         function loadState() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) return JSON.parse(raw);
+                if (raw) return normalizeState(JSON.parse(raw));
             } catch (_) { /* ignore */ }
             return defaultState();
         }
@@ -623,15 +728,56 @@
         const chanceCount = document.getElementById("chance-count");
         const fateCount = document.getElementById("fate-count");
         const toastEl = document.getElementById("toast");
+        const rulesTextEl = document.getElementById("rules-text");
+        const rulesOverlay = document.getElementById("rules-overlay");
+        const rulesOpen = document.getElementById("rules-open");
+        const rulesClose = document.getElementById("rules-close");
+        const rulesBackdrop = document.getElementById("rules-overlay-backdrop");
         const cardsDrawer = document.getElementById("cards-drawer");
         const drawerToggle = document.getElementById("drawer-toggle");
         const drawerClose = document.getElementById("drawer-close");
         const drawerToggleText = drawerToggle.querySelector("span");
 
+        function syncRulesTextarea() {
+            rulesTextEl.value = state.rulesText;
+        }
+
+        rulesTextEl.addEventListener("input", () => {
+            state.rulesText = rulesTextEl.value;
+            debouncedSave();
+        });
+
+        function openRulesModal() {
+            rulesOverlay.classList.add("is-open");
+            rulesOverlay.setAttribute("aria-hidden", "false");
+            rulesOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("rules-modal-open");
+            rulesTextEl.focus();
+        }
+
+        function closeRulesModal() {
+            rulesOverlay.classList.remove("is-open");
+            rulesOverlay.setAttribute("aria-hidden", "true");
+            rulesOpen.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("rules-modal-open");
+            rulesOpen.focus();
+        }
+
+        rulesOpen.addEventListener("click", openRulesModal);
+        rulesClose.addEventListener("click", closeRulesModal);
+        rulesBackdrop.addEventListener("click", closeRulesModal);
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && rulesOverlay.classList.contains("is-open")) {
+                closeRulesModal();
+            }
+        });
+
         /* ---------- Legend ---------- */
         (function buildLegend() {
             const container = document.getElementById("legend");
             Object.entries(TILE_META).forEach(([cls, meta]) => {
+                if (cls === "tile-tax") return;
                 const item = document.createElement("span");
                 item.className = "legend-item";
                 item.innerHTML = `<span class="legend-dot" style="background:${TILE_COLORS[cls]}"></span>${meta.icon} ${meta.legend}`;
@@ -810,11 +956,12 @@
                 try {
                     const imported = JSON.parse(ev.target.result);
                     if (imported.tiles && imported.chance && imported.fate) {
-                        state = imported;
+                        state = normalizeState(imported);
                         saveState();
                         renderBoard();
                         renderCards();
                         showTabs();
+                        syncRulesTextarea();
                         showToast("匯入成功 📥");
                     } else {
                         showToast("JSON 格式不正確 ⚠️");
@@ -834,6 +981,7 @@
             renderBoard();
             renderCards();
             showTabs();
+            syncRulesTextarea();
             showToast("已重設為預設內容 🔄");
         });
 
@@ -852,6 +1000,7 @@
         }
 
         /* ---------- Init ---------- */
+        syncRulesTextarea();
         renderBoard();
         renderCards();
         showTabs();
