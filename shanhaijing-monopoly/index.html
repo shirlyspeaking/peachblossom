@@ -43,7 +43,7 @@
             max-width: 1440px;
             margin: 0 auto;
             padding: 24px 20px 40px;
-            padding-left: calc(min(3.35rem, 11vw) + 14px);
+            padding-left: calc(min(3.75rem, 12vw) + 14px);
             box-sizing: border-box;
         }
 
@@ -59,14 +59,14 @@
             top: 50%;
             transform: translateY(-50%);
             z-index: 55;
-            width: min(3.35rem, calc(var(--title-btn-ref) * 0.5));
-            max-width: min(50vw, 5rem);
+            width: min(3.75rem, calc(var(--title-btn-ref) * 0.55));
+            max-width: min(50vw, 5.5rem);
             min-height: min(68vh, 520px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: stretch;
-            gap: 4px;
+            gap: 2px;
             padding: 4px 2px;
             background: transparent;
             border: none;
@@ -114,6 +114,13 @@
         .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
         .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
+        .left-rail-top {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 2px;
+        }
+
         /* ===== 左側欄標籤按鈕（直排、窄條；長寬不超過參考標題鈕的一半量級）===== */
         .left-rail .rules-tag {
             display: flex;
@@ -121,12 +128,12 @@
             justify-content: center;
             width: 100%;
             max-width: 100%;
-            min-height: 2.75rem;
+            min-height: 2.65rem;
             max-height: min(30vh, calc(var(--title-btn-ref) * 0.85));
-            padding: 8px 4px;
-            font-size: 0.7rem;
-            line-height: 1.35;
-            letter-spacing: 0.06em;
+            padding: 7px 3px;
+            font-size: 0.84rem;
+            line-height: 1.32;
+            letter-spacing: 0.05em;
             border-radius: var(--radius-sm);
             border: 1px solid rgba(63, 29, 56, 0.12);
             background: rgba(255, 255, 255, 0.82);
@@ -184,6 +191,72 @@
             background: rgba(58, 134, 255, 0.16);
         }
 
+        /* 左側欄：回合記錄（預設僅標籤；懸停／鍵盤聚焦時顯示內容） */
+        .left-rail-log-hover {
+            position: relative;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+        .left-rail-log-tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 2.5rem;
+            max-height: min(22vh, 8rem);
+            padding: 6px 3px;
+            font-size: 0.82rem;
+            line-height: 1.3;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.14);
+            background: rgba(255, 255, 255, 0.78);
+            font-family: inherit;
+            color: var(--ink);
+            cursor: pointer;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            box-shadow: 0 2px 6px rgba(63, 29, 56, 0.07);
+        }
+        .left-rail-log-popover {
+            display: none;
+            position: absolute;
+            left: calc(100% + 8px);
+            bottom: 0;
+            z-index: 70;
+            width: min(300px, calc(100vw - 5rem));
+            max-height: min(280px, 55vh);
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 12px 36px rgba(63, 29, 56, 0.22);
+            text-align: left;
+        }
+        .left-rail-log-hover:hover .left-rail-log-popover,
+        .left-rail-log-hover:focus-within .left-rail-log-popover {
+            display: block;
+        }
+        .turn-log--rail {
+            max-height: min(260px, 52vh);
+            overflow-y: auto;
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            line-height: 1.45;
+            color: var(--ink);
+            border: 0;
+            background: transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .turn-log--rail div {
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(63, 29, 56, 0.1);
+        }
+        .turn-log--rail div:last-child { border-bottom: 0; }
+
         /* ===== 毛玻璃上層（基本規則 / 機會卡 / 命運卡 共用）===== */
         .glass-modal {
             position: fixed; inset: 0; z-index: 900;
@@ -191,7 +264,7 @@
             padding: 16px;
             opacity: 0; visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: none;
         }
         .glass-modal.is-open {
             opacity: 1; visibility: visible; pointer-events: auto;
@@ -613,39 +686,6 @@
             }
         }
 
-        .turn-log-wrap {
-            text-align: left;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .turn-log-title {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--ink-light);
-            margin-bottom: 4px;
-        }
-        .turn-log {
-            flex: 1;
-            min-height: 72px;
-            max-height: 110px;
-            overflow-y: auto;
-            font-size: 0.68rem;
-            line-height: 1.45;
-            color: var(--ink);
-            background: rgba(255, 255, 255, 0.55);
-            border: 1px solid rgba(63, 29, 56, 0.1);
-            border-radius: var(--radius-sm);
-            padding: 6px 8px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .turn-log div {
-            padding: 2px 0;
-            border-bottom: 1px dashed rgba(63, 29, 56, 0.08);
-        }
-        .turn-log div:last-child { border-bottom: 0; }
-
         .draw-actions {
             display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; justify-content: center;
         }
@@ -770,12 +810,18 @@
                 width: 100%;
                 max-width: none;
                 min-height: auto;
-                flex-direction: row;
-                justify-content: center;
-                flex-wrap: wrap;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: flex-start;
                 padding: 8px 6px;
-                gap: 6px;
+                gap: 8px;
                 margin: 0 -4px 12px -4px;
+            }
+            .left-rail-top {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
             }
             .left-rail .rules-tag {
                 writing-mode: horizontal-tb;
@@ -784,7 +830,25 @@
                 max-height: none;
                 min-height: auto;
                 padding: 6px 12px;
-                font-size: 0.74rem;
+                font-size: 0.8rem;
+            }
+            .left-rail-log-hover {
+                align-self: center;
+                width: auto;
+            }
+            .left-rail-log-tab {
+                writing-mode: horizontal-tb;
+                min-height: auto;
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .left-rail-log-popover {
+                left: 50%;
+                right: auto;
+                bottom: auto;
+                top: calc(100% + 8px);
+                transform: translateX(-50%);
+                width: min(320px, calc(100vw - 32px));
             }
         }
         @media (max-width: 480px) {
@@ -795,15 +859,23 @@
 </head>
 <body>
     <aside class="left-rail" aria-label="規則與卡片捷徑">
-        <button type="button" class="rules-tag rail-slot-top" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
-            📜 基本規則
-        </button>
-        <button type="button" class="rules-tag tag-chance rail-slot-mid" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡">
-            🟡 機會卡 (<span id="chance-count">0</span>)
-        </button>
-        <button type="button" class="rules-tag tag-fate rail-slot-bottom" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡">
-            🔵 命運卡 (<span id="fate-count">0</span>)
-        </button>
+        <div class="left-rail-top">
+            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
+                📜 基本規則
+            </button>
+            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡設置">
+                🟡 機會卡設置
+            </button>
+            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡設置">
+                🔵 命運卡設置
+            </button>
+        </div>
+        <div class="left-rail-log-hover">
+            <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">回合記錄</button>
+            <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
+                <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
+            </div>
+        </div>
     </aside>
 
     <div class="page">
@@ -854,11 +926,6 @@
                                     </div>
                                 </div>
                                 <p class="center-game-meta" id="turn-indicator" style="margin:0;">輪到：玩家 1</p>
-
-                                <div class="turn-log-wrap">
-                                    <div class="turn-log-title">回合紀錄</div>
-                                    <div class="turn-log" id="turn-log" aria-label="回合紀錄"></div>
-                                </div>
 
                                 <div class="draw-actions">
                                     <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
@@ -1101,8 +1168,6 @@
         const cardsChance = document.getElementById("cards-chance");
         const cardsFate = document.getElementById("cards-fate");
         const drawResult = document.getElementById("draw-result");
-        const chanceCount = document.getElementById("chance-count");
-        const fateCount = document.getElementById("fate-count");
         const toastEl = document.getElementById("toast");
         const rulesTextEl = document.getElementById("rules-text");
         const rulesOverlay = document.getElementById("rules-overlay");
@@ -1117,6 +1182,22 @@
         const fateClose = document.getElementById("fate-close");
         const chanceBackdrop = document.getElementById("chance-overlay-backdrop");
         const fateBackdrop = document.getElementById("fate-overlay-backdrop");
+        const turnLogTab = document.getElementById("turn-log-tab");
+        const turnLogHover = turnLogTab ? turnLogTab.closest(".left-rail-log-hover") : null;
+        if (turnLogTab && turnLogHover) {
+            turnLogHover.addEventListener("mouseenter", function () {
+                turnLogTab.setAttribute("aria-expanded", "true");
+            });
+            turnLogHover.addEventListener("mouseleave", function () {
+                turnLogTab.setAttribute("aria-expanded", "false");
+            });
+            turnLogHover.addEventListener("focusin", function () {
+                turnLogTab.setAttribute("aria-expanded", "true");
+            });
+            turnLogHover.addEventListener("focusout", function () {
+                turnLogTab.setAttribute("aria-expanded", "false");
+            });
+        }
 
         function syncRulesTextarea() {
             rulesTextEl.value = state.rulesText;
@@ -1409,8 +1490,7 @@
         }
 
         function updateCounts() {
-            chanceCount.textContent = state.chance.length;
-            fateCount.textContent = state.fate.length;
+            /* 左側欄已不顯示卡片張數 */
         }
 
         document.addEventListener("input", (e) => {

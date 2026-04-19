@@ -463,7 +463,7 @@
 
     <div id="menu-container">
         <h1>唐風花鈿</h1>
-        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 🪷 正面蘭花指切換隨機花鈿（拇指靠中指、食指伸出） &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可） &nbsp; 📱 手機可點按本欄花鈿與按鈕</p>
+        <p class="subtitle">👉 食指懸停選取 &nbsp; 🤏 捏合確認佩戴／拍照 &nbsp; 📐 鏡像區內食指上下移換款 &nbsp; 🪷 雙手同時蘭花指切換隨機花鈿（拇指靠中指、食指伸出） &nbsp; 😛 吐舌卸妝／回歸現世（維持約半秒，略張嘴即可） &nbsp; 📱 手機可點按本欄花鈿與按鈕</p>
         <div class="grid-container" id="options-grid"></div>
         <button type="button" class="reset-btn" id="btn-reset" title="捏合此鈕可卸妝；或對鏡吐舌並微張嘴維持約半秒">卸妝 / 回歸現世</button>
         <button type="button" class="reset-btn" id="btn-capture-huadian">拍照（花鈿・無背景）</button>
@@ -544,7 +544,7 @@
         let posPickCandidateSince = 0;
         const posPickStableMs = 160;
 
-        /** 正面蘭花指：邊緣觸發隨機換款 */
+        /** 雙手同時蘭花指：邊緣觸發隨機換款 */
         let orchidGestureWasActive = false;
         const orchidRandomCooldownMs = 1200;
         let lastOrchidRandomTime = -orchidRandomCooldownMs;
@@ -1383,8 +1383,8 @@
         }
 
         /**
-         * 正面蘭花指（典式）：拇指靠近中指、食指伸出，與「食指－拇指捏合」區隔。
-         * 無名指、小指相對收攏，避免與全張開掌混淆。
+         * 單手蘭花指（典式）：拇指靠近中指、食指伸出，與「食指－拇指捏合」區隔。
+         * 無名指、小指相對收攏，避免與全張開掌混淆。隨機換款需兩隻手同時通過此判斷。
          */
         function isFrontOrchidFinger(landmarks) {
             const wrist = landmarks[0];
@@ -1513,11 +1513,14 @@
             const pinchThreshold = 0.05;
             const isPinchingNow = pinchDist < pinchThreshold;
 
-            const orchidPose = isFrontOrchidFinger(landmarks);
+            const dualOrchidPose =
+                multiHands.length >= 2 &&
+                isFrontOrchidFinger(multiHands[0]) &&
+                isFrontOrchidFinger(multiHands[1]);
 
             // 卸妝改由人臉網格偵測吐舌（updateTongueUnmakeupGesture）；此處僅讀 tongueUnmakeupPose 暫停垂直選款
-            // 垂直選款：捏合、吐舌卸妝姿勢、蘭花指、或單手呈握拳時不用食指 y
-            if (!isPinchingNow && !tongueUnmakeupPose && !isHandFistRelaxed(landmarks) && !orchidPose && isCursorOverStage(cursorX, cursorY)) {
+            // 垂直選款：捏合、吐舌卸妝姿勢、雙手蘭花指、或單手呈握拳時不用食指 y
+            if (!isPinchingNow && !tongueUnmakeupPose && !isHandFistRelaxed(landmarks) && !dualOrchidPose && isCursorOverStage(cursorX, cursorY)) {
                 tryVerticalPositionPickHuadian(landmarks);
             } else {
                 posPickCandidate = -1;
@@ -1554,7 +1557,7 @@
                 isPinching = false;
             }
 
-            maybeTriggerOrchidRandom(orchidPose);
+            maybeTriggerOrchidRandom(dualOrchidPose);
         }
 
         async function startApp() {
