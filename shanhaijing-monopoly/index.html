@@ -77,8 +77,14 @@
         .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
         .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
-        /* ===== 基本規則：標籤 + 上層面板 ===== */
-        .rules-tag-row { margin-bottom: 16px; }
+        /* ===== 標籤列（基本規則 + 機會 / 命運 兩欄）===== */
+        .rules-tag-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 10px;
+            margin-bottom: 16px;
+        }
+        .rules-tag-grid .rules-tag-full { grid-column: 1 / -1; }
 
         .rules-tag {
             display: inline-flex; align-items: center; gap: 5px;
@@ -98,7 +104,25 @@
         }
         .rules-tag:active { transform: scale(0.98); }
 
-        .rules-overlay {
+        .rules-tag.tag-chance {
+            border-color: rgba(212, 160, 9, 0.4);
+            background: rgba(255, 190, 11, 0.14);
+        }
+        .rules-tag.tag-chance:hover {
+            border-color: rgba(212, 160, 9, 0.65);
+            background: rgba(255, 190, 11, 0.22);
+        }
+        .rules-tag.tag-fate {
+            border-color: rgba(58, 134, 255, 0.4);
+            background: rgba(58, 134, 255, 0.1);
+        }
+        .rules-tag.tag-fate:hover {
+            border-color: rgba(58, 134, 255, 0.6);
+            background: rgba(58, 134, 255, 0.16);
+        }
+
+        /* ===== 毛玻璃上層（基本規則 / 機會卡 / 命運卡 共用）===== */
+        .glass-modal {
             position: fixed; inset: 0; z-index: 900;
             display: flex; align-items: center; justify-content: center;
             padding: 16px;
@@ -106,18 +130,18 @@
             pointer-events: none;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .rules-overlay.is-open {
+        .glass-modal.is-open {
             opacity: 1; visibility: visible; pointer-events: auto;
         }
 
-        .rules-overlay-backdrop {
+        .glass-modal-backdrop {
             position: absolute; inset: 0;
             background: rgba(63, 29, 56, 0.28);
             backdrop-filter: blur(14px) saturate(1.2);
             -webkit-backdrop-filter: blur(14px) saturate(1.2);
         }
 
-        .rules-overlay-panel {
+        .glass-modal-panel {
             position: relative; z-index: 1;
             width: 100%; max-width: 520px;
             max-height: min(82vh, 640px);
@@ -132,17 +156,22 @@
             overflow: hidden;
         }
 
-        .rules-overlay-header {
+        .glass-modal-panel--cards {
+            max-width: min(580px, 100%);
+            max-height: min(86vh, 720px);
+        }
+
+        .glass-modal-header {
             display: flex; align-items: center; justify-content: space-between;
             gap: 12px;
             padding: 14px 16px;
             border-bottom: 1px solid rgba(63, 29, 56, 0.1);
             background: rgba(255, 255, 255, 0.45);
         }
-        .rules-overlay-header h2 {
+        .glass-modal-header h2 {
             font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em;
         }
-        .rules-overlay-close {
+        .glass-modal-close {
             flex-shrink: 0;
             width: 34px; height: 34px;
             border: 1px solid rgba(63, 29, 56, 0.15);
@@ -152,15 +181,20 @@
             color: var(--ink);
             transition: background var(--transition), border-color var(--transition);
         }
-        .rules-overlay-close:hover {
+        .glass-modal-close:hover {
             background: rgba(131, 56, 236, 0.12);
             border-color: rgba(131, 56, 236, 0.35);
         }
 
-        .rules-overlay-body {
+        .glass-modal-body {
             padding: 14px 16px 18px;
             flex: 1; min-height: 0;
             display: flex; flex-direction: column;
+        }
+
+        .glass-modal-body--scroll {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .rules-textarea {
@@ -178,7 +212,7 @@
             box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.15);
         }
 
-        body.rules-modal-open { overflow: hidden; }
+        body.modal-open { overflow: hidden; }
 
         /* ===== Legend ===== */
         .legend {
@@ -314,93 +348,6 @@
         .draw-result.chance-result { border-color: var(--chance); background: rgba(255,190,11,0.12); }
         .draw-result.fate-result   { border-color: var(--fate);   background: rgba(58,134,255,0.1); }
 
-        /* ===== Cards Drawer ===== */
-        .cards-drawer {
-            position: fixed;
-            top: 16px;
-            right: 0;
-            height: calc(100vh - 32px);
-            width: min(460px, calc(100vw - 20px));
-            z-index: 700;
-            display: flex;
-            align-items: stretch;
-            transform: translateX(0);
-            transition: transform var(--transition);
-            pointer-events: none;
-        }
-
-        .cards-drawer.is-collapsed {
-            transform: translateX(calc(100% - 48px));
-        }
-
-        .drawer-handle {
-            width: 48px;
-            border: 0;
-            border-radius: 14px 0 0 14px;
-            background: linear-gradient(180deg, #8338ec 0%, #3a86ff 100%);
-            color: white;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: -4px 8px 18px rgba(63, 29, 56, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            letter-spacing: 0.08em;
-            padding: 8px 0;
-            pointer-events: auto;
-        }
-
-        .drawer-handle span {
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .drawer-panel {
-            flex: 1;
-            background: var(--panel);
-            border-radius: 0 16px 16px 0;
-            box-shadow: -10px 0 30px rgba(63, 29, 56, 0.18);
-            padding: 14px;
-            overflow-y: auto;
-            pointer-events: auto;
-        }
-
-        .drawer-panel .section-header {
-            position: sticky;
-            top: 0;
-            background: rgba(255, 255, 255, 0.92);
-            z-index: 2;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
-
-        .drawer-close {
-            border: 1px solid rgba(63,29,56,0.15);
-            background: white;
-            border-radius: 999px;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .cards-tabs {
-            display: flex; gap: 0; margin-bottom: 14px;
-            border-radius: var(--radius-sm); overflow: hidden;
-            border: 1px solid rgba(63,29,56,0.15);
-        }
-        .cards-tabs button {
-            flex: 1; border: 0; padding: 9px 10px; font-family: inherit;
-            font-size: 0.88rem; font-weight: 600; cursor: pointer;
-            background: rgba(255,255,255,0.6); color: var(--ink-light);
-            transition: all var(--transition);
-        }
-        .cards-tabs button.active-chance { background: var(--chance); color: #4f3600; }
-        .cards-tabs button.active-fate   { background: var(--fate); color: white; }
-        .cards-tabs button:not(.active-chance):not(.active-fate):hover { background: rgba(255,255,255,0.9); }
-
         .cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
 
         .card-editor {
@@ -476,36 +423,6 @@
         @media (max-width: 768px) {
             .title-wrap h1 { font-size: 1.6rem; }
             .top-bar { flex-direction: column; align-items: flex-start; }
-
-            .cards-drawer {
-                top: auto;
-                bottom: 0;
-                right: 0;
-                left: 0;
-                width: 100%;
-                height: min(76vh, 620px);
-                transform: translateY(0);
-            }
-
-            .cards-drawer.is-collapsed {
-                transform: translateY(calc(100% - 40px));
-            }
-
-            .drawer-handle {
-                width: 100%;
-                height: 40px;
-                border-radius: 14px 14px 0 0;
-                writing-mode: horizontal-tb;
-                text-orientation: initial;
-            }
-
-            .drawer-handle span {
-                transform: none;
-            }
-
-            .drawer-panel {
-                border-radius: 0;
-            }
         }
         @media (max-width: 480px) {
             .page { padding: 16px 12px 32px; }
@@ -529,9 +446,15 @@
             <input type="file" id="file-import" accept=".json" hidden>
         </div>
 
-        <div class="rules-tag-row">
-            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel">
+        <div class="rules-tag-grid">
+            <button type="button" class="rules-tag rules-tag-full" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel">
                 📜 基本規則
+            </button>
+            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel">
+                🟡 機會卡 (<span id="chance-count">0</span>)
+            </button>
+            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel">
+                🔵 命運卡 (<span id="fate-count">0</span>)
             </button>
         </div>
 
@@ -562,39 +485,51 @@
         </div>
     </div>
 
-    <aside class="cards-drawer" id="cards-drawer" aria-label="卡片編輯側欄">
-        <button class="drawer-handle" id="drawer-toggle" type="button" aria-expanded="true" aria-controls="drawer-panel">
-            <span>收合卡片</span>
-        </button>
-        <section class="drawer-panel" id="drawer-panel">
-            <div class="section-header">
-                <h2 class="section-title">🃏 機會卡 / 命運卡</h2>
-                <button class="drawer-close" id="drawer-close" type="button" title="收合">✕</button>
-            </div>
-            <div class="cards-tabs">
-                <button id="tab-chance" class="active-chance">機會卡 (<span id="chance-count">0</span>)</button>
-                <button id="tab-fate">命運卡 (<span id="fate-count">0</span>)</button>
-            </div>
-            <div class="cards-grid" id="cards-chance"></div>
-            <div class="cards-grid" id="cards-fate" style="display:none"></div>
-            <button class="add-card-btn" id="add-card">＋ 新增一張卡片</button>
-            <div class="tip">
-                小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
-            </div>
-        </section>
-    </aside>
-
     <div class="toast" id="toast"></div>
 
-    <div class="rules-overlay" id="rules-overlay" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title" aria-hidden="true">
-        <div class="rules-overlay-backdrop" id="rules-overlay-backdrop"></div>
-        <div class="rules-overlay-panel" id="rules-overlay-panel">
-            <div class="rules-overlay-header">
+    <div class="glass-modal" id="rules-overlay" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="rules-overlay-backdrop"></div>
+        <div class="glass-modal-panel" id="rules-overlay-panel">
+            <div class="glass-modal-header">
                 <h2 id="rules-dialog-title">基本規則</h2>
-                <button type="button" class="rules-overlay-close" id="rules-close" aria-label="關閉">✕</button>
+                <button type="button" class="glass-modal-close" id="rules-close" aria-label="關閉">✕</button>
             </div>
-            <div class="rules-overlay-body">
+            <div class="glass-modal-body">
                 <textarea id="rules-text" class="rules-textarea" rows="12" aria-label="自訂遊戲規則" placeholder="請輸入你們約定的遊戲規則，例如：人數、起始金幣、勝利條件、特殊約定等……"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-modal" id="chance-overlay" role="dialog" aria-modal="true" aria-labelledby="chance-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="chance-overlay-backdrop"></div>
+        <div class="glass-modal-panel glass-modal-panel--cards" id="chance-overlay-panel">
+            <div class="glass-modal-header">
+                <h2 id="chance-dialog-title">🟡 機會卡</h2>
+                <button type="button" class="glass-modal-close" id="chance-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="glass-modal-body glass-modal-body--scroll">
+                <div class="cards-grid" id="cards-chance"></div>
+                <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增一張機會卡</button>
+                <div class="tip">
+                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-modal" id="fate-overlay" role="dialog" aria-modal="true" aria-labelledby="fate-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="fate-overlay-backdrop"></div>
+        <div class="glass-modal-panel glass-modal-panel--cards" id="fate-overlay-panel">
+            <div class="glass-modal-header">
+                <h2 id="fate-dialog-title">🔵 命運卡</h2>
+                <button type="button" class="glass-modal-close" id="fate-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="glass-modal-body glass-modal-body--scroll">
+                <div class="cards-grid" id="cards-fate"></div>
+                <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增一張命運卡</button>
+                <div class="tip">
+                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+                </div>
             </div>
         </div>
     </div>
@@ -685,7 +620,6 @@
 
         /* ---------- State ---------- */
         let state = loadState();
-        let activeTab = "chance";
 
         function defaultState() {
             return {
@@ -733,10 +667,14 @@
         const rulesOpen = document.getElementById("rules-open");
         const rulesClose = document.getElementById("rules-close");
         const rulesBackdrop = document.getElementById("rules-overlay-backdrop");
-        const cardsDrawer = document.getElementById("cards-drawer");
-        const drawerToggle = document.getElementById("drawer-toggle");
-        const drawerClose = document.getElementById("drawer-close");
-        const drawerToggleText = drawerToggle.querySelector("span");
+        const chanceOverlay = document.getElementById("chance-overlay");
+        const fateOverlay = document.getElementById("fate-overlay");
+        const chanceOpen = document.getElementById("chance-open");
+        const fateOpen = document.getElementById("fate-open");
+        const chanceClose = document.getElementById("chance-close");
+        const fateClose = document.getElementById("fate-close");
+        const chanceBackdrop = document.getElementById("chance-overlay-backdrop");
+        const fateBackdrop = document.getElementById("fate-overlay-backdrop");
 
         function syncRulesTextarea() {
             rulesTextEl.value = state.rulesText;
@@ -747,11 +685,30 @@
             debouncedSave();
         });
 
+        function syncModalOpenBody() {
+            const anyOpen = [rulesOverlay, chanceOverlay, fateOverlay].some(function (el) {
+                return el.classList.contains("is-open");
+            });
+            document.body.classList.toggle("modal-open", anyOpen);
+        }
+
+        function closeAllGlassModals() {
+            [rulesOverlay, chanceOverlay, fateOverlay].forEach(function (el) {
+                el.classList.remove("is-open");
+                el.setAttribute("aria-hidden", "true");
+            });
+            rulesOpen.setAttribute("aria-expanded", "false");
+            chanceOpen.setAttribute("aria-expanded", "false");
+            fateOpen.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("modal-open");
+        }
+
         function openRulesModal() {
+            closeAllGlassModals();
             rulesOverlay.classList.add("is-open");
             rulesOverlay.setAttribute("aria-hidden", "false");
             rulesOpen.setAttribute("aria-expanded", "true");
-            document.body.classList.add("rules-modal-open");
+            document.body.classList.add("modal-open");
             rulesTextEl.focus();
         }
 
@@ -759,18 +716,57 @@
             rulesOverlay.classList.remove("is-open");
             rulesOverlay.setAttribute("aria-hidden", "true");
             rulesOpen.setAttribute("aria-expanded", "false");
-            document.body.classList.remove("rules-modal-open");
+            syncModalOpenBody();
             rulesOpen.focus();
+        }
+
+        function openChanceModal() {
+            closeAllGlassModals();
+            chanceOverlay.classList.add("is-open");
+            chanceOverlay.setAttribute("aria-hidden", "false");
+            chanceOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeChanceModal() {
+            chanceOverlay.classList.remove("is-open");
+            chanceOverlay.setAttribute("aria-hidden", "true");
+            chanceOpen.setAttribute("aria-expanded", "false");
+            syncModalOpenBody();
+            chanceOpen.focus();
+        }
+
+        function openFateModal() {
+            closeAllGlassModals();
+            fateOverlay.classList.add("is-open");
+            fateOverlay.setAttribute("aria-hidden", "false");
+            fateOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeFateModal() {
+            fateOverlay.classList.remove("is-open");
+            fateOverlay.setAttribute("aria-hidden", "true");
+            fateOpen.setAttribute("aria-expanded", "false");
+            syncModalOpenBody();
+            fateOpen.focus();
         }
 
         rulesOpen.addEventListener("click", openRulesModal);
         rulesClose.addEventListener("click", closeRulesModal);
         rulesBackdrop.addEventListener("click", closeRulesModal);
+        chanceOpen.addEventListener("click", openChanceModal);
+        chanceClose.addEventListener("click", closeChanceModal);
+        chanceBackdrop.addEventListener("click", closeChanceModal);
+        fateOpen.addEventListener("click", openFateModal);
+        fateClose.addEventListener("click", closeFateModal);
+        fateBackdrop.addEventListener("click", closeFateModal);
 
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && rulesOverlay.classList.contains("is-open")) {
-                closeRulesModal();
-            }
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape") return;
+            if (rulesOverlay.classList.contains("is-open")) closeRulesModal();
+            else if (chanceOverlay.classList.contains("is-open")) closeChanceModal();
+            else if (fateOverlay.classList.contains("is-open")) closeFateModal();
         });
 
         /* ---------- Legend ---------- */
@@ -799,7 +795,7 @@
                     `<div class="tile-header">` +
                         `<span class="tile-icon">${meta.icon}</span>` +
                         `<span class="tile-label">${tile.label}</span>` +
-                        `<span class="tile-num">#${i + 1}</span>` +
+                        `<span class="tile-num">${i + 1}</span>` +
                     `</div>` +
                     `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label">` +
                     `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect">`;
@@ -863,56 +859,29 @@
             const idx = +e.target.dataset.idx;
             state[type].splice(idx, 1);
             renderCards();
-            showTabs();
             debouncedSave();
         });
 
-        /* ---------- Tabs ---------- */
-        const tabChance = document.getElementById("tab-chance");
-        const tabFate = document.getElementById("tab-fate");
-
-        function showTabs() {
-            if (activeTab === "chance") {
-                cardsChance.style.display = "";
-                cardsFate.style.display = "none";
-                tabChance.className = "active-chance";
-                tabFate.className = "";
-            } else {
-                cardsChance.style.display = "none";
-                cardsFate.style.display = "";
-                tabChance.className = "";
-                tabFate.className = "active-fate";
-            }
-            updateCounts();
-        }
-
-        tabChance.addEventListener("click", () => { activeTab = "chance"; showTabs(); });
-        tabFate.addEventListener("click", () => { activeTab = "fate"; showTabs(); });
-
-        /* ---------- Drawer ---------- */
-        function setDrawerCollapsed(collapsed) {
-            cardsDrawer.classList.toggle("is-collapsed", collapsed);
-            drawerToggle.setAttribute("aria-expanded", String(!collapsed));
-            drawerToggleText.textContent = collapsed ? "展開卡片" : "收合卡片";
-            localStorage.setItem(`${STORAGE_KEY}-drawer-collapsed`, collapsed ? "1" : "0");
-        }
-
-        drawerToggle.addEventListener("click", () => {
-            setDrawerCollapsed(!cardsDrawer.classList.contains("is-collapsed"));
-        });
-
-        drawerClose.addEventListener("click", () => {
-            setDrawerCollapsed(true);
-        });
-
         /* ---------- Add card ---------- */
-        document.getElementById("add-card").addEventListener("click", () => {
-            state[activeTab].push({ title: "", content: "" });
+        document.getElementById("add-card-chance").addEventListener("click", () => {
+            state.chance.push({ title: "", content: "" });
             renderCards();
-            showTabs();
-            const container = activeTab === "chance" ? cardsChance : cardsFate;
-            const last = container.lastElementChild;
-            if (last) { last.scrollIntoView({ behavior: "smooth", block: "center" }); last.querySelector("input").focus(); }
+            const last = cardsChance.lastElementChild;
+            if (last) {
+                last.scrollIntoView({ behavior: "smooth", block: "center" });
+                last.querySelector("input").focus();
+            }
+            debouncedSave();
+        });
+
+        document.getElementById("add-card-fate").addEventListener("click", () => {
+            state.fate.push({ title: "", content: "" });
+            renderCards();
+            const last = cardsFate.lastElementChild;
+            if (last) {
+                last.scrollIntoView({ behavior: "smooth", block: "center" });
+                last.querySelector("input").focus();
+            }
             debouncedSave();
         });
 
@@ -960,7 +929,6 @@
                         saveState();
                         renderBoard();
                         renderCards();
-                        showTabs();
                         syncRulesTextarea();
                         showToast("匯入成功 📥");
                     } else {
@@ -980,7 +948,6 @@
             saveState();
             renderBoard();
             renderCards();
-            showTabs();
             syncRulesTextarea();
             showToast("已重設為預設內容 🔄");
         });
@@ -1003,8 +970,6 @@
         syncRulesTextarea();
         renderBoard();
         renderCards();
-        showTabs();
-        setDrawerCollapsed(localStorage.getItem(`${STORAGE_KEY}-drawer-collapsed`) === "1");
     })();
     </script>
 </body>
