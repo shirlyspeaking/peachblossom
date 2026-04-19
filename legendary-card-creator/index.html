@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legendary Card Creator</title>
+  <title>Legendary Card Creator · 傳奇卡牌工坊</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; }
@@ -44,6 +44,7 @@
       display: grid;
       grid-template-columns: 35% 65%;
       gap: 14px;
+      align-items: start;
     }
     .panel {
       border: 1px solid rgba(255,255,255,0.12);
@@ -54,7 +55,7 @@
       display: flex;
       flex-direction: column;
     }
-    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
     .tab {
       border: 1px solid rgba(255,255,255,0.14);
       border-radius: 10px;
@@ -106,13 +107,68 @@
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.05);
       border-radius: 18px;
-      padding: 18px 12px;
+      padding: 14px;
       min-height: 78vh;
       display: flex;
       flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+    }
+    .preview-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-start;
       justify-content: center;
+      flex: 1;
+    }
+    .preview-stage {
+      flex: 1 1 280px;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
     }
+    .c-art-panel {
+      flex: 0 0 220px;
+      max-width: 100%;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(2,6,23,0.45);
+      padding: 12px;
+    }
+    .c-art-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 0.95rem;
+      color: #fde68a;
+      font-weight: 700;
+    }
+    .c-art-panel .hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+    .art-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .art-thumb {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.9);
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.12);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .art-thumb:hover { border-color: rgba(253,224,71,0.5); transform: scale(1.02); }
+    .art-thumb.active { border-color: #ffcb05; box-shadow: 0 0 0 1px rgba(255,203,5,0.4); }
     .scene { width: min(460px, 100%); perspective: 1700px; }
     .card {
       position: relative;
@@ -177,7 +233,7 @@
     .footer {
       position: absolute; left: 6%; right: 6%; bottom: 4.7%;
       display: flex; justify-content: space-between; align-items: center;
-      font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+      font-size: .66rem; letter-spacing: .12em;
       color: rgba(248,250,252,.86);
     }
     .edition {
@@ -240,8 +296,7 @@
       text-align: center;
       font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: .28em;
-      text-transform: uppercase;
+      letter-spacing: .2em;
       color: rgba(248,250,252,.95);
       text-shadow: 0 2px 12px rgba(2,6,23,.8);
     }
@@ -252,8 +307,7 @@
       right: 10%;
       text-align: center;
       font-size: .68rem;
-      letter-spacing: .26em;
-      text-transform: uppercase;
+      letter-spacing: .18em;
       color: rgba(226,232,240,.78);
     }
     .back-badge {
@@ -266,8 +320,7 @@
       border-radius: 999px;
       padding: 6px 14px;
       font-size: .65rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
+      letter-spacing: .12em;
       color: rgba(226,232,240,.9);
       backdrop-filter: blur(6px);
     }
@@ -287,13 +340,16 @@
       border-radius: 12px;
       background: rgba(255,255,255,.04);
       color: #cbd5e1;
-      width: min(460px, 100%);
+      width: 100%;
       padding: 10px 12px;
       font-size: .85rem;
     }
+    .frame-texture.none { opacity: 0; pointer-events: none; }
     @media (max-width: 1100px) {
       .layout { grid-template-columns: 1fr; }
       .panel, .preview-wrap { min-height: auto; }
+      .preview-row { flex-direction: column; }
+      .c-art-panel { flex: 1 1 auto; width: 100%; }
     }
   </style>
 </head>
@@ -301,7 +357,7 @@
   <div class="page">
     <div class="topbar">
       <div>
-        <small style="color:#fcd34d;letter-spacing:.2em;text-transform:uppercase;">Legendary Card Creator</small>
+        <small style="color:#fcd34d;letter-spacing:.12em;">Legendary Card Creator · 傳奇卡牌工坊</small>
         <h1>收藏級電子卡牌工坊</h1>
       </div>
       <div class="btns">
@@ -314,25 +370,25 @@
     <div class="layout">
       <aside class="panel">
         <div class="tabs">
-          <button class="tab active" data-tab="basic">基礎</button>
-          <button class="tab" data-tab="visual">視覺</button>
-          <button class="tab" data-tab="upload">上傳</button>
+          <button class="tab active" data-tab="front">正面</button>
+          <button class="tab" data-tab="back">背面</button>
         </div>
 
-        <section class="tab-content active" id="tab-basic">
-          <div class="field"><label>卡牌名稱</label><input id="name" class="input" value="Celestial Emberfox" /></div>
-          <div class="field"><label>HP / Power</label><input id="hp" class="input" value="320" /></div>
-          <div class="field"><label>能力名稱</label><input id="ability" class="input" value="Astral Burst" /></div>
-          <div class="field"><label>能力敘述</label><textarea id="desc" class="textarea">Channel prismatic flames. Draw 2 cards and strike 1 target.</textarea></div>
+        <section class="tab-content active" id="tab-front">
+          <div class="field"><label>卡牌名稱</label><input id="name" class="input" value="星焰靈狐" /></div>
+          <div class="field"><label>生命值／戰力</label><input id="hp" class="input" value="320" /></div>
+          <div class="field"><label>能力名稱</label><input id="ability" class="input" value="星光爆裂" /></div>
+          <div class="field"><label>能力敘述</label><textarea id="desc" class="textarea">引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。</textarea></div>
           <div class="field row">
-            <div><label>繪師</label><input id="illustrator" class="input" value="Shirly Zhang" /></div>
-            <div><label>卡號</label><input id="setNumber" class="input" value="PB-001 / ALT" /></div>
+            <div><label>繪師</label><input id="illustrator" class="input" value="張老師" /></div>
+            <div><label>卡號</label><input id="setNumber" class="input" value="桃-001／異畫" /></div>
           </div>
-        </section>
-
-        <section class="tab-content" id="tab-visual">
           <div class="field">
-            <label>一鍵風格切換</label>
+            <label>能量符號</label>
+            <div class="chip-row" id="energyWrap"></div>
+          </div>
+          <div class="field">
+            <label>一鍵風格</label>
             <div class="row">
               <button class="chip active" id="btnVintage">復古模式</button>
               <button class="chip" id="btnModern">現代模式</button>
@@ -348,7 +404,7 @@
             </div>
           </div>
           <div class="field">
-            <label>邊框色調（直接改色）</label>
+            <label>邊框色調</label>
             <input id="borderTint" class="input" type="color" value="#ffcb05" />
           </div>
           <div class="field">
@@ -359,15 +415,18 @@
               <button class="chip active" data-rarity="3">★★★</button>
             </div>
           </div>
+        </section>
+
+        <section class="tab-content" id="tab-back">
           <div class="field">
-            <label>卡背標題 / 副標</label>
+            <label>卡背標題／副標</label>
             <div class="row">
-              <input id="backTitle" class="input" value="Legendary" />
-              <input id="backSubtitle" class="input" value="Classic Orbit" />
+              <input id="backTitle" class="input" value="傳奇" />
+              <input id="backSubtitle" class="input" value="經典軌道" />
             </div>
           </div>
           <div class="field">
-            <label>卡背配色（環 / 核心）</label>
+            <label>卡背配色（外環／核心光）</label>
             <div class="row">
               <input id="backRingColor" class="input" type="color" value="#bae6fd" />
               <input id="backCoreColor" class="input" type="color" value="#ffcb05" />
@@ -375,67 +434,66 @@
           </div>
           <div class="field">
             <label>卡背徽章文字</label>
-            <input id="backBadgeText" class="input" value="Collector Edition" />
-          </div>
-        </section>
-
-        <section class="tab-content" id="tab-upload">
-          <div class="field">
-            <label>上傳插畫</label>
-            <input id="artUpload" type="file" class="input" accept="image/*" />
-            <small id="uploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳插畫</small>
+            <input id="backBadgeText" class="input" value="收藏家版" />
           </div>
           <div class="field">
-            <label>能量符號</label>
-            <div class="chip-row" id="energyWrap"></div>
-          </div>
-          <div class="field">
-            <label>上傳卡背背景（可選）</label>
+            <label>卡背背景圖（選填）</label>
             <input id="backUpload" type="file" class="input" accept="image/*" />
-            <small id="backUploadName" style="display:block;margin-top:6px;color:#94a3b8;">未設定卡背背景</small>
+            <small id="backUploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳卡背背景</small>
           </div>
-          <button class="btn" id="btnReset" style="width:100%;">一鍵重置</button>
+          <button class="btn" id="btnReset" style="width:100%;">一鍵重置全部</button>
         </section>
       </aside>
 
       <section class="preview-wrap">
-        <div class="scene" id="scene">
-          <div class="card" id="card3d">
-            <div class="face front-shell" id="frontShell">
-              <div class="front-inner" id="frontInner">
-                <div class="card-art" id="cardArt"></div>
-                <div class="holo" id="holo"></div>
-                <div class="header" id="cardHeader">
-                  <div class="name" id="vName">Celestial Emberfox</div>
-                  <div class="hp"><small>HP</small><span id="vHp">320</span></div>
+        <div class="preview-row">
+          <div class="preview-stage">
+            <div class="scene" id="scene">
+              <div class="card" id="card3d">
+                <div class="face front-shell" id="frontShell">
+                  <div class="front-inner" id="frontInner">
+                    <div class="card-art" id="cardArt"></div>
+                    <div class="holo" id="holo"></div>
+                    <div class="header" id="cardHeader">
+                      <div class="name" id="vName">星焰靈狐</div>
+                      <div class="hp"><small>戰力</small><span id="vHp">320</span></div>
+                    </div>
+                    <div class="infobox">
+                      <div class="ability" id="vAbility">星光爆裂</div>
+                      <div class="desc" id="vDesc">引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。</div>
+                      <div class="energy" id="vEnergy"></div>
+                    </div>
+                    <div class="footer">
+                      <div id="vRarity">★ ★ ★</div>
+                      <div id="vIllustrator">繪師　張老師</div>
+                      <div id="vSet">桃-001／異畫</div>
+                    </div>
+                    <div class="edition" id="edition">首版</div>
+                  </div>
+                  <div class="frame-texture brushed" id="frameTexture"></div>
                 </div>
-                <div class="infobox">
-                  <div class="ability" id="vAbility">Astral Burst</div>
-                  <div class="desc" id="vDesc">Channel prismatic flames. Draw 2 cards and strike 1 target.</div>
-                  <div class="energy" id="vEnergy"></div>
+                <div class="face back">
+                  <div class="back-bg" id="backBg"></div>
+                  <div class="ring r1"></div>
+                  <div class="ring r2" id="backRing"></div>
+                  <div class="core" id="backCore"></div>
+                  <div class="back-title" id="vBackTitle">傳奇</div>
+                  <div class="back-subtitle" id="vBackSubtitle">經典軌道</div>
+                  <div class="back-badge" id="vBackBadge">收藏家版</div>
                 </div>
-                <div class="footer">
-                  <div id="vRarity">★ ★ ★</div>
-                  <div id="vIllustrator">Illus. Shirly Zhang</div>
-                  <div id="vSet">PB-001 / ALT</div>
-                </div>
-                <div class="edition" id="edition">1st Edition</div>
               </div>
-              <div class="frame-texture brushed" id="frameTexture"></div>
-            </div>
-            <div class="face back">
-              <div class="back-bg" id="backBg"></div>
-              <div class="ring r1"></div>
-              <div class="ring r2" id="backRing"></div>
-              <div class="core" id="backCore"></div>
-              <div class="back-title" id="vBackTitle">Legendary</div>
-              <div class="back-subtitle" id="vBackSubtitle">Classic Orbit</div>
-              <div class="back-badge" id="vBackBadge">Collector Edition</div>
+              <div class="reflection"></div>
             </div>
           </div>
-          <div class="reflection"></div>
+          <aside class="c-art-panel">
+            <h3>卡牌C位插畫</h3>
+            <p class="hint">上傳正面主視覺插畫；下方圖庫可點選切換為目前卡面插畫。</p>
+            <input id="artUpload" type="file" class="input" accept="image/*" />
+            <small id="uploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳插畫</small>
+            <div class="art-gallery" id="artGallery"></div>
+          </aside>
         </div>
-        <div class="status" id="status">已修復入口：現在點擊主頁卡片會直接進入本程序。</div>
+        <div class="status" id="status">就緒。請從左側編輯正面／背面，或在此上傳 C 位插畫。</div>
       </section>
     </div>
   </div>
@@ -449,14 +507,18 @@
       artUrl: null,
       backArtUrl: null,
       frameTexture: "brushed",
+      artGallery: [],
+      activeArtId: null,
     };
+
+    const DEFAULT_CARD_ART_BG =
+      "linear-gradient(130deg, rgba(255,203,5,.22), rgba(59,130,246,.4), rgba(168,85,247,.46))";
 
     const refs = {
       tabs: document.querySelectorAll(".tab"),
       contents: {
-        basic: document.getElementById("tab-basic"),
-        visual: document.getElementById("tab-visual"),
-        upload: document.getElementById("tab-upload"),
+        front: document.getElementById("tab-front"),
+        back: document.getElementById("tab-back"),
       },
       name: document.getElementById("name"),
       hp: document.getElementById("hp"),
@@ -504,6 +566,7 @@
       backRing: document.getElementById("backRing"),
       backCore: document.getElementById("backCore"),
       backBg: document.getElementById("backBg"),
+      artGallery: document.getElementById("artGallery"),
     };
 
     const ENERGY_META = {
@@ -546,13 +609,35 @@
       });
     }
 
+    function renderArtGallery() {
+      if (!refs.artGallery) return;
+      refs.artGallery.innerHTML = "";
+      state.artGallery.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "art-thumb" + (item.id === state.activeArtId ? " active" : "");
+        btn.style.backgroundImage = `url("${item.url}")`;
+        btn.title = "設為卡面插畫";
+        btn.onclick = () => selectArtFromGallery(item);
+        refs.artGallery.appendChild(btn);
+      });
+    }
+
+    function selectArtFromGallery(item) {
+      state.activeArtId = item.id;
+      state.artUrl = item.url;
+      refs.cardArt.style.background = `url("${item.url}") center / cover`;
+      renderArtGallery();
+      setStatus("已切換為圖庫中的插畫。");
+    }
+
     function renderCard() {
-      refs.vName.textContent = refs.name.value || "Unnamed";
+      refs.vName.textContent = refs.name.value || "未命名";
       refs.vHp.textContent = refs.hp.value || "0";
-      refs.vAbility.textContent = refs.ability.value || "Ability";
+      refs.vAbility.textContent = refs.ability.value || "能力";
       refs.vDesc.textContent = refs.desc.value || "";
-      refs.vIllustrator.textContent = "Illus. " + (refs.illustrator.value || "-");
-      refs.vSet.textContent = refs.setNumber.value || "-";
+      refs.vIllustrator.textContent = "繪師　" + (refs.illustrator.value || "—");
+      refs.vSet.textContent = refs.setNumber.value || "—";
       refs.vRarity.textContent = Array.from({ length: state.rarity }).map(() => "★").join(" ");
       renderCardEnergy();
 
@@ -573,11 +658,13 @@
         refs.frontShell.style.boxShadow = `0 35px 110px -50px ${tint}bb`;
       }
 
-      refs.frameTexture.className = "frame-texture " + (state.frameTexture || "brushed");
+      refs.frameTexture.className = state.frameTexture
+        ? "frame-texture " + state.frameTexture
+        : "frame-texture none";
 
-      refs.vBackTitle.textContent = refs.backTitle.value || "Legendary";
-      refs.vBackSubtitle.textContent = refs.backSubtitle.value || "Classic Orbit";
-      refs.vBackBadge.textContent = refs.backBadgeText.value || "Collector Edition";
+      refs.vBackTitle.textContent = refs.backTitle.value || "傳奇";
+      refs.vBackSubtitle.textContent = refs.backSubtitle.value || "經典軌道";
+      refs.vBackBadge.textContent = refs.backBadgeText.value || "收藏家版";
       refs.backRing.style.borderColor = refs.backRingColor.value;
       refs.backCore.style.background = `radial-gradient(circle, ${refs.backCoreColor.value} 0%, ${refs.backCoreColor.value}cc 38%, rgba(255,255,255,.2) 39%, rgba(255,255,255,.05) 60%, transparent 61%)`;
     }
@@ -613,9 +700,9 @@
         const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
         refs.cardHeader.style.background = `rgb(${r},${g},${b})`;
         refs.cardHeader.style.color = lum > 0.62 ? "#0f172a" : "#f8fafc";
-        setStatus("已根據上傳圖片主色調自動更新標題欄。");
+        setStatus("已依插畫主色調自動調整標題欄顏色。");
       } catch (_) {
-        setStatus("圖片已載入，但智能配色失敗。");
+        setStatus("圖片已載入，智能配色未成功。");
       } finally {
         URL.revokeObjectURL(url);
       }
@@ -679,10 +766,14 @@
     refs.artUpload.onchange = async (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      if (state.artUrl) URL.revokeObjectURL(state.artUrl);
-      state.artUrl = URL.createObjectURL(file);
+      const url = URL.createObjectURL(file);
+      const id = "art-" + Date.now();
+      state.artGallery.push({ id: id, url: url });
+      state.activeArtId = id;
+      state.artUrl = url;
       refs.uploadName.textContent = file.name;
-      refs.cardArt.style.background = `url("${state.artUrl}") center / cover`;
+      refs.cardArt.style.background = `url("${url}") center / cover`;
+      renderArtGallery();
       await applySmartHeaderColor(file);
     };
 
@@ -693,16 +784,16 @@
       state.backArtUrl = URL.createObjectURL(file);
       refs.backUploadName.textContent = file.name;
       refs.backBg.style.backgroundImage = `url("${state.backArtUrl}")`;
-      setStatus("已更新卡背背景圖。");
+      setStatus("已更新卡背背景。");
     };
 
     refs.btnReset.onclick = () => {
-      refs.name.value = "Celestial Emberfox";
+      refs.name.value = "星焰靈狐";
       refs.hp.value = "320";
-      refs.ability.value = "Astral Burst";
-      refs.desc.value = "Channel prismatic flames. Draw 2 cards and strike 1 target.";
-      refs.illustrator.value = "Shirly Zhang";
-      refs.setNumber.value = "PB-001 / ALT";
+      refs.ability.value = "星光爆裂";
+      refs.desc.value = "引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。";
+      refs.illustrator.value = "張老師";
+      refs.setNumber.value = "桃-001／異畫";
       state.frameTexture = "brushed";
       refs.textureBtns.forEach((b) => b.classList.toggle("active", b.dataset.texture === "brushed"));
       refs.borderTint.value = "#ffcb05";
@@ -714,18 +805,26 @@
       refs.btnModern.classList.remove("active");
       refs.cardHeader.style.background = "rgb(51,65,85)";
       refs.cardHeader.style.color = "#f8fafc";
-      refs.backTitle.value = "Legendary";
-      refs.backSubtitle.value = "Classic Orbit";
-      refs.backBadgeText.value = "Collector Edition";
+      refs.backTitle.value = "傳奇";
+      refs.backSubtitle.value = "經典軌道";
+      refs.backBadgeText.value = "收藏家版";
       refs.backRingColor.value = "#bae6fd";
       refs.backCoreColor.value = "#ffcb05";
       if (state.backArtUrl) URL.revokeObjectURL(state.backArtUrl);
       state.backArtUrl = null;
       refs.backBg.style.backgroundImage = "none";
-      refs.backUploadName.textContent = "未設定卡背背景";
+      refs.backUploadName.textContent = "尚未上傳卡背背景";
+      state.artGallery.forEach((item) => URL.revokeObjectURL(item.url));
+      state.artGallery = [];
+      state.activeArtId = null;
+      state.artUrl = null;
+      refs.cardArt.style.background = DEFAULT_CARD_ART_BG;
+      refs.uploadName.textContent = "尚未上傳插畫";
+      if (refs.artUpload) refs.artUpload.value = "";
+      renderArtGallery();
       renderEnergyButtons();
       renderCard();
-      setStatus("已重置為預設收藏版樣式。");
+      setStatus("已重置為預設範例與樣式。");
     };
 
     refs.btnExport.onclick = async () => {
@@ -773,6 +872,7 @@
     };
 
     renderEnergyButtons();
+    renderArtGallery();
     renderCard();
   </script>
 </body>
