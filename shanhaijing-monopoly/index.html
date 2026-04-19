@@ -38,8 +38,47 @@
             line-height: 1.6;
         }
 
+        /* ===== 頁面骨架：左側欄 + 主內容 ===== */
+        .page {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .page-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 左側欄：寬度不超過約「回桃花源」一類標題按鈕的一半（參考 ~10rem） */
+        .left-rail {
+            --title-btn-ref: 10rem;
+            flex: 0 0 auto;
+            width: min(4rem, calc(var(--title-btn-ref) * 0.5));
+            max-width: 50%;
+            min-height: min(72vh, 560px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 8px;
+            padding: 8px 6px;
+            position: sticky;
+            top: 16px;
+            align-self: flex-start;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(63, 29, 56, 0.1);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
         /* ===== Top Bar ===== */
-        .page { max-width: 1440px; margin: 0 auto; padding: 24px 20px 40px; }
 
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
@@ -77,14 +116,36 @@
         .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
         .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
-        /* ===== 標籤列（基本規則 + 機會 / 命運 兩欄）===== */
-        .rules-tag-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 10px;
-            margin-bottom: 16px;
+        /* ===== 左側欄標籤按鈕（直排、窄條；長寬不超過參考標題鈕的一半量級）===== */
+        .left-rail .rules-tag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            min-height: 3rem;
+            max-height: min(30vh, calc(var(--title-btn-ref) * 0.85));
+            padding: 10px 5px;
+            font-size: 0.7rem;
+            line-height: 1.35;
+            letter-spacing: 0.06em;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            background: rgba(255, 255, 255, 0.82);
+            font-family: inherit;
+            color: var(--ink);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(63, 29, 56, 0.08);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
         }
-        .rules-tag-grid .rules-tag-full { grid-column: 1 / -1; }
+        .left-rail .rules-tag:hover {
+            border-color: rgba(131, 56, 236, 0.45);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 14px rgba(131, 56, 236, 0.18);
+        }
+        .left-rail .rules-tag:active { transform: scale(0.98); }
 
         .rules-tag {
             display: inline-flex; align-items: center; gap: 5px;
@@ -104,19 +165,23 @@
         }
         .rules-tag:active { transform: scale(0.98); }
 
-        .rules-tag.tag-chance {
+        .rules-tag.tag-chance,
+        .left-rail .rules-tag.tag-chance {
             border-color: rgba(212, 160, 9, 0.4);
             background: rgba(255, 190, 11, 0.14);
         }
-        .rules-tag.tag-chance:hover {
+        .rules-tag.tag-chance:hover,
+        .left-rail .rules-tag.tag-chance:hover {
             border-color: rgba(212, 160, 9, 0.65);
             background: rgba(255, 190, 11, 0.22);
         }
-        .rules-tag.tag-fate {
+        .rules-tag.tag-fate,
+        .left-rail .rules-tag.tag-fate {
             border-color: rgba(58, 134, 255, 0.4);
             background: rgba(58, 134, 255, 0.1);
         }
-        .rules-tag.tag-fate:hover {
+        .rules-tag.tag-fate:hover,
+        .left-rail .rules-tag.tag-fate:hover {
             border-color: rgba(58, 134, 255, 0.6);
             background: rgba(58, 134, 255, 0.16);
         }
@@ -289,6 +354,29 @@
         }
         .tile input + input { margin-top: 4px; }
 
+        .tile-pawns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 4px;
+            min-height: 14px;
+            align-content: flex-start;
+        }
+        .tile-pawn-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            font-size: 8px;
+            font-weight: 800;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+        }
+
         .tile-start   { background: linear-gradient(145deg, #cdb4db, #ffc8dd); }
         .tile-land    { background: linear-gradient(145deg, #bde0fe, #a2d2ff); }
         .tile-event   { background: linear-gradient(145deg, #ffafcc, #ffc8dd); }
@@ -307,14 +395,190 @@
                 rgba(58, 134, 255, 0.08));
             border: 2px dashed rgba(63, 29, 56, 0.18);
             display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            text-align: center; padding: 22px 16px;
+            justify-content: flex-start;
+            align-items: stretch;
+            text-align: center;
+            padding: 10px 12px 12px;
+            gap: 8px;
+            overflow: hidden;
+            min-height: 0;
         }
-        .center-panel h3 { font-size: 1.25rem; margin-bottom: 6px; }
-        .center-panel .center-desc { line-height: 1.7; max-width: 380px; color: var(--ink-light); font-size: 0.9rem; }
+        .center-panel h3 { font-size: 1.05rem; margin-bottom: 2px; flex-shrink: 0; }
+        .center-game-meta {
+            font-size: 0.75rem;
+            color: var(--ink-light);
+            margin-bottom: 4px;
+        }
+        .center-settings {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+            flex-shrink: 0;
+        }
+        .center-settings label { display: flex; align-items: center; gap: 6px; }
+        .center-settings select {
+            font-family: inherit;
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .center-players-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 14px;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 6px 4px;
+            flex-shrink: 0;
+        }
+        .center-piece-wrap {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .center-piece-wrap.center-piece-wrap--active .center-piece-token {
+            box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .center-piece-bubble {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            z-index: 3;
+            pointer-events: auto;
+        }
+        .money-input {
+            width: 46px;
+            font-size: 9px;
+            line-height: 1.2;
+            padding: 2px 3px;
+            border-radius: 5px;
+            border: 1px solid rgba(63, 29, 56, 0.28);
+            background: rgba(255, 255, 255, 0.98);
+            color: var(--ink);
+            text-align: center;
+            font-family: inherit;
+            box-shadow: 0 1px 4px rgba(63, 29, 56, 0.12);
+        }
+        .money-input:focus {
+            outline: none;
+            border-color: #8338ec;
+        }
+        .center-piece-token {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            flex-shrink: 0;
+        }
+        .center-piece-label {
+            font-size: 0.65rem;
+            color: var(--ink-light);
+            white-space: nowrap;
+        }
+
+        .dice-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 4px 0;
+            flex-shrink: 0;
+        }
+        .btn-roll {
+            border: 0;
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #8338ec, #ff006e);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(131, 56, 236, 0.35);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .btn-roll:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(131, 56, 236, 0.45);
+        }
+        .btn-roll:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .dice {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #fff 0%, #f0e6ee 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--ink);
+            border: 2px solid rgba(63, 29, 56, 0.15);
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.06), 0 4px 10px rgba(63, 29, 56, 0.12);
+            flex-shrink: 0;
+        }
+        .dice.dice--rolling {
+            animation: dice-wobble 0.11s linear infinite;
+        }
+        @keyframes dice-wobble {
+            0%, 100% { transform: rotate(-8deg) scale(1.02); }
+            50% { transform: rotate(8deg) scale(1.05); }
+        }
+
+        .turn-log-wrap {
+            text-align: left;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .turn-log-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--ink-light);
+            margin-bottom: 4px;
+        }
+        .turn-log {
+            flex: 1;
+            min-height: 72px;
+            max-height: 110px;
+            overflow-y: auto;
+            font-size: 0.68rem;
+            line-height: 1.45;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(63, 29, 56, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .turn-log div {
+            padding: 2px 0;
+            border-bottom: 1px dashed rgba(63, 29, 56, 0.08);
+        }
+        .turn-log div:last-child { border-bottom: 0; }
 
         .draw-actions {
-            display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; justify-content: center;
+            display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; justify-content: center;
         }
         .draw-actions button {
             border: 0; border-radius: 999px; padding: 10px 20px;
@@ -423,6 +687,32 @@
         @media (max-width: 768px) {
             .title-wrap h1 { font-size: 1.6rem; }
             .top-bar { flex-direction: column; align-items: flex-start; }
+
+            .page {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .left-rail {
+                position: relative;
+                top: auto;
+                width: 100%;
+                max-width: none;
+                min-height: auto;
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+                padding: 10px 8px;
+                gap: 8px;
+            }
+            .left-rail .rules-tag {
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
+                width: auto;
+                max-height: none;
+                min-height: auto;
+                padding: 6px 12px;
+                font-size: 0.74rem;
+            }
         }
         @media (max-width: 480px) {
             .page { padding: 16px 12px 32px; }
@@ -432,56 +722,85 @@
 </head>
 <body>
     <div class="page">
-        <div class="top-bar">
-            <div class="title-wrap">
-                <h1>🐉 山海經大富翁</h1>
-            </div>
-            <a class="back-link" href="../index.html">← 回桃花源</a>
-        </div>
-
-        <div class="toolbar">
-            <button id="btn-export">📤 匯出設定 (JSON)</button>
-            <button id="btn-import">📥 匯入設定</button>
-            <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
-            <input type="file" id="file-import" accept=".json" hidden>
-        </div>
-
-        <div class="rules-tag-grid">
-            <button type="button" class="rules-tag rules-tag-full" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel">
+        <aside class="left-rail" aria-label="規則與卡片捷徑">
+            <button type="button" class="rules-tag rail-slot-top" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
                 📜 基本規則
             </button>
-            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel">
+            <button type="button" class="rules-tag tag-chance rail-slot-mid" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡">
                 🟡 機會卡 (<span id="chance-count">0</span>)
             </button>
-            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel">
+            <button type="button" class="rules-tag tag-fate rail-slot-bottom" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡">
                 🔵 命運卡 (<span id="fate-count">0</span>)
             </button>
-        </div>
+        </aside>
 
-        <div class="legend" id="legend"></div>
-
-        <div class="layout">
-            <section class="board-section">
-                <div class="section-header">
-                    <h2 class="section-title">🗺️ 大富翁棋盤</h2>
+        <div class="page-main">
+            <div class="top-bar">
+                <div class="title-wrap">
+                    <h1>🐉 山海經大富翁</h1>
                 </div>
-                <div class="board-scroll">
-                    <div class="board-grid" id="board-grid">
-                        <div class="center-panel">
-                            <h3>《山海經》異獸巡遊</h3>
-                            <p class="center-desc">中央區域可後續加入：玩家棋子、資金欄、擲骰動畫、回合紀錄與勝利條件。</p>
-                            <div class="draw-actions">
-                                <button class="draw-chance" id="draw-chance">🎲 抽機會卡</button>
-                                <button class="draw-fate" id="draw-fate">🎲 抽命運卡</button>
-                            </div>
-                            <div class="draw-result-area">
-                                <div class="draw-result" id="draw-result">點擊上方按鈕抽卡 ↑</div>
+                <a class="back-link" href="../index.html">← 回桃花源</a>
+            </div>
+
+            <div class="toolbar">
+                <button id="btn-export">📤 匯出設定 (JSON)</button>
+                <button id="btn-import">📥 匯入設定</button>
+                <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
+                <input type="file" id="file-import" accept=".json" hidden>
+            </div>
+
+            <div class="legend" id="legend"></div>
+
+            <div class="layout">
+                <section class="board-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🗺️ 大富翁棋盤</h2>
+                    </div>
+                    <div class="board-scroll">
+                        <div class="board-grid" id="board-grid">
+                            <div class="center-panel">
+                                <h3>《山海經》異獸巡遊</h3>
+                                <p class="center-game-meta" id="center-position-hint">棋子與資金如下；棋盤外圈小圓點同步顯示位置。</p>
+
+                                <div class="center-settings">
+                                    <label>
+                                        遊玩人數
+                                        <select id="player-count" aria-label="遊玩人數">
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4" selected>4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="center-players-row" id="center-players-host" aria-live="polite"></div>
+
+                                <div class="dice-row">
+                                    <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
+                                    <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                </div>
+                                <p class="center-game-meta" id="turn-indicator" style="margin:0;">輪到：玩家 1</p>
+
+                                <div class="turn-log-wrap">
+                                    <div class="turn-log-title">回合紀錄</div>
+                                    <div class="turn-log" id="turn-log" aria-label="回合紀錄"></div>
+                                </div>
+
+                                <div class="draw-actions">
+                                    <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
+                                    <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
+                                </div>
+                                <div class="draw-result-area">
+                                    <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
+            </div>
         </div>
     </div>
 
@@ -612,6 +931,31 @@
             [6,1],[5,1],[4,1],[3,1],[2,1]
         ];
 
+        const NUM_TILES = POS.length;
+        const DEFAULT_START_MONEY = 1500;
+        const PASS_GO_BONUS = 200;
+        const PLAYER_COLORS = ["#e63946", "#457b9d", "#2a9d8f", "#e9c46a", "#9b5de5", "#f57dbc"];
+
+        function buildDefaultPlayers(count) {
+            const players = [];
+            for (let i = 0; i < count; i++) {
+                players.push({ id: i, money: DEFAULT_START_MONEY, position: 0 });
+            }
+            return players;
+        }
+
+        function defaultGame() {
+            const c = 4;
+            return {
+                playerCount: c,
+                players: buildDefaultPlayers(c),
+                currentPlayerIndex: 0,
+                turnLog: [
+                    "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " + DEFAULT_START_MONEY + " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " + PASS_GO_BONUS + " 金幣。"
+                ]
+            };
+        }
+
         const DEFAULT_RULES_TEXT =
             "玩家輪流擲骰前進，經過起點可領取獎勵金幣。\n" +
             "停在地塊可依你自訂文本執行效果（買地、收租、事件等）。\n" +
@@ -626,7 +970,8 @@
                 tiles: DEFAULT_TILES.map(t => ({ ...t })),
                 chance: DEFAULT_CHANCE.map(c => ({ ...c })),
                 fate: DEFAULT_FATE.map(f => ({ ...f })),
-                rulesText: DEFAULT_RULES_TEXT
+                rulesText: DEFAULT_RULES_TEXT,
+                game: defaultGame()
             };
         }
 
@@ -634,6 +979,31 @@
             if (!raw || typeof raw !== "object") return defaultState();
             if (!raw.rulesText || typeof raw.rulesText !== "string") {
                 raw.rulesText = DEFAULT_RULES_TEXT;
+            }
+            if (!raw.game || typeof raw.game !== "object") {
+                raw.game = defaultGame();
+            } else {
+                const g = raw.game;
+                let n = parseInt(g.playerCount, 10);
+                if (isNaN(n) || n < 2 || n > 6) n = 4;
+                g.playerCount = n;
+                if (!Array.isArray(g.players) || g.players.length !== n) {
+                    g.players = buildDefaultPlayers(n);
+                } else {
+                    g.players = g.players.map(function (p, i) {
+                        return {
+                            id: i,
+                            money: typeof p.money === "number" && p.money >= 0 ? Math.floor(p.money) : DEFAULT_START_MONEY,
+                            position: typeof p.position === "number" ? ((p.position % NUM_TILES) + NUM_TILES) % NUM_TILES : 0
+                        };
+                    });
+                }
+                let cpi = parseInt(g.currentPlayerIndex, 10);
+                if (isNaN(cpi)) cpi = 0;
+                g.currentPlayerIndex = ((cpi % g.playerCount) + g.playerCount) % g.playerCount;
+                if (!Array.isArray(g.turnLog)) {
+                    g.turnLog = defaultGame().turnLog.slice();
+                }
             }
             return raw;
         }
@@ -798,9 +1168,71 @@
                         `<span class="tile-num">${i + 1}</span>` +
                     `</div>` +
                     `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label">` +
-                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect">`;
+                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect">` +
+                    `<div class="tile-pawns" data-tile-idx="${i}"></div>`;
                 boardGrid.appendChild(el);
             });
+            renderPawnsOnBoard();
+        }
+
+        function renderPawnsOnBoard() {
+            if (!state.game || !Array.isArray(state.game.players)) return;
+            const tileEls = boardGrid.querySelectorAll(".tile");
+            tileEls.forEach(function (t) {
+                const h = t.querySelector(".tile-pawns");
+                if (h) h.innerHTML = "";
+            });
+            state.game.players.forEach(function (p, idx) {
+                const ti = ((p.position % NUM_TILES) + NUM_TILES) % NUM_TILES;
+                const tileEl = tileEls[ti];
+                if (!tileEl) return;
+                const holder = tileEl.querySelector(".tile-pawns");
+                if (!holder) return;
+                const dot = document.createElement("span");
+                dot.className = "tile-pawn-dot";
+                dot.style.background = PLAYER_COLORS[idx % PLAYER_COLORS.length];
+                dot.textContent = String(idx + 1);
+                dot.title = "玩家 " + (idx + 1);
+                holder.appendChild(dot);
+            });
+        }
+
+        function pushTurnLog(line) {
+            state.game.turnLog.push(line);
+            if (state.game.turnLog.length > 100) {
+                state.game.turnLog = state.game.turnLog.slice(-100);
+            }
+        }
+
+        function renderCenterGameUI() {
+            const g = state.game;
+            const host = document.getElementById("center-players-host");
+            const sel = document.getElementById("player-count");
+            if (sel) sel.value = String(g.playerCount);
+
+            host.innerHTML = "";
+            g.players.forEach(function (p, i) {
+                const wrap = document.createElement("div");
+                wrap.className = "center-piece-wrap" + (i === g.currentPlayerIndex ? " center-piece-wrap--active" : "");
+                const col = PLAYER_COLORS[i % PLAYER_COLORS.length];
+                wrap.innerHTML =
+                    `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金" /></div>` +
+                    `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
+                    `<span class="center-piece-label">玩家 ${i + 1}</span>`;
+                host.appendChild(wrap);
+            });
+
+            document.getElementById("turn-indicator").textContent =
+                "輪到：玩家 " + (g.currentPlayerIndex + 1) + "（共 " + g.playerCount + " 人）";
+
+            const logEl = document.getElementById("turn-log");
+            logEl.innerHTML = "";
+            g.turnLog.slice(-30).forEach(function (line) {
+                const row = document.createElement("div");
+                row.textContent = line;
+                logEl.appendChild(row);
+            });
+            logEl.scrollTop = logEl.scrollHeight;
         }
 
         boardGrid.addEventListener("input", (e) => {
@@ -812,6 +1244,72 @@
                 e.target.closest(".tile").querySelector(".tile-label").textContent = e.target.value;
             }
             debouncedSave();
+        });
+
+        document.querySelector(".center-panel").addEventListener("change", function (e) {
+            const t = e.target;
+            if (!t.classList.contains("money-input")) return;
+            const idx = +t.dataset.playerIdx;
+            if (isNaN(idx) || !state.game.players[idx]) return;
+            let v = parseInt(t.value, 10);
+            if (isNaN(v) || v < 0) v = 0;
+            state.game.players[idx].money = v;
+            debouncedSave();
+        });
+
+        document.getElementById("player-count").addEventListener("change", function () {
+            const n = Math.max(2, Math.min(6, parseInt(this.value, 10)));
+            state.game.playerCount = n;
+            state.game.players = buildDefaultPlayers(n);
+            state.game.currentPlayerIndex = 0;
+            pushTurnLog("人數設為 " + n + " 人：棋子回到起點，資金重置為每位 " + DEFAULT_START_MONEY + "。");
+            saveState();
+            renderPawnsOnBoard();
+            renderCenterGameUI();
+            showToast("已更新遊玩人數");
+        });
+
+        document.getElementById("btn-roll").addEventListener("click", function () {
+            const g = state.game;
+            const diceEl = document.getElementById("dice-display");
+            const btn = this;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            diceEl.classList.add("dice--rolling");
+            const tick = setInterval(function () {
+                diceEl.textContent = String(1 + Math.floor(Math.random() * 6));
+            }, 75);
+            setTimeout(function () {
+                clearInterval(tick);
+                diceEl.classList.remove("dice--rolling");
+                const roll = 1 + Math.floor(Math.random() * 6);
+                diceEl.textContent = String(roll);
+
+                const pid = g.currentPlayerIndex;
+                const p = g.players[pid];
+                const oldPos = p.position;
+                const sum = oldPos + roll;
+                const crossedGo = sum >= NUM_TILES;
+                p.position = sum % NUM_TILES;
+                if (crossedGo) {
+                    p.money += PASS_GO_BONUS;
+                }
+
+                const tileName = (state.tiles[p.position] && state.tiles[p.position].label) ? state.tiles[p.position].label : "？";
+                const nextIdx = (g.currentPlayerIndex + 1) % g.playerCount;
+                let msg = "玩家 " + (pid + 1) + " 擲出 " + roll + " 點 →「" + tileName + "」（第 " + (p.position + 1) + " 格）";
+                if (crossedGo) {
+                    msg += "；經過起點 +" + PASS_GO_BONUS;
+                }
+                msg += "。下一位：玩家 " + (nextIdx + 1) + "。";
+                pushTurnLog(msg);
+
+                g.currentPlayerIndex = nextIdx;
+                saveState();
+                renderPawnsOnBoard();
+                renderCenterGameUI();
+                btn.disabled = false;
+            }, 720);
         });
 
         /* ---------- Cards ---------- */
@@ -930,6 +1428,7 @@
                         renderBoard();
                         renderCards();
                         syncRulesTextarea();
+                        renderCenterGameUI();
                         showToast("匯入成功 📥");
                     } else {
                         showToast("JSON 格式不正確 ⚠️");
@@ -949,6 +1448,7 @@
             renderBoard();
             renderCards();
             syncRulesTextarea();
+            renderCenterGameUI();
             showToast("已重設為預設內容 🔄");
         });
 
@@ -970,6 +1470,7 @@
         syncRulesTextarea();
         renderBoard();
         renderCards();
+        renderCenterGameUI();
     })();
     </script>
 </body>
