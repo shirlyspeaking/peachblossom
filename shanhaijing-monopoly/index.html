@@ -38,44 +38,42 @@
             line-height: 1.6;
         }
 
-        /* ===== 頁面骨架：左側欄 + 主內容 ===== */
+        /* ===== 頁面骨架：左側欄（固定於螢幕左缘）+ 主內容 ===== */
         .page {
             max-width: 1440px;
             margin: 0 auto;
             padding: 24px 20px 40px;
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 14px;
+            padding-left: calc(min(3.35rem, 11vw) + 14px);
+            box-sizing: border-box;
         }
 
         .page-main {
-            flex: 1;
             min-width: 0;
         }
 
-        /* 左側欄：寬度不超過約「回桃花源」一類標題按鈕的一半（參考 ~10rem） */
+        /* 左側欄：無外框；固定於視窗最左側，垂直置中分布 */
         .left-rail {
             --title-btn-ref: 10rem;
-            flex: 0 0 auto;
-            width: min(4rem, calc(var(--title-btn-ref) * 0.5));
-            max-width: 50%;
-            min-height: min(72vh, 560px);
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 55;
+            width: min(3.35rem, calc(var(--title-btn-ref) * 0.5));
+            max-width: min(50vw, 5rem);
+            min-height: min(68vh, 520px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: stretch;
-            gap: 8px;
-            padding: 8px 6px;
-            position: sticky;
-            top: 16px;
-            align-self: flex-start;
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(63, 29, 56, 0.1);
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            gap: 4px;
+            padding: 4px 2px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            pointer-events: auto;
         }
 
         /* ===== Top Bar ===== */
@@ -123,9 +121,9 @@
             justify-content: center;
             width: 100%;
             max-width: 100%;
-            min-height: 3rem;
+            min-height: 2.75rem;
             max-height: min(30vh, calc(var(--title-btn-ref) * 0.85));
-            padding: 10px 5px;
+            padding: 8px 4px;
             font-size: 0.7rem;
             line-height: 1.35;
             letter-spacing: 0.06em;
@@ -403,7 +401,6 @@
             overflow: hidden;
             min-height: 0;
         }
-        .center-panel h3 { font-size: 1.05rem; margin-bottom: 2px; flex-shrink: 0; }
         .center-game-meta {
             font-size: 0.75rem;
             color: var(--ink-light);
@@ -438,40 +435,68 @@
             flex-shrink: 0;
         }
         .center-piece-wrap {
-            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
+        }
+        /* 僅包住圓形棋子，資金框以此為基準貼在外側右上角 */
+        .center-piece-figure {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
         }
         .center-piece-wrap.center-piece-wrap--active .center-piece-token {
             box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         .center-piece-bubble {
             position: absolute;
-            top: -8px;
-            right: -10px;
             z-index: 3;
             pointer-events: auto;
+            /* 圓形棋子外側右上角，不覆蓋圓形 */
+            top: -14px;
+            right: -16px;
+            left: auto;
+            bottom: auto;
+            width: max-content;
+            filter: drop-shadow(0 1px 2px rgba(63, 29, 56, 0.2));
+        }
+        /* 對話框小尾巴，指向棋子 */
+        .center-piece-bubble::after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            bottom: -4px;
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-top: 5px solid rgba(255, 255, 255, 0.97);
         }
         .money-input {
-            width: 46px;
-            font-size: 9px;
-            line-height: 1.2;
-            padding: 2px 3px;
-            border-radius: 5px;
-            border: 1px solid rgba(63, 29, 56, 0.28);
-            background: rgba(255, 255, 255, 0.98);
+            display: block;
+            width: 38px;
+            max-width: 38px;
+            font-size: 7px;
+            line-height: 1.15;
+            padding: 2px 2px;
+            border-radius: 6px;
+            border: 1px solid rgba(63, 29, 56, 0.22);
+            background: rgba(255, 255, 255, 0.97);
             color: var(--ink);
             text-align: center;
             font-family: inherit;
-            box-shadow: 0 1px 4px rgba(63, 29, 56, 0.12);
+            box-sizing: border-box;
         }
         .money-input:focus {
             outline: none;
             border-color: #8338ec;
         }
         .center-piece-token {
+            position: absolute;
+            left: 0;
+            top: 0;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -483,7 +508,6 @@
             color: #fff;
             border: 2px solid rgba(255, 255, 255, 0.95);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-            flex-shrink: 0;
         }
         .center-piece-label {
             font-size: 0.65rem;
@@ -521,27 +545,72 @@
             opacity: 0.55;
             cursor: not-allowed;
         }
+        /* 透視外殼：讓骰子呈現立體塊狀 */
+        .dice-shell {
+            perspective: 160px;
+            perspective-origin: 50% 35%;
+            flex-shrink: 0;
+            padding: 6px 8px 10px;
+        }
+
         .dice {
-            width: 46px;
-            height: 46px;
-            border-radius: 10px;
-            background: linear-gradient(180deg, #fff 0%, #f0e6ee 100%);
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            transform: rotateX(24deg) rotateY(-32deg);
+            transform-style: preserve-3d;
+            background:
+                linear-gradient(152deg,
+                    rgba(255, 252, 254, 1) 0%,
+                    rgba(236, 224, 232, 0.98) 42%,
+                    rgba(188, 168, 182, 1) 100%);
+            border: 1px solid rgba(75, 42, 58, 0.38);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.45rem;
+            font-size: 1.42rem;
             font-weight: 800;
-            color: var(--ink);
-            border: 2px solid rgba(63, 29, 56, 0.15);
-            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.06), 0 4px 10px rgba(63, 29, 56, 0.12);
+            color: #4a2840;
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65),
+                0 -1px 1px rgba(60, 30, 45, 0.12);
+            box-shadow:
+                inset 5px 5px 14px rgba(255, 255, 255, 0.82),
+                inset -5px -8px 14px rgba(48, 28, 40, 0.28),
+                inset 0 -2px 4px rgba(90, 50, 65, 0.12),
+                0 9px 0 -1px rgba(72, 44, 56, 0.55),
+                0 16px 22px -8px rgba(35, 20, 30, 0.5),
+                0 3px 6px rgba(255, 255, 255, 0.35) inset;
             flex-shrink: 0;
+            isolation: isolate;
         }
+
+        /* 頂緣高光（不遮住中央點數） */
+        .dice::before {
+            content: "";
+            position: absolute;
+            left: 7px;
+            right: 7px;
+            top: 5px;
+            height: 38%;
+            border-radius: 10px 10px 40% 40%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .dice.dice--rolling {
             animation: dice-wobble 0.11s linear infinite;
         }
+
         @keyframes dice-wobble {
-            0%, 100% { transform: rotate(-8deg) scale(1.02); }
-            50% { transform: rotate(8deg) scale(1.05); }
+            0%, 100% {
+                transform: rotateX(24deg) rotateY(-32deg) rotateZ(-12deg) translateY(0);
+            }
+            50% {
+                transform: rotateX(24deg) rotateY(-32deg) rotateZ(12deg) translateY(-3px);
+            }
         }
 
         .turn-log-wrap {
@@ -689,20 +758,24 @@
             .top-bar { flex-direction: column; align-items: flex-start; }
 
             .page {
-                flex-direction: column;
-                align-items: stretch;
+                padding-left: 16px;
+                padding-right: 16px;
             }
             .left-rail {
                 position: relative;
+                left: auto;
                 top: auto;
+                transform: none;
+                z-index: auto;
                 width: 100%;
                 max-width: none;
                 min-height: auto;
                 flex-direction: row;
                 justify-content: center;
                 flex-wrap: wrap;
-                padding: 10px 8px;
-                gap: 8px;
+                padding: 8px 6px;
+                gap: 6px;
+                margin: 0 -4px 12px -4px;
             }
             .left-rail .rules-tag {
                 writing-mode: horizontal-tb;
@@ -721,19 +794,19 @@
     </style>
 </head>
 <body>
-    <div class="page">
-        <aside class="left-rail" aria-label="規則與卡片捷徑">
-            <button type="button" class="rules-tag rail-slot-top" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
-                📜 基本規則
-            </button>
-            <button type="button" class="rules-tag tag-chance rail-slot-mid" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡">
-                🟡 機會卡 (<span id="chance-count">0</span>)
-            </button>
-            <button type="button" class="rules-tag tag-fate rail-slot-bottom" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡">
-                🔵 命運卡 (<span id="fate-count">0</span>)
-            </button>
-        </aside>
+    <aside class="left-rail" aria-label="規則與卡片捷徑">
+        <button type="button" class="rules-tag rail-slot-top" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
+            📜 基本規則
+        </button>
+        <button type="button" class="rules-tag tag-chance rail-slot-mid" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡">
+            🟡 機會卡 (<span id="chance-count">0</span>)
+        </button>
+        <button type="button" class="rules-tag tag-fate rail-slot-bottom" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡">
+            🔵 命運卡 (<span id="fate-count">0</span>)
+        </button>
+    </aside>
 
+    <div class="page">
         <div class="page-main">
             <div class="top-bar">
                 <div class="title-wrap">
@@ -754,14 +827,11 @@
             <div class="layout">
                 <section class="board-section">
                     <div class="section-header">
-                        <h2 class="section-title">🗺️ 大富翁棋盤</h2>
+                        <h2 class="section-title">🗺️ 大富翁——山海經巡遊</h2>
                     </div>
                     <div class="board-scroll">
                         <div class="board-grid" id="board-grid">
                             <div class="center-panel">
-                                <h3>《山海經》異獸巡遊</h3>
-                                <p class="center-game-meta" id="center-position-hint">棋子與資金如下；棋盤外圈小圓點同步顯示位置。</p>
-
                                 <div class="center-settings">
                                     <label>
                                         遊玩人數
@@ -779,7 +849,9 @@
 
                                 <div class="dice-row">
                                     <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
-                                    <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                    <div class="dice-shell">
+                                        <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                    </div>
                                 </div>
                                 <p class="center-game-meta" id="turn-indicator" style="margin:0;">輪到：玩家 1</p>
 
@@ -1216,8 +1288,10 @@
                 wrap.className = "center-piece-wrap" + (i === g.currentPlayerIndex ? " center-piece-wrap--active" : "");
                 const col = PLAYER_COLORS[i % PLAYER_COLORS.length];
                 wrap.innerHTML =
-                    `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金" /></div>` +
-                    `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
+                    `<div class="center-piece-figure">` +
+                        `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
+                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金" /></div>` +
+                    `</div>` +
                     `<span class="center-piece-label">玩家 ${i + 1}</span>`;
                 host.appendChild(wrap);
             });
