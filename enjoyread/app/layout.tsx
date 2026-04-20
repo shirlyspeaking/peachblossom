@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const notoSans = Noto_Sans_TC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const notoSerif = Noto_Serif_TC({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
 
 export const metadata: Metadata = {
   title: "悅讀 EnjoyRead - 中學生閱讀平台",
@@ -17,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${notoSans.variable} ${notoSerif.variable} font-sans`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

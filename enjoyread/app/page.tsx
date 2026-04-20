@@ -58,7 +58,7 @@ export default function HomePage() {
   const displayedArticles = articles.length > 0 ? articles : MOCK_ARTICLES;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -68,7 +68,7 @@ export default function HomePage() {
       <main className="container px-4 py-8 md:px-6">
         {/* Hero Section */}
         <section className="mb-12 text-center">
-          <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+          <h1 className="font-display text-4xl font-normal tracking-[0.08em] text-primary-800 dark:text-primary-300 md:text-5xl lg:text-6xl">
             探索知識，輕鬆閱讀
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
@@ -80,7 +80,7 @@ export default function HomePage() {
               <input
                 type="text"
                 placeholder="試試：黑洞、AI、鄭和下西洋..."
-                className="h-12 w-full rounded-lg border bg-background pl-12 pr-4 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="h-12 w-full rounded-2xl border border-border/80 bg-card/90 pl-12 pr-4 text-base shadow-sm ring-offset-background backdrop-blur-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -88,7 +88,7 @@ export default function HomePage() {
             </div>
             <button
               onClick={handleSearch}
-              className="h-12 rounded-lg bg-primary-600 px-6 font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="h-12 rounded-full bg-primary-600 px-6 font-semibold text-primary-foreground shadow-md transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               搜尋
             </button>
@@ -108,7 +108,7 @@ export default function HomePage() {
           </aside>
 
           <section className="order-1 lg:order-2">
-            <h2 className="mb-6 text-2xl font-semibold">
+            <h2 className="mb-6 font-serif text-2xl font-semibold text-primary-900 dark:text-primary-200">
               {searchQuery ? "搜尋結果" : "熱門文章"}
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

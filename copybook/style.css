@@ -46,42 +46,48 @@
     font-display: swap;
 }
 
-/* ===== Theme: 桃花 (default) ===== */
+/* ===== Theme: 桃花（與桃花源主畫面 oklch 色票一致）===== */
 :root {
-    --accent-dark: #8e2157;
-    --accent-mid: #c94b7c;
-    --paper: #fffdf8;
-    --line-soft: rgba(199, 79, 123, 0.35);
-    --line-soft-hong: rgba(199, 79, 123, 0.22);
-    --line-soft-light: rgba(199, 79, 123, 0.18);
-    --ink: #4b2a3d;
-    --bg: linear-gradient(135deg, #ffeef2, #ffd8e5 35%, #ffeaf2);
-    --ui-border: rgba(142, 33, 87, 0.15);
-    --input-border: rgba(142, 33, 87, 0.25);
-    --label-color: #6a3f55;
-    --page-title-color: #8a5b73;
-    --page-shadow: rgba(142, 33, 87, 0.12);
-    --cell-text: #3d2130;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23c74f7b' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+    --pb-bg: oklch(0.975 0.014 8);
+    --pb-bg-soft: oklch(0.953 0.018 8);
+    --accent-dark: oklch(0.42 0.11 8);
+    --accent-mid: oklch(0.61 0.17 10);
+    --paper: oklch(0.995 0.006 8);
+    --line-soft: color-mix(in oklch, oklch(0.61 0.17 10) 32%, transparent);
+    --line-soft-hong: color-mix(in oklch, oklch(0.61 0.17 10) 22%, transparent);
+    --line-soft-light: color-mix(in oklch, oklch(0.61 0.17 10) 16%, transparent);
+    --ink: oklch(0.305 0.06 8);
+    --bg:
+        radial-gradient(circle at 12% 14%, oklch(0.99 0.012 10) 0%, transparent 28%),
+        radial-gradient(circle at 86% 10%, oklch(0.92 0.045 8 / 0.55) 0%, transparent 24%),
+        radial-gradient(circle at 78% 64%, oklch(0.94 0.026 30 / 0.42) 0%, transparent 22%),
+        linear-gradient(180deg, var(--pb-bg) 0%, var(--pb-bg-soft) 54%, oklch(0.965 0.018 16) 100%);
+    --ui-border: color-mix(in oklch, oklch(0.72 0.06 10) 45%, transparent);
+    --input-border: color-mix(in oklch, oklch(0.72 0.06 10) 55%, transparent);
+    --label-color: oklch(0.49 0.04 10);
+    --page-title-color: oklch(0.42 0.11 8);
+    --page-shadow: oklch(0.53 0.09 8 / 0.1);
+    --cell-text: oklch(0.32 0.06 8);
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23a8556f' stroke-opacity='0.38' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23a8556f' stroke-opacity='0.38' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
-/* ===== Theme: 青瓷 — 龍泉窯青瓷 ===== */
+/* ===== Theme: 藕綠 — 淺灰綠、偏藕荷調，輕柔不搶眼 ===== */
 body[data-theme="green"] {
-    --accent-dark: #2e6b45;
-    --accent-mid: #5a9a72;
-    --paper: #fafdf7;
-    --line-soft: rgba(90, 154, 114, 0.35);
-    --line-soft-hong: rgba(90, 154, 114, 0.22);
-    --line-soft-light: rgba(90, 154, 114, 0.18);
-    --ink: #2a3d30;
-    --bg: linear-gradient(135deg, #f2f7f3, #dbeadc 35%, #edf5ee);
-    --ui-border: rgba(46, 107, 69, 0.15);
-    --input-border: rgba(46, 107, 69, 0.25);
-    --label-color: #3f6a50;
-    --page-title-color: #5b8a68;
-    --page-shadow: rgba(46, 107, 69, 0.12);
-    --cell-text: #1e3026;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%235a9a72' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+    --accent-dark: #5a6d5c;
+    --accent-mid: #9bb5a0;
+    --paper: #fbfcfa;
+    --line-soft: rgba(145, 168, 152, 0.3);
+    --line-soft-hong: rgba(145, 168, 152, 0.2);
+    --line-soft-light: rgba(145, 168, 152, 0.14);
+    --ink: #3a423e;
+    --bg: linear-gradient(135deg, #f9faf8, #eef3ef 38%, #f5f8f5);
+    --ui-border: rgba(100, 118, 105, 0.14);
+    --input-border: rgba(100, 118, 105, 0.22);
+    --label-color: #5c6d61;
+    --page-title-color: #758a7c;
+    --page-shadow: rgba(90, 109, 95, 0.09);
+    --cell-text: #2e3530;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%239bb5a0' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%239bb5a0' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
 /* ===== Theme: 汝窯 — 天青色等煙雨 ===== */
@@ -130,9 +136,10 @@ body[data-theme="silver"] {
 
 body {
     margin: 0;
-    font-family: "Kaiti TC", "STKaiti", "Songti TC", "Noto Serif TC", serif;
+    font-family: "Noto Sans TC", "Kaiti TC", "STKaiti", "Songti TC", "Noto Serif TC", sans-serif;
     color: var(--ink);
     background: var(--bg);
+    background-attachment: fixed;
     transition: background 0.4s ease, color 0.3s ease;
 }
 
@@ -143,15 +150,21 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
-    border-bottom: 1px solid var(--ui-border);
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(6px);
+    border-bottom: 1px solid color-mix(in oklch, oklch(0.72 0.06 10 / 0.55) 54%, transparent);
+    background: color-mix(in oklch, oklch(0.988 0.01 8) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px oklch(0.48 0.08 8 / 0.06);
     transition: border-color 0.3s;
 }
 
 .header-left h1 {
     margin: 4px 0 0;
-    font-size: 1.35rem;
+    font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+    font-size: clamp(1.35rem, 3vw, 1.6rem);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--page-title-color);
 }
 
 .back-link {
@@ -204,7 +217,7 @@ body {
 }
 
 .theme-dot--pink   { background: linear-gradient(135deg, #f5c6d6, #c94b7c); }
-.theme-dot--green  { background: linear-gradient(135deg, #c5dfca, #5a9a72); }
+.theme-dot--green  { background: linear-gradient(135deg, #e2ebe3, #9bb5a0); }
 .theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
 .theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
 
@@ -212,19 +225,20 @@ body {
 
 .layout {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 20px;
+    grid-template-columns: minmax(220px, 270px) 1fr;
+    gap: 16px;
     padding: 20px;
 }
 
 .panel {
-    background: rgba(255, 255, 255, 0.86);
+    background: color-mix(in oklch, oklch(0.988 0.01 8) 90%, transparent);
     border: 1px solid var(--ui-border);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 22px;
+    padding: 12px 12px 14px;
     position: sticky;
     top: 12px;
     height: fit-content;
+    box-shadow: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
     transition: border-color 0.3s;
 }
 
@@ -274,12 +288,12 @@ textarea {
     margin-top: 14px;
 }
 
-.actions.actions-5 {
+.actions.actions-3 {
     grid-template-columns: repeat(3, 1fr);
 }
 
 @media (max-width: 400px) {
-    .actions.actions-5 {
+    .actions.actions-3 {
         grid-template-columns: 1fr 1fr;
     }
 }

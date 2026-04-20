@@ -28,7 +28,6 @@
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
     var fontPreset = document.getElementById('fontPreset');
-    var customFont = document.getElementById('customFont');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
@@ -37,11 +36,9 @@
     var charsPerLine = document.getElementById('charsPerLine');
     var linesPerPage = document.getElementById('linesPerPage');
     var preview = document.getElementById('preview');
-    var btnRegenerate = document.getElementById('btnRegenerate');
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
-    var btnTxt = document.getElementById('btnTxt');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
@@ -101,12 +98,7 @@
     }
 
     function getFontFamily() {
-        var preset = fontPreset.value.trim();
-        var custom = customFont.value.trim();
-        if (custom) {
-            return custom + ', ' + preset;
-        }
-        return preset;
+        return fontPreset.value.trim();
     }
 
     /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
@@ -320,16 +312,6 @@
         }, 2000);
     }
 
-    function buildTxtContent() {
-        return normalizeText(textInput.value);
-    }
-
-    function onTxt() {
-        var blob = new Blob([buildTxtContent()], { type: 'text/plain;charset=utf-8' });
-        downloadBlob('字帖內容.txt', blob);
-        setStatus('已下載 TXT');
-    }
-
     function canvasToBlob(canvas) {
         return new Promise(function (resolve, reject) {
             canvas.toBlob(function (b) {
@@ -440,13 +422,12 @@
     function applyChenyuFont() {
         var opt = document.getElementById('fontOptChenyu');
         if (opt && fontPreset) fontPreset.value = opt.value;
-        if (customFont) customFont.value = '';
         setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
         renderNow();
     }
 
     var inputs = [
-        textInput, fontPreset, customFont, gridType, copyStyle, fontSize, lineHeight,
+        textInput, fontPreset, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {
@@ -454,11 +435,9 @@
         el.addEventListener('input', scheduleRender);
         el.addEventListener('change', scheduleRender);
     });
-    if (btnRegenerate) btnRegenerate.addEventListener('click', renderNow);
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
-    if (btnTxt) btnTxt.addEventListener('click', onTxt);
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();

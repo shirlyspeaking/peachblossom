@@ -143,7 +143,7 @@ export default function CalligraphyPage() {
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">書法字帖生成平台</h1>
+        <h1 className="font-display text-2xl font-normal tracking-[0.06em] text-primary-900 sm:text-3xl">書法字帖生成平台</h1>
         <p className="mt-2 text-slate-600">流程：上傳文字材料（或貼上）→ 選擇毛筆/硬筆與字型 → 生成預覽 → 下載 PDF。</p>
       </section>
 
@@ -151,7 +151,7 @@ export default function CalligraphyPage() {
         <Card>
           <CardHeader><CardTitle>素材與設定</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <textarea className="min-h-36 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="貼上詩歌或文字材料..." value={text} onChange={(e) => setText(e.target.value)} />
+            <textarea className="min-h-36 w-full rounded-xl border border-primary-200/70 bg-white/95 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="貼上詩歌或文字材料..." value={text} onChange={(e) => setText(e.target.value)} />
             <div className="flex gap-2">
               <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setText(SAMPLE_TEXT)}>一鍵帶入示例文本</Button>
             </div>
@@ -161,17 +161,17 @@ export default function CalligraphyPage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">類型
-                <select className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3" value={config.mode} onChange={(e) => setConfig((prev) => ({ ...prev, mode: e.target.value as "brush" | "pen", rows: e.target.value === "brush" ? 8 : 12, cols: e.target.value === "brush" ? 8 : 12, fontSize: e.target.value === "brush" ? 46 : 24 }))}>
+                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.mode} onChange={(e) => setConfig((prev) => ({ ...prev, mode: e.target.value as "brush" | "pen", rows: e.target.value === "brush" ? 8 : 12, cols: e.target.value === "brush" ? 8 : 12, fontSize: e.target.value === "brush" ? 46 : 24 }))}>
                   <option value="brush">毛筆</option><option value="pen">硬筆</option>
                 </select>
               </label>
               <label className="text-sm">格線
-                <select className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3" value={config.gridType} onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}>
+                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.gridType} onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}>
                   {GRID_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                 </select>
               </label>
               <label className="text-sm">字型
-                <select className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3" value={config.fontId} onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}>
+                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.fontId} onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}>
                   {FONT_OPTIONS.map((item) => <option key={item.id} value={item.id} disabled={!availableFontIds.includes(item.id)}>{item.label}</option>)}
                 </select>
               </label>
@@ -180,7 +180,7 @@ export default function CalligraphyPage() {
               </label>
               <label className="text-sm sm:col-span-2">字帖版本
                 <select
-                  className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3"
+                  className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3"
                   value={config.copybookVariant}
                   onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}
                 >
@@ -205,7 +205,7 @@ export default function CalligraphyPage() {
           <CardContent>
             {/* 外框單一邊框，左右寬度一致；內格僅用右/下分隔線，避免雙線與欄數變化時外緣粗細不一 */}
             <div
-              className="w-full overflow-hidden rounded-lg border-2 border-slate-400 bg-white"
+              className="w-full overflow-hidden rounded-xl border-2 border-primary-300/90 bg-white shadow-inner"
               style={{ aspectRatio: `${config.cols} / ${config.rows}` }}
             >
               <div

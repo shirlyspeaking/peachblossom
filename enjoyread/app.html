@@ -4,84 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>悅讀 EnjoyRead - 最新有趣文章</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #1e293b; min-height: 100vh; }
-        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .logo { font-size: 1.25rem; font-weight: 600; color: #0284c7; text-decoration: none; }
-        .logo:hover { color: #0369a1; }
+        :root {
+            color-scheme: light;
+            --bg: oklch(0.975 0.014 8);
+            --bg-soft: oklch(0.953 0.018 8);
+            --surface: oklch(0.988 0.01 8 / 0.9);
+            --text: oklch(0.305 0.06 8);
+            --text-soft: oklch(0.49 0.04 10);
+            --accent: oklch(0.61 0.17 10);
+            --accent-deep: oklch(0.42 0.11 8);
+            --accent-soft: oklch(0.84 0.06 12);
+            --line: oklch(0.852 0.03 10 / 0.7);
+            --line-strong: oklch(0.72 0.06 10 / 0.55);
+            --shadow-soft: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
+            --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        body {
+            font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 12% 14%, oklch(0.99 0.012 10) 0%, transparent 28%),
+                radial-gradient(circle at 86% 10%, oklch(0.92 0.045 8 / 0.55) 0%, transparent 24%),
+                radial-gradient(circle at 78% 64%, oklch(0.94 0.026 30 / 0.42) 0%, transparent 22%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 54%, oklch(0.965 0.018 16) 100%);
+            background-attachment: fixed;
+        }
+        .navbar {
+            background: color-mix(in oklch, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid color-mix(in oklch, var(--line-strong) 54%, transparent);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 10px 30px oklch(0.48 0.08 8 / 0.06);
+        }
+        .logo {
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-family: "Noto Serif TC", serif;
+            color: var(--accent-deep);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+        }
+        .logo:hover { color: var(--accent); }
         .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .nav-history-btn {
-            padding: 8px 16px;
-            background: #fff;
-            border: 1px solid #bae6fd;
-            color: #0369a1;
-            border-radius: 10px;
+            padding: 9px 16px;
+            background: linear-gradient(
+                135deg,
+                color-mix(in oklch, oklch(0.99 0.008 8) 90%, var(--accent-soft) 10%) 0%,
+                color-mix(in oklch, oklch(0.96 0.014 10) 78%, var(--accent-soft) 22%) 100%
+            );
+            border: 1px solid color-mix(in oklch, var(--line-strong) 50%, transparent);
+            color: var(--accent-deep);
+            border-radius: 999px;
             cursor: pointer;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
+            transition: transform 180ms var(--ease), box-shadow 180ms var(--ease);
+            box-shadow: 0 8px 20px oklch(0.5 0.09 10 / 0.08);
         }
-        .nav-history-btn:hover { background: #f0f9ff; border-color: #0ea5e9; }
-        .history-empty { text-align: center; padding: 48px 20px; color: #64748b; line-height: 1.7; }
-        .history-item { border-left: 3px solid #0ea5e9; padding-left: 16px; margin-bottom: 20px; }
-        .history-item time { font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 6px; }
+        .nav-history-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px oklch(0.48 0.09 8 / 0.12);
+        }
+        .history-empty { text-align: center; padding: 48px 20px; color: var(--text-soft); line-height: 1.7; }
+        .history-item { border-left: 3px solid color-mix(in oklch, var(--accent) 70%, var(--line) 30%); padding-left: 16px; margin-bottom: 20px; }
+        .history-item time { font-size: 0.8rem; color: var(--text-soft); display: block; margin-bottom: 6px; }
         .history-item h3 { font-size: 1.05rem; margin-bottom: 6px; }
-        .history-item h3 a { color: #0c4a6e; text-decoration: none; }
-        .history-item h3 a:hover { text-decoration: underline; color: #0284c7; }
-        .clear-history-btn { margin-top: 16px; padding: 8px 14px; font-size: 0.85rem; color: #64748b; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; }
-        .clear-history-btn:hover { background: #e2e8f0; }
+        .history-item h3 a { color: var(--accent-deep); text-decoration: none; }
+        .history-item h3 a:hover { text-decoration: underline; color: var(--accent); }
+        .clear-history-btn { margin-top: 16px; padding: 8px 14px; font-size: 0.85rem; color: var(--text-soft); background: color-mix(in oklch, var(--surface) 88%, transparent); border: 1px solid color-mix(in oklch, var(--line) 80%, transparent); border-radius: 999px; cursor: pointer; }
+        .clear-history-btn:hover { background: color-mix(in oklch, var(--accent-soft) 35%, var(--surface) 65%); }
         .hidden { display: none !important; }
         .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
-        .page-title { font-size: 1.75rem; color: #0c4a6e; margin-bottom: 8px; }
-        .page-desc { color: #64748b; margin-bottom: 32px; line-height: 1.6; }
+        .page-title {
+            font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+            font-size: clamp(1.65rem, 4vw, 2rem);
+            font-weight: 400;
+            color: var(--accent-deep);
+            margin-bottom: 8px;
+            letter-spacing: 0.06em;
+        }
+        .page-desc { color: var(--text-soft); margin-bottom: 32px; line-height: 1.75; }
         .article-card {
-            background: #fff;
-            border-radius: 16px;
+            background: color-mix(in oklch, var(--surface) 94%, transparent);
+            border-radius: 20px;
             padding: 24px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid rgba(14, 165, 233, 0.1);
-            transition: box-shadow 0.2s;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
         }
-        .article-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        .article-source { font-size: 0.8rem; color: #0ea5e9; font-weight: 500; margin-bottom: 8px; }
-        .article-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #0f172a; }
-        .article-summary { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 16px; }
-        .article-meta { font-size: 0.8rem; color: #94a3b8; margin-bottom: 16px; }
+        .article-card:hover { box-shadow: 0 18px 40px oklch(0.48 0.08 8 / 0.12); transform: translateY(-2px); }
+        .article-source { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.02em; }
+        .article-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: var(--accent-deep); }
+        .article-summary { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 16px; }
+        .article-meta { font-size: 0.8rem; color: var(--text-soft); margin-bottom: 16px; opacity: 0.9; }
         .tts-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
+            background: linear-gradient(
+                135deg,
+                color-mix(in oklch, var(--accent) 88%, var(--accent-deep) 12%) 0%,
+                var(--accent-deep) 100%
+            );
+            color: oklch(0.99 0.01 8);
             border: none;
-            border-radius: 10px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 0.95rem;
-            font-weight: 500;
-            transition: transform 0.15s, box-shadow 0.15s;
+            font-weight: 600;
+            transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+            box-shadow: 0 10px 22px oklch(0.45 0.1 8 / 0.18);
         }
-        .tts-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35); }
+        .tts-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px oklch(0.42 0.1 8 / 0.22); }
         .tts-btn.playing { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
-        .loading { text-align: center; padding: 48px; color: #64748b; }
-        .loading-spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        .loading { text-align: center; padding: 48px; color: var(--text-soft); }
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid color-mix(in oklch, var(--line) 70%, transparent);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .error-msg { background: #fef2f2; color: #b91c1c; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
-        .refresh-btn { margin-top: 16px; padding: 8px 16px; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .error-msg { background: color-mix(in oklch, oklch(0.96 0.05 20) 90%, transparent); color: oklch(0.46 0.16 24); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid color-mix(in oklch, oklch(0.85 0.08 20) 60%, transparent); }
+        .refresh-btn { margin-top: 16px; padding: 8px 16px; background: var(--accent-deep); color: oklch(0.99 0.01 8); border: none; border-radius: 999px; cursor: pointer; font-weight: 600; }
         .refresh-articles-btn {
             padding: 10px 20px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            color: white;
+            background: linear-gradient(
+                135deg,
+                color-mix(in oklch, var(--accent) 88%, var(--accent-deep) 12%) 0%,
+                var(--accent-deep) 100%
+            );
+            color: oklch(0.99 0.01 8);
             border: none;
-            border-radius: 10px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 0.95rem;
-            font-weight: 500;
-            transition: transform 0.15s, opacity 0.15s;
+            font-weight: 600;
+            transition: transform 0.15s var(--ease), opacity 0.15s;
+            box-shadow: 0 10px 22px oklch(0.45 0.1 8 / 0.18);
         }
-        .refresh-articles-btn:hover { transform: scale(1.03); opacity: 0.95; }
-        .refresh-articles-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .refresh-articles-btn:hover { transform: translateY(-1px); opacity: 0.96; }
+        .refresh-articles-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
     </style>
 </head>
 <body>

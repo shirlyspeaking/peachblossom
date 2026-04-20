@@ -1,13 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   * {
-    @apply border-slate-200;
+    @apply border-slate-200/80;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply text-slate-900 antialiased;
+    font-family: "Noto Sans TC", system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 12% 14%, oklch(0.99 0.012 10) 0%, transparent 28%),
+      radial-gradient(circle at 86% 10%, oklch(0.92 0.045 8 / 0.55) 0%, transparent 24%),
+      radial-gradient(circle at 78% 64%, oklch(0.94 0.026 30 / 0.42) 0%, transparent 22%),
+      linear-gradient(180deg, oklch(0.975 0.014 8) 0%, oklch(0.953 0.018 8) 54%, oklch(0.965 0.018 16) 100%);
+    background-attachment: fixed;
   }
 }

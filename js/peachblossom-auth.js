@@ -8,7 +8,15 @@
 (function () {
   "use strict";
 
-  var APP_ID = "peachspring-home";
+  var APP_ID =
+    typeof window.PEACHBLOSSOM_AUTH_APP_ID === "string" && window.PEACHBLOSSOM_AUTH_APP_ID.trim()
+      ? window.PEACHBLOSSOM_AUTH_APP_ID.trim()
+      : "peachspring-home";
+
+  var LOGIN_BTN_LABEL =
+    typeof window.PEACHBLOSSOM_AUTH_LOGIN_LABEL === "string" && window.PEACHBLOSSOM_AUTH_LOGIN_LABEL.trim()
+      ? window.PEACHBLOSSOM_AUTH_LOGIN_LABEL.trim()
+      : "Google 登入桃花源";
 
   function getAuthBase() {
     if (typeof window.PEACHBLOSSOM_AUTH_BASE === "string" && window.PEACHBLOSSOM_AUTH_BASE.trim()) {
@@ -79,7 +87,9 @@
           if (btn) btn.addEventListener("click", logout);
         } else {
           setBar(
-            '<button type="button" class="auth-btn auth-btn-in" id="peachblossom-auth-login">Google 登入桃花源</button>'
+            '<button type="button" class="auth-btn auth-btn-in" id="peachblossom-auth-login">' +
+              escapeHtml(LOGIN_BTN_LABEL) +
+              "</button>"
           );
           var loginBtn = el("peachblossom-auth-login");
           if (loginBtn) loginBtn.addEventListener("click", login);

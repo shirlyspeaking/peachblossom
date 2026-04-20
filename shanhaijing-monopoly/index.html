@@ -38,8 +38,45 @@
             line-height: 1.6;
         }
 
+        /* ===== 頁面骨架：左側欄（固定於螢幕左缘）+ 主內容 ===== */
+        .page {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+            padding-left: calc(min(3.75rem, 12vw) + 14px);
+            box-sizing: border-box;
+        }
+
+        .page-main {
+            min-width: 0;
+        }
+
+        /* 左側欄：無外框；固定於視窗最左側，垂直置中分布 */
+        .left-rail {
+            --title-btn-ref: 10rem;
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 55;
+            width: min(3.75rem, calc(var(--title-btn-ref) * 0.55));
+            max-width: min(50vw, 5.5rem);
+            min-height: min(68vh, 520px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 2px;
+            padding: 4px 2px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            pointer-events: auto;
+        }
+
         /* ===== Top Bar ===== */
-        .page { max-width: 1440px; margin: 0 auto; padding: 24px 20px 40px; }
 
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
@@ -52,7 +89,6 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .title-wrap p { margin-top: 6px; color: var(--ink-light); font-size: 0.95rem; }
 
         .back-link {
             display: inline-flex; align-items: center; gap: 6px;
@@ -63,6 +99,378 @@
             transition: transform var(--transition), box-shadow var(--transition);
         }
         .back-link:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 22px rgba(131, 56, 236, 0.45); }
+
+        /* ===== Toolbar ===== */
+        .toolbar {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .toolbar button {
+            border: 1px solid rgba(63, 29, 56, 0.2); background: var(--panel);
+            border-radius: 999px; padding: 8px 16px; font-family: inherit;
+            font-size: 0.85rem; color: var(--ink); cursor: pointer;
+            transition: all var(--transition);
+        }
+        .toolbar button:hover { background: rgba(131, 56, 236, 0.1); border-color: #8338ec; }
+        .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
+        .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        #peachblossom-auth-bar {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            border-radius: 999px;
+            background: var(--panel);
+            box-shadow: var(--shadow-card);
+            font-size: 0.88rem;
+        }
+        #peachblossom-auth-bar .auth-status,
+        #peachblossom-auth-bar .auth-user {
+            color: var(--ink-light);
+            max-width: min(48vw, 220px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #peachblossom-auth-bar .auth-warn { color: #c0392b; }
+        #peachblossom-auth-bar .auth-btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.12), rgba(255, 0, 110, 0.08));
+            box-shadow: 0 4px 12px rgba(63, 29, 56, 0.1);
+        }
+        #peachblossom-auth-bar .auth-btn:hover { filter: brightness(1.05); }
+        #peachblossom-auth-bar .auth-btn-out {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(63, 29, 56, 0.15);
+        }
+
+        .online-panel {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
+            background: var(--panel);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(63, 29, 56, 0.1);
+        }
+        .online-panel h3 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            letter-spacing: 0.04em;
+        }
+        .online-panel .online-tip {
+            font-size: 0.86rem;
+            color: var(--ink-light);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .online-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .online-actions label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+        }
+        .online-actions input[type="text"] {
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            padding: 8px 10px;
+            font-family: inherit;
+            width: 8.5rem;
+            text-transform: uppercase;
+        }
+        .online-actions button {
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .online-actions button:hover:not(:disabled) {
+            border-color: #8338ec;
+            background: rgba(131, 56, 236, 0.08);
+        }
+        .online-actions button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .online-actions button.btn-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.35);
+        }
+        .online-status {
+            margin-top: 12px;
+            font-size: 0.86rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+        .online-status strong { color: var(--ink); }
+        .room-code-display {
+            font-family: ui-monospace, monospace;
+            letter-spacing: 0.12em;
+            font-size: 1.05rem;
+            color: #8338ec;
+        }
+
+        .left-rail-top {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 2px;
+        }
+
+        /* ===== 左側欄標籤按鈕（直排、窄條；長寬不超過參考標題鈕的一半量級）===== */
+        .left-rail .rules-tag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            min-height: 2.65rem;
+            max-height: min(30vh, calc(var(--title-btn-ref) * 0.85));
+            padding: 7px 3px;
+            font-size: 0.84rem;
+            line-height: 1.32;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            background: rgba(255, 255, 255, 0.82);
+            font-family: inherit;
+            color: var(--ink);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(63, 29, 56, 0.08);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+        }
+        .left-rail .rules-tag:hover {
+            border-color: rgba(131, 56, 236, 0.45);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 14px rgba(131, 56, 236, 0.18);
+        }
+        .left-rail .rules-tag:active { transform: scale(0.98); }
+
+        .rules-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.78rem; padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            background: rgba(255, 255, 255, 0.75);
+            font-family: inherit; color: var(--ink);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(63, 29, 56, 0.08);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+        }
+        .rules-tag:hover {
+            border-color: rgba(131, 56, 236, 0.45);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 14px rgba(131, 56, 236, 0.18);
+        }
+        .rules-tag:active { transform: scale(0.98); }
+
+        .rules-tag.tag-chance,
+        .left-rail .rules-tag.tag-chance {
+            border-color: rgba(212, 160, 9, 0.4);
+            background: rgba(255, 190, 11, 0.14);
+        }
+        .rules-tag.tag-chance:hover,
+        .left-rail .rules-tag.tag-chance:hover {
+            border-color: rgba(212, 160, 9, 0.65);
+            background: rgba(255, 190, 11, 0.22);
+        }
+        .rules-tag.tag-fate,
+        .left-rail .rules-tag.tag-fate {
+            border-color: rgba(58, 134, 255, 0.4);
+            background: rgba(58, 134, 255, 0.1);
+        }
+        .rules-tag.tag-fate:hover,
+        .left-rail .rules-tag.tag-fate:hover {
+            border-color: rgba(58, 134, 255, 0.6);
+            background: rgba(58, 134, 255, 0.16);
+        }
+
+        /* 左側欄：回合記錄（預設僅標籤；懸停／鍵盤聚焦時顯示內容） */
+        .left-rail-log-hover {
+            position: relative;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+        .left-rail-log-tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 2.5rem;
+            max-height: min(22vh, 8rem);
+            padding: 6px 3px;
+            font-size: 0.82rem;
+            line-height: 1.3;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.14);
+            background: rgba(255, 255, 255, 0.78);
+            font-family: inherit;
+            color: var(--ink);
+            cursor: pointer;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            box-shadow: 0 2px 6px rgba(63, 29, 56, 0.07);
+        }
+        .left-rail-log-popover {
+            display: none;
+            position: absolute;
+            left: calc(100% + 8px);
+            bottom: 0;
+            z-index: 70;
+            width: min(300px, calc(100vw - 5rem));
+            max-height: min(280px, 55vh);
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 12px 36px rgba(63, 29, 56, 0.22);
+            text-align: left;
+        }
+        .left-rail-log-hover:hover .left-rail-log-popover,
+        .left-rail-log-hover:focus-within .left-rail-log-popover {
+            display: block;
+        }
+        .turn-log--rail {
+            max-height: min(260px, 52vh);
+            overflow-y: auto;
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            line-height: 1.45;
+            color: var(--ink);
+            border: 0;
+            background: transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .turn-log--rail div {
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(63, 29, 56, 0.1);
+        }
+        .turn-log--rail div:last-child { border-bottom: 0; }
+
+        /* ===== 毛玻璃上層（基本規則 / 機會卡 / 命運卡 共用）===== */
+        .glass-modal {
+            position: fixed; inset: 0; z-index: 900;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            opacity: 0; visibility: hidden;
+            pointer-events: none;
+            transition: none;
+        }
+        .glass-modal.is-open {
+            opacity: 1; visibility: visible; pointer-events: auto;
+        }
+
+        .glass-modal-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(63, 29, 56, 0.28);
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
+        }
+
+        .glass-modal-panel {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 520px;
+            max-height: min(82vh, 640px);
+            display: flex; flex-direction: column;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 24px 60px rgba(63, 29, 56, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+
+        .glass-modal-panel--cards {
+            max-width: min(580px, 100%);
+            max-height: min(86vh, 720px);
+        }
+
+        .glass-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(63, 29, 56, 0.1);
+            background: rgba(255, 255, 255, 0.45);
+        }
+        .glass-modal-header h2 {
+            font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em;
+        }
+        .glass-modal-close {
+            flex-shrink: 0;
+            width: 34px; height: 34px;
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            font-size: 1rem; line-height: 1; cursor: pointer;
+            color: var(--ink);
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .glass-modal-close:hover {
+            background: rgba(131, 56, 236, 0.12);
+            border-color: rgba(131, 56, 236, 0.35);
+        }
+
+        .glass-modal-body {
+            padding: 14px 16px 18px;
+            flex: 1; min-height: 0;
+            display: flex; flex-direction: column;
+        }
+
+        .glass-modal-body--scroll {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .rules-textarea {
+            width: 100%; flex: 1; min-height: 200px;
+            padding: 12px 14px; border-radius: var(--radius-md);
+            border: 1px solid rgba(63, 29, 56, 0.18);
+            font-family: inherit; font-size: 0.92rem; line-height: 1.75;
+            color: var(--ink); background: rgba(255, 255, 255, 0.88);
+            resize: vertical;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .rules-textarea::placeholder { color: #baa5b0; }
+        .rules-textarea:focus {
+            outline: none; border-color: #8338ec;
+            box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.15);
+        }
+
+        body.modal-open { overflow: hidden; }
 
         /* ===== Legend ===== */
         .legend {
@@ -139,6 +547,29 @@
         }
         .tile input + input { margin-top: 4px; }
 
+        .tile-pawns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 4px;
+            min-height: 14px;
+            align-content: flex-start;
+        }
+        .tile-pawn-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            font-size: 8px;
+            font-weight: 800;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+        }
+
         .tile-start   { background: linear-gradient(145deg, #cdb4db, #ffc8dd); }
         .tile-land    { background: linear-gradient(145deg, #bde0fe, #a2d2ff); }
         .tile-event   { background: linear-gradient(145deg, #ffafcc, #ffc8dd); }
@@ -157,86 +588,251 @@
                 rgba(58, 134, 255, 0.08));
             border: 2px dashed rgba(63, 29, 56, 0.18);
             display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            text-align: center; padding: 22px 16px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 12px 14px;
+            gap: clamp(12px, 2.2vh, 20px);
+            overflow: hidden;
+            min-height: 0;
         }
-        .center-panel-header {
+        .center-block {
             width: 100%;
-            display: grid;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+        .center-block--players {
+            gap: 6px;
+        }
+        .center-block--dice {
+            gap: 6px;
+        }
+        .center-block--cards {
             gap: 10px;
         }
-        .center-title-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            text-align: left;
+        .center-game-meta {
+            font-size: 0.75rem;
+            color: var(--ink-light);
+            margin: 0;
         }
-        .center-panel h3 { font-size: 1.25rem; margin: 0; }
-        .center-panel-actions {
+        .center-settings {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: center;
             gap: 8px;
             flex-wrap: wrap;
+            font-size: 0.78rem;
+            flex-shrink: 0;
         }
-        .title-action {
-            border: 1px solid rgba(63, 29, 56, 0.18);
-            background: rgba(255,255,255,0.82);
+        .center-settings label { display: flex; align-items: center; gap: 6px; }
+        .center-settings select {
+            font-family: inherit;
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .center-players-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 14px;
+            justify-content: center;
+            align-items: flex-end;
+            align-content: center;
+            padding: 2px 0 4px;
+            flex-shrink: 0;
+        }
+        .center-piece-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        /* 僅包住圓形棋子，資金框以此為基準貼在外側右上角 */
+        .center-piece-figure {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+        .center-piece-wrap.center-piece-wrap--active .center-piece-token {
+            box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .center-piece-bubble {
+            position: absolute;
+            z-index: 3;
+            pointer-events: auto;
+            /* 圓形棋子外側右上角，不覆蓋圓形 */
+            top: -14px;
+            right: -16px;
+            left: auto;
+            bottom: auto;
+            width: max-content;
+            filter: drop-shadow(0 1px 2px rgba(63, 29, 56, 0.2));
+        }
+        /* 對話框小尾巴，指向棋子 */
+        .center-piece-bubble::after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            bottom: -4px;
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-top: 5px solid rgba(255, 255, 255, 0.97);
+        }
+        .money-input {
+            display: block;
+            width: 38px;
+            max-width: 38px;
+            font-size: 7px;
+            line-height: 1.15;
+            padding: 2px 2px;
+            border-radius: 6px;
+            border: 1px solid rgba(63, 29, 56, 0.22);
+            background: rgba(255, 255, 255, 0.97);
+            color: var(--ink);
+            text-align: center;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .money-input:focus {
+            outline: none;
+            border-color: #8338ec;
+        }
+        .center-piece-token {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+        .center-piece-label {
+            font-size: 0.65rem;
+            color: var(--ink-light);
+            white-space: nowrap;
+        }
+
+        .dice-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(10px, 2.5vw, 18px);
+            flex-wrap: wrap;
+            margin: 0;
+            flex-shrink: 0;
+        }
+        .btn-roll {
+            border: 0;
             border-radius: 999px;
-            padding: 8px 14px;
+            padding: 8px 18px;
             font-family: inherit;
             font-size: 0.85rem;
-            color: var(--ink);
+            font-weight: 700;
             cursor: pointer;
-            transition: all var(--transition);
-            box-shadow: 0 2px 8px rgba(63, 29, 56, 0.08);
+            background: linear-gradient(135deg, #8338ec, #ff006e);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(131, 56, 236, 0.35);
+            transition: transform var(--transition), box-shadow var(--transition);
         }
-        .title-action:hover {
-            background: rgba(131, 56, 236, 0.1);
-            border-color: rgba(131, 56, 236, 0.45);
-            transform: translateY(-1px);
+        .btn-roll:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(131, 56, 236, 0.45);
         }
-        .title-action.is-active {
-            background: rgba(131, 56, 236, 0.12);
-            border-color: rgba(131, 56, 236, 0.4);
-            color: #6d28d9;
+        .btn-roll:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
         }
-        .title-action.btn-danger {
-            color: #c0392b;
-            border-color: rgba(192, 57, 43, 0.28);
+        /* 透視外殼：讓骰子呈現立體塊狀 */
+        .dice-shell {
+            perspective: 160px;
+            perspective-origin: 50% 35%;
+            flex-shrink: 0;
+            padding: 6px 8px 10px;
         }
-        .title-action.btn-danger:hover {
-            background: rgba(192, 57, 43, 0.08);
-            border-color: rgba(192, 57, 43, 0.4);
+
+        .dice {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            transform: rotateX(24deg) rotateY(-32deg);
+            transform-style: preserve-3d;
+            background:
+                linear-gradient(152deg,
+                    rgba(255, 252, 254, 1) 0%,
+                    rgba(236, 224, 232, 0.98) 42%,
+                    rgba(188, 168, 182, 1) 100%);
+            border: 1px solid rgba(75, 42, 58, 0.38);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.42rem;
+            font-weight: 800;
+            color: #4a2840;
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65),
+                0 -1px 1px rgba(60, 30, 45, 0.12);
+            box-shadow:
+                inset 5px 5px 14px rgba(255, 255, 255, 0.82),
+                inset -5px -8px 14px rgba(48, 28, 40, 0.28),
+                inset 0 -2px 4px rgba(90, 50, 65, 0.12),
+                0 9px 0 -1px rgba(72, 44, 56, 0.55),
+                0 16px 22px -8px rgba(35, 20, 30, 0.5),
+                0 3px 6px rgba(255, 255, 255, 0.35) inset;
+            flex-shrink: 0;
+            isolation: isolate;
         }
-        .center-info-panel {
-            width: 100%;
-            text-align: left;
-            background: rgba(255,255,255,0.76);
-            border: 1px solid rgba(63, 29, 56, 0.12);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            box-shadow: 0 4px 12px rgba(63, 29, 56, 0.06);
+
+        /* 頂緣高光（不遮住中央點數） */
+        .dice::before {
+            content: "";
+            position: absolute;
+            left: 7px;
+            right: 7px;
+            top: 5px;
+            height: 38%;
+            border-radius: 10px 10px 40% 40%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
+            pointer-events: none;
+            z-index: 0;
         }
-        .center-info-panel[hidden] {
-            display: none;
+
+        .dice.dice--rolling {
+            animation: dice-wobble 0.11s linear infinite;
         }
-        .center-info-panel ul {
-            padding-left: 1.35rem;
-            line-height: 1.9;
-            color: var(--ink-light);
-        }
-        .center-panel .center-desc {
-            line-height: 1.7;
-            max-width: none;
-            color: var(--ink-light);
-            font-size: 0.9rem;
+
+        @keyframes dice-wobble {
+            0%, 100% {
+                transform: rotateX(24deg) rotateY(-32deg) rotateZ(-12deg) translateY(0);
+            }
+            50% {
+                transform: rotateX(24deg) rotateY(-32deg) rotateZ(12deg) translateY(-3px);
+            }
         }
 
         .draw-actions {
-            display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; justify-content: center;
+            display: flex; gap: 10px; margin: 0; flex-wrap: wrap; justify-content: center;
         }
         .draw-actions button {
             border: 0; border-radius: 999px; padding: 10px 20px;
@@ -249,7 +845,12 @@
         .draw-chance { background: var(--chance); color: #4f3600; }
         .draw-fate   { background: var(--fate); color: white; }
 
-        .draw-result-area { perspective: 600px; margin-top: 14px; width: 100%; max-width: 440px; }
+        .draw-result-area {
+            perspective: 600px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: min(440px, 100%);
+        }
 
         .draw-result {
             font-size: 0.92rem; background: rgba(255,255,255,0.9);
@@ -270,153 +871,6 @@
         .draw-result.chance-result { border-color: var(--chance); background: rgba(255,190,11,0.12); }
         .draw-result.fate-result   { border-color: var(--fate);   background: rgba(58,134,255,0.1); }
 
-        /* ===== Cards Drawer ===== */
-        .cards-drawer {
-            position: fixed;
-            top: 16px;
-            right: 0;
-            height: calc(100vh - 32px);
-            width: min(460px, calc(100vw - 20px));
-            z-index: 700;
-            display: flex;
-            align-items: stretch;
-            transform: translateX(0);
-            transition: transform var(--transition);
-            pointer-events: none;
-        }
-
-        .cards-drawer.is-collapsed {
-            transform: translateX(calc(100% - 48px));
-        }
-
-        .drawer-handle {
-            width: 48px;
-            border: 0;
-            border-radius: 14px 0 0 14px;
-            background: linear-gradient(180deg, #8338ec 0%, #3a86ff 100%);
-            color: white;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: -4px 8px 18px rgba(63, 29, 56, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            letter-spacing: 0.08em;
-            padding: 8px 0;
-            pointer-events: auto;
-        }
-
-        .drawer-handle span {
-            transform: rotate(180deg);
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .drawer-panel {
-            flex: 1;
-            background: var(--panel);
-            border-radius: 0 16px 16px 0;
-            box-shadow: -10px 0 30px rgba(63, 29, 56, 0.18);
-            padding: 14px;
-            overflow-y: auto;
-            pointer-events: auto;
-        }
-
-        .drawer-panel .section-header {
-            position: sticky;
-            top: 0;
-            background: rgba(255, 255, 255, 0.92);
-            z-index: 2;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
-
-        .drawer-close {
-            border: 1px solid rgba(63,29,56,0.15);
-            background: white;
-            border-radius: 999px;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .cards-summary {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .cards-summary-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 12px;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-        .cards-summary-chip.chance {
-            background: rgba(255,190,11,0.16);
-            color: #6e4b00;
-        }
-        .cards-summary-chip.fate {
-            background: rgba(58,134,255,0.16);
-            color: #1b4eb5;
-        }
-
-        .cards-sections {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            align-items: start;
-        }
-        .cards-column {
-            display: grid;
-            gap: 10px;
-            min-width: 0;
-        }
-        .cards-column-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 12px 14px;
-            border-radius: var(--radius-md);
-            background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(63,29,56,0.08);
-        }
-        .deck-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-        }
-        .deck-title strong {
-            font-size: 0.95rem;
-        }
-        .deck-title span {
-            font-size: 0.8rem;
-            color: var(--ink-light);
-        }
-        .deck-count {
-            flex-shrink: 0;
-            padding: 5px 9px;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-        .deck-count.chance {
-            background: rgba(255,190,11,0.16);
-            color: #6e4b00;
-        }
-        .deck-count.fate {
-            background: rgba(58,134,255,0.16);
-            color: #1b4eb5;
-        }
-
         .cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
 
         .card-editor {
@@ -427,14 +881,8 @@
             position: relative;
         }
         .card-editor:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-        .card-editor.chance {
-            border-color: rgba(255,190,11,0.38);
-            background: linear-gradient(180deg, rgba(255,190,11,0.14) 0%, rgba(255,255,255,0.94) 42%);
-        }
-        .card-editor.fate {
-            border-color: rgba(58,134,255,0.34);
-            background: linear-gradient(180deg, rgba(58,134,255,0.12) 0%, rgba(255,255,255,0.94) 42%);
-        }
+        .card-editor.chance { border-left: 5px solid var(--chance); }
+        .card-editor.fate   { border-left: 5px solid var(--fate); }
 
         .card-editor-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -498,45 +946,59 @@
         @media (max-width: 768px) {
             .title-wrap h1 { font-size: 1.6rem; }
             .top-bar { flex-direction: column; align-items: flex-start; }
-            .center-title-row {
-                align-items: flex-start;
-            }
-            .center-panel-actions {
-                justify-content: flex-start;
-            }
 
-            .cards-drawer {
+            .page {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            .left-rail {
+                position: relative;
+                left: auto;
                 top: auto;
-                bottom: 0;
-                right: 0;
-                left: 0;
-                width: 100%;
-                height: min(76vh, 620px);
-                transform: translateY(0);
-            }
-
-            .cards-drawer.is-collapsed {
-                transform: translateY(calc(100% - 40px));
-            }
-
-            .drawer-handle {
-                width: 100%;
-                height: 40px;
-                border-radius: 14px 14px 0 0;
-                writing-mode: horizontal-tb;
-                text-orientation: initial;
-            }
-
-            .drawer-handle span {
                 transform: none;
+                z-index: auto;
+                width: 100%;
+                max-width: none;
+                min-height: auto;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: flex-start;
+                padding: 8px 6px;
+                gap: 8px;
+                margin: 0 -4px 12px -4px;
             }
-
-            .drawer-panel {
-                border-radius: 0;
+            .left-rail-top {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
             }
-
-            .cards-sections {
-                grid-template-columns: 1fr;
+            .left-rail .rules-tag {
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
+                width: auto;
+                max-height: none;
+                min-height: auto;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .left-rail-log-hover {
+                align-self: center;
+                width: auto;
+            }
+            .left-rail-log-tab {
+                writing-mode: horizontal-tb;
+                min-height: auto;
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .left-rail-log-popover {
+                left: 50%;
+                right: auto;
+                bottom: auto;
+                top: calc(100% + 8px);
+                transform: translateX(-50%);
+                width: min(320px, calc(100vw - 32px));
             }
         }
         @media (max-width: 480px) {
@@ -546,111 +1008,404 @@
     </style>
 </head>
 <body>
-    <div class="page">
-        <div class="top-bar">
-            <div class="title-wrap">
-                <h1>🐉 山海經大富翁</h1>
-                <p>棋盤每格可編輯、機會卡與命運卡可自由增刪——所有修改自動儲存。</p>
-            </div>
-            <a class="back-link" href="../index.html">← 回桃花源</a>
+    <aside class="left-rail" aria-label="規則與卡片捷徑">
+        <div class="left-rail-top">
+            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
+                📜 基本規則
+            </button>
+            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡設置">
+                🟡 機會卡設置
+            </button>
+            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡設置">
+                🔵 命運卡設置
+            </button>
         </div>
+        <div class="left-rail-log-hover">
+            <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">回合記錄</button>
+            <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
+                <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
+            </div>
+        </div>
+    </aside>
 
-        <div class="legend" id="legend"></div>
-
-        <div class="layout">
-            <section class="board-section">
-                <div class="section-header">
-                    <h2 class="section-title">🗺️ 大富翁棋盤</h2>
+    <div class="page">
+        <div class="page-main">
+            <div class="top-bar">
+                <div class="title-wrap">
+                    <h1>🐉 山海經大富翁</h1>
                 </div>
-                <div class="board-scroll">
-                    <div class="board-grid" id="board-grid">
-                        <div class="center-panel">
-                            <div class="center-panel-header">
-                                <div class="center-title-row">
-                                    <h3>山海經巡遊</h3>
-                                    <div class="center-panel-actions">
-                                        <button class="title-action is-active" id="btn-toggle-rules" type="button" aria-expanded="true" aria-controls="rules-panel">📜 基本規則</button>
-                                        <button class="title-action is-active" id="btn-toggle-log" type="button" aria-expanded="true" aria-controls="log-panel">📝 回合記錄</button>
-                                        <button id="btn-reset" class="title-action btn-danger" type="button">🔄 重設為預設</button>
+                <div class="top-bar-right">
+                    <div id="peachblossom-auth-bar" aria-live="polite"></div>
+                    <a class="back-link" href="../index.html">← 回桃花源</a>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <button id="btn-export">📤 匯出設定 (JSON)</button>
+                <button id="btn-import">📥 匯入設定</button>
+                <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
+                <input type="file" id="file-import" accept=".json" hidden>
+            </div>
+
+            <section class="online-panel" id="online-panel" aria-labelledby="online-panel-title">
+                <h3 id="online-panel-title">🌐 線上對戰（Google 登入）</h3>
+                <p class="online-tip">
+                    請先於右上方完成 Google 登入。房主建立房間後，將<strong>房間代碼</strong>或分享連結傳給其他玩家；每位玩家對應棋盤上的一個「玩家」座位。
+                    遊戲須架設在 <strong>peachspring.cc</strong> 網域下，瀏覽器才能帶上登入 Cookie 與伺服器同步。
+                </p>
+                <div class="online-actions">
+                    <button type="button" id="btn-online-create">建立線上房間</button>
+                    <label>加入代碼
+                        <input type="text" id="room-code-input" maxlength="8" placeholder="ABCDEF" autocomplete="off" spellcheck="false" />
+                    </label>
+                    <button type="button" id="btn-online-join">加入房間</button>
+                    <button type="button" id="btn-online-leave" class="btn-danger" disabled>離開線上模式</button>
+                </div>
+                <div class="online-status" id="online-status"></div>
+            </section>
+
+            <div class="legend" id="legend"></div>
+
+            <div class="layout">
+                <section class="board-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🗺️ 大富翁——山海經巡遊</h2>
+                    </div>
+                    <div class="board-scroll">
+                        <div class="board-grid" id="board-grid">
+                            <div class="center-panel">
+                                <div class="center-block center-block--players" aria-label="玩家與人數">
+                                    <div class="center-settings">
+                                        <label>
+                                            遊玩人數
+                                            <select id="player-count" aria-label="遊玩人數">
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4" selected>4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="center-players-row" id="center-players-host" aria-live="polite"></div>
+                                </div>
+
+                                <div class="center-block center-block--dice" aria-label="擲骰">
+                                    <div class="dice-row">
+                                        <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
+                                        <div class="dice-shell">
+                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                        </div>
+                                    </div>
+                                    <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
+                                </div>
+
+                                <div class="center-block center-block--cards" aria-label="抽牌">
+                                    <div class="draw-actions">
+                                        <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
+                                        <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
+                                    </div>
+                                    <div class="draw-result-area">
+                                        <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
                                     </div>
                                 </div>
-                                <section class="center-info-panel" id="rules-panel">
-                                    <ul>
-                                        <li>玩家輪流擲骰前進，經過<strong>起點</strong>可領取獎勵金幣。</li>
-                                        <li>停在地塊可依你自訂文本執行效果（買地、收租、事件等）。</li>
-                                        <li>停在「<strong>機會</strong>」或「<strong>命運</strong>」格時，抽對應卡片並執行卡面內容。</li>
-                                        <li>此版為<strong>可編輯雛形</strong>，可先設計內容與規則文本，所有改動自動儲存。</li>
-                                    </ul>
-                                </section>
-                                <section class="center-info-panel" id="log-panel">
-                                    <p class="center-desc">中央區域可後續加入：玩家棋子、資金欄、擲骰動畫、回合紀錄與勝利條件。</p>
-                                </section>
-                            </div>
-                            <div class="draw-actions">
-                                <button class="draw-chance" id="draw-chance">🎲 抽機會卡</button>
-                                <button class="draw-fate" id="draw-fate">🎲 抽命運卡</button>
-                            </div>
-                            <div class="draw-result-area">
-                                <div class="draw-result" id="draw-result">點擊上方按鈕抽卡 ↑</div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
+            </div>
         </div>
     </div>
 
-    <aside class="cards-drawer" id="cards-drawer" aria-label="卡片編輯側欄">
-        <button class="drawer-handle" id="drawer-toggle" type="button" aria-expanded="true" aria-controls="drawer-panel">
-            <span>收合卡片</span>
-        </button>
-        <section class="drawer-panel" id="drawer-panel">
-            <div class="section-header">
-                <h2 class="section-title">🃏 機會卡 / 命運卡</h2>
-                <button class="drawer-close" id="drawer-close" type="button" title="收合">✕</button>
-            </div>
-            <div class="cards-summary">
-                <div class="cards-summary-chip chance">🟡 機會卡 <span id="chance-count">0</span></div>
-                <div class="cards-summary-chip fate">🔵 命運卡 <span id="fate-count">0</span></div>
-            </div>
-            <div class="cards-sections">
-                <section class="cards-column" aria-label="機會卡列表">
-                    <div class="cards-column-header">
-                        <div class="deck-title">
-                            <strong>🟡 機會卡</strong>
-                            <span>偏向事件轉機與額外行動</span>
-                        </div>
-                        <div class="deck-count chance"><span id="chance-column-count">0</span> 張</div>
-                    </div>
-                    <div class="cards-grid" id="cards-chance"></div>
-                    <button class="add-card-btn" id="add-chance-card">＋ 新增機會卡</button>
-                </section>
-                <section class="cards-column" aria-label="命運卡列表">
-                    <div class="cards-column-header">
-                        <div class="deck-title">
-                            <strong>🔵 命運卡</strong>
-                            <span>偏向命運轉折與條件懲獎</span>
-                        </div>
-                        <div class="deck-count fate"><span id="fate-column-count">0</span> 張</div>
-                    </div>
-                    <div class="cards-grid" id="cards-fate"></div>
-                    <button class="add-card-btn" id="add-fate-card">＋ 新增命運卡</button>
-                </section>
-            </div>
-            <div class="tip">
-                小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
-            </div>
-        </section>
-    </aside>
-
     <div class="toast" id="toast"></div>
 
+    <div class="glass-modal" id="rules-overlay" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="rules-overlay-backdrop"></div>
+        <div class="glass-modal-panel" id="rules-overlay-panel">
+            <div class="glass-modal-header">
+                <h2 id="rules-dialog-title">基本規則</h2>
+                <button type="button" class="glass-modal-close" id="rules-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="glass-modal-body">
+                <textarea id="rules-text" class="rules-textarea" rows="12" aria-label="自訂遊戲規則" placeholder="請輸入你們約定的遊戲規則，例如：人數、起始金幣、勝利條件、特殊約定等……"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-modal" id="chance-overlay" role="dialog" aria-modal="true" aria-labelledby="chance-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="chance-overlay-backdrop"></div>
+        <div class="glass-modal-panel glass-modal-panel--cards" id="chance-overlay-panel">
+            <div class="glass-modal-header">
+                <h2 id="chance-dialog-title">🟡 機會卡</h2>
+                <button type="button" class="glass-modal-close" id="chance-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="glass-modal-body glass-modal-body--scroll">
+                <div class="cards-grid" id="cards-chance"></div>
+                <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增一張機會卡</button>
+                <div class="tip">
+                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-modal" id="fate-overlay" role="dialog" aria-modal="true" aria-labelledby="fate-dialog-title" aria-hidden="true">
+        <div class="glass-modal-backdrop" id="fate-overlay-backdrop"></div>
+        <div class="glass-modal-panel glass-modal-panel--cards" id="fate-overlay-panel">
+            <div class="glass-modal-header">
+                <h2 id="fate-dialog-title">🔵 命運卡</h2>
+                <button type="button" class="glass-modal-close" id="fate-close" aria-label="關閉">✕</button>
+            </div>
+            <div class="glass-modal-body glass-modal-body--scroll">
+                <div class="cards-grid" id="cards-fate"></div>
+                <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增一張命運卡</button>
+                <div class="tip">
+                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.PEACHBLOSSOM_AUTH_APP_ID = "shanhaijing-monopoly";
+        window.PEACHBLOSSOM_AUTH_LOGIN_LABEL = "Google 登入";
+    </script>
+    <script src="../js/peachblossom-auth.js"></script>
     <script>
     (function () {
         "use strict";
 
         const STORAGE_KEY = "shanhaijing-monopoly-v1";
+
+        let onlineMode = false;
+        let onlineRoomCode = "";
+        let onlineVersion = 0;
+        /** @type {{ hostUserId: string, members: Array<{userId: string, playerIndex: number, name: string|null, email: string, picture: string|null}> } | null} */
+        let onlineMeta = null;
+        let myUserId = null;
+        let pollTimer = null;
+        let onlineSaveTimer = null;
+
+        function getAuthBase() {
+            if (typeof window.PEACHBLOSSOM_AUTH_BASE === "string" && window.PEACHBLOSSOM_AUTH_BASE.trim()) {
+                return window.PEACHBLOSSOM_AUTH_BASE.replace(/\/$/, "");
+            }
+            var h = window.location.hostname;
+            if (h === "localhost" || h === "127.0.0.1") {
+                return "http://localhost:8787";
+            }
+            return "https://auth.peachspring.cc";
+        }
+
+        function roomsBaseUrl() {
+            return getAuthBase() + "/auth/apps/shanhaijing-monopoly/rooms";
+        }
+
+        function setOnlineStatus(html) {
+            var el = document.getElementById("online-status");
+            if (el) el.innerHTML = html;
+        }
+
+        function refreshMyUser(cb) {
+            fetch(getAuthBase() + "/auth/session", { credentials: "include", cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    myUserId = data && data.user && data.user.id ? data.user.id : null;
+                    if (cb) cb(data);
+                })
+                .catch(function () {
+                    myUserId = null;
+                    if (cb) cb(null);
+                });
+        }
+
+        function lobbyFull() {
+            if (!onlineMeta || !state.game) return false;
+            var members = onlineMeta.members || [];
+            return members.length >= state.game.playerCount;
+        }
+
+        function memberAtPlayerIndex(idx) {
+            if (!onlineMeta || !onlineMeta.members) return null;
+            var list = onlineMeta.members;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].playerIndex === idx) return list[i];
+            }
+            return null;
+        }
+
+        function isOnlineHost() {
+            return !!(onlineMode && onlineMeta && myUserId && onlineMeta.hostUserId === myUserId);
+        }
+
+        function buildServerSnapshot() {
+            return {
+                hostUserId: onlineMeta.hostUserId,
+                members: onlineMeta.members.slice(),
+                tiles: state.tiles,
+                chance: state.chance,
+                fate: state.fate,
+                rulesText: state.rulesText,
+                game: state.game
+            };
+        }
+
+        function stopOnlinePoll() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        function applyServerPayload(data, silentToast) {
+            if (!data || !data.snapshot) return;
+            onlineVersion = data.version;
+            onlineMeta = {
+                hostUserId: data.snapshot.hostUserId,
+                members: data.snapshot.members || []
+            };
+            state = normalizeState({
+                tiles: data.snapshot.tiles,
+                chance: data.snapshot.chance,
+                fate: data.snapshot.fate,
+                rulesText: data.snapshot.rulesText,
+                game: data.snapshot.game
+            });
+            syncRulesTextarea();
+            renderBoard();
+            renderCards();
+            renderCenterGameUI();
+            renderPawnsOnBoard();
+            if (onlineMode) refreshOnlineStatusBanner();
+            if (!silentToast) showToast("已同步房間狀態");
+        }
+
+        function pollRoom() {
+            if (!onlineMode || !onlineRoomCode) return;
+            fetch(roomsBaseUrl() + "/" + encodeURIComponent(onlineRoomCode), {
+                credentials: "include",
+                cache: "no-store"
+            })
+                .then(function (res) {
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data || !data.ok) return;
+                    if (data.version !== onlineVersion) {
+                        applyServerPayload(data, true);
+                    }
+                })
+                .catch(function () { /* ignore */ });
+        }
+
+        function startOnlinePoll() {
+            stopOnlinePoll();
+            pollTimer = setInterval(pollRoom, 2600);
+        }
+
+        function pushOnlineSnapshot(cb) {
+            if (!onlineMode || !onlineRoomCode) {
+                if (cb) cb(true);
+                return;
+            }
+            fetch(roomsBaseUrl() + "/" + encodeURIComponent(onlineRoomCode), {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    version: onlineVersion,
+                    snapshot: buildServerSnapshot()
+                })
+            })
+                .then(function (res) {
+                    return res.json().then(function (j) {
+                        return { ok: res.ok, status: res.status, j: j };
+                    });
+                })
+                .then(function (x) {
+                    if (x.ok && x.j && x.j.ok) {
+                        onlineVersion = x.j.version;
+                        if (x.j.snapshot) {
+                            applyServerPayload({ version: x.j.version, snapshot: x.j.snapshot }, true);
+                        }
+                        if (cb) cb(true);
+                        return;
+                    }
+                    if (x.j && x.j.error === "version_conflict" && x.j.snapshot) {
+                        applyServerPayload({
+                            version: x.j.serverVersion != null ? x.j.serverVersion : onlineVersion,
+                            snapshot: x.j.snapshot
+                        }, true);
+                        showToast("與伺服器同步後已合併狀態");
+                        if (cb) cb(false);
+                        return;
+                    }
+                    showToast("同步失敗，請重試");
+                    if (cb) cb(false);
+                })
+                .catch(function () {
+                    showToast("網路錯誤");
+                    if (cb) cb(false);
+                });
+        }
+
+        function enterOnlineMode(roomCode, data) {
+            onlineMode = true;
+            onlineRoomCode = roomCode;
+            document.getElementById("btn-online-leave").disabled = false;
+            document.getElementById("player-count").disabled = true;
+            applyServerPayload(data, true);
+            startOnlinePoll();
+            refreshOnlineStatusBanner();
+            showToast("已進入線上房間");
+        }
+
+        function leaveOnlineMode() {
+            stopOnlinePoll();
+            onlineMode = false;
+            onlineRoomCode = "";
+            onlineVersion = 0;
+            onlineMeta = null;
+            document.getElementById("btn-online-leave").disabled = true;
+            document.getElementById("player-count").disabled = false;
+            setOnlineStatus("");
+            updateEditorLocks();
+            renderCenterGameUI();
+            showToast("已返回本機模式（未寫入雲端）");
+        }
+
+        function refreshOnlineStatusBanner() {
+            if (!onlineMode || !onlineRoomCode) return;
+            var share =
+                window.location.origin +
+                window.location.pathname +
+                "?room=" +
+                encodeURIComponent(onlineRoomCode);
+            setOnlineStatus(
+                "<div>房間代碼：<span class=\"room-code-display\">" +
+                    String(onlineRoomCode).replace(/</g, "") +
+                    "</span></div>" +
+                    "<div style=\"margin-top:6px;\">分享連結：<a href=\"" +
+                    esc(share) +
+                    "\">" +
+                    esc(share) +
+                    "</a>（房主與已加入玩家可同步棋局）</div>" +
+                    "<div style=\"margin-top:8px;\">已加入玩家：<strong>" +
+                    (onlineMeta && onlineMeta.members ? onlineMeta.members.length : 0) +
+                    "</strong> / <strong>" +
+                    state.game.playerCount +
+                    "</strong></div>"
+            );
+        }
+
+        function scheduleOnlinePushAfterEdit() {
+            if (!onlineMode) return;
+            clearTimeout(onlineSaveTimer);
+            onlineSaveTimer = setTimeout(function () {
+                pushOnlineSnapshot(null);
+            }, 900);
+        }
 
         const TILE_META = {
             "tile-start":   { icon: "🏁", legend: "起點" },
@@ -724,6 +1479,37 @@
             [6,1],[5,1],[4,1],[3,1],[2,1]
         ];
 
+        const NUM_TILES = POS.length;
+        const DEFAULT_START_MONEY = 1500;
+        const PASS_GO_BONUS = 200;
+        const PLAYER_COLORS = ["#e63946", "#457b9d", "#2a9d8f", "#e9c46a", "#9b5de5", "#f57dbc"];
+
+        function buildDefaultPlayers(count) {
+            const players = [];
+            for (let i = 0; i < count; i++) {
+                players.push({ id: i, money: DEFAULT_START_MONEY, position: 0 });
+            }
+            return players;
+        }
+
+        function defaultGame() {
+            const c = 4;
+            return {
+                playerCount: c,
+                players: buildDefaultPlayers(c),
+                currentPlayerIndex: 0,
+                turnLog: [
+                    "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " + DEFAULT_START_MONEY + " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " + PASS_GO_BONUS + " 金幣。"
+                ]
+            };
+        }
+
+        const DEFAULT_RULES_TEXT =
+            "玩家輪流擲骰前進，經過起點可領取獎勵金幣。\n" +
+            "停在地塊可依你自訂文本執行效果（買地、收租、事件等）。\n" +
+            "停在「機會」或「命運」格時，抽對應卡片並執行卡面內容。\n" +
+            "此版為可編輯雛形，可先設計內容與規則文本，所有改動自動儲存。";
+
         /* ---------- State ---------- */
         let state = loadState();
 
@@ -731,24 +1517,69 @@
             return {
                 tiles: DEFAULT_TILES.map(t => ({ ...t })),
                 chance: DEFAULT_CHANCE.map(c => ({ ...c })),
-                fate: DEFAULT_FATE.map(f => ({ ...f }))
+                fate: DEFAULT_FATE.map(f => ({ ...f })),
+                rulesText: DEFAULT_RULES_TEXT,
+                game: defaultGame()
             };
+        }
+
+        function normalizeState(raw) {
+            if (!raw || typeof raw !== "object") return defaultState();
+            if (!raw.rulesText || typeof raw.rulesText !== "string") {
+                raw.rulesText = DEFAULT_RULES_TEXT;
+            }
+            if (!raw.game || typeof raw.game !== "object") {
+                raw.game = defaultGame();
+            } else {
+                const g = raw.game;
+                let n = parseInt(g.playerCount, 10);
+                if (isNaN(n) || n < 2 || n > 6) n = 4;
+                g.playerCount = n;
+                if (!Array.isArray(g.players) || g.players.length !== n) {
+                    g.players = buildDefaultPlayers(n);
+                } else {
+                    g.players = g.players.map(function (p, i) {
+                        return {
+                            id: i,
+                            money: typeof p.money === "number" && p.money >= 0 ? Math.floor(p.money) : DEFAULT_START_MONEY,
+                            position: typeof p.position === "number" ? ((p.position % NUM_TILES) + NUM_TILES) % NUM_TILES : 0
+                        };
+                    });
+                }
+                let cpi = parseInt(g.currentPlayerIndex, 10);
+                if (isNaN(cpi)) cpi = 0;
+                g.currentPlayerIndex = ((cpi % g.playerCount) + g.playerCount) % g.playerCount;
+                if (!Array.isArray(g.turnLog)) {
+                    g.turnLog = defaultGame().turnLog.slice();
+                }
+            }
+            return raw;
         }
 
         function loadState() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) return JSON.parse(raw);
+                if (raw) return normalizeState(JSON.parse(raw));
             } catch (_) { /* ignore */ }
             return defaultState();
         }
 
-        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+        function saveState() {
+            if (onlineMode) return;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
 
         let saveTimer = null;
         function debouncedSave() {
             clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => { saveState(); showToast("已自動儲存 ✓"); }, 600);
+            saveTimer = setTimeout(function () {
+                if (onlineMode) {
+                    scheduleOnlinePushAfterEdit();
+                    return;
+                }
+                saveState();
+                showToast("已自動儲存 ✓");
+            }, 600);
         }
 
         /* ---------- DOM refs ---------- */
@@ -756,24 +1587,135 @@
         const cardsChance = document.getElementById("cards-chance");
         const cardsFate = document.getElementById("cards-fate");
         const drawResult = document.getElementById("draw-result");
-        const chanceCount = document.getElementById("chance-count");
-        const fateCount = document.getElementById("fate-count");
-        const chanceColumnCount = document.getElementById("chance-column-count");
-        const fateColumnCount = document.getElementById("fate-column-count");
         const toastEl = document.getElementById("toast");
-        const rulesPanel = document.getElementById("rules-panel");
-        const logPanel = document.getElementById("log-panel");
-        const rulesToggle = document.getElementById("btn-toggle-rules");
-        const logToggle = document.getElementById("btn-toggle-log");
-        const cardsDrawer = document.getElementById("cards-drawer");
-        const drawerToggle = document.getElementById("drawer-toggle");
-        const drawerClose = document.getElementById("drawer-close");
-        const drawerToggleText = drawerToggle.querySelector("span");
+        const rulesTextEl = document.getElementById("rules-text");
+        const rulesOverlay = document.getElementById("rules-overlay");
+        const rulesOpen = document.getElementById("rules-open");
+        const rulesClose = document.getElementById("rules-close");
+        const rulesBackdrop = document.getElementById("rules-overlay-backdrop");
+        const chanceOverlay = document.getElementById("chance-overlay");
+        const fateOverlay = document.getElementById("fate-overlay");
+        const chanceOpen = document.getElementById("chance-open");
+        const fateOpen = document.getElementById("fate-open");
+        const chanceClose = document.getElementById("chance-close");
+        const fateClose = document.getElementById("fate-close");
+        const chanceBackdrop = document.getElementById("chance-overlay-backdrop");
+        const fateBackdrop = document.getElementById("fate-overlay-backdrop");
+        const turnLogTab = document.getElementById("turn-log-tab");
+        const turnLogHover = turnLogTab ? turnLogTab.closest(".left-rail-log-hover") : null;
+        if (turnLogTab && turnLogHover) {
+            turnLogHover.addEventListener("mouseenter", function () {
+                turnLogTab.setAttribute("aria-expanded", "true");
+            });
+            turnLogHover.addEventListener("mouseleave", function () {
+                turnLogTab.setAttribute("aria-expanded", "false");
+            });
+            turnLogHover.addEventListener("focusin", function () {
+                turnLogTab.setAttribute("aria-expanded", "true");
+            });
+            turnLogHover.addEventListener("focusout", function () {
+                turnLogTab.setAttribute("aria-expanded", "false");
+            });
+        }
+
+        function syncRulesTextarea() {
+            rulesTextEl.value = state.rulesText;
+        }
+
+        rulesTextEl.addEventListener("input", () => {
+            state.rulesText = rulesTextEl.value;
+            debouncedSave();
+        });
+
+        function syncModalOpenBody() {
+            const anyOpen = [rulesOverlay, chanceOverlay, fateOverlay].some(function (el) {
+                return el.classList.contains("is-open");
+            });
+            document.body.classList.toggle("modal-open", anyOpen);
+        }
+
+        function closeAllGlassModals() {
+            [rulesOverlay, chanceOverlay, fateOverlay].forEach(function (el) {
+                el.classList.remove("is-open");
+                el.setAttribute("aria-hidden", "true");
+            });
+            rulesOpen.setAttribute("aria-expanded", "false");
+            chanceOpen.setAttribute("aria-expanded", "false");
+            fateOpen.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("modal-open");
+        }
+
+        function openRulesModal() {
+            closeAllGlassModals();
+            rulesOverlay.classList.add("is-open");
+            rulesOverlay.setAttribute("aria-hidden", "false");
+            rulesOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+            rulesTextEl.focus();
+        }
+
+        function closeRulesModal() {
+            rulesOverlay.classList.remove("is-open");
+            rulesOverlay.setAttribute("aria-hidden", "true");
+            rulesOpen.setAttribute("aria-expanded", "false");
+            syncModalOpenBody();
+            rulesOpen.focus();
+        }
+
+        function openChanceModal() {
+            closeAllGlassModals();
+            chanceOverlay.classList.add("is-open");
+            chanceOverlay.setAttribute("aria-hidden", "false");
+            chanceOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeChanceModal() {
+            chanceOverlay.classList.remove("is-open");
+            chanceOverlay.setAttribute("aria-hidden", "true");
+            chanceOpen.setAttribute("aria-expanded", "false");
+            syncModalOpenBody();
+            chanceOpen.focus();
+        }
+
+        function openFateModal() {
+            closeAllGlassModals();
+            fateOverlay.classList.add("is-open");
+            fateOverlay.setAttribute("aria-hidden", "false");
+            fateOpen.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeFateModal() {
+            fateOverlay.classList.remove("is-open");
+            fateOverlay.setAttribute("aria-hidden", "true");
+            fateOpen.setAttribute("aria-expanded", "false");
+            syncModalOpenBody();
+            fateOpen.focus();
+        }
+
+        rulesOpen.addEventListener("click", openRulesModal);
+        rulesClose.addEventListener("click", closeRulesModal);
+        rulesBackdrop.addEventListener("click", closeRulesModal);
+        chanceOpen.addEventListener("click", openChanceModal);
+        chanceClose.addEventListener("click", closeChanceModal);
+        chanceBackdrop.addEventListener("click", closeChanceModal);
+        fateOpen.addEventListener("click", openFateModal);
+        fateClose.addEventListener("click", closeFateModal);
+        fateBackdrop.addEventListener("click", closeFateModal);
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape") return;
+            if (rulesOverlay.classList.contains("is-open")) closeRulesModal();
+            else if (chanceOverlay.classList.contains("is-open")) closeChanceModal();
+            else if (fateOverlay.classList.contains("is-open")) closeFateModal();
+        });
 
         /* ---------- Legend ---------- */
         (function buildLegend() {
             const container = document.getElementById("legend");
             Object.entries(TILE_META).forEach(([cls, meta]) => {
+                if (cls === "tile-tax") return;
                 const item = document.createElement("span");
                 item.className = "legend-item";
                 item.innerHTML = `<span class="legend-dot" style="background:${TILE_COLORS[cls]}"></span>${meta.icon} ${meta.legend}`;
@@ -782,8 +1724,32 @@
         })();
 
         /* ---------- Board ---------- */
+        function canEditBoardAndCards() {
+            return !onlineMode || isOnlineHost();
+        }
+
+        function updateEditorLocks() {
+            var can = canEditBoardAndCards();
+            var rules = document.getElementById("rules-text");
+            if (rules) rules.disabled = !can;
+            document.querySelectorAll("#board-grid .tile input").forEach(function (inp) {
+                inp.disabled = !can;
+            });
+            document.querySelectorAll(".card-editor input, .card-editor textarea").forEach(function (inp) {
+                inp.disabled = !can;
+            });
+            document.querySelectorAll(".card-delete").forEach(function (btn) {
+                btn.disabled = !can;
+            });
+            var ac1 = document.getElementById("add-card-chance");
+            var ac2 = document.getElementById("add-card-fate");
+            if (ac1) ac1.disabled = !can;
+            if (ac2) ac2.disabled = !can;
+        }
+
         function renderBoard() {
             boardGrid.querySelectorAll(".tile").forEach(el => el.remove());
+            var disAttr = canEditBoardAndCards() ? "" : " disabled";
             state.tiles.forEach((tile, i) => {
                 const [row, col] = POS[i];
                 const meta = TILE_META[tile.type] || { icon: "❓" };
@@ -795,12 +1761,98 @@
                     `<div class="tile-header">` +
                         `<span class="tile-icon">${meta.icon}</span>` +
                         `<span class="tile-label">${tile.label}</span>` +
-                        `<span class="tile-num">#${i + 1}</span>` +
+                        `<span class="tile-num">${i + 1}</span>` +
                     `</div>` +
-                    `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label">` +
-                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect">`;
+                    `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label"${disAttr}>` +
+                    `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect"${disAttr}>` +
+                    `<div class="tile-pawns" data-tile-idx="${i}"></div>`;
                 boardGrid.appendChild(el);
             });
+            renderPawnsOnBoard();
+            updateEditorLocks();
+        }
+
+        function renderPawnsOnBoard() {
+            if (!state.game || !Array.isArray(state.game.players)) return;
+            const tileEls = boardGrid.querySelectorAll(".tile");
+            tileEls.forEach(function (t) {
+                const h = t.querySelector(".tile-pawns");
+                if (h) h.innerHTML = "";
+            });
+            state.game.players.forEach(function (p, idx) {
+                const ti = ((p.position % NUM_TILES) + NUM_TILES) % NUM_TILES;
+                const tileEl = tileEls[ti];
+                if (!tileEl) return;
+                const holder = tileEl.querySelector(".tile-pawns");
+                if (!holder) return;
+                const dot = document.createElement("span");
+                dot.className = "tile-pawn-dot";
+                dot.style.background = PLAYER_COLORS[idx % PLAYER_COLORS.length];
+                dot.textContent = String(idx + 1);
+                dot.title = "玩家 " + (idx + 1);
+                holder.appendChild(dot);
+            });
+        }
+
+        function pushTurnLog(line) {
+            state.game.turnLog.push(line);
+            if (state.game.turnLog.length > 100) {
+                state.game.turnLog = state.game.turnLog.slice(-100);
+            }
+        }
+
+        function renderCenterGameUI() {
+            const g = state.game;
+            const host = document.getElementById("center-players-host");
+            const sel = document.getElementById("player-count");
+            if (sel) sel.value = String(g.playerCount);
+
+            host.innerHTML = "";
+            g.players.forEach(function (p, i) {
+                const wrap = document.createElement("div");
+                wrap.className = "center-piece-wrap" + (i === g.currentPlayerIndex ? " center-piece-wrap--active" : "");
+                const col = PLAYER_COLORS[i % PLAYER_COLORS.length];
+                const mem = onlineMode ? memberAtPlayerIndex(i) : null;
+                const label =
+                    mem && (mem.name || mem.email)
+                        ? "玩家 " + (i + 1) + "（" + (mem.name || mem.email) + "）"
+                        : "玩家 " + (i + 1) + (onlineMode ? "（等待加入）" : "");
+                const readOnlyMoney =
+                    onlineMode &&
+                    (!mem || !myUserId || mem.userId !== myUserId);
+                const roAttr = readOnlyMoney ? " readonly" : "";
+                wrap.innerHTML =
+                    `<div class="center-piece-figure">` +
+                        `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
+                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金"${roAttr} /></div>` +
+                    `</div>` +
+                    `<span class="center-piece-label">${esc(label)}</span>`;
+                host.appendChild(wrap);
+            });
+
+            var curMem = onlineMode ? memberAtPlayerIndex(g.currentPlayerIndex) : null;
+            var turnLine =
+                "輪到：玩家 " +
+                (g.currentPlayerIndex + 1) +
+                (curMem && (curMem.name || curMem.email)
+                    ? "（" + (curMem.name || curMem.email) + "）"
+                    : "") +
+                "（共 " +
+                g.playerCount +
+                " 人）";
+            if (onlineMode && !lobbyFull()) {
+                turnLine += " — 等待玩家加入中，尚不可擲骰";
+            }
+            document.getElementById("turn-indicator").textContent = turnLine;
+
+            const logEl = document.getElementById("turn-log");
+            logEl.innerHTML = "";
+            g.turnLog.slice(-30).forEach(function (line) {
+                const row = document.createElement("div");
+                row.textContent = line;
+                logEl.appendChild(row);
+            });
+            logEl.scrollTop = logEl.scrollHeight;
         }
 
         boardGrid.addEventListener("input", (e) => {
@@ -814,6 +1866,96 @@
             debouncedSave();
         });
 
+        document.querySelector(".center-panel").addEventListener("change", function (e) {
+            const t = e.target;
+            if (!t.classList.contains("money-input")) return;
+            const idx = +t.dataset.playerIdx;
+            if (isNaN(idx) || !state.game.players[idx]) return;
+            let v = parseInt(t.value, 10);
+            if (isNaN(v) || v < 0) v = 0;
+            state.game.players[idx].money = v;
+            debouncedSave();
+        });
+
+        document.getElementById("player-count").addEventListener("change", function () {
+            if (onlineMode) {
+                showToast("線上房間無法變更人數");
+                this.value = String(state.game.playerCount);
+                return;
+            }
+            const n = Math.max(2, Math.min(6, parseInt(this.value, 10)));
+            state.game.playerCount = n;
+            state.game.players = buildDefaultPlayers(n);
+            state.game.currentPlayerIndex = 0;
+            pushTurnLog("人數設為 " + n + " 人：棋子回到起點，資金重置為每位 " + DEFAULT_START_MONEY + "。");
+            saveState();
+            renderPawnsOnBoard();
+            renderCenterGameUI();
+            showToast("已更新遊玩人數");
+        });
+
+        document.getElementById("btn-roll").addEventListener("click", function () {
+            const g = state.game;
+            const diceEl = document.getElementById("dice-display");
+            const btn = this;
+            if (btn.disabled) return;
+            if (onlineMode) {
+                if (!lobbyFull()) {
+                    showToast("請等待所有玩家加入房間");
+                    return;
+                }
+                const cur = memberAtPlayerIndex(g.currentPlayerIndex);
+                if (!cur || !myUserId || cur.userId !== myUserId) {
+                    showToast("目前輪到座位「玩家 " + (g.currentPlayerIndex + 1) + "」，請由該位玩家操作");
+                    return;
+                }
+            }
+            btn.disabled = true;
+            diceEl.classList.add("dice--rolling");
+            const tick = setInterval(function () {
+                diceEl.textContent = String(1 + Math.floor(Math.random() * 6));
+            }, 75);
+            setTimeout(function () {
+                clearInterval(tick);
+                diceEl.classList.remove("dice--rolling");
+                const roll = 1 + Math.floor(Math.random() * 6);
+                diceEl.textContent = String(roll);
+
+                const pid = g.currentPlayerIndex;
+                const p = g.players[pid];
+                const oldPos = p.position;
+                const sum = oldPos + roll;
+                const crossedGo = sum >= NUM_TILES;
+                p.position = sum % NUM_TILES;
+                if (crossedGo) {
+                    p.money += PASS_GO_BONUS;
+                }
+
+                const tileName = (state.tiles[p.position] && state.tiles[p.position].label) ? state.tiles[p.position].label : "？";
+                const nextIdx = (g.currentPlayerIndex + 1) % g.playerCount;
+                let msg = "玩家 " + (pid + 1) + " 擲出 " + roll + " 點 →「" + tileName + "」（第 " + (p.position + 1) + " 格）";
+                if (crossedGo) {
+                    msg += "；經過起點 +" + PASS_GO_BONUS;
+                }
+                msg += "。下一位：玩家 " + (nextIdx + 1) + "。";
+                pushTurnLog(msg);
+
+                g.currentPlayerIndex = nextIdx;
+                if (onlineMode) {
+                    pushOnlineSnapshot(function () {
+                        renderPawnsOnBoard();
+                        renderCenterGameUI();
+                        btn.disabled = false;
+                    });
+                } else {
+                    saveState();
+                    renderPawnsOnBoard();
+                    renderCenterGameUI();
+                    btn.disabled = false;
+                }
+            }, 720);
+        });
+
         /* ---------- Cards ---------- */
         function renderCards() {
             cardsChance.innerHTML = "";
@@ -821,6 +1963,7 @@
             state.chance.forEach((c, i) => cardsChance.appendChild(makeCardEl("chance", c, i)));
             state.fate.forEach((f, i) => cardsFate.appendChild(makeCardEl("fate", f, i)));
             updateCounts();
+            updateEditorLocks();
         }
 
         function makeCardEl(type, card, index) {
@@ -837,10 +1980,7 @@
         }
 
         function updateCounts() {
-            chanceCount.textContent = state.chance.length;
-            fateCount.textContent = state.fate.length;
-            chanceColumnCount.textContent = state.chance.length;
-            fateColumnCount.textContent = state.fate.length;
+            /* 左側欄已不顯示卡片張數 */
         }
 
         document.addEventListener("input", (e) => {
@@ -864,34 +2004,28 @@
             debouncedSave();
         });
 
-        /* ---------- Drawer ---------- */
-        function setDrawerCollapsed(collapsed) {
-            cardsDrawer.classList.toggle("is-collapsed", collapsed);
-            drawerToggle.setAttribute("aria-expanded", String(!collapsed));
-            drawerToggleText.textContent = collapsed ? "展開卡片" : "收合卡片";
-            localStorage.setItem(`${STORAGE_KEY}-drawer-collapsed`, collapsed ? "1" : "0");
-        }
-
-        drawerToggle.addEventListener("click", () => {
-            setDrawerCollapsed(!cardsDrawer.classList.contains("is-collapsed"));
-        });
-
-        drawerClose.addEventListener("click", () => {
-            setDrawerCollapsed(true);
-        });
-
         /* ---------- Add card ---------- */
-        function addCard(type) {
-            state[type].push({ title: "", content: "" });
+        document.getElementById("add-card-chance").addEventListener("click", () => {
+            state.chance.push({ title: "", content: "" });
             renderCards();
-            const container = type === "chance" ? cardsChance : cardsFate;
-            const last = container.lastElementChild;
-            if (last) { last.scrollIntoView({ behavior: "smooth", block: "center" }); last.querySelector("input").focus(); }
+            const last = cardsChance.lastElementChild;
+            if (last) {
+                last.scrollIntoView({ behavior: "smooth", block: "center" });
+                last.querySelector("input").focus();
+            }
             debouncedSave();
-        }
+        });
 
-        document.getElementById("add-chance-card").addEventListener("click", () => addCard("chance"));
-        document.getElementById("add-fate-card").addEventListener("click", () => addCard("fate"));
+        document.getElementById("add-card-fate").addEventListener("click", () => {
+            state.fate.push({ title: "", content: "" });
+            renderCards();
+            const last = cardsFate.lastElementChild;
+            if (last) {
+                last.scrollIntoView({ behavior: "smooth", block: "center" });
+                last.querySelector("input").focus();
+            }
+            debouncedSave();
+        });
 
         /* ---------- Draw Card ---------- */
         function drawCard(type) {
@@ -912,29 +2046,63 @@
         document.getElementById("draw-chance").addEventListener("click", () => drawCard("chance"));
         document.getElementById("draw-fate").addEventListener("click", () => drawCard("fate"));
 
-        function syncPanelToggle(button, panel) {
-            const expanded = !panel.hidden;
-            button.setAttribute("aria-expanded", String(expanded));
-            button.classList.toggle("is-active", expanded);
-        }
+        /* ---------- Toolbar ---------- */
+        document.getElementById("btn-export").addEventListener("click", () => {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "shanhaijing-monopoly.json";
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast("已匯出 JSON 檔案 📤");
+        });
 
-        function bindPanelToggle(button, panel) {
-            button.addEventListener("click", () => {
-                panel.hidden = !panel.hidden;
-                syncPanelToggle(button, panel);
-            });
-            syncPanelToggle(button, panel);
-        }
-
-        bindPanelToggle(rulesToggle, rulesPanel);
-        bindPanelToggle(logToggle, logPanel);
+        const fileInput = document.getElementById("file-import");
+        document.getElementById("btn-import").addEventListener("click", () => {
+            if (onlineMode) {
+                showToast("請先離開線上模式再匯入");
+                return;
+            }
+            fileInput.click();
+        });
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (imported.tiles && imported.chance && imported.fate) {
+                        state = normalizeState(imported);
+                        saveState();
+                        renderBoard();
+                        renderCards();
+                        syncRulesTextarea();
+                        renderCenterGameUI();
+                        showToast("匯入成功 📥");
+                    } else {
+                        showToast("JSON 格式不正確 ⚠️");
+                    }
+                } catch (_) {
+                    showToast("檔案解析失敗 ⚠️");
+                }
+            };
+            reader.readAsText(file);
+            fileInput.value = "";
+        });
 
         document.getElementById("btn-reset").addEventListener("click", () => {
+            if (onlineMode) {
+                showToast("請先離開線上模式再重設");
+                return;
+            }
             if (!confirm("確定要重設為預設內容？所有修改將清除。")) return;
             state = defaultState();
             saveState();
             renderBoard();
             renderCards();
+            syncRulesTextarea();
+            renderCenterGameUI();
             showToast("已重設為預設內容 🔄");
         });
 
@@ -952,10 +2120,104 @@
             return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
+        document.getElementById("btn-online-create").addEventListener("click", function () {
+            refreshMyUser(function (data) {
+                if (!data || !data.authenticated || !data.user) {
+                    showToast("請先完成 Google 登入");
+                    return;
+                }
+                var sel = document.getElementById("player-count");
+                var n = Math.max(2, Math.min(6, parseInt(sel.value, 10)));
+                fetch(roomsBaseUrl(), {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        playerCount: n,
+                        state: state
+                    })
+                })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (j) {
+                        if (!j || !j.ok) {
+                            showToast(j && j.error ? String(j.error) : "建立失敗");
+                            return;
+                        }
+                        enterOnlineMode(j.roomCode, { version: j.version, snapshot: j.snapshot });
+                    })
+                    .catch(function () {
+                        showToast("建立失敗");
+                    });
+            });
+        });
+
+        document.getElementById("btn-online-join").addEventListener("click", function () {
+            var raw = document.getElementById("room-code-input").value;
+            var code = String(raw || "")
+                .trim()
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, "");
+            if (code.length < 4) {
+                showToast("請輸入有效房間代碼");
+                return;
+            }
+            refreshMyUser(function (data) {
+                if (!data || !data.authenticated || !data.user) {
+                    showToast("請先完成 Google 登入");
+                    return;
+                }
+                fetch(roomsBaseUrl() + "/join", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: code })
+                })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (j) {
+                        if (!j || !j.ok) {
+                            var msg = "加入失敗";
+                            if (j && j.error === "room_full") msg = "房間已滿";
+                            else if (j && j.error === "room_not_found") msg = "找不到房間";
+                            showToast(msg);
+                            return;
+                        }
+                        enterOnlineMode(j.roomCode, { version: j.version, snapshot: j.snapshot });
+                    })
+                    .catch(function () {
+                        showToast("加入失敗");
+                    });
+            });
+        });
+
+        document.getElementById("btn-online-leave").addEventListener("click", function () {
+            if (!onlineMode) return;
+            leaveOnlineMode();
+        });
+
+        (function fillRoomFromQuery() {
+            var sp = new URLSearchParams(window.location.search);
+            var r = sp.get("room");
+            if (r) {
+                var input = document.getElementById("room-code-input");
+                if (input) {
+                    input.value = String(r)
+                        .trim()
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, "");
+                }
+            }
+        })();
+
         /* ---------- Init ---------- */
+        syncRulesTextarea();
         renderBoard();
         renderCards();
-        setDrawerCollapsed(localStorage.getItem(`${STORAGE_KEY}-drawer-collapsed`) === "1");
+        renderCenterGameUI();
+        updateEditorLocks();
     })();
     </script>
 </body>
