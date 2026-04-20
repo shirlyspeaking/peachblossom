@@ -43,7 +43,6 @@
             max-width: 1440px;
             margin: 0 auto;
             padding: 24px 20px 40px;
-            padding-left: calc(min(3.75rem, 12vw) + 14px);
             box-sizing: border-box;
         }
 
@@ -99,20 +98,6 @@
             transition: transform var(--transition), box-shadow var(--transition);
         }
         .back-link:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 22px rgba(131, 56, 236, 0.45); }
-
-        /* ===== Toolbar ===== */
-        .toolbar {
-            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
-        }
-        .toolbar button {
-            border: 1px solid rgba(63, 29, 56, 0.2); background: var(--panel);
-            border-radius: 999px; padding: 8px 16px; font-family: inherit;
-            font-size: 0.85rem; color: var(--ink); cursor: pointer;
-            transition: all var(--transition);
-        }
-        .toolbar button:hover { background: rgba(131, 56, 236, 0.1); border-color: #8338ec; }
-        .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
-        .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
 
         .top-bar-right {
             display: flex;
@@ -499,6 +484,47 @@
             margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
         }
         .section-title { font-size: 1.1rem; }
+        .board-title-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+        .board-title-actions .rules-tag,
+        .board-title-actions .left-rail-log-tab {
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            width: auto;
+            min-height: auto;
+            max-height: none;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+        .rules-tag.btn-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.3);
+            background: rgba(255, 255, 255, 0.75);
+        }
+        .rules-tag.btn-danger:hover {
+            background: rgba(192, 57, 43, 0.08);
+            border-color: rgba(192, 57, 43, 0.45);
+            box-shadow: 0 4px 14px rgba(192, 57, 43, 0.16);
+        }
+        .board-title-actions .left-rail-log-hover {
+            align-self: auto;
+        }
+        .board-title-actions .left-rail-log-popover {
+            left: auto;
+            right: 0;
+            top: calc(100% + 8px);
+            bottom: auto;
+            width: min(360px, calc(100vw - 40px));
+        }
+        .board-title-actions .turn-log--rail {
+            font-size: 0.78rem;
+            max-height: min(320px, 56vh);
+        }
 
         /* ===== Board ===== */
         .board-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -844,6 +870,13 @@
         .draw-actions button:active { transform: scale(0.97); }
         .draw-chance { background: var(--chance); color: #4f3600; }
         .draw-fate   { background: var(--fate); color: white; }
+        .card-config-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
         .draw-result-area {
             perspective: 600px;
@@ -1008,26 +1041,6 @@
     </style>
 </head>
 <body>
-    <aside class="left-rail" aria-label="規則與卡片捷徑">
-        <div class="left-rail-top">
-            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
-                📜 基本規則
-            </button>
-            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡設置">
-                🟡 機會卡設置
-            </button>
-            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡設置">
-                🔵 命運卡設置
-            </button>
-        </div>
-        <div class="left-rail-log-hover">
-            <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">回合記錄</button>
-            <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
-                <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
-            </div>
-        </div>
-    </aside>
-
     <div class="page">
         <div class="page-main">
             <div class="top-bar">
@@ -1038,13 +1051,6 @@
                     <div id="peachblossom-auth-bar" aria-live="polite"></div>
                     <a class="back-link" href="../index.html">← 回桃花源</a>
                 </div>
-            </div>
-
-            <div class="toolbar">
-                <button id="btn-export">📤 匯出設定 (JSON)</button>
-                <button id="btn-import">📥 匯入設定</button>
-                <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
-                <input type="file" id="file-import" accept=".json" hidden>
             </div>
 
             <section class="online-panel" id="online-panel" aria-labelledby="online-panel-title">
@@ -1070,6 +1076,16 @@
                 <section class="board-section">
                     <div class="section-header">
                         <h2 class="section-title">🗺️ 大富翁——山海經巡遊</h2>
+                        <div class="board-title-actions">
+                            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">📜 基本規則</button>
+                            <div class="left-rail-log-hover">
+                                <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">📝 回合記錄</button>
+                                <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
+                                    <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
+                                </div>
+                            </div>
+                            <button id="btn-reset" class="rules-tag btn-danger" type="button">🔄 重設為預設</button>
+                        </div>
                     </div>
                     <div class="board-scroll">
                         <div class="board-grid" id="board-grid">
@@ -1104,6 +1120,10 @@
                                     <div class="draw-actions">
                                         <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
                                         <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
+                                    </div>
+                                    <div class="card-config-actions">
+                                        <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡設置">🟡 機會卡設置</button>
+                                        <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡設置">🔵 命運卡設置</button>
                                     </div>
                                     <div class="draw-result-area">
                                         <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
@@ -2045,51 +2065,6 @@
 
         document.getElementById("draw-chance").addEventListener("click", () => drawCard("chance"));
         document.getElementById("draw-fate").addEventListener("click", () => drawCard("fate"));
-
-        /* ---------- Toolbar ---------- */
-        document.getElementById("btn-export").addEventListener("click", () => {
-            const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "shanhaijing-monopoly.json";
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast("已匯出 JSON 檔案 📤");
-        });
-
-        const fileInput = document.getElementById("file-import");
-        document.getElementById("btn-import").addEventListener("click", () => {
-            if (onlineMode) {
-                showToast("請先離開線上模式再匯入");
-                return;
-            }
-            fileInput.click();
-        });
-        fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    if (imported.tiles && imported.chance && imported.fate) {
-                        state = normalizeState(imported);
-                        saveState();
-                        renderBoard();
-                        renderCards();
-                        syncRulesTextarea();
-                        renderCenterGameUI();
-                        showToast("匯入成功 📥");
-                    } else {
-                        showToast("JSON 格式不正確 ⚠️");
-                    }
-                } catch (_) {
-                    showToast("檔案解析失敗 ⚠️");
-                }
-            };
-            reader.readAsText(file);
-            fileInput.value = "";
-        });
 
         document.getElementById("btn-reset").addEventListener("click", () => {
             if (onlineMode) {
