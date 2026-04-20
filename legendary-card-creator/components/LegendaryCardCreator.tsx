@@ -470,7 +470,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                           {!isModern ? (
                             <div
                               className={cn(
-                                "absolute inset-x-[6%] top-[13%] h-[44%] overflow-hidden rounded-[1.1rem] border-2",
+                                "absolute inset-x-[6%] top-[16%] h-[42%] overflow-hidden rounded-[1.1rem] border-2",
                                 shadowless ? "" : "shadow-[0_22px_38px_-24px_rgba(15,23,42,0.95)]"
                               )}
                               style={{ borderColor: "rgba(255, 234, 176, 0.68)" }}
