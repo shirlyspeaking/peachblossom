@@ -12,19 +12,6 @@ type TabKey = "basic" | "visual" | "upload";
 type Era = "vintage" | "modern";
 type EnergyType = "fire" | "water" | "electric" | "grass" | "psychic" | "dark";
 
-type Html2CanvasOptions = {
-  backgroundColor?: string | null;
-  logging?: boolean;
-  scale?: number;
-  useCORS?: boolean;
-};
-
-declare global {
-  interface Window {
-    html2canvas?: (element: HTMLElement, options?: Html2CanvasOptions) => Promise<HTMLCanvasElement>;
-  }
-}
-
 const ENERGY_OPTIONS: Array<{ id: EnergyType; symbol: string; swatch: string }> = [
   { id: "fire", symbol: "F", swatch: "from-orange-400 via-red-500 to-rose-500" },
   { id: "water", symbol: "W", swatch: "from-cyan-400 via-sky-500 to-blue-600" },
@@ -111,21 +98,10 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   const [headerText, setHeaderText] = useState("#f8fafc");
   const [pointer, setPointer] = useState({ x: 50, y: 50 });
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [exportReady, setExportReady] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (window.html2canvas) {
-        setExportReady(true);
-        window.clearInterval(timer);
-      }
-    }, 240);
-    return () => window.clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -205,11 +181,12 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   }
 
   async function exportCard() {
-    if (!previewRef.current || !window.html2canvas) return;
+    if (!previewRef.current) return;
     setExporting(true);
     setStatus("正在輸出拍賣展示質感 PNG...");
     try {
-      const canvas = await window.html2canvas(previewRef.current, {
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(previewRef.current, {
         backgroundColor: null,
         logging: false,
         scale: 4,
@@ -254,7 +231,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 {showBack ? "顯示正面" : "翻到背面"}
               </Button>
-              <Button onClick={() => void exportCard()} disabled={exporting || !exportReady} className="bg-[#FFCB05] text-slate-950 hover:bg-yellow-300">
+              <Button onClick={() => void exportCard()} disabled={exporting} className="bg-[#FFCB05] text-slate-950 hover:bg-yellow-300">
                 <Download className="mr-2 h-4 w-4" />
                 {exporting ? "匯出中..." : "匯出 PNG"}
               </Button>
