@@ -7,18 +7,39 @@ import {
   readSessionCookie,
 } from "./cookies";
 import {
+  addAppRoomMember,
   createSession,
+  createAppRoom,
   deleteSession,
+  findAppRoom,
   findSessionWithUser,
   hasFontAdminAccess,
+  listAppRoomMembers,
+  touchAppRoom,
+  updateAppRoomSnapshotIfVersionMatches,
   upsertUserAndLinkGoogle,
 } from "./db";
 import { exchangeAuthorizationCode, fetchGoogleUserInfo } from "./google";
-import type { Env, OAuthStatePayload } from "./types";
+import type {
+  AppRoomMember,
+  AppRoomSnapshot,
+  AppRoomRow,
+  Env,
+  OAuthStatePayload,
+  RoleRow,
+  UserRow,
+} from "./types";
 
 const APP_ID_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const ROOM_CODE_RE = /^[A-Z0-9]{4,8}$/;
 const OAUTH_KV_PREFIX = "oauth:";
 const OAUTH_TTL_SEC = 600;
+const SHANHAIJING_APP_ID = "shanhaijing-monopoly";
+
+type AuthenticatedSession = {
+  user: UserRow;
+  roles: RoleRow[];
+};
 
 function adminEmails(env: Env): string[] {
   return parseCommaList(env.AUTH_ADMIN_EMAILS).map((e) => e.toLowerCase());
@@ -73,7 +94,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
       headers: {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
         "Access-Control-Allow-Headers": allowHeaders,
         "Access-Control-Max-Age": "86400",
         Vary: "Origin",
@@ -99,6 +120,24 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   const accessMatch = path.match(/^\/auth\/apps\/([^/]+)\/access$/);
   if (accessMatch && method === "GET") {
     return handleAppAccess(request, env, accessMatch[1]!, corsOrigin);
+  }
+
+  const roomsMatch = path.match(/^\/auth\/apps\/([^/]+)\/rooms$/);
+  if (roomsMatch && method === "POST") {
+    return handleCreateRoom(request, env, roomsMatch[1]!, corsOrigin);
+  }
+
+  const joinRoomMatch = path.match(/^\/auth\/apps\/([^/]+)\/rooms\/join$/);
+  if (joinRoomMatch && method === "POST") {
+    return handleJoinRoom(request, env, joinRoomMatch[1]!, corsOrigin);
+  }
+
+  const roomMatch = path.match(/^\/auth\/apps\/([^/]+)\/rooms\/([^/]+)$/);
+  if (roomMatch && method === "GET") {
+    return handleGetRoom(request, env, roomMatch[1]!, roomMatch[2]!, corsOrigin);
+  }
+  if (roomMatch && method === "PUT") {
+    return handleUpdateRoom(request, env, roomMatch[1]!, roomMatch[2]!, corsOrigin);
   }
 
   const loginMatch = path.match(/^\/auth\/apps\/([^/]+)\/login$/);
@@ -158,7 +197,7 @@ async function handleAppAccess(
   appId: string,
   corsOrigin: string | null
 ): Promise<Response> {
-  if (appId === "peachspring-home") {
+  if (appId === "peachspring-home" || appId === SHANHAIJING_APP_ID) {
     const sid = readSessionCookie(request);
     if (!sid) {
       return json({ allowed: false, reason: "no_session" }, 200, corsOrigin);
@@ -206,7 +245,7 @@ async function handleLogin(request: Request, env: Env, appId: string): Promise<R
   }
 
   // 僅允許已知 appId 走中央登入，避免任意字串濫用 auth 端點。
-  if (appId !== "font-admin" && appId !== "peachspring-home") {
+  if (appId !== "font-admin" && appId !== "peachspring-home" && appId !== SHANHAIJING_APP_ID) {
     return json({ ok: false, error: "unknown_app_id" }, 404, null);
   }
 
@@ -236,6 +275,435 @@ async function handleLogin(request: Request, env: Env, appId: string): Promise<R
   authUrl.searchParams.set("code_challenge_method", "S256");
 
   return redirect(authUrl.toString());
+}
+
+function requireRoomAppId(appId: string, corsOrigin: string | null): Response | null {
+  if (!APP_ID_RE.test(appId)) {
+    return json({ ok: false, error: "invalid_app_id" }, 400, corsOrigin);
+  }
+  if (appId !== SHANHAIJING_APP_ID) {
+    return json({ ok: false, error: "unknown_app_id" }, 404, corsOrigin);
+  }
+  return null;
+}
+
+async function requireAuthenticatedSession(
+  request: Request,
+  env: Env,
+  corsOrigin: string | null
+): Promise<AuthenticatedSession | Response> {
+  const sid = readSessionCookie(request);
+  if (!sid) {
+    return denyInlineJson("no_session", 401, corsOrigin);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const row = await findSessionWithUser(env.DB, sid, now);
+  if (!row) {
+    return denyInlineJson("invalid_session", 401, corsOrigin);
+  }
+
+  return row;
+}
+
+function isResponse(value: Response | unknown): value is Response {
+  return value instanceof Response;
+}
+
+function parseObjectLike(input: unknown): Record<string, unknown> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  return { ...(input as Record<string, unknown>) };
+}
+
+function mergeRoomSnapshot(
+  snapshotLike: unknown,
+  hostUserId: string,
+  members: AppRoomMember[]
+): AppRoomSnapshot {
+  return {
+    ...parseObjectLike(snapshotLike),
+    hostUserId,
+    members,
+  };
+}
+
+function parseStoredSnapshot(snapshotJson: string): Record<string, unknown> {
+  try {
+    return parseObjectLike(JSON.parse(snapshotJson) as unknown);
+  } catch {
+    return {};
+  }
+}
+
+function normalizeRoomCode(raw: unknown): string {
+  return String(raw || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function randomRoomCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  for (const b of bytes) {
+    out += alphabet[b % alphabet.length];
+  }
+  return out;
+}
+
+function clampPlayerCount(input: unknown): number {
+  const n = Number.parseInt(String(input ?? ""), 10);
+  if (!Number.isFinite(n)) return 2;
+  return Math.max(2, Math.min(6, n));
+}
+
+function firstAvailablePlayerIndex(members: AppRoomMember[], playerCount: number): number {
+  const used = new Set(members.map((m) => m.playerIndex));
+  for (let i = 0; i < playerCount; i += 1) {
+    if (!used.has(i)) return i;
+  }
+  return -1;
+}
+
+function looksLikeConstraintError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return /constraint|unique/i.test(msg);
+}
+
+async function readJsonBody(request: Request): Promise<Record<string, unknown>> {
+  const body = (await request.json()) as unknown;
+  return parseObjectLike(body);
+}
+
+async function loadRoomState(
+  env: Env,
+  appId: string,
+  roomCode: string
+): Promise<{ room: AppRoomRow; members: AppRoomMember[]; snapshot: AppRoomSnapshot } | null> {
+  const room = await findAppRoom(env.DB, appId, roomCode);
+  if (!room) return null;
+  const members = await listAppRoomMembers(env.DB, appId, roomCode);
+  const snapshot = mergeRoomSnapshot(parseStoredSnapshot(room.snapshot_json), room.host_user_id, members);
+  return { room, members, snapshot };
+}
+
+async function bumpRoomVersion(
+  env: Env,
+  appId: string,
+  roomCode: string,
+  nowSec: number
+): Promise<number> {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const room = await findAppRoom(env.DB, appId, roomCode);
+    if (!room) throw new Error("room_not_found");
+    const updated = await updateAppRoomSnapshotIfVersionMatches(env.DB, {
+      appId,
+      roomCode,
+      expectedVersion: room.version,
+      nextVersion: room.version + 1,
+      snapshotJson: room.snapshot_json,
+      nowSec,
+    });
+    if (updated) return room.version + 1;
+  }
+  throw new Error("room_version_bump_failed");
+}
+
+async function handleCreateRoom(
+  request: Request,
+  env: Env,
+  appId: string,
+  corsOrigin: string | null
+): Promise<Response> {
+  const appError = requireRoomAppId(appId, corsOrigin);
+  if (appError) return appError;
+
+  const session = await requireAuthenticatedSession(request, env, corsOrigin);
+  if (isResponse(session)) return session;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request);
+  } catch {
+    return denyInlineJson("invalid_json", 400, corsOrigin);
+  }
+
+  const playerCount = clampPlayerCount(body.playerCount);
+  const members: AppRoomMember[] = [
+    {
+      userId: session.user.id,
+      playerIndex: 0,
+      email: session.user.email,
+      name: session.user.name,
+      picture: session.user.picture,
+      joinedAt: Math.floor(Date.now() / 1000),
+    },
+  ];
+  const snapshot = mergeRoomSnapshot(body.state, session.user.id, members);
+  const snapshotJson = JSON.stringify(snapshot);
+  const now = Math.floor(Date.now() / 1000);
+
+  let roomCode = "";
+  let created = false;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    roomCode = randomRoomCode();
+    try {
+      await createAppRoom(env.DB, {
+        appId,
+        roomCode,
+        hostUserId: session.user.id,
+        playerCount,
+        snapshotJson,
+        nowSec: now,
+      });
+      created = true;
+      break;
+    } catch (error) {
+      if (!looksLikeConstraintError(error)) throw error;
+    }
+  }
+
+  if (!created || !roomCode) {
+    return denyInlineJson("room_create_failed", 500, corsOrigin);
+  }
+
+  return json(
+    {
+      ok: true,
+      roomCode,
+      version: 1,
+      snapshot,
+    },
+    200,
+    corsOrigin
+  );
+}
+
+async function handleJoinRoom(
+  request: Request,
+  env: Env,
+  appId: string,
+  corsOrigin: string | null
+): Promise<Response> {
+  const appError = requireRoomAppId(appId, corsOrigin);
+  if (appError) return appError;
+
+  const session = await requireAuthenticatedSession(request, env, corsOrigin);
+  if (isResponse(session)) return session;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request);
+  } catch {
+    return denyInlineJson("invalid_json", 400, corsOrigin);
+  }
+
+  const roomCode = normalizeRoomCode(body.code);
+  if (!ROOM_CODE_RE.test(roomCode)) {
+    return denyInlineJson("invalid_room_code", 400, corsOrigin);
+  }
+
+  let roomState = await loadRoomState(env, appId, roomCode);
+  if (!roomState) {
+    return denyInlineJson("room_not_found", 404, corsOrigin);
+  }
+
+  const existing = roomState.members.find((member) => member.userId === session.user.id);
+  if (existing) {
+    await touchAppRoom(env.DB, appId, roomCode, Math.floor(Date.now() / 1000));
+    return json(
+      {
+        ok: true,
+        roomCode,
+        version: roomState.room.version,
+        snapshot: roomState.snapshot,
+      },
+      200,
+      corsOrigin
+    );
+  }
+
+  if (roomState.members.length >= roomState.room.player_count) {
+    return denyInlineJson("room_full", 409, corsOrigin);
+  }
+
+  const playerIndex = firstAvailablePlayerIndex(roomState.members, roomState.room.player_count);
+  if (playerIndex < 0) {
+    return denyInlineJson("room_full", 409, corsOrigin);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  try {
+    await addAppRoomMember(env.DB, {
+      appId,
+      roomCode,
+      userId: session.user.id,
+      playerIndex,
+      nowSec: now,
+    });
+  } catch (error) {
+    if (!looksLikeConstraintError(error)) throw error;
+  }
+
+  roomState = await loadRoomState(env, appId, roomCode);
+  if (!roomState) {
+    return denyInlineJson("room_not_found", 404, corsOrigin);
+  }
+
+  const joined = roomState.members.find((member) => member.userId === session.user.id);
+  if (!joined) {
+    if (roomState.members.length >= roomState.room.player_count) {
+      return denyInlineJson("room_full", 409, corsOrigin);
+    }
+    return denyInlineJson("room_join_failed", 409, corsOrigin);
+  }
+
+  await bumpRoomVersion(env, appId, roomCode, now);
+  roomState = await loadRoomState(env, appId, roomCode);
+  if (!roomState) {
+    return denyInlineJson("room_not_found", 404, corsOrigin);
+  }
+
+  return json(
+    {
+      ok: true,
+      roomCode,
+      version: roomState.room.version,
+      snapshot: roomState.snapshot,
+    },
+    200,
+    corsOrigin
+  );
+}
+
+async function handleGetRoom(
+  request: Request,
+  env: Env,
+  appId: string,
+  rawRoomCode: string,
+  corsOrigin: string | null
+): Promise<Response> {
+  const appError = requireRoomAppId(appId, corsOrigin);
+  if (appError) return appError;
+
+  const session = await requireAuthenticatedSession(request, env, corsOrigin);
+  if (isResponse(session)) return session;
+
+  const roomCode = normalizeRoomCode(rawRoomCode);
+  if (!ROOM_CODE_RE.test(roomCode)) {
+    return denyInlineJson("invalid_room_code", 400, corsOrigin);
+  }
+
+  const roomState = await loadRoomState(env, appId, roomCode);
+  if (!roomState) {
+    return denyInlineJson("room_not_found", 404, corsOrigin);
+  }
+
+  const isMember = roomState.members.some((member) => member.userId === session.user.id);
+  if (!isMember) {
+    return denyInlineJson("not_room_member", 403, corsOrigin);
+  }
+
+  await touchAppRoom(env.DB, appId, roomCode, Math.floor(Date.now() / 1000));
+
+  return json(
+    {
+      ok: true,
+      roomCode,
+      version: roomState.room.version,
+      snapshot: roomState.snapshot,
+    },
+    200,
+    corsOrigin
+  );
+}
+
+async function handleUpdateRoom(
+  request: Request,
+  env: Env,
+  appId: string,
+  rawRoomCode: string,
+  corsOrigin: string | null
+): Promise<Response> {
+  const appError = requireRoomAppId(appId, corsOrigin);
+  if (appError) return appError;
+
+  const session = await requireAuthenticatedSession(request, env, corsOrigin);
+  if (isResponse(session)) return session;
+
+  const roomCode = normalizeRoomCode(rawRoomCode);
+  if (!ROOM_CODE_RE.test(roomCode)) {
+    return denyInlineJson("invalid_room_code", 400, corsOrigin);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request);
+  } catch {
+    return denyInlineJson("invalid_json", 400, corsOrigin);
+  }
+
+  const expectedVersion = Number.parseInt(String(body.version ?? ""), 10);
+  if (!Number.isFinite(expectedVersion) || expectedVersion < 1) {
+    return denyInlineJson("invalid_version", 400, corsOrigin);
+  }
+
+  const roomState = await loadRoomState(env, appId, roomCode);
+  if (!roomState) {
+    return denyInlineJson("room_not_found", 404, corsOrigin);
+  }
+
+  const isMember = roomState.members.some((member) => member.userId === session.user.id);
+  if (!isMember) {
+    return denyInlineJson("not_room_member", 403, corsOrigin);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const mergedSnapshot = mergeRoomSnapshot(
+    body.snapshot,
+    roomState.room.host_user_id,
+    roomState.members
+  );
+
+  const updated = await updateAppRoomSnapshotIfVersionMatches(env.DB, {
+    appId,
+    roomCode,
+    expectedVersion,
+    nextVersion: expectedVersion + 1,
+    snapshotJson: JSON.stringify(mergedSnapshot),
+    nowSec: now,
+  });
+
+  if (!updated) {
+    const latest = await loadRoomState(env, appId, roomCode);
+    if (!latest) {
+      return denyInlineJson("room_not_found", 404, corsOrigin);
+    }
+    return json(
+      {
+        ok: false,
+        error: "version_conflict",
+        roomCode,
+        version: latest.room.version,
+        snapshot: latest.snapshot,
+      },
+      409,
+      corsOrigin
+    );
+  }
+
+  return json(
+    {
+      ok: true,
+      roomCode,
+      version: expectedVersion + 1,
+      snapshot: mergedSnapshot,
+    },
+    200,
+    corsOrigin
+  );
 }
 
 async function handleCallback(request: Request, env: Env): Promise<Response> {
