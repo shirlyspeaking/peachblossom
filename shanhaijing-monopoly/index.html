@@ -512,6 +512,78 @@
             max-height: min(320px, 56vh);
         }
 
+        .board-preset-wrap {
+            position: relative;
+        }
+        .board-preset-popover {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            z-index: 60;
+            width: min(300px, calc(100vw - 36px));
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            box-shadow: var(--shadow-hover);
+            font-size: 0.84rem;
+            line-height: 1.45;
+            color: var(--ink);
+        }
+        .board-preset-popover[hidden] {
+            display: none !important;
+        }
+        .board-preset-hint {
+            margin: 0 0 10px;
+            color: var(--ink-light);
+            font-size: 0.82rem;
+        }
+        .board-preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .board-preset-row:first-of-type {
+            margin-top: 0;
+        }
+        .board-preset-popover label {
+            display: block;
+            width: 100%;
+        }
+        .board-preset-popover input[type="text"],
+        .board-preset-popover select {
+            width: 100%;
+            margin-top: 4px;
+            padding: 7px 9px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.18);
+            font-family: inherit;
+            font-size: 0.86rem;
+        }
+        .board-preset-popover button {
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.92);
+            padding: 7px 12px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .board-preset-popover button:hover:not(:disabled) {
+            border-color: #8338ec;
+            background: rgba(131, 56, 236, 0.08);
+        }
+        .board-preset-popover button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .board-preset-popover .btn-preset-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.35);
+        }
+
         /* ===== 右側：機會／命運卡編輯抽屜 ===== */
         .cards-drawer {
             position: fixed;
@@ -1167,93 +1239,48 @@
             opacity: 0.55;
             cursor: not-allowed;
         }
-        /* 透視外殼：讓骰子呈現立體塊狀 */
+        /* 骰子外觀：以 🎲 為主體，旁邊顯示點數 */
         .dice-shell {
-            perspective: 160px;
-            perspective-origin: 50% 35%;
             flex-shrink: 0;
-            padding: 6px 8px 10px;
-        }
-
-        .dice {
-            position: relative;
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            transform: rotateX(24deg) rotateY(-32deg);
-            transform-style: preserve-3d;
-            background:
-                linear-gradient(152deg,
-                    rgba(255, 252, 254, 1) 0%,
-                    rgba(236, 224, 232, 0.98) 42%,
-                    rgba(188, 168, 182, 1) 100%);
-            border: 1px solid rgba(75, 42, 58, 0.38);
+            padding: 4px 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.42rem;
-            font-weight: 800;
-            color: #4a2840;
-            text-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.65),
-                0 -1px 1px rgba(60, 30, 45, 0.12);
-            box-shadow:
-                inset 5px 5px 14px rgba(255, 255, 255, 0.82),
-                inset -5px -8px 14px rgba(48, 28, 40, 0.28),
-                inset 0 -2px 4px rgba(90, 50, 65, 0.12),
-                0 9px 0 -1px rgba(72, 44, 56, 0.55),
-                0 16px 22px -8px rgba(35, 20, 30, 0.5),
-                0 3px 6px rgba(255, 255, 255, 0.35) inset;
-            flex-shrink: 0;
-            isolation: isolate;
         }
-        .dice .dice-glyph {
-            position: absolute;
-            right: 4px;
-            bottom: 3px;
-            font-size: 1.05rem;
-            line-height: 1;
-            opacity: 0.42;
-            z-index: 1;
-            filter: saturate(1.1);
-            pointer-events: none;
+
+        .dice {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-shrink: 0;
             user-select: none;
         }
+        .dice .dice-emoji {
+            font-size: clamp(2.4rem, 8vw, 3rem);
+            line-height: 1;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(63, 29, 56, 0.2));
+        }
         .dice .dice-face-value {
-            position: relative;
-            z-index: 2;
-            font-size: 1.42rem;
+            min-width: 1.5rem;
+            font-size: clamp(1.25rem, 4vw, 1.65rem);
             font-weight: 800;
             color: #4a2840;
-            text-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.65),
-                0 -1px 1px rgba(60, 30, 45, 0.12);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
         }
 
-        /* 頂緣高光（不遮住中央點數） */
-        .dice::before {
-            content: "";
-            position: absolute;
-            left: 7px;
-            right: 7px;
-            top: 5px;
-            height: 38%;
-            border-radius: 10px 10px 40% 40%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .dice.dice--rolling {
+        .dice.dice--rolling .dice-emoji {
             animation: dice-wobble 0.11s linear infinite;
         }
 
         @keyframes dice-wobble {
             0%, 100% {
-                transform: rotateX(24deg) rotateY(-32deg) rotateZ(-12deg) translateY(0);
+                transform: rotate(-14deg) translateY(0);
             }
             50% {
-                transform: rotateX(24deg) rotateY(-32deg) rotateZ(12deg) translateY(-3px);
+                transform: rotate(14deg) translateY(-3px);
             }
         }
 
@@ -1424,6 +1451,32 @@
                                     <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
                                 </div>
                             </div>
+                            <button type="button" class="rules-tag" id="btn-restart-game" title="保留棋盤地名、機會／命運卡與規則文字，重置棋子、金幣與領地">🔁 重新開始</button>
+                            <div class="board-preset-wrap">
+                                <button type="button" class="rules-tag" id="btn-preset-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="board-preset-popover" title="儲存或載入棋盤設定（須登入）">📂 棋盤收藏</button>
+                                <div class="board-preset-popover" id="board-preset-popover" role="region" aria-label="棋盤設定收藏" hidden>
+                                    <p class="board-preset-hint" id="board-preset-auth-msg">
+                                        使用 Google 登入後，可將目前<strong>棋盤格、機會／命運卡、規則文字</strong>存入此瀏覽器，方便下次載入重複使用（資料僅存在本機）。
+                                    </p>
+                                    <div id="board-preset-logged-block">
+                                        <label>收藏名稱
+                                            <input type="text" id="preset-name-input" maxlength="40" placeholder="例如：春節親子版" autocomplete="off" />
+                                        </label>
+                                        <div class="board-preset-row">
+                                            <button type="button" id="btn-preset-save">儲存目前設定</button>
+                                        </div>
+                                        <label>載入已存
+                                            <select id="preset-select" aria-label="選擇已儲存的棋盤設定">
+                                                <option value="">— 請選擇 —</option>
+                                            </select>
+                                        </label>
+                                        <div class="board-preset-row">
+                                            <button type="button" id="btn-preset-load">套用至棋盤</button>
+                                            <button type="button" class="btn-preset-danger" id="btn-preset-delete">刪除</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <button id="btn-reset" class="rules-tag btn-danger" type="button">🔄 重設為預設</button>
                         </div>
                     </div>
@@ -1451,7 +1504,7 @@
                                         <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
                                         <div class="dice-shell">
                                             <div class="dice" id="dice-display" role="img" aria-label="骰子點數">
-                                                <span class="dice-glyph" aria-hidden="true">🎲</span>
+                                                <span class="dice-emoji" aria-hidden="true">🎲</span>
                                                 <span class="dice-face-value" id="dice-face-value">1</span>
                                             </div>
                                         </div>
@@ -1550,6 +1603,8 @@
         "use strict";
 
         const STORAGE_KEY = "shanhaijing-monopoly-v1";
+        const BOARD_PRESETS_KEY = "shanhaijing-monopoly-board-presets-v1";
+        const MAX_BOARD_PRESETS_PER_USER = 20;
 
         let onlineMode = false;
         let onlineRoomCode = "";
@@ -1919,16 +1974,191 @@
             return players;
         }
 
+        function initialTurnLogLine() {
+            return (
+                "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " +
+                DEFAULT_START_MONEY +
+                " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " +
+                PASS_GO_BONUS +
+                " 金幣。"
+            );
+        }
+
         function defaultGame() {
             const c = 4;
             return {
                 playerCount: c,
                 players: buildDefaultPlayers(c),
                 currentPlayerIndex: 0,
-                turnLog: [
-                    "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " + DEFAULT_START_MONEY + " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " + PASS_GO_BONUS + " 金幣。"
-                ]
+                turnLog: [initialTurnLogLine()]
             };
+        }
+
+        /** 新開一局：保留人數選擇，重置資金、位置、回合與紀錄 */
+        function buildFreshGameKeepingPlayerCount() {
+            var n = parseInt(state.game.playerCount, 10);
+            if (isNaN(n) || n < 2 || n > 6) n = 4;
+            return {
+                playerCount: n,
+                players: buildDefaultPlayers(n),
+                currentPlayerIndex: 0,
+                turnLog: [initialTurnLogLine()]
+            };
+        }
+
+        function clearAllTileOwners() {
+            state.tiles.forEach(function (t) {
+                t.owner = null;
+            });
+        }
+
+        function persistAfterBoardEdit() {
+            if (onlineMode) scheduleOnlinePushAfterEdit();
+            else saveState();
+        }
+
+        function restartGameSession() {
+            if (onlineMode && !isOnlineHost()) {
+                showToast("僅房主可重新開始遊戲");
+                return;
+            }
+            if (
+                !confirm(
+                    "確定重新開始本局？\n將保留：棋盤格、機會／命運卡、規則文字。\n將重置：棋子位置、金幣、領地擁有權、回合與回合記錄。"
+                )
+            ) {
+                return;
+            }
+            state.game = buildFreshGameKeepingPlayerCount();
+            clearAllTileOwners();
+            var rollBtn = document.getElementById("btn-roll");
+            if (rollBtn) rollBtn.disabled = false;
+            persistAfterBoardEdit();
+            renderBoard();
+            renderCenterGameUI();
+            showToast("已重新開始遊戲");
+        }
+
+        function readBoardPresetsRoot() {
+            try {
+                var raw = localStorage.getItem(BOARD_PRESETS_KEY);
+                if (!raw) return { byUser: {} };
+                var o = JSON.parse(raw);
+                if (!o || typeof o !== "object" || !o.byUser) return { byUser: {} };
+                return o;
+            } catch (e) {
+                return { byUser: {} };
+            }
+        }
+
+        function writeBoardPresetsRoot(root) {
+            try {
+                localStorage.setItem(BOARD_PRESETS_KEY, JSON.stringify(root));
+            } catch (e) {
+                showToast("無法寫入收藏（可能超過容量）");
+            }
+        }
+
+        function genPresetId() {
+            if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+            return "p_" + Date.now() + "_" + Math.floor(Math.random() * 1e9);
+        }
+
+        function snapshotBoardSettingsOnly() {
+            return {
+                tiles: JSON.parse(JSON.stringify(state.tiles)),
+                chance: JSON.parse(JSON.stringify(state.chance)),
+                fate: JSON.parse(JSON.stringify(state.fate)),
+                rulesText: state.rulesText
+            };
+        }
+
+        function applyBoardPresetPayload(preset) {
+            var n = parseInt(state.game.playerCount, 10);
+            if (isNaN(n) || n < 2 || n > 6) n = 4;
+            var merged = normalizeState({
+                tiles: preset.tiles,
+                chance: preset.chance,
+                fate: preset.fate,
+                rulesText: preset.rulesText || DEFAULT_RULES_TEXT,
+                game: {
+                    playerCount: n,
+                    players: buildDefaultPlayers(n),
+                    currentPlayerIndex: 0,
+                    turnLog: [initialTurnLogLine()]
+                }
+            });
+            state.tiles = merged.tiles;
+            state.chance = merged.chance;
+            state.fate = merged.fate;
+            state.rulesText = merged.rulesText;
+            state.game = merged.game;
+            syncRulesTextarea();
+            persistAfterBoardEdit();
+            renderBoard();
+            renderCards();
+            renderCenterGameUI();
+        }
+
+        function fillPresetSelect() {
+            var sel = document.getElementById("preset-select");
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— 請選擇 —</option>';
+            if (!myUserId) return;
+            var root = readBoardPresetsRoot();
+            var list = (root.byUser[myUserId] || []).slice();
+            list.sort(function (a, b) {
+                return (b.savedAt || 0) - (a.savedAt || 0);
+            });
+            list.forEach(function (p) {
+                var opt = document.createElement("option");
+                opt.value = p.id;
+                var t = p.name || "未命名";
+                var d = p.savedAt ? new Date(p.savedAt) : null;
+                opt.textContent = t + (d ? " · " + d.toLocaleDateString() : "");
+                sel.appendChild(opt);
+            });
+        }
+
+        function updateBoardPresetControls() {
+            var canEdit = canEditBoardAndCards();
+            var restartBtn = document.getElementById("btn-restart-game");
+            if (restartBtn) restartBtn.disabled = !!(onlineMode && !isOnlineHost());
+
+            var logged = !!myUserId;
+            var authMsg = document.getElementById("board-preset-auth-msg");
+            var block = document.getElementById("board-preset-logged-block");
+            if (authMsg) {
+                authMsg.style.display = logged ? "none" : "block";
+            }
+            if (block) {
+                block.style.display = logged ? "block" : "none";
+            }
+
+            var saveBtn = document.getElementById("btn-preset-save");
+            var loadBtn = document.getElementById("btn-preset-load");
+            var delBtn = document.getElementById("btn-preset-delete");
+            var sel = document.getElementById("preset-select");
+            var hasSel = sel && sel.value;
+            if (saveBtn) saveBtn.disabled = !logged || !canEdit;
+            if (loadBtn) loadBtn.disabled = !logged || !canEdit || !hasSel;
+            if (delBtn) delBtn.disabled = !logged || !canEdit || !hasSel;
+        }
+
+        function setBoardPresetPopoverOpen(open) {
+            var pop = document.getElementById("board-preset-popover");
+            var btn = document.getElementById("btn-preset-toggle");
+            if (!pop || !btn) return;
+            pop.hidden = !open;
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+            if (open) {
+                refreshMyUser(function () {
+                    fillPresetSelect();
+                    updateBoardPresetControls();
+                });
+            } else {
+                updateBoardPresetControls();
+            }
         }
 
         const DEFAULT_RULES_TEXT =
@@ -2227,6 +2457,10 @@
             if (rulesOverlay.classList.contains("is-open")) closeRulesModal();
             else if (medalOverlay && medalOverlay.classList.contains("is-open")) closeMedalPopup();
             else if (buyLandOverlay && buyLandOverlay.classList.contains("is-open") && buyLandNo) buyLandNo.click();
+            else {
+                var pp = document.getElementById("board-preset-popover");
+                if (pp && !pp.hidden) setBoardPresetPopoverOpen(false);
+            }
         });
 
         /* ---------- Board ---------- */
@@ -2251,6 +2485,7 @@
             var ac2 = document.getElementById("add-card-fate");
             if (ac1) ac1.disabled = !can;
             if (ac2) ac2.disabled = !can;
+            updateBoardPresetControls();
         }
 
         function renderBoard() {
@@ -2846,12 +3081,137 @@
             }
         })();
 
+        (function wireRestartAndPresets() {
+            var btnRestart = document.getElementById("btn-restart-game");
+            if (btnRestart) btnRestart.addEventListener("click", restartGameSession);
+
+            var presetToggle = document.getElementById("btn-preset-toggle");
+            var presetPop = document.getElementById("board-preset-popover");
+            if (presetToggle && presetPop) {
+                presetToggle.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    setBoardPresetPopoverOpen(!!presetPop.hidden);
+                });
+            }
+            document.addEventListener("mousedown", function (e) {
+                if (!presetPop || presetPop.hidden) return;
+                var t = e.target;
+                if (presetPop.contains(t)) return;
+                if (presetToggle && presetToggle.contains(t)) return;
+                setBoardPresetPopoverOpen(false);
+            });
+
+            var sel = document.getElementById("preset-select");
+            if (sel) sel.addEventListener("change", updateBoardPresetControls);
+
+            var btnSave = document.getElementById("btn-preset-save");
+            if (btnSave) {
+                btnSave.addEventListener("click", function () {
+                    if (!myUserId) {
+                        showToast("請先完成 Google 登入");
+                        return;
+                    }
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可儲存棋盤設定");
+                        return;
+                    }
+                    var input = document.getElementById("preset-name-input");
+                    var name = input && input.value ? String(input.value).trim() : "";
+                    if (!name) {
+                        showToast("請輸入收藏名稱");
+                        return;
+                    }
+                    var root = readBoardPresetsRoot();
+                    if (!root.byUser[myUserId]) root.byUser[myUserId] = [];
+                    var list = root.byUser[myUserId];
+                    var snap = Object.assign(
+                        { id: genPresetId(), name: name, savedAt: Date.now() },
+                        snapshotBoardSettingsOnly()
+                    );
+                    list.unshift(snap);
+                    if (list.length > MAX_BOARD_PRESETS_PER_USER) {
+                        list.length = MAX_BOARD_PRESETS_PER_USER;
+                    }
+                    writeBoardPresetsRoot(root);
+                    fillPresetSelect();
+                    if (input) input.value = "";
+                    showToast("已儲存收藏");
+                    updateBoardPresetControls();
+                });
+            }
+
+            var btnLoad = document.getElementById("btn-preset-load");
+            if (btnLoad) {
+                btnLoad.addEventListener("click", function () {
+                    if (!myUserId) return;
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可載入棋盤");
+                        return;
+                    }
+                    var s = document.getElementById("preset-select");
+                    var id = s && s.value;
+                    if (!id) return;
+                    var root = readBoardPresetsRoot();
+                    var list = root.byUser[myUserId] || [];
+                    var preset = null;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].id === id) {
+                            preset = list[i];
+                            break;
+                        }
+                    }
+                    if (!preset) {
+                        showToast("找不到此收藏");
+                        return;
+                    }
+                    if (
+                        !confirm(
+                            "套用後將取代目前棋盤、機會／命運卡與規則文字，並依目前人數重新開局。確定？"
+                        )
+                    ) {
+                        return;
+                    }
+                    applyBoardPresetPayload(preset);
+                    setBoardPresetPopoverOpen(false);
+                    showToast("已載入「" + (preset.name || "未命名") + "」");
+                });
+            }
+
+            var btnDel = document.getElementById("btn-preset-delete");
+            if (btnDel) {
+                btnDel.addEventListener("click", function () {
+                    if (!myUserId) return;
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可刪除收藏");
+                        return;
+                    }
+                    var s = document.getElementById("preset-select");
+                    var id = s && s.value;
+                    if (!id) return;
+                    if (!confirm("確定刪除此筆收藏？（不影響目前棋盤）")) return;
+                    var root = readBoardPresetsRoot();
+                    var list = root.byUser[myUserId] || [];
+                    root.byUser[myUserId] = list.filter(function (p) {
+                        return p.id !== id;
+                    });
+                    writeBoardPresetsRoot(root);
+                    fillPresetSelect();
+                    updateBoardPresetControls();
+                    showToast("已刪除收藏");
+                });
+            }
+        })();
+
         /* ---------- Init ---------- */
         syncRulesTextarea();
         renderBoard();
         renderCards();
         renderCenterGameUI();
         updateEditorLocks();
+        refreshMyUser(function () {
+            fillPresetSelect();
+            updateBoardPresetControls();
+        });
     })();
     </script>
 </body>
