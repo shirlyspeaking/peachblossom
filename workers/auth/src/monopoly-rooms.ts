@@ -98,6 +98,23 @@ export async function tryMonopolyRooms(
     return handleCreate(request, env, corsOrigin);
   }
 
+  /** 避免瀏覽器或開發者工具對根路徑發 GET 時出現易誤解的 404 */
+  if (path === ROOM_PREFIX && method === "GET") {
+    return json(
+      {
+        ok: true,
+        app: "shanhaijing-monopoly",
+        endpoints: {
+          createRoom: { method: "POST", path: ROOM_PREFIX },
+          joinRoom: { method: "POST", path: `${ROOM_PREFIX}/join` },
+          getOrUpdateRoom: { method: "GET | PUT", path: `${ROOM_PREFIX}/:roomCode` },
+        },
+      },
+      200,
+      corsOrigin
+    );
+  }
+
   const m = path.match(new RegExp(`^${escapeRegex(ROOM_PREFIX)}/([^/]+)$`));
   if (!m) return json({ ok: false, error: "not_found" }, 404, corsOrigin);
   const code = normalizeCode(m[1]!);
