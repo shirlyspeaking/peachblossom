@@ -1,0 +1,67 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { PLAYER_COLORS } from '../config/game'
+import { themeGradientForTileLabel } from '../utils/game'
+import type { Tile, TileMeta } from '../types/game'
+
+const props = defineProps<{
+  tile: Tile
+  index: number
+  row: number
+  col: number
+  meta: TileMeta
+  disabled: boolean
+  pawns: number[]
+}>()
+
+const emit = defineEmits<{
+  updateField: [index: number, field: 'label' | 'effect', value: string]
+}>()
+
+const tileStyle = computed(() => ({
+  gridRow: props.row,
+  gridColumn: props.col,
+  background: themeGradientForTileLabel(props.tile.label) || undefined,
+}))
+</script>
+
+<template>
+  <article class="board-tile" :class="tile.type" :style="tileStyle">
+    <header class="board-tile__header">
+      <span class="board-tile__icon">{{ meta.icon }}</span>
+      <span class="board-tile__label">{{ tile.label }}</span>
+      <span class="board-tile__num">{{ index + 1 }}</span>
+    </header>
+
+    <input
+      class="board-tile__input"
+      :disabled="disabled"
+      :value="tile.label"
+      placeholder="格名"
+      @input="emit('updateField', index, 'label', ($event.target as HTMLInputElement).value)"
+    />
+
+    <input
+      class="board-tile__input"
+      :disabled="disabled"
+      :value="tile.effect"
+      placeholder="效果說明"
+      @input="emit('updateField', index, 'effect', ($event.target as HTMLInputElement).value)"
+    />
+
+    <div v-if="tile.owner !== null" class="board-tile__owner" :style="{ color: PLAYER_COLORS[tile.owner % PLAYER_COLORS.length] }">
+      已由玩家 {{ tile.owner + 1 }} 持有
+    </div>
+
+    <div class="board-tile__pawns">
+      <span
+        v-for="pawn in pawns"
+        :key="pawn"
+        class="board-tile__pawn"
+        :style="{ background: PLAYER_COLORS[(pawn - 1) % PLAYER_COLORS.length] }"
+      >
+        {{ pawn }}
+      </span>
+    </div>
+  </article>
+</template>
