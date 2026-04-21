@@ -1580,25 +1580,25 @@
             50% { transform: translateY(-4px) scale(1.03); }
         }
         .center-piece-bubble {
-            left: 50%;
-            bottom: -10px;
-            transform: translateX(-50%);
-            width: calc(100% + 18px);
-            top: auto;
+            top: -10px;
+            left: -20px;
             right: auto;
+            bottom: auto;
+            transform: none;
+            width: auto;
         }
         .center-piece-bubble::after {
             display: none;
         }
         .money-input {
-            width: 100%;
-            max-width: none;
-            font-size: 0.95rem;
-            line-height: 1.15;
-            padding: 10px 8px;
-            border-radius: 999px;
+            width: 44px;
+            max-width: 44px;
+            font-size: 0.72rem;
+            line-height: 1.1;
+            padding: 3px 4px;
+            border-radius: 8px;
             font-weight: 800;
-            box-shadow: 0 8px 18px rgba(86, 48, 61, 0.08);
+            box-shadow: 0 4px 10px rgba(86, 48, 61, 0.14);
         }
         .center-piece-token {
             width: 76px;
@@ -1848,7 +1848,7 @@
             <div class="top-bar">
                 <div class="title-wrap">
                     <h1>🐉 山海經大富翁</h1>
-                    <p class="title-sub">和靈獸夥伴一起擲骰、抽卡、買下神話地圖，讓孩子一眼就知道現在該做什麼。</p>
+                    <p class="title-sub">讓我嗯一起探索山海經的世界吧！</p>
                 </div>
                 <div class="top-bar-right">
                     <div id="peachblossom-auth-bar" aria-live="polite"></div>
@@ -1861,11 +1861,6 @@
                 <p class="online-tip">
                     先登入，再開房或輸入房號。進房後，每位玩家都會變成一隻自己的靈獸。
                 </p>
-                <div class="online-mini-steps" aria-hidden="true">
-                    <span>🔐 先登入</span>
-                    <span>🏕️ 開房或輸入房號</span>
-                    <span>🎲 一起開玩</span>
-                </div>
                 <div class="online-actions">
                     <button type="button" id="btn-online-create">建立線上房間</button>
                     <label>加入代碼
@@ -1934,7 +1929,6 @@
                                             </select>
                                         </label>
                                     </div>
-                                    <p class="center-story-caption">每位玩家都有自己的靈獸夥伴與金幣口袋。</p>
                                     <div class="center-players-row" id="center-players-host" aria-live="polite"></div>
                                 </div>
 
@@ -2407,6 +2401,7 @@
         const DEFAULT_START_MONEY = 1500;
         const PASS_GO_BONUS = 200;
         const LAND_PRICE = 300;
+        const DEFAULT_TOLL_FEE = 120;
         const PLAYER_COLORS = ["#e63946", "#457b9d", "#2a9d8f", "#e9c46a", "#9b5de5", "#f57dbc"];
 
         function themeGradientForTileLabel(label) {
@@ -3083,10 +3078,7 @@
             var curMem = onlineMode ? memberAtPlayerIndex(g.currentPlayerIndex) : null;
             var turnLine =
                 "現在出發：" +
-                playerTitle(g.currentPlayerIndex, curMem) +
-                " · " +
-                g.playerCount +
-                " 隻靈獸";
+                playerTitle(g.currentPlayerIndex, curMem);
             if (onlineMode && !lobbyFull()) {
                 turnLine += " · 等朋友到齊再擲骰";
             }
@@ -3174,10 +3166,70 @@
             }
         }
 
+        function getTileTollFee(tile) {
+            var effect = String((tile && tile.effect) || "");
+            var m = effect.match(/(\d+)\s*金幣/);
+            if (m && m[1]) {
+                var n = parseInt(m[1], 10);
+                if (!isNaN(n) && n > 0) return n;
+            }
+            return DEFAULT_TOLL_FEE;
+        }
+
+        function settleOwnedLandToll(pid, tileIndex) {
+            var tile = state.tiles[tileIndex];
+            if (!tile) return false;
+            var owner = parseInt(tile.owner, 10);
+            if (isNaN(owner) || owner < 0 || owner >= state.game.players.length) return false;
+            if (owner === pid) return false;
+
+            var traveler = state.game.players[pid];
+            var landlord = state.game.players[owner];
+            var fee = getTileTollFee(tile);
+            var paid = Math.max(0, Math.min(traveler.money, fee));
+            if (paid > 0) {
+                traveler.money -= paid;
+                landlord.money += paid;
+            }
+
+            var ownerMem = onlineMode ? memberAtPlayerIndex(owner) : null;
+            var travelerMem = onlineMode ? memberAtPlayerIndex(pid) : null;
+            if (paid < fee) {
+                pushTurnLog(
+                    playerTitle(pid, travelerMem) +
+                        " 走到「" +
+                        tile.label +
+                        "」，應付過路費 " +
+                        fee +
+                        "，但只剩 " +
+                        paid +
+                        "；已全數付給 " +
+                        playerTitle(owner, ownerMem) +
+                        "。"
+                );
+            } else {
+                pushTurnLog(
+                    playerTitle(pid, travelerMem) +
+                        " 走到「" +
+                        tile.label +
+                        "」，支付過路費 " +
+                        paid +
+                        " 給 " +
+                        playerTitle(owner, ownerMem) +
+                        "。"
+                );
+            }
+            return true;
+        }
+
         function tryPurchaseOrFinish(pid, tileIndex, btn) {
             var tile = state.tiles[tileIndex];
             var p = state.game.players[pid];
             var unowned = tile.owner === null || tile.owner === undefined || tile.owner === "";
+            if (settleOwnedLandToll(pid, tileIndex)) {
+                advanceTurnAfterLand(pid, btn);
+                return;
+            }
             if (!isPurchasableLandTile(tile) || !unowned) {
                 advanceTurnAfterLand(pid, btn);
                 return;
