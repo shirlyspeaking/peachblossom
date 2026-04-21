@@ -457,20 +457,6 @@
 
         body.modal-open { overflow: hidden; }
 
-        /* ===== Legend ===== */
-        .legend {
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
-        }
-        .legend-item {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 0.78rem; padding: 4px 10px;
-            border-radius: 999px; border: 1px solid rgba(63, 29, 56, 0.12);
-            background: rgba(255,255,255,0.7);
-        }
-        .legend-dot {
-            width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-        }
-
         /* ===== Layout ===== */
         .layout {
             display: block;
@@ -532,7 +518,7 @@
             top: 16px;
             right: 0;
             height: calc(100vh - 32px);
-            width: min(440px, calc(100vw - 20px));
+            width: min(560px, calc(100vw - 20px));
             z-index: 700;
             display: flex;
             align-items: stretch;
@@ -541,10 +527,10 @@
             pointer-events: none;
         }
         .cards-drawer.is-collapsed {
-            transform: translateX(calc(100% - 48px));
+            transform: translateX(calc(100% - 52px));
         }
         .drawer-handle {
-            width: 48px;
+            width: 52px;
             border: 0;
             border-radius: 14px 0 0 14px;
             background: linear-gradient(180deg, #8338ec 0%, #3a86ff 100%);
@@ -555,16 +541,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            letter-spacing: 0.08em;
-            padding: 8px 0;
+            flex-direction: column;
+            gap: 3px;
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            letter-spacing: 0.02em;
+            padding: 8px 4px;
             pointer-events: auto;
         }
-        .drawer-handle span {
-            transform: rotate(180deg);
-            font-size: 0.82rem;
+        .drawer-handle .drawer-handle-line {
+            display: block;
+            font-size: 0.78rem;
             font-weight: 700;
+            line-height: 1.15;
+            transform: none;
         }
         .drawer-panel {
             flex: 1;
@@ -602,39 +592,31 @@
             cursor: pointer;
             font-size: 0.95rem;
         }
-        .cards-tabs {
+        .cards-editor-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: start;
+            min-height: 0;
+        }
+        .cards-editor-col {
             display: flex;
-            gap: 0;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            border: 1px solid rgba(63, 29, 56, 0.15);
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
         }
-        .cards-tabs button {
-            flex: 1;
-            border: 0;
-            padding: 9px 10px;
-            font-family: inherit;
+        .cards-col-title {
             font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.6);
-            color: var(--ink-light);
-            transition: all var(--transition);
+            font-weight: 700;
+            margin: 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(63, 29, 56, 0.12);
         }
-        .cards-tabs button.tab-chance-on {
-            background: rgba(255, 190, 11, 0.28);
+        .cards-col-title.cards-col-title--chance {
             color: #5c4200;
         }
-        .cards-tabs button.tab-fate-on {
-            background: rgba(58, 134, 255, 0.22);
+        .cards-col-title.cards-col-title--fate {
             color: #1b4eb5;
-        }
-        .cards-tabs button.tab-fate-on {
-            background: rgba(58, 134, 255, 0.22);
-            color: #1b4eb5;
-        }
-        .cards-tab-panel[hidden] {
-            display: none;
         }
         .cards-grid {
             display: grid;
@@ -733,6 +715,12 @@
             border-color: #8338ec;
             color: #8338ec;
             background: rgba(131, 56, 236, 0.06);
+        }
+
+        @media (max-width: 520px) {
+            .cards-editor-two-col {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* ===== 獎章式抽卡彈窗 ===== */
@@ -1219,6 +1207,28 @@
             flex-shrink: 0;
             isolation: isolate;
         }
+        .dice .dice-glyph {
+            position: absolute;
+            right: 4px;
+            bottom: 3px;
+            font-size: 1.05rem;
+            line-height: 1;
+            opacity: 0.42;
+            z-index: 1;
+            filter: saturate(1.1);
+            pointer-events: none;
+            user-select: none;
+        }
+        .dice .dice-face-value {
+            position: relative;
+            z-index: 2;
+            font-size: 1.42rem;
+            font-weight: 800;
+            color: #4a2840;
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65),
+                0 -1px 1px rgba(60, 30, 45, 0.12);
+        }
 
         /* 頂緣高光（不遮住中央點數） */
         .dice::before {
@@ -1260,32 +1270,6 @@
         .draw-actions button:active { transform: scale(0.97); }
         .draw-chance { background: var(--chance); color: #4f3600; }
         .draw-fate   { background: var(--fate); color: white; }
-
-        .draw-result-area {
-            perspective: 600px;
-            margin: 0 auto;
-            width: 100%;
-            max-width: min(440px, 100%);
-        }
-
-        .draw-result {
-            font-size: 0.92rem; background: rgba(255,255,255,0.9);
-            border-radius: var(--radius-md); padding: 12px 14px;
-            min-height: 48px; border: 1px solid rgba(63,29,56,0.1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.4s;
-        }
-        .draw-result.reveal {
-            animation: cardFlip 0.55s ease-out;
-        }
-        @keyframes cardFlip {
-            0%   { transform: rotateX(90deg) scale(0.8); opacity: 0; }
-            50%  { transform: rotateX(-8deg) scale(1.04); opacity: 1; }
-            100% { transform: rotateX(0deg) scale(1); opacity: 1; }
-        }
-        .draw-result.chance-result { border-color: var(--chance); background: rgba(255,190,11,0.12); }
-        .draw-result.fate-result   { border-color: var(--fate);   background: rgba(58,134,255,0.1); }
 
         .tip {
             margin-top: 14px; padding: 12px 14px;
@@ -1382,9 +1366,11 @@
                 border-radius: 14px 14px 0 0;
                 writing-mode: horizontal-tb;
                 text-orientation: initial;
+                flex-direction: row;
+                gap: 6px;
             }
-            .drawer-handle span {
-                transform: none;
+            .drawer-handle .drawer-handle-line {
+                font-size: 0.85rem;
             }
             .drawer-panel {
                 border-radius: 0;
@@ -1426,8 +1412,6 @@
                 <div class="online-status" id="online-status"></div>
             </section>
 
-            <div class="legend" id="legend"></div>
-
             <div class="layout">
                 <section class="board-section">
                     <div class="section-header">
@@ -1466,7 +1450,10 @@
                                     <div class="dice-row">
                                         <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
                                         <div class="dice-shell">
-                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">
+                                                <span class="dice-glyph" aria-hidden="true">🎲</span>
+                                                <span class="dice-face-value" id="dice-face-value">1</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
@@ -1476,9 +1463,6 @@
                                     <div class="draw-actions">
                                         <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
                                         <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
-                                    </div>
-                                    <div class="draw-result-area">
-                                        <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
                                     </div>
                                 </div>
                             </div>
@@ -1492,24 +1476,24 @@
 
     <aside class="cards-drawer is-collapsed" id="cards-drawer" aria-label="機會與命運卡編輯">
         <button class="drawer-handle" id="cards-drawer-toggle" type="button" aria-expanded="false" aria-controls="cards-drawer-panel">
-            <span>卡片設置</span>
+            <span class="drawer-handle-line">卡片</span><span class="drawer-handle-line">設置</span>
         </button>
         <div class="drawer-panel" id="cards-drawer-panel">
             <div class="drawer-panel-header">
                 <h2>🃏 機會 / 命運卡</h2>
                 <button type="button" class="drawer-close" id="cards-drawer-close" title="收合">✕</button>
             </div>
-            <div class="cards-tabs" role="tablist">
-                <button type="button" role="tab" id="tab-chance" class="tab-chance-on" aria-selected="true" aria-controls="cards-tab-chance-panel">🟡 機會卡</button>
-                <button type="button" role="tab" id="tab-fate" aria-selected="false" aria-controls="cards-tab-fate-panel">🔵 命運卡</button>
-            </div>
-            <div class="cards-tab-panel" id="cards-tab-chance-panel" role="tabpanel">
-                <div class="cards-grid" id="cards-chance"></div>
-                <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增一張機會卡</button>
-            </div>
-            <div class="cards-tab-panel" id="cards-tab-fate-panel" role="tabpanel" hidden>
-                <div class="cards-grid" id="cards-fate"></div>
-                <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增一張命運卡</button>
+            <div class="cards-editor-two-col">
+                <section class="cards-editor-col" aria-labelledby="cards-col-chance-title">
+                    <h3 class="cards-col-title cards-col-title--chance" id="cards-col-chance-title">🟡 機會卡</h3>
+                    <div class="cards-grid" id="cards-chance"></div>
+                    <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增一張機會卡</button>
+                </section>
+                <section class="cards-editor-col" aria-labelledby="cards-col-fate-title">
+                    <h3 class="cards-col-title cards-col-title--fate" id="cards-col-fate-title">🔵 命運卡</h3>
+                    <div class="cards-grid" id="cards-fate"></div>
+                    <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增一張命運卡</button>
+                </section>
             </div>
             <div class="tip">
                 小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
@@ -2032,7 +2016,7 @@
         const boardGrid = document.getElementById("board-grid");
         const cardsChance = document.getElementById("cards-chance");
         const cardsFate = document.getElementById("cards-fate");
-        const drawResult = document.getElementById("draw-result");
+        const diceFaceValueEl = document.getElementById("dice-face-value");
         const toastEl = document.getElementById("toast");
         const rulesTextEl = document.getElementById("rules-text");
         const rulesOverlay = document.getElementById("rules-overlay");
@@ -2042,11 +2026,6 @@
         const cardsDrawer = document.getElementById("cards-drawer");
         const cardsDrawerToggle = document.getElementById("cards-drawer-toggle");
         const cardsDrawerClose = document.getElementById("cards-drawer-close");
-        const cardsDrawerToggleText = cardsDrawerToggle ? cardsDrawerToggle.querySelector("span") : null;
-        const tabChanceBtn = document.getElementById("tab-chance");
-        const tabFateBtn = document.getElementById("tab-fate");
-        const cardsTabChancePanel = document.getElementById("cards-tab-chance-panel");
-        const cardsTabFatePanel = document.getElementById("cards-tab-fate-panel");
         const medalOverlay = document.getElementById("medal-overlay");
         const medalBackdrop = document.getElementById("medal-overlay-backdrop");
         const medalRibbon = document.getElementById("medal-ribbon-label");
@@ -2150,8 +2129,15 @@
         function setCardsDrawerCollapsed(collapsed) {
             if (!cardsDrawer) return;
             cardsDrawer.classList.toggle("is-collapsed", collapsed);
-            if (cardsDrawerToggle) cardsDrawerToggle.setAttribute("aria-expanded", String(!collapsed));
-            if (cardsDrawerToggleText) cardsDrawerToggleText.textContent = collapsed ? "卡片設置" : "收合";
+            if (cardsDrawerToggle) {
+                cardsDrawerToggle.setAttribute("aria-expanded", String(!collapsed));
+                if (collapsed) {
+                    cardsDrawerToggle.innerHTML =
+                        '<span class="drawer-handle-line">卡片</span><span class="drawer-handle-line">設置</span>';
+                } else {
+                    cardsDrawerToggle.innerHTML = '<span class="drawer-handle-line">收合</span>';
+                }
+            }
             try {
                 localStorage.setItem(STORAGE_KEY + "-cards-drawer", collapsed ? "1" : "0");
             } catch (e) {
@@ -2174,23 +2160,6 @@
         } catch (e) {
             setCardsDrawerCollapsed(true);
         }
-
-        function setCardTab(which) {
-            var isChance = which === "chance";
-            if (tabChanceBtn) {
-                tabChanceBtn.classList.toggle("tab-chance-on", isChance);
-                tabChanceBtn.setAttribute("aria-selected", isChance ? "true" : "false");
-            }
-            if (tabFateBtn) {
-                tabFateBtn.classList.toggle("tab-fate-on", !isChance);
-                tabFateBtn.setAttribute("aria-selected", !isChance ? "true" : "false");
-            }
-            if (cardsTabChancePanel) cardsTabChancePanel.hidden = !isChance;
-            if (cardsTabFatePanel) cardsTabFatePanel.hidden = isChance;
-        }
-        if (tabChanceBtn) tabChanceBtn.addEventListener("click", function () { setCardTab("chance"); });
-        if (tabFateBtn) tabFateBtn.addEventListener("click", function () { setCardTab("fate"); });
-        setCardTab("chance");
 
         if (medalOkBtn) medalOkBtn.addEventListener("click", closeMedalPopup);
         if (medalBackdrop) medalBackdrop.addEventListener("click", closeMedalPopup);
@@ -2259,18 +2228,6 @@
             else if (medalOverlay && medalOverlay.classList.contains("is-open")) closeMedalPopup();
             else if (buyLandOverlay && buyLandOverlay.classList.contains("is-open") && buyLandNo) buyLandNo.click();
         });
-
-        /* ---------- Legend ---------- */
-        (function buildLegend() {
-            const container = document.getElementById("legend");
-            Object.entries(TILE_META).forEach(([cls, meta]) => {
-                if (cls === "tile-tax") return;
-                const item = document.createElement("span");
-                item.className = "legend-item";
-                item.innerHTML = `<span class="legend-dot" style="background:${TILE_COLORS[cls]}"></span>${meta.icon} ${meta.legend}`;
-                container.appendChild(item);
-            });
-        })();
 
         /* ---------- Board ---------- */
         function canEditBoardAndCards() {
@@ -2527,14 +2484,58 @@
             });
         }
 
+        /**
+         * 關閉獎章後套用卡面可自動結算的效果（例如「立刻前往起點」）。
+         * @returns {number} 結算後應處理的地格索引
+         */
+        function applyResolvedCardEffect(pid, cardType, pick, landedPos) {
+            if (!pick) return landedPos;
+            var p = state.game.players[pid];
+            var content = String(pick.content || "");
+            var title = String(pick.title || "").trim();
+            var teleport =
+                /(立刻\s*)?前往起點|回到起點|移動至起點|到達起點|移至起點|到達\s*「?\s*起點/.test(content) ||
+                /(立刻\s*)?前往起點|回到起點/.test(String(pick.title || ""));
+            if (!teleport) return landedPos;
+
+            var denyBonus = /不領|無獎勵|無法領|不發放|不拿.*獎勵|不領獎|不經過/.test(content);
+            var grantPass =
+                !denyBonus &&
+                /領取|可領|經過起點\s*\+|獲得.*經過|\+.*200|起點獎勵/.test(content);
+
+            p.position = 0;
+            if (grantPass) {
+                p.money += PASS_GO_BONUS;
+                pushTurnLog(
+                    "玩家 " +
+                        (pid + 1) +
+                        " 依「" +
+                        (title || "卡片") +
+                        "」效果移至起點，並領取經過起點 " +
+                        PASS_GO_BONUS +
+                        " 金幣。"
+                );
+            } else {
+                pushTurnLog(
+                    "玩家 " +
+                        (pid + 1) +
+                        " 依「" +
+                        (title || "卡片") +
+                        "」效果立刻移至起點（不領經過起點獎勵）。"
+                );
+            }
+            if (onlineMode) scheduleOnlinePushAfterEdit();
+            else saveState();
+            renderPawnsOnBoard();
+            renderBoard();
+            renderCenterGameUI();
+            return 0;
+        }
+
         function runLandEffects(pid, btn) {
             var p = state.game.players[pid];
             var pos = p.position;
             var tile = state.tiles[pos];
-
-            function afterCardOrSkip() {
-                tryPurchaseOrFinish(pid, pos, btn);
-            }
 
             if (isChanceTile(tile)) {
                 var pick = pickRandomCard("chance");
@@ -2547,7 +2548,10 @@
                       String(pick.content || "").trim()
                     : "玩家 " + (pid + 1) + " 停在機會格，但牌堆尚無卡片。";
                 pushTurnLog(line);
-                showMedalCard("chance", pick, afterCardOrSkip);
+                showMedalCard("chance", pick, function () {
+                    var newPos = applyResolvedCardEffect(pid, "chance", pick, pos);
+                    tryPurchaseOrFinish(pid, newPos, btn);
+                });
                 return;
             }
             if (isFateTile(tile)) {
@@ -2561,10 +2565,13 @@
                       String(pickf.content || "").trim()
                     : "玩家 " + (pid + 1) + " 停在命運格，但牌堆尚無卡片。";
                 pushTurnLog(linef);
-                showMedalCard("fate", pickf, afterCardOrSkip);
+                showMedalCard("fate", pickf, function () {
+                    var newPos = applyResolvedCardEffect(pid, "fate", pickf, pos);
+                    tryPurchaseOrFinish(pid, newPos, btn);
+                });
                 return;
             }
-            afterCardOrSkip();
+            tryPurchaseOrFinish(pid, pos, btn);
         }
 
         document.getElementById("btn-roll").addEventListener("click", function () {
@@ -2586,13 +2593,15 @@
             btn.disabled = true;
             diceEl.classList.add("dice--rolling");
             const tick = setInterval(function () {
-                diceEl.textContent = String(1 + Math.floor(Math.random() * 6));
+                var n = String(1 + Math.floor(Math.random() * 6));
+                if (diceFaceValueEl) diceFaceValueEl.textContent = n;
             }, 75);
             setTimeout(function () {
                 clearInterval(tick);
                 diceEl.classList.remove("dice--rolling");
                 const roll = 1 + Math.floor(Math.random() * 6);
-                diceEl.textContent = String(roll);
+                if (diceFaceValueEl) diceFaceValueEl.textContent = String(roll);
+                diceEl.setAttribute("aria-label", "骰子 " + roll + " 點");
 
                 const pid = g.currentPlayerIndex;
                 const p = g.players[pid];
@@ -2703,16 +2712,14 @@
         function drawCard(type) {
             var picked = pickRandomCard(type);
             if (!picked) {
-                drawResult.textContent = "此牌堆目前沒有卡片。";
+                showToast("此牌堆目前沒有卡片。");
                 return;
             }
-            const title = picked.title.trim() || "（未命名卡）";
-            const content = picked.content.trim() || "（尚未輸入內容）";
-            const label = type === "chance" ? "🟡 機會卡" : "🔵 命運卡";
-            drawResult.className = `draw-result ${type}-result reveal`;
-            drawResult.textContent = `${label}：${title} — ${content}`;
-            drawResult.addEventListener("animationend", () => drawResult.classList.remove("reveal"), { once: true });
-            showMedalCard(type, picked, null);
+            var pid = state.game.currentPlayerIndex;
+            var landedPos = state.game.players[pid].position;
+            showMedalCard(type, picked, function () {
+                applyResolvedCardEffect(pid, type, picked, landedPos);
+            });
         }
 
         document.getElementById("draw-chance").addEventListener("click", () => drawCard("chance"));
