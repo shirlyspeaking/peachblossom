@@ -5,7 +5,7 @@ export const GRID_TYPES = ["tian", "mizi", "jiugong", "lines"] as const;
 export type GridType = (typeof GRID_TYPES)[number];
 
 /** 字帖版本：淺色描紅為練字用淺粉紅字色 */
-export const COPYBOOK_VARIANTS = ["standard", "lightTracing"] as const;
+export const COPYBOOK_VARIANTS = ["standard", "lightTracing", "strokeOrderPractice"] as const;
 export type CopybookVariant = (typeof COPYBOOK_VARIANTS)[number];
 
 export const INPUT_SOURCE_TYPES = ["text", "file"] as const;
@@ -39,6 +39,8 @@ export type LayoutCell = {
   char: string;
   row: number;
   col: number;
+  practiceStep?: 1 | 2 | 3 | 4;
+  sourceChar?: string;
 };
 
 export type LayoutPage = {

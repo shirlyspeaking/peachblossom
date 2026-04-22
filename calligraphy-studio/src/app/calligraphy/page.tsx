@@ -20,6 +20,7 @@ const GRID_OPTIONS: Array<{ value: GridType; label: string }> = [
 const COPYBOOK_VARIANT_OPTIONS: Array<{ value: CopybookVariant; label: string }> = [
   { value: "standard", label: "標準（黑字）" },
   { value: "lightTracing", label: "淺色描紅" },
+  { value: "strokeOrderPractice", label: "筆順練習（1看2描3臨4寫）" },
 ];
 
 const SAMPLE_TEXT = `春眠不覺曉，處處聞啼鳥。
@@ -215,7 +216,6 @@ export default function CalligraphyPage() {
                 {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
                   const row = Math.floor(idx / config.cols);
                   const col = idx % config.cols;
-                  const char = activePage?.cells.find((cell) => cell.row === row && cell.col === col)?.char || "";
                   const isLines = config.gridType === "lines";
                   const showInnerVertical = !isLines && col < config.cols - 1;
                   const showInnerHorizontal = row < config.rows - 1;
@@ -225,7 +225,21 @@ export default function CalligraphyPage() {
                         ? "border-b border-slate-300"
                         : ""
                       : [showInnerVertical ? "border-r border-slate-300" : "", showInnerHorizontal ? "border-b border-slate-300" : ""].filter(Boolean).join(" ");
-                  const charTone = config.copybookVariant === "lightTracing" ? "text-pink-300" : "text-slate-900";
+                  const currentCell = activePage?.cells.find((cell) => cell.row === row && cell.col === col);
+                  const char = currentCell?.char || "";
+                  const step = currentCell?.practiceStep;
+                  const charTone =
+                    config.copybookVariant === "lightTracing"
+                      ? "text-pink-300"
+                      : config.copybookVariant === "strokeOrderPractice"
+                        ? step === 1
+                          ? "text-slate-900"
+                          : step === 2
+                            ? "text-slate-500"
+                            : step === 3
+                              ? "text-slate-300"
+                              : "text-transparent"
+                        : "text-slate-900";
                   const showCenterGuides =
                     config.showGuideLines && !isLines && (config.gridType === "tian" || config.gridType === "mizi" || config.gridType === "jiugong");
                   const showMiziDiagonals = showCenterGuides && config.gridType === "mizi";
@@ -252,12 +266,20 @@ export default function CalligraphyPage() {
                           ) : null}
                         </>
                       ) : null}
+                      {config.copybookVariant === "strokeOrderPractice" && step ? (
+                        <span className="pointer-events-none absolute left-1 top-1 z-20 rounded bg-primary-100/80 px-1 text-[10px] leading-4 text-primary-800">
+                          {step}
+                        </span>
+                      ) : null}
                       <span className="relative z-10">{char}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
+            {config.copybookVariant === "strokeOrderPractice" ? (
+              <p className="mt-2 text-xs text-slate-500">每字依序展開為 4 格：1 看字形、2 描紅、3 臨寫、4 空格默寫。</p>
+            ) : null}
           </CardContent>
         </Card>
       </div>
