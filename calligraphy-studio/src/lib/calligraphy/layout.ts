@@ -19,17 +19,35 @@ function defaultConfig(config: PageLayoutConfig): PageLayoutConfig {
 export function buildLayout(text: string, config: PageLayoutConfig): LayoutResult {
   const cfg = defaultConfig(config);
   const characters = toCharacters(text);
+  const charactersForLayout =
+    cfg.copybookVariant === "strokeOrderPractice"
+      ? characters.flatMap((char) => [char, char, char, ""])
+      : characters;
   const perPage = cfg.rows * cfg.cols;
   const pages: LayoutPage[] = [];
 
-  for (let pageIndex = 0; pageIndex * perPage < characters.length; pageIndex += 1) {
+  for (let pageIndex = 0; pageIndex * perPage < charactersForLayout.length; pageIndex += 1) {
     const start = pageIndex * perPage;
-    const pageChars = characters.slice(start, start + perPage);
-    const cells: LayoutCell[] = pageChars.map((char, idx) => ({
-      char,
-      row: Math.floor(idx / cfg.cols),
-      col: idx % cfg.cols,
-    }));
+    const pageChars = charactersForLayout.slice(start, start + perPage);
+    const cells: LayoutCell[] = pageChars.map((char, idx) => {
+      const absoluteIdx = start + idx;
+      if (cfg.copybookVariant === "strokeOrderPractice") {
+        const step = ((absoluteIdx % 4) + 1) as 1 | 2 | 3 | 4;
+        const sourceChar = characters[Math.floor(absoluteIdx / 4)] || "";
+        return {
+          char,
+          row: Math.floor(idx / cfg.cols),
+          col: idx % cfg.cols,
+          practiceStep: step,
+          sourceChar,
+        };
+      }
+      return {
+        char,
+        row: Math.floor(idx / cfg.cols),
+        col: idx % cfg.cols,
+      };
+    });
     pages.push({ index: pageIndex, cells });
   }
 

@@ -1,0 +1,199 @@
+import {
+  DEFAULT_CHANCE,
+  DEFAULT_FATE,
+  DEFAULT_RULES_TEXT,
+  DEFAULT_START_MONEY,
+  DEFAULT_TILES,
+  PASS_GO_BONUS,
+  POSITIONS,
+} from '../config/game'
+import type { BoardPresetRoot, CardItem, GameSession, GameState, Tile } from '../types/game'
+
+export const NUM_TILES = POSITIONS.length
+
+export function deepClone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
+export function getAuthBase() {
+  const overridden = (window as Window & { PEACHBLOSSOM_AUTH_BASE?: string }).PEACHBLOSSOM_AUTH_BASE
+  if (typeof overridden === 'string' && overridden.trim()) {
+    return overridden.replace(/\/$/, '')
+  }
+  const host = window.location.hostname
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:8787'
+  }
+  return 'https://auth.peachspring.cc'
+}
+
+export function roomsBaseUrl() {
+  return `${getAuthBase()}/auth/apps/shanhaijing-monopoly/rooms`
+}
+
+export function buildDefaultPlayers(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: index,
+    money: DEFAULT_START_MONEY,
+    position: 0,
+  }))
+}
+
+export function initialTurnLogLine() {
+  return `歡迎來到山海經大富翁。可調整人數，每位玩家起始 ${DEFAULT_START_MONEY} 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 ${PASS_GO_BONUS} 金幣。`
+}
+
+export function defaultGame(): GameSession {
+  const playerCount = 4
+  return {
+    playerCount,
+    players: buildDefaultPlayers(playerCount),
+    currentPlayerIndex: 0,
+    turnLog: [initialTurnLogLine()],
+  }
+}
+
+export function defaultState(): GameState {
+  return {
+    tiles: deepClone(DEFAULT_TILES),
+    chance: deepClone(DEFAULT_CHANCE),
+    fate: deepClone(DEFAULT_FATE),
+    rulesText: DEFAULT_RULES_TEXT,
+    game: defaultGame(),
+  }
+}
+
+export function normalizeTiles(rawTiles: Partial<Tile>[] = []) {
+  return DEFAULT_TILES.map((tile, index) => {
+    const merged = { ...tile, ...(rawTiles[index] ?? {}) }
+    const rawOwner = (rawTiles[index] as { owner?: unknown } | undefined)?.owner ?? merged.owner
+    const owner =
+      rawOwner === '' || rawOwner === undefined || rawOwner === null
+        ? null
+        : Number.parseInt(String(rawOwner), 10)
+
+    return {
+      ...tile,
+      ...merged,
+      owner: Number.isNaN(owner) ? null : owner,
+    }
+  })
+}
+
+export function normalizeCards(rawCards: unknown, fallback: CardItem[]) {
+  if (!Array.isArray(rawCards)) {
+    return deepClone(fallback)
+  }
+
+  return rawCards.map((item) => ({
+    title: typeof item?.title === 'string' ? item.title : '',
+    content: typeof item?.content === 'string' ? item.content : '',
+  }))
+}
+
+export function normalizeState(raw: Partial<GameState> | null | undefined): GameState {
+  if (!raw || typeof raw !== 'object') {
+    return defaultState()
+  }
+
+  const game = raw.game && typeof raw.game === 'object' ? raw.game : defaultGame()
+  let playerCount = Number.parseInt(String(game.playerCount ?? 4), 10)
+  if (Number.isNaN(playerCount) || playerCount < 2 || playerCount > 6) {
+    playerCount = 4
+  }
+
+  const players = Array.isArray(game.players) && game.players.length === playerCount
+    ? game.players.map((player, index) => ({
+        id: index,
+        money:
+          typeof player?.money === 'number' && player.money >= 0
+            ? Math.floor(player.money)
+            : DEFAULT_START_MONEY,
+        position:
+          typeof player?.position === 'number'
+            ? ((player.position % NUM_TILES) + NUM_TILES) % NUM_TILES
+            : 0,
+      }))
+    : buildDefaultPlayers(playerCount)
+
+  let currentPlayerIndex = Number.parseInt(String(game.currentPlayerIndex ?? 0), 10)
+  if (Number.isNaN(currentPlayerIndex)) {
+    currentPlayerIndex = 0
+  }
+
+  return {
+    tiles: normalizeTiles(raw.tiles),
+    chance: normalizeCards(raw.chance, DEFAULT_CHANCE),
+    fate: normalizeCards(raw.fate, DEFAULT_FATE),
+    rulesText: typeof raw.rulesText === 'string' ? raw.rulesText : DEFAULT_RULES_TEXT,
+    game: {
+      playerCount,
+      players,
+      currentPlayerIndex: ((currentPlayerIndex % playerCount) + playerCount) % playerCount,
+      turnLog: Array.isArray(game.turnLog) && game.turnLog.length
+        ? game.turnLog.map((line) => String(line))
+        : defaultGame().turnLog.slice(),
+    },
+  }
+}
+
+export function readBoardPresetsRoot(raw: string | null): BoardPresetRoot {
+  if (!raw) {
+    return { byUser: {} }
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as BoardPresetRoot
+    if (!parsed || typeof parsed !== 'object' || !parsed.byUser) {
+      return { byUser: {} }
+    }
+    return parsed
+  } catch {
+    return { byUser: {} }
+  }
+}
+
+export function themeGradientForTileLabel(label: string) {
+  const rules: Array<[RegExp, string]> = [
+    [/東海|瀛洲|波|濤|水府/, 'linear-gradient(145deg, #c8e7ff 0%, #7eb6e8 48%, #a8d4f0 100%)'],
+    [/青丘|青松|翠|竹|林|木神/, 'linear-gradient(145deg, #d8f5e0 0%, #6eb87a 45%, #9fd4a8 100%)'],
+    [/崑崙|流沙|漠|黃沙|丘墟/, 'linear-gradient(145deg, #fdebd8 0%, #e8c49a 50%, #f3dcb8 100%)'],
+    [/北冥|冥|寒冰|深淵/, 'linear-gradient(145deg, #d4e4f7 0%, #6b8cae 48%, #9bb8d4 100%)'],
+    [/扶桑|若木|日|曦|霞/, 'linear-gradient(145deg, #ffe0d4 0%, #f4a582 45%, #ffc4a8 100%)'],
+    [/鐘山|不周|嶽|崖|峰/, 'linear-gradient(145deg, #e4ead8 0%, #8fa882 52%, #b8c9a8 100%)'],
+    [/幽都|監|獄|煞/, 'linear-gradient(145deg, #e2d8ee 0%, #8f7aad 48%, #b9a8cc 100%)'],
+    [/西王母|瑤池|池|蓮/, 'linear-gradient(145deg, #f5e0f0 0%, #d4a8c8 48%, #e8c0dc 100%)'],
+    [/玄圃|圃|園/, 'linear-gradient(145deg, #e8f8e8 0%, #8fcf9a 45%, #b8e6c4 100%)'],
+    [/塗山|禹|石/, 'linear-gradient(145deg, #f0e8dc 0%, #c4a882 50%, #dcc8a8 100%)'],
+    [/丹穴|丹|赤|朱/, 'linear-gradient(145deg, #ffe4dc 0%, #e88870 48%, #ffb8a8 100%)'],
+    [/羽民|翼|翔/, 'linear-gradient(145deg, #e0f2ff 0%, #8ec5e8 50%, #b8dcf5 100%)'],
+    [/無啟|民國|國/, 'linear-gradient(145deg, #f2f0ff 0%, #b8b0d8 48%, #d4cce8 100%)'],
+    [/祭典|修繕|稅|費/, 'linear-gradient(145deg, #fff6d8 0%, #f0c878 50%, #ffe8a8 100%)'],
+    [/神獸|集市|市/, 'linear-gradient(145deg, #fff8e8 0%, #f5d88a 48%, #ffe8b8 100%)'],
+    [/起點|歸/, 'linear-gradient(145deg, #f0e0f5 0%, #d8b8e8 45%, #e8c8f0 100%)'],
+  ]
+
+  return rules.find(([pattern]) => pattern.test(String(label)))?.[1] ?? ''
+}
+
+export function isChanceTile(tile: Tile) {
+  return (
+    tile.type === 'tile-event' &&
+    (String(tile.label).includes('機會') || String(tile.effect || '').includes('機會'))
+  )
+}
+
+export function isFateTile(tile: Tile) {
+  return (
+    tile.type === 'tile-event' &&
+    (String(tile.label).includes('命運') || String(tile.effect || '').includes('命運'))
+  )
+}
+
+export function isPurchasableLandTile(tile: Tile) {
+  return String(tile.effect || '').includes('可購買地塊')
+}
+
+export function memberLabel(name?: string | null, email?: string | null) {
+  return name || email || ''
+}

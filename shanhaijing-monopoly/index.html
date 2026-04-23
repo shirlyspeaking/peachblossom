@@ -6,45 +6,84 @@
     <title>山海經大富翁 · 桃花源</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+TC:wght@400;500;700;800&display=swap");
         :root {
-            --bg-1: #ffe8d6;
-            --bg-2: #ffd6ff;
-            --bg-3: #caffbf;
-            --ink: #3f1d38;
-            --ink-light: #7a5470;
-            --panel: rgba(255, 255, 255, 0.88);
-            --chance: #ffbe0b;
-            --chance-dark: #d4a009;
-            --fate: #3a86ff;
-            --fate-dark: #2563eb;
-            --accent: #ff006e;
-            --accent-soft: rgba(255, 0, 110, 0.12);
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --shadow-card: 0 8px 28px rgba(63, 29, 56, 0.13);
-            --shadow-hover: 0 14px 40px rgba(63, 29, 56, 0.22);
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg-1: oklch(0.96 0.03 70);
+            --bg-2: oklch(0.94 0.05 355);
+            --bg-3: oklch(0.92 0.06 150);
+            --bg-4: oklch(0.9 0.08 35);
+            --ink: oklch(0.31 0.05 355);
+            --ink-light: oklch(0.49 0.04 350);
+            --panel: rgba(255, 251, 246, 0.86);
+            --panel-strong: rgba(255, 248, 238, 0.96);
+            --chance: oklch(0.84 0.14 82);
+            --chance-dark: oklch(0.62 0.14 82);
+            --fate: oklch(0.74 0.13 248);
+            --fate-dark: oklch(0.56 0.13 248);
+            --accent: oklch(0.7 0.17 15);
+            --accent-soft: rgba(247, 130, 98, 0.12);
+            --radius-sm: 12px;
+            --radius-md: 24px;
+            --radius-lg: 34px;
+            --shadow-card: 0 18px 40px rgba(88, 47, 60, 0.12);
+            --shadow-hover: 0 24px 48px rgba(88, 47, 60, 0.18);
+            --transition: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: "Noto Serif TC", "Songti TC", "PingFang TC", serif;
-            background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+            font-family: "Noto Sans TC", "PingFang TC", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 226, 194, 0.92), transparent 24rem),
+                radial-gradient(circle at top right, rgba(255, 206, 230, 0.75), transparent 22rem),
+                radial-gradient(circle at bottom center, rgba(193, 241, 214, 0.9), transparent 24rem),
+                linear-gradient(155deg, var(--bg-1) 0%, var(--bg-2) 42%, var(--bg-3) 78%, var(--bg-4) 100%);
             background-attachment: fixed;
             color: var(--ink);
             min-height: 100vh;
-            line-height: 1.6;
+            line-height: 1.65;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 999px;
+            filter: blur(6px);
+            opacity: 0.7;
+            animation: drift-cloud 16s ease-in-out infinite;
+        }
+        body::before {
+            width: 16rem;
+            height: 16rem;
+            top: 6rem;
+            left: -3rem;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0) 72%);
+        }
+        body::after {
+            width: 18rem;
+            height: 18rem;
+            right: -5rem;
+            bottom: 8rem;
+            background: radial-gradient(circle, rgba(255, 244, 188, 0.62) 0%, rgba(255, 244, 188, 0) 72%);
+            animation-delay: -8s;
+        }
+        @keyframes drift-cloud {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(0, -16px, 0) scale(1.05); }
         }
 
         /* ===== 頁面骨架：左側欄（固定於螢幕左缘）+ 主內容 ===== */
         .page {
-            max-width: 1440px;
+            max-width: 1480px;
             margin: 0 auto;
-            padding: 24px 20px 40px;
-            padding-left: calc(min(3.75rem, 12vw) + 14px);
+            padding: 28px 22px 48px;
             box-sizing: border-box;
+            position: relative;
         }
 
         .page-main {
@@ -79,40 +118,47 @@
         /* ===== Top Bar ===== */
 
         .top-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
 
         .title-wrap h1 {
-            font-size: 2.1rem; letter-spacing: 0.08em;
-            background: linear-gradient(135deg, #8338ec, #ff006e);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            letter-spacing: 0.04em;
+            color: oklch(0.36 0.07 18);
+            text-shadow: 0 6px 14px rgba(255, 255, 255, 0.4);
+            line-height: 1.05;
+            margin-bottom: 8px;
+        }
+        .title-sub {
+            max-width: 34rem;
+            color: var(--ink-light);
+            font-size: 0.98rem;
+            line-height: 1.6;
         }
 
         .back-link {
-            display: inline-flex; align-items: center; gap: 6px;
-            text-decoration: none; color: white; font-size: 0.92rem; white-space: nowrap;
-            background: linear-gradient(135deg, #8338ec, #ff006e);
-            border-radius: 999px; padding: 10px 20px;
-            box-shadow: 0 4px 14px rgba(131, 56, 236, 0.35);
-            transition: transform var(--transition), box-shadow var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--ink);
+            font-size: 0.94rem;
+            font-weight: 700;
+            white-space: nowrap;
+            background: rgba(255, 251, 246, 0.84);
+            border-radius: 999px;
+            padding: 11px 18px;
+            border: 1px solid rgba(115, 75, 87, 0.14);
+            box-shadow: 0 12px 24px rgba(96, 54, 68, 0.09);
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
         }
-        .back-link:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 22px rgba(131, 56, 236, 0.45); }
-
-        /* ===== Toolbar ===== */
-        .toolbar {
-            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
-        }
-        .toolbar button {
-            border: 1px solid rgba(63, 29, 56, 0.2); background: var(--panel);
-            border-radius: 999px; padding: 8px 16px; font-family: inherit;
-            font-size: 0.85rem; color: var(--ink); cursor: pointer;
-            transition: all var(--transition);
-        }
-        .toolbar button:hover { background: rgba(131, 56, 236, 0.1); border-color: #8338ec; }
-        .toolbar .btn-danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.3); }
-        .toolbar .btn-danger:hover { background: rgba(192, 57, 43, 0.08); }
+        .back-link:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(96, 54, 68, 0.14); background: rgba(255, 255, 255, 0.95); }
 
         .top-bar-right {
             display: flex;
@@ -126,13 +172,14 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 8px 10px;
-            min-height: 44px;
-            padding: 8px 12px;
-            border: 1px solid rgba(63, 29, 56, 0.15);
+            min-height: 48px;
+            padding: 10px 14px;
+            border: 1px solid rgba(115, 75, 87, 0.14);
             border-radius: 999px;
-            background: var(--panel);
+            background: rgba(255, 251, 246, 0.78);
             box-shadow: var(--shadow-card);
-            font-size: 0.88rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(12px);
         }
         #peachblossom-auth-bar .auth-status,
         #peachblossom-auth-bar .auth-user {
@@ -147,13 +194,13 @@
             cursor: pointer;
             border: none;
             border-radius: 999px;
-            padding: 8px 14px;
+            padding: 10px 16px;
             font: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.88rem;
+            font-weight: 700;
             color: var(--ink);
-            background: linear-gradient(135deg, rgba(131, 56, 236, 0.12), rgba(255, 0, 110, 0.08));
-            box-shadow: 0 4px 12px rgba(63, 29, 56, 0.1);
+            background: linear-gradient(135deg, rgba(255, 222, 190, 0.86), rgba(255, 241, 228, 0.95));
+            box-shadow: 0 8px 18px rgba(63, 29, 56, 0.08);
         }
         #peachblossom-auth-bar .auth-btn:hover { filter: brightness(1.05); }
         #peachblossom-auth-bar .auth-btn-out {
@@ -162,57 +209,100 @@
         }
 
         .online-panel {
-            margin-bottom: 18px;
-            padding: 16px 18px;
-            border-radius: var(--radius-md);
-            background: var(--panel);
+            margin-bottom: 22px;
+            padding: 18px 18px 16px;
+            border-radius: calc(var(--radius-md) + 2px);
+            background:
+                linear-gradient(140deg, rgba(255, 249, 241, 0.94), rgba(255, 240, 232, 0.9)),
+                var(--panel);
             box-shadow: var(--shadow-card);
-            border: 1px solid rgba(63, 29, 56, 0.1);
+            border: 1px solid rgba(115, 75, 87, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .online-panel::after {
+            content: "☁️";
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 2rem;
+            opacity: 0.22;
+            animation: drift-cloud 12s ease-in-out infinite;
         }
         .online-panel h3 {
-            font-size: 1.05rem;
+            font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+            font-size: 1.35rem;
             margin-bottom: 8px;
             letter-spacing: 0.04em;
         }
         .online-panel .online-tip {
-            font-size: 0.86rem;
+            font-size: 0.94rem;
             color: var(--ink-light);
             margin-bottom: 12px;
-            line-height: 1.5;
+            line-height: 1.55;
+            max-width: 42rem;
+        }
+        .online-mini-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .online-mini-steps span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(115, 75, 87, 0.1);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ink);
         }
         .online-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
         .online-actions label {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--ink);
         }
         .online-actions input[type="text"] {
-            border-radius: var(--radius-sm);
-            border: 1px solid rgba(63, 29, 56, 0.2);
-            padding: 8px 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(115, 75, 87, 0.18);
+            padding: 12px 14px;
             font-family: inherit;
-            width: 8.5rem;
+            width: 9rem;
             text-transform: uppercase;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
         .online-actions button {
             border-radius: 999px;
-            border: 1px solid rgba(63, 29, 56, 0.2);
+            border: 1px solid rgba(115, 75, 87, 0.16);
             background: rgba(255, 255, 255, 0.9);
-            padding: 8px 14px;
+            padding: 11px 18px;
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: all var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition);
+            box-shadow: 0 10px 18px rgba(94, 54, 67, 0.08);
         }
         .online-actions button:hover:not(:disabled) {
-            border-color: #8338ec;
-            background: rgba(131, 56, 236, 0.08);
+            border-color: rgba(247, 130, 98, 0.45);
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
         }
         .online-actions button:disabled {
             opacity: 0.45;
@@ -224,16 +314,40 @@
         }
         .online-status {
             margin-top: 12px;
-            font-size: 0.86rem;
+            font-size: 0.88rem;
             color: var(--ink-light);
             line-height: 1.45;
         }
         .online-status strong { color: var(--ink); }
+        .online-status-card {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        .online-status-item {
+            padding: 12px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(115, 75, 87, 0.1);
+            min-height: 72px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+        .online-status-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: var(--ink-light);
+            text-transform: uppercase;
+        }
         .room-code-display {
             font-family: ui-monospace, monospace;
-            letter-spacing: 0.12em;
-            font-size: 1.05rem;
-            color: #8338ec;
+            letter-spacing: 0.18em;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: oklch(0.51 0.14 288);
         }
 
         .left-rail-top {
@@ -472,20 +586,6 @@
 
         body.modal-open { overflow: hidden; }
 
-        /* ===== Legend ===== */
-        .legend {
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
-        }
-        .legend-item {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 0.78rem; padding: 4px 10px;
-            border-radius: 999px; border: 1px solid rgba(63, 29, 56, 0.12);
-            background: rgba(255,255,255,0.7);
-        }
-        .legend-dot {
-            width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-        }
-
         /* ===== Layout ===== */
         .layout {
             display: block;
@@ -499,6 +599,511 @@
             margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
         }
         .section-title { font-size: 1.1rem; }
+        .board-title-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+        .board-title-actions .rules-tag,
+        .board-title-actions .left-rail-log-tab {
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            width: auto;
+            min-height: auto;
+            max-height: none;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+        .rules-tag.btn-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.3);
+            background: rgba(255, 255, 255, 0.75);
+        }
+        .rules-tag.btn-danger:hover {
+            background: rgba(192, 57, 43, 0.08);
+            border-color: rgba(192, 57, 43, 0.45);
+            box-shadow: 0 4px 14px rgba(192, 57, 43, 0.16);
+        }
+        .board-title-actions .left-rail-log-hover {
+            align-self: auto;
+        }
+        .board-title-actions .left-rail-log-popover {
+            left: auto;
+            right: 0;
+            top: calc(100% + 8px);
+            bottom: auto;
+            width: min(360px, calc(100vw - 40px));
+        }
+        .board-title-actions .turn-log--rail {
+            font-size: 0.78rem;
+            max-height: min(320px, 56vh);
+        }
+
+        .board-preset-wrap {
+            position: relative;
+        }
+        .board-preset-popover {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            z-index: 60;
+            width: min(300px, calc(100vw - 36px));
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            box-shadow: var(--shadow-hover);
+            font-size: 0.84rem;
+            line-height: 1.45;
+            color: var(--ink);
+        }
+        .board-preset-popover[hidden] {
+            display: none !important;
+        }
+        .board-preset-hint {
+            margin: 0 0 10px;
+            color: var(--ink-light);
+            font-size: 0.82rem;
+        }
+        .board-preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .board-preset-row:first-of-type {
+            margin-top: 0;
+        }
+        .board-preset-popover label {
+            display: block;
+            width: 100%;
+        }
+        .board-preset-popover input[type="text"],
+        .board-preset-popover select {
+            width: 100%;
+            margin-top: 4px;
+            padding: 7px 9px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.18);
+            font-family: inherit;
+            font-size: 0.86rem;
+        }
+        .board-preset-popover button {
+            border-radius: 999px;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.92);
+            padding: 7px 12px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .board-preset-popover button:hover:not(:disabled) {
+            border-color: #8338ec;
+            background: rgba(131, 56, 236, 0.08);
+        }
+        .board-preset-popover button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .board-preset-popover .btn-preset-danger {
+            color: #c0392b;
+            border-color: rgba(192, 57, 43, 0.35);
+        }
+
+        /* ===== 右側：機會／命運卡編輯抽屜 ===== */
+        .cards-drawer {
+            position: fixed;
+            top: 16px;
+            right: 0;
+            height: calc(100vh - 32px);
+            width: min(560px, calc(100vw - 20px));
+            z-index: 700;
+            display: flex;
+            align-items: stretch;
+            transform: translateX(0);
+            transition: transform var(--transition);
+            pointer-events: none;
+        }
+        .cards-drawer.is-collapsed {
+            transform: translateX(calc(100% - 52px));
+        }
+        .drawer-handle {
+            width: 52px;
+            border: 0;
+            border-radius: 14px 0 0 14px;
+            background: linear-gradient(180deg, #8338ec 0%, #3a86ff 100%);
+            color: white;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: -4px 8px 18px rgba(63, 29, 56, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 3px;
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            letter-spacing: 0.02em;
+            padding: 8px 4px;
+            pointer-events: auto;
+        }
+        .drawer-handle .drawer-handle-line {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.15;
+            transform: none;
+        }
+        .drawer-panel {
+            flex: 1;
+            background: var(--panel);
+            border-radius: 0 16px 16px 0;
+            box-shadow: -10px 0 30px rgba(63, 29, 56, 0.18);
+            padding: 14px;
+            overflow-y: auto;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .drawer-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.94);
+            z-index: 2;
+            padding-bottom: 6px;
+        }
+        .drawer-panel-header h2 {
+            font-size: 1rem;
+            margin: 0;
+        }
+        .drawer-close {
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            background: white;
+            border-radius: 999px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .cards-editor-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: start;
+            min-height: 0;
+        }
+        .cards-editor-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .cards-col-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin: 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(63, 29, 56, 0.12);
+        }
+        .cards-col-title.cards-col-title--chance {
+            color: #5c4200;
+        }
+        .cards-col-title.cards-col-title--fate {
+            color: #1b4eb5;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .card-editor {
+            border-radius: var(--radius-md);
+            padding: 12px;
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            background: rgba(255, 255, 255, 0.92);
+            transition: all var(--transition);
+            position: relative;
+        }
+        .card-editor:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+        .card-editor.chance {
+            border-color: rgba(255, 190, 11, 0.38);
+            background: linear-gradient(180deg, rgba(255, 190, 11, 0.12) 0%, rgba(255, 255, 255, 0.94) 42%);
+        }
+        .card-editor.fate {
+            border-color: rgba(58, 134, 255, 0.34);
+            background: linear-gradient(180deg, rgba(58, 134, 255, 0.1) 0%, rgba(255, 255, 255, 0.94) 42%);
+        }
+        .card-editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .card-editor-header h4 {
+            font-size: 0.9rem;
+        }
+        .card-delete {
+            background: none;
+            border: 1px solid rgba(192, 57, 43, 0.25);
+            color: #c0392b;
+            border-radius: 999px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .card-delete:hover {
+            background: rgba(192, 57, 43, 0.1);
+            border-color: #c0392b;
+        }
+        .card-editor input,
+        .card-editor textarea {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(63, 29, 56, 0.15);
+            padding: 7px 9px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            background: white;
+            color: var(--ink);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .card-editor textarea {
+            margin-top: 6px;
+            resize: vertical;
+            min-height: 52px;
+        }
+        .card-editor input:focus,
+        .card-editor textarea:focus {
+            outline: none;
+            border-color: #8338ec;
+            box-shadow: 0 0 0 3px rgba(131, 56, 236, 0.15);
+        }
+        .card-editor input::placeholder,
+        .card-editor textarea::placeholder {
+            color: #baa5b0;
+        }
+        .add-card-btn {
+            width: 100%;
+            border: 2px dashed rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--ink-light);
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-top: 4px;
+        }
+        .add-card-btn:hover {
+            border-color: #8338ec;
+            color: #8338ec;
+            background: rgba(131, 56, 236, 0.06);
+        }
+
+        @media (max-width: 520px) {
+            .cards-editor-two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== 獎章式抽卡彈窗 ===== */
+        .medal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 920;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .medal-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .medal-overlay-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(63, 29, 56, 0.32);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .medal-box {
+            position: relative;
+            z-index: 1;
+            width: min(360px, 100%);
+            text-align: center;
+        }
+        .medal-ribbon {
+            display: inline-block;
+            padding: 8px 22px 10px;
+            border-radius: 999px 999px 0 0;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(63, 29, 56, 0.2);
+        }
+        .medal-overlay.medal--chance .medal-ribbon {
+            background: linear-gradient(135deg, #f4c430, #d4a009);
+        }
+        .medal-overlay.medal--fate .medal-ribbon {
+            background: linear-gradient(135deg, #5b8cff, #2563eb);
+        }
+        .medal-disk {
+            margin: -2px auto 0;
+            padding: 22px 20px 20px;
+            border-radius: 50%;
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 250, 0.96) 45%, rgba(255, 235, 245, 0.94) 100%);
+            border: 3px solid rgba(212, 160, 9, 0.35);
+            box-shadow: 0 18px 40px rgba(63, 29, 56, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.85);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .medal-overlay.medal--fate .medal-disk {
+            border-color: rgba(58, 134, 255, 0.4);
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 250, 255, 0.96) 50%, rgba(230, 240, 255, 0.94) 100%);
+        }
+        .medal-disk h3 {
+            font-size: 1.05rem;
+            color: var(--ink);
+            margin: 0;
+        }
+        .medal-disk p {
+            font-size: 0.9rem;
+            color: var(--ink-light);
+            line-height: 1.65;
+            margin: 0;
+            max-width: 28ch;
+        }
+        .medal-ok {
+            margin-top: 8px;
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 28px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #8338ec, #ff006e);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(131, 56, 236, 0.35);
+        }
+        .medal-ok:hover {
+            filter: brightness(1.05);
+        }
+
+        /* ===== 購買地塊對話框 ===== */
+        .buy-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 910;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .buy-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity 0.2s ease;
+        }
+        .buy-overlay-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(63, 29, 56, 0.28);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .buy-panel {
+            position: relative;
+            z-index: 1;
+            width: min(380px, 100%);
+            background: var(--panel);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px 18px;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid rgba(63, 29, 56, 0.1);
+        }
+        .buy-panel h2 {
+            font-size: 1.05rem;
+            margin: 0 0 10px;
+        }
+        .buy-panel p {
+            font-size: 0.9rem;
+            color: var(--ink-light);
+            line-height: 1.65;
+            margin: 0 0 16px;
+        }
+        .buy-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .buy-actions button {
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(63, 29, 56, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all var(--transition);
+        }
+        .buy-actions button:hover {
+            border-color: #8338ec;
+            background: rgba(131, 56, 236, 0.08);
+        }
+        .buy-actions .buy-yes {
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.18), rgba(255, 0, 110, 0.12));
+            border-color: rgba(131, 56, 236, 0.45);
+            color: var(--ink);
+        }
+
+        .tile-owner-badge {
+            margin-top: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(63, 29, 56, 0.12);
+            color: var(--ink);
+            text-align: center;
+            line-height: 1.2;
+        }
 
         /* ===== Board ===== */
         .board-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -694,8 +1299,8 @@
         }
         .money-input {
             display: block;
-            width: 38px;
-            max-width: 38px;
+            width: 56px;
+            max-width: 56px;
             font-size: 7px;
             line-height: 1.15;
             padding: 2px 2px;
@@ -763,71 +1368,48 @@
             opacity: 0.55;
             cursor: not-allowed;
         }
-        /* 透視外殼：讓骰子呈現立體塊狀 */
+        /* 骰子外觀：以 🎲 為主體，旁邊顯示點數 */
         .dice-shell {
-            perspective: 160px;
-            perspective-origin: 50% 35%;
             flex-shrink: 0;
-            padding: 6px 8px 10px;
-        }
-
-        .dice {
-            position: relative;
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            transform: rotateX(24deg) rotateY(-32deg);
-            transform-style: preserve-3d;
-            background:
-                linear-gradient(152deg,
-                    rgba(255, 252, 254, 1) 0%,
-                    rgba(236, 224, 232, 0.98) 42%,
-                    rgba(188, 168, 182, 1) 100%);
-            border: 1px solid rgba(75, 42, 58, 0.38);
+            padding: 4px 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.42rem;
+        }
+
+        .dice {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .dice .dice-emoji {
+            font-size: clamp(2.4rem, 8vw, 3rem);
+            line-height: 1;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(63, 29, 56, 0.2));
+        }
+        .dice .dice-face-value {
+            min-width: 1.5rem;
+            font-size: clamp(1.25rem, 4vw, 1.65rem);
             font-weight: 800;
             color: #4a2840;
-            text-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.65),
-                0 -1px 1px rgba(60, 30, 45, 0.12);
-            box-shadow:
-                inset 5px 5px 14px rgba(255, 255, 255, 0.82),
-                inset -5px -8px 14px rgba(48, 28, 40, 0.28),
-                inset 0 -2px 4px rgba(90, 50, 65, 0.12),
-                0 9px 0 -1px rgba(72, 44, 56, 0.55),
-                0 16px 22px -8px rgba(35, 20, 30, 0.5),
-                0 3px 6px rgba(255, 255, 255, 0.35) inset;
-            flex-shrink: 0;
-            isolation: isolate;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
         }
 
-        /* 頂緣高光（不遮住中央點數） */
-        .dice::before {
-            content: "";
-            position: absolute;
-            left: 7px;
-            right: 7px;
-            top: 5px;
-            height: 38%;
-            border-radius: 10px 10px 40% 40%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .dice.dice--rolling {
+        .dice.dice--rolling .dice-emoji {
             animation: dice-wobble 0.11s linear infinite;
         }
 
         @keyframes dice-wobble {
             0%, 100% {
-                transform: rotateX(24deg) rotateY(-32deg) rotateZ(-12deg) translateY(0);
+                transform: rotate(-14deg) translateY(0);
             }
             50% {
-                transform: rotateX(24deg) rotateY(-32deg) rotateZ(12deg) translateY(-3px);
+                transform: rotate(14deg) translateY(-3px);
             }
         }
 
@@ -844,85 +1426,6 @@
         .draw-actions button:active { transform: scale(0.97); }
         .draw-chance { background: var(--chance); color: #4f3600; }
         .draw-fate   { background: var(--fate); color: white; }
-
-        .draw-result-area {
-            perspective: 600px;
-            margin: 0 auto;
-            width: 100%;
-            max-width: min(440px, 100%);
-        }
-
-        .draw-result {
-            font-size: 0.92rem; background: rgba(255,255,255,0.9);
-            border-radius: var(--radius-md); padding: 12px 14px;
-            min-height: 48px; border: 1px solid rgba(63,29,56,0.1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.4s;
-        }
-        .draw-result.reveal {
-            animation: cardFlip 0.55s ease-out;
-        }
-        @keyframes cardFlip {
-            0%   { transform: rotateX(90deg) scale(0.8); opacity: 0; }
-            50%  { transform: rotateX(-8deg) scale(1.04); opacity: 1; }
-            100% { transform: rotateX(0deg) scale(1); opacity: 1; }
-        }
-        .draw-result.chance-result { border-color: var(--chance); background: rgba(255,190,11,0.12); }
-        .draw-result.fate-result   { border-color: var(--fate);   background: rgba(58,134,255,0.1); }
-
-        .cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-
-        .card-editor {
-            border-radius: var(--radius-md); padding: 12px;
-            border: 1px solid rgba(63,29,56,0.12);
-            background: rgba(255,255,255,0.92);
-            transition: all var(--transition);
-            position: relative;
-        }
-        .card-editor:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-        .card-editor.chance { border-left: 5px solid var(--chance); }
-        .card-editor.fate   { border-left: 5px solid var(--fate); }
-
-        .card-editor-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .card-editor-header h4 { font-size: 0.9rem; }
-        .card-delete {
-            background: none; border: 1px solid rgba(192,57,43,0.25);
-            color: #c0392b; border-radius: 999px; width: 26px; height: 26px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.85rem; line-height: 1;
-            transition: all var(--transition); flex-shrink: 0;
-        }
-        .card-delete:hover { background: rgba(192,57,43,0.1); border-color: #c0392b; }
-
-        .card-editor input,
-        .card-editor textarea {
-            width: 100%; border-radius: var(--radius-sm);
-            border: 1px solid rgba(63,29,56,0.15);
-            padding: 7px 9px; font-family: inherit;
-            font-size: 0.86rem; background: white; color: var(--ink);
-            transition: border-color var(--transition), box-shadow var(--transition);
-        }
-        .card-editor input:focus,
-        .card-editor textarea:focus {
-            outline: none; border-color: #8338ec;
-            box-shadow: 0 0 0 3px rgba(131,56,236,0.15);
-        }
-        .card-editor textarea { margin-top: 6px; resize: vertical; min-height: 52px; }
-        .card-editor input::placeholder,
-        .card-editor textarea::placeholder { color: #baa5b0; }
-
-        .add-card-btn {
-            width: 100%; border: 2px dashed rgba(63,29,56,0.2);
-            background: rgba(255,255,255,0.5); border-radius: var(--radius-md);
-            padding: 14px; font-family: inherit; font-size: 0.9rem;
-            color: var(--ink-light); cursor: pointer;
-            transition: all var(--transition); margin-top: 10px;
-        }
-        .add-card-btn:hover { border-color: #8338ec; color: #8338ec; background: rgba(131,56,236,0.06); }
 
         .tip {
             margin-top: 14px; padding: 12px 14px;
@@ -941,10 +1444,285 @@
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        .section-title {
+            font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            color: var(--ink);
+        }
+        .rules-tag,
+        .left-rail-log-tab {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(115, 75, 87, 0.12);
+            box-shadow: 0 10px 18px rgba(90,55,66,0.08);
+        }
+        .board-section {
+            background: rgba(255, 251, 245, 0.72);
+            border: 1px solid rgba(115, 75, 87, 0.12);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+        }
+        .tile-owner-badge {
+            margin-top: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 5px 8px;
+        }
+        .tile-pawn-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            font-size: 14px;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.14);
+            background: rgba(255, 255, 255, 0.45);
+            animation: pawn-bob 2.8s ease-in-out infinite;
+        }
+        @keyframes pawn-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .center-panel {
+            border-radius: calc(var(--radius-lg) + 2px);
+            background:
+                radial-gradient(circle at top center, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 58%),
+                linear-gradient(160deg, rgba(255, 248, 237, 0.94), rgba(255, 239, 233, 0.9), rgba(241, 250, 245, 0.92));
+            border: 1px solid rgba(115, 75, 87, 0.12);
+            padding: 18px 18px 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 16px 30px rgba(95, 55, 69, 0.1);
+            position: relative;
+        }
+        .center-panel::before {
+            content: "";
+            position: absolute;
+            width: 13rem;
+            height: 13rem;
+            border-radius: 50%;
+            top: -4rem;
+            right: -2rem;
+            background: radial-gradient(circle, rgba(255, 220, 188, 0.56) 0%, rgba(255, 220, 188, 0) 74%);
+            pointer-events: none;
+        }
+        .center-block--players { gap: 10px; }
+        .center-game-meta {
+            font-size: 0.92rem;
+            color: var(--ink);
+            font-weight: 800;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+        }
+        .center-story-caption {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--ink-light);
+            margin: 0;
+        }
+        .center-settings {
+            gap: 10px;
+            font-size: 0.88rem;
+        }
+        .center-settings label {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            font-weight: 800;
+            color: var(--ink);
+        }
+        .center-settings select {
+            font-size: 0.92rem;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 800;
+        }
+        .center-players-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+        .center-piece-wrap {
+            gap: 10px;
+            padding: 12px 10px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(115, 75, 87, 0.1);
+            border-radius: 22px;
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+            box-shadow: 0 12px 22px rgba(90, 55, 66, 0.08);
+            position: relative;
+        }
+        .center-piece-wrap.center-piece-wrap--active {
+            background: rgba(255, 255, 255, 0.92);
+            transform: translateY(-4px);
+            box-shadow: 0 22px 34px rgba(90, 55, 66, 0.14);
+        }
+        .center-piece-wrap.center-piece-wrap--active::after {
+            content: "輪到";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--ink);
+            background: rgba(255, 231, 184, 0.94);
+            border-radius: 999px;
+            padding: 4px 8px;
+        }
+        .center-piece-figure {
+            width: 76px;
+            height: 76px;
+        }
+        .center-piece-wrap.center-piece-wrap--active .center-piece-token {
+            box-shadow: 0 0 0 8px rgba(255, 223, 141, 0.32), 0 22px 20px rgba(0, 0, 0, 0.12);
+            animation: active-player-glow 2.2s ease-in-out infinite;
+        }
+        @keyframes active-player-glow {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-4px) scale(1.03); }
+        }
+        .center-piece-bubble {
+            top: -10px;
+            left: -20px;
+            right: auto;
+            bottom: auto;
+            transform: none;
+            width: auto;
+        }
+        .center-piece-bubble::after {
+            display: none;
+        }
+        .money-input {
+            width: 62px;
+            max-width: 62px;
+            font-size: 0.72rem;
+            line-height: 1.1;
+            padding: 3px 4px;
+            border-radius: 8px;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(86, 48, 61, 0.14);
+        }
+        .center-piece-token {
+            width: 76px;
+            height: 76px;
+            font-size: 2rem;
+            border: 4px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 12px 18px rgba(0, 0, 0, 0.14);
+        }
+        .center-piece-label {
+            font-size: 0.9rem;
+            color: var(--ink);
+            font-weight: 800;
+        }
+        .center-piece-meta {
+            font-size: 0.76rem;
+            color: var(--ink-light);
+            font-weight: 700;
+        }
+        .btn-roll {
+            padding: 12px 22px;
+            font-size: 1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, oklch(0.78 0.16 28), oklch(0.72 0.16 12));
+            box-shadow: 0 16px 24px rgba(220, 116, 82, 0.28);
+        }
+        .btn-roll:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 20px 30px rgba(220, 116, 82, 0.34);
+            filter: saturate(1.08);
+        }
+        .dice-shell {
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 24px;
+            border: 1px solid rgba(115, 75, 87, 0.1);
+            box-shadow: 0 10px 18px rgba(86,48,61,0.08);
+        }
+        .draw-actions button {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+        .tip {
+            border-radius: 20px;
+            background: rgba(255, 248, 234, 0.9);
+            border: 1px solid rgba(115,75,87,0.1);
+        }
+        .toast {
+            background: rgba(58, 40, 51, 0.92);
+            padding: 12px 24px;
+            font-size: 0.94rem;
+            font-weight: 800;
+            box-shadow: 0 16px 26px rgba(0,0,0,0.18);
+            backdrop-filter: blur(8px);
+        }
+        .turn-log {
+            display: grid;
+            gap: 8px;
+        }
+        .turn-log-entry {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px;
+            align-items: start;
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.78);
+            border-radius: 14px;
+            border: 1px solid rgba(115,75,87,0.08);
+        }
+        .turn-log-entry-icon {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .turn-log-entry-text {
+            font-size: 0.84rem;
+            color: var(--ink);
+            line-height: 1.45;
+        }
+        .rules-quick-guide {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .rules-quick-guide div {
+            padding: 12px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(115,75,87,0.1);
+            text-align: center;
+            font-weight: 800;
+            color: var(--ink);
+        }
+        .rules-quick-guide span {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+        .rules-textarea {
+            background: rgba(255,255,255,0.88);
+            border-radius: 18px;
+            border: 1px solid rgba(115,75,87,0.1);
+        }
+        .buy-panel {
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255,248,240,0.98), rgba(255,239,228,0.96));
+        }
+        .buy-actions button {
+            padding: 12px 22px;
+            font-size: 0.96rem;
+            font-weight: 800;
+            box-shadow: 0 10px 18px rgba(90,55,66,0.08);
+        }
+        .buy-actions .buy-yes {
+            background: linear-gradient(135deg, rgba(255, 218, 156, 0.92), rgba(255, 236, 199, 0.96));
+            border-color: rgba(218, 149, 74, 0.38);
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 1200px) {}
         @media (max-width: 768px) {
-            .title-wrap h1 { font-size: 1.6rem; }
+            .title-wrap h1 { font-size: 1.9rem; }
+            .title-sub { font-size: 0.9rem; }
             .top-bar { flex-direction: column; align-items: flex-start; }
 
             .page {
@@ -1000,39 +1778,77 @@
                 transform: translateX(-50%);
                 width: min(320px, calc(100vw - 32px));
             }
+
+            .cards-drawer {
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                width: 100%;
+                height: min(78vh, 620px);
+                transform: translateY(0);
+            }
+            .cards-drawer.is-collapsed {
+                transform: translateY(calc(100% - 48px));
+            }
+            .drawer-handle {
+                width: 100%;
+                height: 48px;
+                border-radius: 14px 14px 0 0;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                flex-direction: row;
+                gap: 6px;
+            }
+            .drawer-handle .drawer-handle-line {
+                font-size: 0.85rem;
+            }
+            .drawer-panel {
+                border-radius: 0;
+            }
+            .center-players-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .center-piece-figure {
+                width: 68px;
+                height: 68px;
+            }
+            .center-piece-token {
+                width: 68px;
+                height: 68px;
+                font-size: 1.8rem;
+            }
         }
         @media (max-width: 480px) {
             .page { padding: 16px 12px 32px; }
             .board-section { padding: 12px; }
+            .online-mini-steps {
+                gap: 6px;
+            }
+            .online-mini-steps span,
+            .center-settings label {
+                width: 100%;
+                justify-content: center;
+            }
+            .center-players-row {
+                grid-template-columns: 1fr;
+            }
+            .draw-actions button,
+            .online-actions button,
+            .btn-roll {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <aside class="left-rail" aria-label="規則與卡片捷徑">
-        <div class="left-rail-top">
-            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">
-                📜 基本規則
-            </button>
-            <button type="button" class="rules-tag tag-chance" id="chance-open" aria-expanded="false" aria-controls="chance-overlay-panel" title="機會卡設置">
-                🟡 機會卡設置
-            </button>
-            <button type="button" class="rules-tag tag-fate" id="fate-open" aria-expanded="false" aria-controls="fate-overlay-panel" title="命運卡設置">
-                🔵 命運卡設置
-            </button>
-        </div>
-        <div class="left-rail-log-hover">
-            <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">回合記錄</button>
-            <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
-                <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
-            </div>
-        </div>
-    </aside>
-
     <div class="page">
         <div class="page-main">
             <div class="top-bar">
                 <div class="title-wrap">
                     <h1>🐉 山海經大富翁</h1>
+                    <p class="title-sub">讓我嗯一起探索山海經的世界吧！</p>
                 </div>
                 <div class="top-bar-right">
                     <div id="peachblossom-auth-bar" aria-live="polite"></div>
@@ -1040,19 +1856,7 @@
                 </div>
             </div>
 
-            <div class="toolbar">
-                <button id="btn-export">📤 匯出設定 (JSON)</button>
-                <button id="btn-import">📥 匯入設定</button>
-                <button id="btn-reset" class="btn-danger">🔄 重設為預設</button>
-                <input type="file" id="file-import" accept=".json" hidden>
-            </div>
-
             <section class="online-panel" id="online-panel" aria-labelledby="online-panel-title">
-                <h3 id="online-panel-title">🌐 線上對戰（Google 登入）</h3>
-                <p class="online-tip">
-                    請先於右上方完成 Google 登入。房主建立房間後，將<strong>房間代碼</strong>或分享連結傳給其他玩家；每位玩家對應棋盤上的一個「玩家」座位。
-                    遊戲須架設在 <strong>peachspring.cc</strong> 網域下，瀏覽器才能帶上登入 Cookie 與伺服器同步。
-                </p>
                 <div class="online-actions">
                     <button type="button" id="btn-online-create">建立線上房間</button>
                     <label>加入代碼
@@ -1064,12 +1868,46 @@
                 <div class="online-status" id="online-status"></div>
             </section>
 
-            <div class="legend" id="legend"></div>
-
             <div class="layout">
                 <section class="board-section">
                     <div class="section-header">
                         <h2 class="section-title">🗺️ 大富翁——山海經巡遊</h2>
+                        <div class="board-title-actions">
+                            <button type="button" class="rules-tag" id="rules-open" aria-expanded="false" aria-controls="rules-overlay-panel" title="基本規則">📜 基本規則</button>
+                            <div class="left-rail-log-hover">
+                                <button type="button" class="left-rail-log-tab" id="turn-log-tab" aria-haspopup="true" aria-expanded="false" aria-controls="turn-log-popover">📝 回合記錄</button>
+                                <div class="left-rail-log-popover" id="turn-log-popover" role="region" aria-label="回合記錄內容">
+                                    <div id="turn-log" class="turn-log turn-log--rail" aria-live="polite" aria-relevant="additions"></div>
+                                </div>
+                            </div>
+                            <button type="button" class="rules-tag" id="btn-restart-game" title="保留棋盤地名、機會／命運卡與規則文字，重置棋子、金幣與領地">🔁 重新開始</button>
+                            <div class="board-preset-wrap">
+                                <button type="button" class="rules-tag" id="btn-preset-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="board-preset-popover" title="儲存或載入棋盤設定（須登入）">📂 棋盤收藏</button>
+                                <div class="board-preset-popover" id="board-preset-popover" role="region" aria-label="棋盤設定收藏" hidden>
+                                    <p class="board-preset-hint" id="board-preset-auth-msg">
+                                        使用 Google 登入後，可將目前<strong>棋盤格、機會／命運卡、規則文字</strong>存入此瀏覽器，方便下次載入重複使用（資料僅存在本機）。
+                                    </p>
+                                    <div id="board-preset-logged-block">
+                                        <label>收藏名稱
+                                            <input type="text" id="preset-name-input" maxlength="40" placeholder="例如：春節親子版" autocomplete="off" />
+                                        </label>
+                                        <div class="board-preset-row">
+                                            <button type="button" id="btn-preset-save">儲存目前設定</button>
+                                        </div>
+                                        <label>載入已存
+                                            <select id="preset-select" aria-label="選擇已儲存的棋盤設定">
+                                                <option value="">— 請選擇 —</option>
+                                            </select>
+                                        </label>
+                                        <div class="board-preset-row">
+                                            <button type="button" id="btn-preset-load">套用至棋盤</button>
+                                            <button type="button" class="btn-preset-danger" id="btn-preset-delete">刪除</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="btn-reset" class="rules-tag btn-danger" type="button">🔄 重設為預設</button>
+                        </div>
                     </div>
                     <div class="board-scroll">
                         <div class="board-grid" id="board-grid">
@@ -1077,7 +1915,7 @@
                                 <div class="center-block center-block--players" aria-label="玩家與人數">
                                     <div class="center-settings">
                                         <label>
-                                            遊玩人數
+                                            🐾 人數
                                             <select id="player-count" aria-label="遊玩人數">
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
@@ -1092,21 +1930,21 @@
 
                                 <div class="center-block center-block--dice" aria-label="擲骰">
                                     <div class="dice-row">
-                                        <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">擲骰</button>
+                                        <button type="button" class="btn-roll" id="btn-roll" title="目前回合玩家擲骰前進">🎲 擲骰前進</button>
                                         <div class="dice-shell">
-                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">1</div>
+                                            <div class="dice" id="dice-display" role="img" aria-label="骰子點數">
+                                                <span class="dice-emoji" aria-hidden="true">🎲</span>
+                                                <span class="dice-face-value" id="dice-face-value">1</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p class="center-game-meta" id="turn-indicator">輪到：玩家 1</p>
+                                    <p class="center-game-meta" id="turn-indicator">輪到小動物出發</p>
                                 </div>
 
                                 <div class="center-block center-block--cards" aria-label="抽牌">
                                     <div class="draw-actions">
-                                        <button type="button" class="draw-chance" id="draw-chance">抽機會卡</button>
-                                        <button type="button" class="draw-fate" id="draw-fate">抽命運卡</button>
-                                    </div>
-                                    <div class="draw-result-area">
-                                        <div class="draw-result" id="draw-result">點擊上方抽牌或先擲骰移動</div>
+                                        <button type="button" class="draw-chance" id="draw-chance">🟡 機會</button>
+                                        <button type="button" class="draw-fate" id="draw-fate">🔵 命運</button>
                                     </div>
                                 </div>
                             </div>
@@ -1118,51 +1956,73 @@
         </div>
     </div>
 
+    <aside class="cards-drawer is-collapsed" id="cards-drawer" aria-label="機會與命運卡編輯">
+        <button class="drawer-handle" id="cards-drawer-toggle" type="button" aria-expanded="false" aria-controls="cards-drawer-panel">
+            <span class="drawer-handle-line">卡堆</span><span class="drawer-handle-line">工坊</span>
+        </button>
+        <div class="drawer-panel" id="cards-drawer-panel">
+            <div class="drawer-panel-header">
+                <h2>🃏 卡堆工坊</h2>
+                <button type="button" class="drawer-close" id="cards-drawer-close" title="收合">✕</button>
+            </div>
+            <div class="cards-editor-two-col">
+                <section class="cards-editor-col" aria-labelledby="cards-col-chance-title">
+                    <h3 class="cards-col-title cards-col-title--chance" id="cards-col-chance-title">🟡 機會卡</h3>
+                    <div class="cards-grid" id="cards-chance"></div>
+                    <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增機會卡</button>
+                </section>
+                <section class="cards-editor-col" aria-labelledby="cards-col-fate-title">
+                    <h3 class="cards-col-title cards-col-title--fate" id="cards-col-fate-title">🔵 命運卡</h3>
+                    <div class="cards-grid" id="cards-fate"></div>
+                    <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增命運卡</button>
+                </section>
+            </div>
+            <div class="tip">
+                寫短一點最好玩，例如「前進 3 格」「拿 150 金幣」「和一位玩家交換位置」。
+            </div>
+        </div>
+    </aside>
+
     <div class="toast" id="toast"></div>
+
+    <div class="medal-overlay" id="medal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="medal-title">
+        <div class="medal-overlay-backdrop" id="medal-overlay-backdrop"></div>
+        <div class="medal-box">
+            <div class="medal-ribbon" id="medal-ribbon-label">機會卡</div>
+            <div class="medal-disk">
+                <h3 id="medal-title">（標題）</h3>
+                <p id="medal-body">（內容）</p>
+                <button type="button" class="medal-ok" id="medal-ok">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="buy-overlay" id="buy-land-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="buy-land-title">
+        <div class="buy-overlay-backdrop" id="buy-land-backdrop"></div>
+        <div class="buy-panel">
+            <h2 id="buy-land-title">要收下這塊地嗎？</h2>
+            <p id="buy-land-desc"></p>
+            <div class="buy-actions">
+                <button type="button" id="buy-land-yes">🪙 買下</button>
+                <button type="button" id="buy-land-no">🌿 先不要</button>
+            </div>
+        </div>
+    </div>
 
     <div class="glass-modal" id="rules-overlay" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title" aria-hidden="true">
         <div class="glass-modal-backdrop" id="rules-overlay-backdrop"></div>
         <div class="glass-modal-panel" id="rules-overlay-panel">
             <div class="glass-modal-header">
-                <h2 id="rules-dialog-title">基本規則</h2>
+                <h2 id="rules-dialog-title">快速玩法</h2>
                 <button type="button" class="glass-modal-close" id="rules-close" aria-label="關閉">✕</button>
             </div>
             <div class="glass-modal-body">
-                <textarea id="rules-text" class="rules-textarea" rows="12" aria-label="自訂遊戲規則" placeholder="請輸入你們約定的遊戲規則，例如：人數、起始金幣、勝利條件、特殊約定等……"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div class="glass-modal" id="chance-overlay" role="dialog" aria-modal="true" aria-labelledby="chance-dialog-title" aria-hidden="true">
-        <div class="glass-modal-backdrop" id="chance-overlay-backdrop"></div>
-        <div class="glass-modal-panel glass-modal-panel--cards" id="chance-overlay-panel">
-            <div class="glass-modal-header">
-                <h2 id="chance-dialog-title">🟡 機會卡</h2>
-                <button type="button" class="glass-modal-close" id="chance-close" aria-label="關閉">✕</button>
-            </div>
-            <div class="glass-modal-body glass-modal-body--scroll">
-                <div class="cards-grid" id="cards-chance"></div>
-                <button type="button" class="add-card-btn" id="add-card-chance">＋ 新增一張機會卡</button>
-                <div class="tip">
-                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
+                <div class="rules-quick-guide" aria-hidden="true">
+                    <div><span>🎲</span>輪流擲骰前進</div>
+                    <div><span>🪙</span>買地和拿金幣</div>
+                    <div><span>🃏</span>抽卡讓局勢翻轉</div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="glass-modal" id="fate-overlay" role="dialog" aria-modal="true" aria-labelledby="fate-dialog-title" aria-hidden="true">
-        <div class="glass-modal-backdrop" id="fate-overlay-backdrop"></div>
-        <div class="glass-modal-panel glass-modal-panel--cards" id="fate-overlay-panel">
-            <div class="glass-modal-header">
-                <h2 id="fate-dialog-title">🔵 命運卡</h2>
-                <button type="button" class="glass-modal-close" id="fate-close" aria-label="關閉">✕</button>
-            </div>
-            <div class="glass-modal-body glass-modal-body--scroll">
-                <div class="cards-grid" id="cards-fate"></div>
-                <button type="button" class="add-card-btn" id="add-card-fate">＋ 新增一張命運卡</button>
-                <div class="tip">
-                    小提示：內容可寫「前進/後退 N 格」「加減金幣」「指定角色互動」等，先用這版快速測試故事與規則平衡。
-                </div>
+                <textarea id="rules-text" class="rules-textarea" rows="12" aria-label="自訂遊戲規則" placeholder="想加自己的玩法，就把重要規則寫在這裡。短句最好懂。"></textarea>
             </div>
         </div>
     </div>
@@ -1177,15 +2037,67 @@
         "use strict";
 
         const STORAGE_KEY = "shanhaijing-monopoly-v1";
+        const BOARD_PRESETS_KEY = "shanhaijing-monopoly-board-presets-v1";
+        const MAX_BOARD_PRESETS_PER_USER = 20;
 
         let onlineMode = false;
         let onlineRoomCode = "";
         let onlineVersion = 0;
+        const PLAYER_ANIMALS = ["🐯", "🦊", "🐼", "🐸", "🦄", "🐧"];
         /** @type {{ hostUserId: string, members: Array<{userId: string, playerIndex: number, name: string|null, email: string, picture: string|null}> } | null} */
         let onlineMeta = null;
         let myUserId = null;
         let pollTimer = null;
         let onlineSaveTimer = null;
+
+        function playerAnimal(idx) {
+            return PLAYER_ANIMALS[idx % PLAYER_ANIMALS.length];
+        }
+
+        function rawPlayerName(mem) {
+            return mem && (mem.name || mem.email) ? String(mem.name || mem.email) : "";
+        }
+
+        function playerTitle(idx, mem) {
+            var animal = playerAnimal(idx);
+            var name = rawPlayerName(mem);
+            return animal + " " + (name || ("玩家" + (idx + 1)));
+        }
+
+        function playerStatusText(idx, mem) {
+            if (onlineMode && !mem) return "等待加入";
+            return "就位";
+        }
+
+        function playerMoneyLabel(idx, mem) {
+            return playerTitle(idx, mem) + " 金幣";
+        }
+
+        function shortShareText(url) {
+            try {
+                var u = new URL(url);
+                return u.pathname + u.search;
+            } catch (e) {
+                return url;
+            }
+        }
+
+        function turnLogIcon(line) {
+            if (/抽到|命運卡|機會卡/.test(line)) return "🃏";
+            if (/買|購得|購買|地/.test(line)) return "🏕️";
+            if (/金幣|獎勵/.test(line)) return "🪙";
+            if (/下一位|輪到/.test(line)) return "🔁";
+            if (/擲出|前進|移至|起點/.test(line)) return "🎲";
+            return "✨";
+        }
+
+        function renderTurnLogEntry(line) {
+            return '<div class="turn-log-entry"><span class="turn-log-entry-icon" aria-hidden="true">' +
+                turnLogIcon(line) +
+                '</span><div class="turn-log-entry-text">' +
+                esc(line) +
+                '</div></div>';
+        }
 
         function getAuthBase() {
             if (typeof window.PEACHBLOSSOM_AUTH_BASE === "string" && window.PEACHBLOSSOM_AUTH_BASE.trim()) {
@@ -1383,19 +2295,21 @@
                 "?room=" +
                 encodeURIComponent(onlineRoomCode);
             setOnlineStatus(
-                "<div>房間代碼：<span class=\"room-code-display\">" +
-                    String(onlineRoomCode).replace(/</g, "") +
+                "<div class=\"online-status-card\">" +
+                    "<div class=\"online-status-item\"><span class=\"online-status-label\">房號</span><span class=\"room-code-display\">" +
+                        String(onlineRoomCode).replace(/</g, "") +
                     "</span></div>" +
-                    "<div style=\"margin-top:6px;\">分享連結：<a href=\"" +
-                    esc(share) +
-                    "\">" +
-                    esc(share) +
-                    "</a>（房主與已加入玩家可同步棋局）</div>" +
-                    "<div style=\"margin-top:8px;\">已加入玩家：<strong>" +
-                    (onlineMeta && onlineMeta.members ? onlineMeta.members.length : 0) +
-                    "</strong> / <strong>" +
-                    state.game.playerCount +
-                    "</strong></div>"
+                    "<div class=\"online-status-item\"><span class=\"online-status-label\">已進房靈獸</span><strong>" +
+                        (onlineMeta && onlineMeta.members ? onlineMeta.members.length : 0) +
+                        " / " +
+                        state.game.playerCount +
+                    "</strong></div>" +
+                    "<div class=\"online-status-item\"><span class=\"online-status-label\">分享</span><a href=\"" +
+                        esc(share) +
+                        "\">" +
+                        esc(shortShareText(share)) +
+                    "</a></div>" +
+                "</div>"
             );
         }
 
@@ -1482,7 +2396,62 @@
         const NUM_TILES = POS.length;
         const DEFAULT_START_MONEY = 1500;
         const PASS_GO_BONUS = 200;
+        const LAND_PRICE = 300;
+        const DEFAULT_TOLL_FEE = 120;
         const PLAYER_COLORS = ["#e63946", "#457b9d", "#2a9d8f", "#e9c46a", "#9b5de5", "#f57dbc"];
+
+        function themeGradientForTileLabel(label) {
+            var s = String(label || "");
+            var rules = [
+                [/東海|瀛洲|波|濤|水府/, "linear-gradient(145deg, #c8e7ff 0%, #7eb6e8 48%, #a8d4f0 100%)"],
+                [/青丘|青松|翠|竹|林|木神/, "linear-gradient(145deg, #d8f5e0 0%, #6eb87a 45%, #9fd4a8 100%)"],
+                [/崑崙|流沙|漠|黃沙|丘墟/, "linear-gradient(145deg, #fdebd8 0%, #e8c49a 50%, #f3dcb8 100%)"],
+                [/北冥|冥|寒冰|深淵/, "linear-gradient(145deg, #d4e4f7 0%, #6b8cae 48%, #9bb8d4 100%)"],
+                [/扶桑|若木|日|曦|霞/, "linear-gradient(145deg, #ffe0d4 0%, #f4a582 45%, #ffc4a8 100%)"],
+                [/鐘山|不周|嶽|崖|峰/, "linear-gradient(145deg, #e4ead8 0%, #8fa882 52%, #b8c9a8 100%)"],
+                [/幽都|監|獄|煞/, "linear-gradient(145deg, #e2d8ee 0%, #8f7aad 48%, #b9a8cc 100%)"],
+                [/西王母|瑶池|池|蓮/, "linear-gradient(145deg, #f5e0f0 0%, #d4a8c8 48%, #e8c0dc 100%)"],
+                [/玄圃|圃|園/, "linear-gradient(145deg, #e8f8e8 0%, #8fcf9a 45%, #b8e6c4 100%)"],
+                [/塗山|禹|石/, "linear-gradient(145deg, #f0e8dc 0%, #c4a882 50%, #dcc8a8 100%)"],
+                [/丹穴|丹|赤|朱/, "linear-gradient(145deg, #ffe4dc 0%, #e88870 48%, #ffb8a8 100%)"],
+                [/羽民|翼|翔/, "linear-gradient(145deg, #e0f2ff 0%, #8ec5e8 50%, #b8dcf5 100%)"],
+                [/無啟|民國|國/, "linear-gradient(145deg, #f2f0ff 0%, #b8b0d8 48%, #d4cce8 100%)"],
+                [/祭典|修繕|稅|費/, "linear-gradient(145deg, #fff6d8 0%, #f0c878 50%, #ffe8a8 100%)"],
+                [/神獸|集市|市/, "linear-gradient(145deg, #fff8e8 0%, #f5d88a 48%, #ffe8b8 100%)"],
+                [/起點|歸/, "linear-gradient(145deg, #f0e0f5 0%, #d8b8e8 45%, #e8c8f0 100%)"]
+            ];
+            for (var i = 0; i < rules.length; i++) {
+                if (rules[i][0].test(s)) return rules[i][1];
+            }
+            return null;
+        }
+
+        function normalizeTiles(rawTiles) {
+            var out = [];
+            for (var i = 0; i < DEFAULT_TILES.length; i++) {
+                var def = DEFAULT_TILES[i];
+                var t = rawTiles && rawTiles[i] ? rawTiles[i] : {};
+                var merged = Object.assign({}, def, t);
+                if (merged.owner !== undefined && merged.owner !== null && merged.owner !== "") {
+                    var o = parseInt(merged.owner, 10);
+                    merged.owner = isNaN(o) ? null : o;
+                } else {
+                    merged.owner = null;
+                }
+                out.push(merged);
+            }
+            return out;
+        }
+
+        function isChanceTile(t) {
+            return t && t.type === "tile-event" && (String(t.label).indexOf("機會") >= 0 || String(t.effect || "").indexOf("機會") >= 0);
+        }
+        function isFateTile(t) {
+            return t && t.type === "tile-event" && (String(t.label).indexOf("命運") >= 0 || String(t.effect || "").indexOf("命運") >= 0);
+        }
+        function isPurchasableLandTile(t) {
+            return t && String(t.effect || "").indexOf("可購買地塊") >= 0;
+        }
 
         function buildDefaultPlayers(count) {
             const players = [];
@@ -1492,30 +2461,207 @@
             return players;
         }
 
+        function initialTurnLogLine() {
+            return (
+                "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " +
+                DEFAULT_START_MONEY +
+                " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " +
+                PASS_GO_BONUS +
+                " 金幣。"
+            );
+        }
+
         function defaultGame() {
             const c = 4;
             return {
                 playerCount: c,
                 players: buildDefaultPlayers(c),
                 currentPlayerIndex: 0,
-                turnLog: [
-                    "歡迎來到山海經大富翁。可調整人數，每位玩家起始 " + DEFAULT_START_MONEY + " 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 " + PASS_GO_BONUS + " 金幣。"
-                ]
+                turnLog: [initialTurnLogLine()]
             };
         }
 
+        /** 新開一局：保留人數選擇，重置資金、位置、回合與紀錄 */
+        function buildFreshGameKeepingPlayerCount() {
+            var n = parseInt(state.game.playerCount, 10);
+            if (isNaN(n) || n < 2 || n > 6) n = 4;
+            return {
+                playerCount: n,
+                players: buildDefaultPlayers(n),
+                currentPlayerIndex: 0,
+                turnLog: [initialTurnLogLine()]
+            };
+        }
+
+        function clearAllTileOwners() {
+            state.tiles.forEach(function (t) {
+                t.owner = null;
+            });
+        }
+
+        function persistAfterBoardEdit() {
+            if (onlineMode) scheduleOnlinePushAfterEdit();
+            else saveState();
+        }
+
+        function restartGameSession() {
+            if (onlineMode && !isOnlineHost()) {
+                showToast("僅房主可重新開始遊戲");
+                return;
+            }
+            if (
+                !confirm(
+                    "確定重新開始本局？\n將保留：棋盤格、機會／命運卡、規則文字。\n將重置：棋子位置、金幣、領地擁有權、回合與回合記錄。"
+                )
+            ) {
+                return;
+            }
+            state.game = buildFreshGameKeepingPlayerCount();
+            clearAllTileOwners();
+            var rollBtn = document.getElementById("btn-roll");
+            if (rollBtn) rollBtn.disabled = false;
+            persistAfterBoardEdit();
+            renderBoard();
+            renderCenterGameUI();
+            showToast("已重新開始遊戲");
+        }
+
+        function readBoardPresetsRoot() {
+            try {
+                var raw = localStorage.getItem(BOARD_PRESETS_KEY);
+                if (!raw) return { byUser: {} };
+                var o = JSON.parse(raw);
+                if (!o || typeof o !== "object" || !o.byUser) return { byUser: {} };
+                return o;
+            } catch (e) {
+                return { byUser: {} };
+            }
+        }
+
+        function writeBoardPresetsRoot(root) {
+            try {
+                localStorage.setItem(BOARD_PRESETS_KEY, JSON.stringify(root));
+            } catch (e) {
+                showToast("無法寫入收藏（可能超過容量）");
+            }
+        }
+
+        function genPresetId() {
+            if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+            return "p_" + Date.now() + "_" + Math.floor(Math.random() * 1e9);
+        }
+
+        function snapshotBoardSettingsOnly() {
+            return {
+                tiles: JSON.parse(JSON.stringify(state.tiles)),
+                chance: JSON.parse(JSON.stringify(state.chance)),
+                fate: JSON.parse(JSON.stringify(state.fate)),
+                rulesText: state.rulesText
+            };
+        }
+
+        function applyBoardPresetPayload(preset) {
+            var n = parseInt(state.game.playerCount, 10);
+            if (isNaN(n) || n < 2 || n > 6) n = 4;
+            var merged = normalizeState({
+                tiles: preset.tiles,
+                chance: preset.chance,
+                fate: preset.fate,
+                rulesText: preset.rulesText || DEFAULT_RULES_TEXT,
+                game: {
+                    playerCount: n,
+                    players: buildDefaultPlayers(n),
+                    currentPlayerIndex: 0,
+                    turnLog: [initialTurnLogLine()]
+                }
+            });
+            state.tiles = merged.tiles;
+            state.chance = merged.chance;
+            state.fate = merged.fate;
+            state.rulesText = merged.rulesText;
+            state.game = merged.game;
+            syncRulesTextarea();
+            persistAfterBoardEdit();
+            renderBoard();
+            renderCards();
+            renderCenterGameUI();
+        }
+
+        function fillPresetSelect() {
+            var sel = document.getElementById("preset-select");
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— 請選擇 —</option>';
+            if (!myUserId) return;
+            var root = readBoardPresetsRoot();
+            var list = (root.byUser[myUserId] || []).slice();
+            list.sort(function (a, b) {
+                return (b.savedAt || 0) - (a.savedAt || 0);
+            });
+            list.forEach(function (p) {
+                var opt = document.createElement("option");
+                opt.value = p.id;
+                var t = p.name || "未命名";
+                var d = p.savedAt ? new Date(p.savedAt) : null;
+                opt.textContent = t + (d ? " · " + d.toLocaleDateString() : "");
+                sel.appendChild(opt);
+            });
+        }
+
+        function updateBoardPresetControls() {
+            var canEdit = canEditBoardAndCards();
+            var restartBtn = document.getElementById("btn-restart-game");
+            if (restartBtn) restartBtn.disabled = !!(onlineMode && !isOnlineHost());
+
+            var logged = !!myUserId;
+            var authMsg = document.getElementById("board-preset-auth-msg");
+            var block = document.getElementById("board-preset-logged-block");
+            if (authMsg) {
+                authMsg.style.display = logged ? "none" : "block";
+            }
+            if (block) {
+                block.style.display = logged ? "block" : "none";
+            }
+
+            var saveBtn = document.getElementById("btn-preset-save");
+            var loadBtn = document.getElementById("btn-preset-load");
+            var delBtn = document.getElementById("btn-preset-delete");
+            var sel = document.getElementById("preset-select");
+            var hasSel = sel && sel.value;
+            if (saveBtn) saveBtn.disabled = !logged || !canEdit;
+            if (loadBtn) loadBtn.disabled = !logged || !canEdit || !hasSel;
+            if (delBtn) delBtn.disabled = !logged || !canEdit || !hasSel;
+        }
+
+        function setBoardPresetPopoverOpen(open) {
+            var pop = document.getElementById("board-preset-popover");
+            var btn = document.getElementById("btn-preset-toggle");
+            if (!pop || !btn) return;
+            pop.hidden = !open;
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+            if (open) {
+                refreshMyUser(function () {
+                    fillPresetSelect();
+                    updateBoardPresetControls();
+                });
+            } else {
+                updateBoardPresetControls();
+            }
+        }
+
         const DEFAULT_RULES_TEXT =
-            "玩家輪流擲骰前進，經過起點可領取獎勵金幣。\n" +
-            "停在地塊可依你自訂文本執行效果（買地、收租、事件等）。\n" +
-            "停在「機會」或「命運」格時，抽對應卡片並執行卡面內容。\n" +
-            "此版為可編輯雛形，可先設計內容與規則文本，所有改動自動儲存。";
+            "輪流擲骰，沿著外圈前進。\n" +
+            "經過起點可拿到獎勵金幣。\n" +
+            "停在機會或命運格，就抽一張牌照著做。\n" +
+            "想自訂玩法時，寫短句最容易看懂。";
 
         /* ---------- State ---------- */
         let state = loadState();
 
         function defaultState() {
             return {
-                tiles: DEFAULT_TILES.map(t => ({ ...t })),
+                tiles: DEFAULT_TILES.map(function (t) {
+                    return Object.assign({}, t, { owner: null });
+                }),
                 chance: DEFAULT_CHANCE.map(c => ({ ...c })),
                 fate: DEFAULT_FATE.map(f => ({ ...f })),
                 rulesText: DEFAULT_RULES_TEXT,
@@ -1528,6 +2674,7 @@
             if (!raw.rulesText || typeof raw.rulesText !== "string") {
                 raw.rulesText = DEFAULT_RULES_TEXT;
             }
+            raw.tiles = normalizeTiles(raw.tiles || []);
             if (!raw.game || typeof raw.game !== "object") {
                 raw.game = defaultGame();
             } else {
@@ -1586,21 +2733,27 @@
         const boardGrid = document.getElementById("board-grid");
         const cardsChance = document.getElementById("cards-chance");
         const cardsFate = document.getElementById("cards-fate");
-        const drawResult = document.getElementById("draw-result");
+        const diceFaceValueEl = document.getElementById("dice-face-value");
         const toastEl = document.getElementById("toast");
         const rulesTextEl = document.getElementById("rules-text");
         const rulesOverlay = document.getElementById("rules-overlay");
         const rulesOpen = document.getElementById("rules-open");
         const rulesClose = document.getElementById("rules-close");
         const rulesBackdrop = document.getElementById("rules-overlay-backdrop");
-        const chanceOverlay = document.getElementById("chance-overlay");
-        const fateOverlay = document.getElementById("fate-overlay");
-        const chanceOpen = document.getElementById("chance-open");
-        const fateOpen = document.getElementById("fate-open");
-        const chanceClose = document.getElementById("chance-close");
-        const fateClose = document.getElementById("fate-close");
-        const chanceBackdrop = document.getElementById("chance-overlay-backdrop");
-        const fateBackdrop = document.getElementById("fate-overlay-backdrop");
+        const cardsDrawer = document.getElementById("cards-drawer");
+        const cardsDrawerToggle = document.getElementById("cards-drawer-toggle");
+        const cardsDrawerClose = document.getElementById("cards-drawer-close");
+        const medalOverlay = document.getElementById("medal-overlay");
+        const medalBackdrop = document.getElementById("medal-overlay-backdrop");
+        const medalRibbon = document.getElementById("medal-ribbon-label");
+        const medalTitleEl = document.getElementById("medal-title");
+        const medalBodyEl = document.getElementById("medal-body");
+        const medalOkBtn = document.getElementById("medal-ok");
+        const buyLandOverlay = document.getElementById("buy-land-overlay");
+        const buyLandBackdrop = document.getElementById("buy-land-backdrop");
+        const buyLandDesc = document.getElementById("buy-land-desc");
+        const buyLandYes = document.getElementById("buy-land-yes");
+        const buyLandNo = document.getElementById("buy-land-no");
         const turnLogTab = document.getElementById("turn-log-tab");
         const turnLogHover = turnLogTab ? turnLogTab.closest(".left-rail-log-hover") : null;
         if (turnLogTab && turnLogHover) {
@@ -1627,26 +2780,146 @@
             debouncedSave();
         });
 
+        var medalContinue = null;
+        var buyLandContinue = null;
+
         function syncModalOpenBody() {
-            const anyOpen = [rulesOverlay, chanceOverlay, fateOverlay].some(function (el) {
-                return el.classList.contains("is-open");
-            });
-            document.body.classList.toggle("modal-open", anyOpen);
+            var anyOpen =
+                (rulesOverlay && rulesOverlay.classList.contains("is-open")) ||
+                (medalOverlay && medalOverlay.classList.contains("is-open")) ||
+                (buyLandOverlay && buyLandOverlay.classList.contains("is-open"));
+            document.body.classList.toggle("modal-open", !!anyOpen);
         }
 
-        function closeAllGlassModals() {
-            [rulesOverlay, chanceOverlay, fateOverlay].forEach(function (el) {
-                el.classList.remove("is-open");
-                el.setAttribute("aria-hidden", "true");
+        function closeMedalPopup() {
+            if (medalOverlay) {
+                medalOverlay.classList.remove("is-open", "medal--chance", "medal--fate");
+                medalOverlay.setAttribute("aria-hidden", "true");
+            }
+            var cb = medalContinue;
+            medalContinue = null;
+            syncModalOpenBody();
+            if (cb) cb();
+        }
+
+        function closeBuyLandPopup() {
+            if (buyLandOverlay) {
+                buyLandOverlay.classList.remove("is-open");
+                buyLandOverlay.setAttribute("aria-hidden", "true");
+            }
+            var cb = buyLandContinue;
+            buyLandContinue = null;
+            syncModalOpenBody();
+            if (cb) cb();
+        }
+
+        function showMedalCard(type, pick, onContinue) {
+            medalContinue = onContinue || null;
+            if (!medalOverlay) return;
+            medalOverlay.classList.remove("medal--chance", "medal--fate");
+            medalOverlay.classList.add(type === "fate" ? "medal--fate" : "medal--chance");
+            if (medalRibbon) {
+                medalRibbon.textContent = type === "fate" ? "命運卡" : "機會卡";
+            }
+            if (!pick || !state[type] || !state[type].length) {
+                if (medalTitleEl) medalTitleEl.textContent = "這疊牌還空著";
+                if (medalBodyEl) medalBodyEl.textContent = "打開右側卡堆工坊，先放進幾張有趣的卡吧。";
+            } else {
+                if (medalTitleEl) medalTitleEl.textContent = pick.title.trim() || "神祕事件";
+                if (medalBodyEl) medalBodyEl.textContent = pick.content.trim() || "沒有寫效果。";
+            }
+            medalOverlay.classList.add("is-open");
+            medalOverlay.setAttribute("aria-hidden", "false");
+            syncModalOpenBody();
+        }
+
+        function showBuyLandDialog(html, onChoice) {
+            buyLandContinue = onChoice || null;
+            if (buyLandDesc) buyLandDesc.innerHTML = html;
+            if (buyLandOverlay) {
+                buyLandOverlay.classList.add("is-open");
+                buyLandOverlay.setAttribute("aria-hidden", "false");
+            }
+            syncModalOpenBody();
+        }
+
+        function setCardsDrawerCollapsed(collapsed) {
+            if (!cardsDrawer) return;
+            cardsDrawer.classList.toggle("is-collapsed", collapsed);
+            if (cardsDrawerToggle) {
+                cardsDrawerToggle.setAttribute("aria-expanded", String(!collapsed));
+                if (collapsed) {
+                    cardsDrawerToggle.innerHTML =
+                        '<span class="drawer-handle-line">卡堆</span><span class="drawer-handle-line">工坊</span>';
+                } else {
+                    cardsDrawerToggle.innerHTML = '<span class="drawer-handle-line">收合</span>';
+                }
+            }
+            try {
+                localStorage.setItem(STORAGE_KEY + "-cards-drawer", collapsed ? "1" : "0");
+            } catch (e) {
+                /* ignore */
+            }
+        }
+
+        if (cardsDrawerToggle) {
+            cardsDrawerToggle.addEventListener("click", function () {
+                setCardsDrawerCollapsed(!cardsDrawer.classList.contains("is-collapsed"));
             });
-            rulesOpen.setAttribute("aria-expanded", "false");
-            chanceOpen.setAttribute("aria-expanded", "false");
-            fateOpen.setAttribute("aria-expanded", "false");
-            document.body.classList.remove("modal-open");
+        }
+        if (cardsDrawerClose) {
+            cardsDrawerClose.addEventListener("click", function () {
+                setCardsDrawerCollapsed(true);
+            });
+        }
+        try {
+            setCardsDrawerCollapsed(localStorage.getItem(STORAGE_KEY + "-cards-drawer") !== "0");
+        } catch (e) {
+            setCardsDrawerCollapsed(true);
+        }
+
+        if (medalOkBtn) medalOkBtn.addEventListener("click", closeMedalPopup);
+        if (medalBackdrop) medalBackdrop.addEventListener("click", closeMedalPopup);
+
+        if (buyLandYes) {
+            buyLandYes.addEventListener("click", function () {
+                var cb = buyLandContinue;
+                buyLandContinue = null;
+                if (buyLandOverlay) {
+                    buyLandOverlay.classList.remove("is-open");
+                    buyLandOverlay.setAttribute("aria-hidden", "true");
+                }
+                syncModalOpenBody();
+                if (cb) cb(true);
+            });
+        }
+        if (buyLandNo) {
+            buyLandNo.addEventListener("click", function () {
+                var cb = buyLandContinue;
+                buyLandContinue = null;
+                if (buyLandOverlay) {
+                    buyLandOverlay.classList.remove("is-open");
+                    buyLandOverlay.setAttribute("aria-hidden", "true");
+                }
+                syncModalOpenBody();
+                if (cb) cb(false);
+            });
+        }
+        if (buyLandBackdrop) {
+            buyLandBackdrop.addEventListener("click", function () {
+                if (buyLandNo) buyLandNo.click();
+            });
         }
 
         function openRulesModal() {
-            closeAllGlassModals();
+            if (
+                (medalOverlay && medalOverlay.classList.contains("is-open")) ||
+                (buyLandOverlay && buyLandOverlay.classList.contains("is-open"))
+            ) {
+                showToast("請先關閉目前的卡片或購地視窗");
+                return;
+            }
+            if (rulesOverlay.classList.contains("is-open")) return;
             rulesOverlay.classList.add("is-open");
             rulesOverlay.setAttribute("aria-hidden", "false");
             rulesOpen.setAttribute("aria-expanded", "true");
@@ -1662,66 +2935,20 @@
             rulesOpen.focus();
         }
 
-        function openChanceModal() {
-            closeAllGlassModals();
-            chanceOverlay.classList.add("is-open");
-            chanceOverlay.setAttribute("aria-hidden", "false");
-            chanceOpen.setAttribute("aria-expanded", "true");
-            document.body.classList.add("modal-open");
-        }
-
-        function closeChanceModal() {
-            chanceOverlay.classList.remove("is-open");
-            chanceOverlay.setAttribute("aria-hidden", "true");
-            chanceOpen.setAttribute("aria-expanded", "false");
-            syncModalOpenBody();
-            chanceOpen.focus();
-        }
-
-        function openFateModal() {
-            closeAllGlassModals();
-            fateOverlay.classList.add("is-open");
-            fateOverlay.setAttribute("aria-hidden", "false");
-            fateOpen.setAttribute("aria-expanded", "true");
-            document.body.classList.add("modal-open");
-        }
-
-        function closeFateModal() {
-            fateOverlay.classList.remove("is-open");
-            fateOverlay.setAttribute("aria-hidden", "true");
-            fateOpen.setAttribute("aria-expanded", "false");
-            syncModalOpenBody();
-            fateOpen.focus();
-        }
-
         rulesOpen.addEventListener("click", openRulesModal);
         rulesClose.addEventListener("click", closeRulesModal);
         rulesBackdrop.addEventListener("click", closeRulesModal);
-        chanceOpen.addEventListener("click", openChanceModal);
-        chanceClose.addEventListener("click", closeChanceModal);
-        chanceBackdrop.addEventListener("click", closeChanceModal);
-        fateOpen.addEventListener("click", openFateModal);
-        fateClose.addEventListener("click", closeFateModal);
-        fateBackdrop.addEventListener("click", closeFateModal);
 
         document.addEventListener("keydown", function (e) {
             if (e.key !== "Escape") return;
             if (rulesOverlay.classList.contains("is-open")) closeRulesModal();
-            else if (chanceOverlay.classList.contains("is-open")) closeChanceModal();
-            else if (fateOverlay.classList.contains("is-open")) closeFateModal();
+            else if (medalOverlay && medalOverlay.classList.contains("is-open")) closeMedalPopup();
+            else if (buyLandOverlay && buyLandOverlay.classList.contains("is-open") && buyLandNo) buyLandNo.click();
+            else {
+                var pp = document.getElementById("board-preset-popover");
+                if (pp && !pp.hidden) setBoardPresetPopoverOpen(false);
+            }
         });
-
-        /* ---------- Legend ---------- */
-        (function buildLegend() {
-            const container = document.getElementById("legend");
-            Object.entries(TILE_META).forEach(([cls, meta]) => {
-                if (cls === "tile-tax") return;
-                const item = document.createElement("span");
-                item.className = "legend-item";
-                item.innerHTML = `<span class="legend-dot" style="background:${TILE_COLORS[cls]}"></span>${meta.icon} ${meta.legend}`;
-                container.appendChild(item);
-            });
-        })();
 
         /* ---------- Board ---------- */
         function canEditBoardAndCards() {
@@ -1745,6 +2972,7 @@
             var ac2 = document.getElementById("add-card-fate");
             if (ac1) ac1.disabled = !can;
             if (ac2) ac2.disabled = !can;
+            updateBoardPresetControls();
         }
 
         function renderBoard() {
@@ -1757,6 +2985,19 @@
                 el.className = `tile ${tile.type}`;
                 el.style.gridRow = row;
                 el.style.gridColumn = col;
+                var tg = themeGradientForTileLabel(tile.label);
+                if (tg) el.style.background = tg;
+                else el.style.background = "";
+                var own = tile.owner;
+                var ownerHtml = "";
+                if (own !== null && own !== undefined && own !== "") {
+                    var oi = parseInt(own, 10);
+                    if (!isNaN(oi)) {
+                        var pc = PLAYER_COLORS[oi % PLAYER_COLORS.length];
+                        ownerHtml =
+                            `<div class="tile-owner-badge" style="color:${pc};border-color:${pc}">${playerAnimal(oi)} 的領地</div>`;
+                    }
+                }
                 el.innerHTML =
                     `<div class="tile-header">` +
                         `<span class="tile-icon">${meta.icon}</span>` +
@@ -1765,6 +3006,7 @@
                     `</div>` +
                     `<input type="text" value="${esc(tile.label)}" placeholder="格名" data-idx="${i}" data-field="label"${disAttr}>` +
                     `<input type="text" value="${esc(tile.effect)}" placeholder="效果說明" data-idx="${i}" data-field="effect"${disAttr}>` +
+                    ownerHtml +
                     `<div class="tile-pawns" data-tile-idx="${i}"></div>`;
                 boardGrid.appendChild(el);
             });
@@ -1788,8 +3030,8 @@
                 const dot = document.createElement("span");
                 dot.className = "tile-pawn-dot";
                 dot.style.background = PLAYER_COLORS[idx % PLAYER_COLORS.length];
-                dot.textContent = String(idx + 1);
-                dot.title = "玩家 " + (idx + 1);
+                dot.textContent = playerAnimal(idx);
+                dot.title = playerTitle(idx, onlineMode ? memberAtPlayerIndex(idx) : null);
                 holder.appendChild(dot);
             });
         }
@@ -1813,43 +3055,36 @@
                 wrap.className = "center-piece-wrap" + (i === g.currentPlayerIndex ? " center-piece-wrap--active" : "");
                 const col = PLAYER_COLORS[i % PLAYER_COLORS.length];
                 const mem = onlineMode ? memberAtPlayerIndex(i) : null;
-                const label =
-                    mem && (mem.name || mem.email)
-                        ? "玩家 " + (i + 1) + "（" + (mem.name || mem.email) + "）"
-                        : "玩家 " + (i + 1) + (onlineMode ? "（等待加入）" : "");
+                const label = playerTitle(i, mem);
+                const status = playerStatusText(i, mem);
                 const readOnlyMoney =
                     onlineMode &&
                     (!mem || !myUserId || mem.userId !== myUserId);
                 const roAttr = readOnlyMoney ? " readonly" : "";
                 wrap.innerHTML =
                     `<div class="center-piece-figure">` +
-                        `<div class="center-piece-token" style="background:${col}">${i + 1}</div>` +
-                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="玩家${i + 1}資金"${roAttr} /></div>` +
+                        `<div class="center-piece-token" style="background:${col}">${playerAnimal(i)}</div>` +
+                        `<div class="center-piece-bubble"><input type="number" class="money-input" min="0" step="1" data-player-idx="${i}" value="${p.money}" aria-label="${esc(playerMoneyLabel(i, mem))}"${roAttr} /></div>` +
                     `</div>` +
-                    `<span class="center-piece-label">${esc(label)}</span>`;
+                    `<span class="center-piece-label">${esc(label)}</span>` +
+                    `<span class="center-piece-meta">${esc(status)}</span>`;
                 host.appendChild(wrap);
             });
 
             var curMem = onlineMode ? memberAtPlayerIndex(g.currentPlayerIndex) : null;
             var turnLine =
-                "輪到：玩家 " +
-                (g.currentPlayerIndex + 1) +
-                (curMem && (curMem.name || curMem.email)
-                    ? "（" + (curMem.name || curMem.email) + "）"
-                    : "") +
-                "（共 " +
-                g.playerCount +
-                " 人）";
+                "現在出發：" +
+                playerTitle(g.currentPlayerIndex, curMem);
             if (onlineMode && !lobbyFull()) {
-                turnLine += " — 等待玩家加入中，尚不可擲骰";
+                turnLine += " · 等朋友到齊再擲骰";
             }
             document.getElementById("turn-indicator").textContent = turnLine;
 
             const logEl = document.getElementById("turn-log");
             logEl.innerHTML = "";
-            g.turnLog.slice(-30).forEach(function (line) {
+            g.turnLog.slice(-8).forEach(function (line) {
                 const row = document.createElement("div");
-                row.textContent = line;
+                row.innerHTML = renderTurnLogEntry(line);
                 logEl.appendChild(row);
             });
             logEl.scrollTop = logEl.scrollHeight;
@@ -1861,7 +3096,10 @@
             const field = e.target.dataset.field;
             state.tiles[idx][field] = e.target.value;
             if (field === "label") {
-                e.target.closest(".tile").querySelector(".tile-label").textContent = e.target.value;
+                var tileEl = e.target.closest(".tile");
+                tileEl.querySelector(".tile-label").textContent = e.target.value;
+                var grad = themeGradientForTileLabel(e.target.value);
+                tileEl.style.background = grad || "";
             }
             debouncedSave();
         });
@@ -1887,12 +3125,225 @@
             state.game.playerCount = n;
             state.game.players = buildDefaultPlayers(n);
             state.game.currentPlayerIndex = 0;
-            pushTurnLog("人數設為 " + n + " 人：棋子回到起點，資金重置為每位 " + DEFAULT_START_MONEY + "。");
+            state.tiles.forEach(function (t) {
+                if (t.owner != null && t.owner >= n) t.owner = null;
+            });
+            pushTurnLog("這局改成 " + n + " 隻靈獸，大家回到起點並拿回 " + DEFAULT_START_MONEY + " 金幣。");
             saveState();
+            renderBoard();
             renderPawnsOnBoard();
             renderCenterGameUI();
             showToast("已更新遊玩人數");
         });
+
+        function pickRandomCard(type) {
+            var deck = state[type];
+            if (!deck || !deck.length) return null;
+            return deck[Math.floor(Math.random() * deck.length)];
+        }
+
+        function advanceTurnAfterLand(pid, btn) {
+            var g = state.game;
+            g.currentPlayerIndex = (pid + 1) % g.playerCount;
+            pushTurnLog("下一位出發：" + playerTitle(g.currentPlayerIndex, onlineMode ? memberAtPlayerIndex(g.currentPlayerIndex) : null) + "。");
+            if (onlineMode) {
+                pushOnlineSnapshot(function () {
+                    renderPawnsOnBoard();
+                    renderCenterGameUI();
+                    renderBoard();
+                    btn.disabled = false;
+                });
+            } else {
+                saveState();
+                renderPawnsOnBoard();
+                renderCenterGameUI();
+                renderBoard();
+                btn.disabled = false;
+            }
+        }
+
+        function getTileTollFee(tile) {
+            var effect = String((tile && tile.effect) || "");
+            var m = effect.match(/(\d+)\s*金幣/);
+            if (m && m[1]) {
+                var n = parseInt(m[1], 10);
+                if (!isNaN(n) && n > 0) return n;
+            }
+            return DEFAULT_TOLL_FEE;
+        }
+
+        function settleOwnedLandToll(pid, tileIndex) {
+            var tile = state.tiles[tileIndex];
+            if (!tile) return false;
+            var owner = parseInt(tile.owner, 10);
+            if (isNaN(owner) || owner < 0 || owner >= state.game.players.length) return false;
+            if (owner === pid) return false;
+
+            var traveler = state.game.players[pid];
+            var landlord = state.game.players[owner];
+            var fee = getTileTollFee(tile);
+            var paid = Math.max(0, Math.min(traveler.money, fee));
+            if (paid > 0) {
+                traveler.money -= paid;
+                landlord.money += paid;
+            }
+
+            var ownerMem = onlineMode ? memberAtPlayerIndex(owner) : null;
+            var travelerMem = onlineMode ? memberAtPlayerIndex(pid) : null;
+            if (paid < fee) {
+                pushTurnLog(
+                    playerTitle(pid, travelerMem) +
+                        " 走到「" +
+                        tile.label +
+                        "」，應付過路費 " +
+                        fee +
+                        "，但只剩 " +
+                        paid +
+                        "；已全數付給 " +
+                        playerTitle(owner, ownerMem) +
+                        "。"
+                );
+            } else {
+                pushTurnLog(
+                    playerTitle(pid, travelerMem) +
+                        " 走到「" +
+                        tile.label +
+                        "」，支付過路費 " +
+                        paid +
+                        " 給 " +
+                        playerTitle(owner, ownerMem) +
+                        "。"
+                );
+            }
+            return true;
+        }
+
+        function tryPurchaseOrFinish(pid, tileIndex, btn) {
+            var tile = state.tiles[tileIndex];
+            var p = state.game.players[pid];
+            var unowned = tile.owner === null || tile.owner === undefined || tile.owner === "";
+            if (settleOwnedLandToll(pid, tileIndex)) {
+                advanceTurnAfterLand(pid, btn);
+                return;
+            }
+            if (!isPurchasableLandTile(tile) || !unowned) {
+                advanceTurnAfterLand(pid, btn);
+                return;
+            }
+            var html =
+                "<strong>" + playerAnimal(pid) + "</strong> 要不要花 <strong>" +
+                LAND_PRICE +
+                " 金幣</strong> 收下「<strong>" +
+                esc(tile.label) +
+                "</strong>」？<br>現在有 " +
+                p.money +
+                " 金幣。";
+            showBuyLandDialog(html, function (yes) {
+                if (yes) {
+                    if (p.money < LAND_PRICE) {
+                        pushTurnLog(playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 金幣不夠，沒辦法買下「" + tile.label + "」。");
+                        showToast("金幣不足");
+                    } else {
+                        p.money -= LAND_PRICE;
+                        state.tiles[tileIndex].owner = pid;
+                        pushTurnLog(
+                            playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 用 " + LAND_PRICE + " 金幣買下「" + tile.label + "」。"
+                        );
+                        if (onlineMode) scheduleOnlinePushAfterEdit();
+                        else saveState();
+                    }
+                } else {
+                    pushTurnLog(playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 先不買「" + tile.label + "」。");
+                }
+                advanceTurnAfterLand(pid, btn);
+            });
+        }
+
+        /**
+         * 關閉獎章後套用卡面可自動結算的效果（例如「立刻前往起點」）。
+         * @returns {number} 結算後應處理的地格索引
+         */
+        function applyResolvedCardEffect(pid, cardType, pick, landedPos) {
+            if (!pick) return landedPos;
+            var p = state.game.players[pid];
+            var content = String(pick.content || "");
+            var title = String(pick.title || "").trim();
+            var teleport =
+                /(立刻\s*)?前往起點|回到起點|移動至起點|到達起點|移至起點|到達\s*「?\s*起點/.test(content) ||
+                /(立刻\s*)?前往起點|回到起點/.test(String(pick.title || ""));
+            if (!teleport) return landedPos;
+
+            var denyBonus = /不領|無獎勵|無法領|不發放|不拿.*獎勵|不領獎|不經過/.test(content);
+            var grantPass =
+                !denyBonus &&
+                /領取|可領|經過起點\s*\+|獲得.*經過|\+.*200|起點獎勵/.test(content);
+
+            p.position = 0;
+            if (grantPass) {
+                p.money += PASS_GO_BONUS;
+                pushTurnLog(
+                    playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) +
+                        " 依「" +
+                        (title || "卡片") +
+                        "」效果移至起點，並領取經過起點 " +
+                        PASS_GO_BONUS +
+                        " 金幣。"
+                );
+            } else {
+                pushTurnLog(
+                    playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) +
+                        " 依「" +
+                        (title || "卡片") +
+                        "」效果立刻移至起點（不領經過起點獎勵）。"
+                );
+            }
+            if (onlineMode) scheduleOnlinePushAfterEdit();
+            else saveState();
+            renderPawnsOnBoard();
+            renderBoard();
+            renderCenterGameUI();
+            return 0;
+        }
+
+        function runLandEffects(pid, btn) {
+            var p = state.game.players[pid];
+            var pos = p.position;
+            var tile = state.tiles[pos];
+
+            if (isChanceTile(tile)) {
+                var pick = pickRandomCard("chance");
+                var line = pick
+                    ? playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) +
+                      " 抽到機會卡：「" +
+                      String(pick.title || "").trim() +
+                      "」— " +
+                      String(pick.content || "").trim()
+                    : playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 停在機會格，但牌堆還沒有卡片。";
+                pushTurnLog(line);
+                showMedalCard("chance", pick, function () {
+                    var newPos = applyResolvedCardEffect(pid, "chance", pick, pos);
+                    tryPurchaseOrFinish(pid, newPos, btn);
+                });
+                return;
+            }
+            if (isFateTile(tile)) {
+                var pickf = pickRandomCard("fate");
+                var linef = pickf
+                    ? playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) +
+                      " 抽到命運卡：「" +
+                      String(pickf.title || "").trim() +
+                      "」— " +
+                      String(pickf.content || "").trim()
+                    : playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 停在命運格，但牌堆還沒有卡片。";
+                pushTurnLog(linef);
+                showMedalCard("fate", pickf, function () {
+                    var newPos = applyResolvedCardEffect(pid, "fate", pickf, pos);
+                    tryPurchaseOrFinish(pid, newPos, btn);
+                });
+                return;
+            }
+            tryPurchaseOrFinish(pid, pos, btn);
+        }
 
         document.getElementById("btn-roll").addEventListener("click", function () {
             const g = state.game;
@@ -1906,20 +3357,22 @@
                 }
                 const cur = memberAtPlayerIndex(g.currentPlayerIndex);
                 if (!cur || !myUserId || cur.userId !== myUserId) {
-                    showToast("目前輪到座位「玩家 " + (g.currentPlayerIndex + 1) + "」，請由該位玩家操作");
+                    showToast("現在輪到 " + playerTitle(g.currentPlayerIndex, cur) + " 行動");
                     return;
                 }
             }
             btn.disabled = true;
             diceEl.classList.add("dice--rolling");
             const tick = setInterval(function () {
-                diceEl.textContent = String(1 + Math.floor(Math.random() * 6));
+                var n = String(1 + Math.floor(Math.random() * 6));
+                if (diceFaceValueEl) diceFaceValueEl.textContent = n;
             }, 75);
             setTimeout(function () {
                 clearInterval(tick);
                 diceEl.classList.remove("dice--rolling");
                 const roll = 1 + Math.floor(Math.random() * 6);
-                diceEl.textContent = String(roll);
+                if (diceFaceValueEl) diceFaceValueEl.textContent = String(roll);
+                diceEl.setAttribute("aria-label", "骰子 " + roll + " 點");
 
                 const pid = g.currentPlayerIndex;
                 const p = g.players[pid];
@@ -1932,26 +3385,25 @@
                 }
 
                 const tileName = (state.tiles[p.position] && state.tiles[p.position].label) ? state.tiles[p.position].label : "？";
-                const nextIdx = (g.currentPlayerIndex + 1) % g.playerCount;
-                let msg = "玩家 " + (pid + 1) + " 擲出 " + roll + " 點 →「" + tileName + "」（第 " + (p.position + 1) + " 格）";
+                let msg = playerTitle(pid, onlineMode ? memberAtPlayerIndex(pid) : null) + " 擲出 " + roll + " 點，走到「" + tileName + "」";
                 if (crossedGo) {
                     msg += "；經過起點 +" + PASS_GO_BONUS;
                 }
-                msg += "。下一位：玩家 " + (nextIdx + 1) + "。";
                 pushTurnLog(msg);
 
-                g.currentPlayerIndex = nextIdx;
                 if (onlineMode) {
                     pushOnlineSnapshot(function () {
                         renderPawnsOnBoard();
                         renderCenterGameUI();
-                        btn.disabled = false;
+                        renderBoard();
+                        runLandEffects(pid, btn);
                     });
                 } else {
                     saveState();
                     renderPawnsOnBoard();
                     renderCenterGameUI();
-                    btn.disabled = false;
+                    renderBoard();
+                    runLandEffects(pid, btn);
                 }
             }, 720);
         });
@@ -1971,7 +3423,7 @@
             el.className = `card-editor ${type}`;
             el.innerHTML =
                 `<div class="card-editor-header">` +
-                    `<h4>${type === "chance" ? "🟡 機會卡" : "🔵 命運卡"} #${index + 1}</h4>` +
+                    `<h4>${type === "chance" ? "🟡 機會卡" : "🔵 命運卡"} ${["一","二","三","四","五","六","七","八","九","十"][index] || ("第" + (index + 1))}</h4>` +
                     `<button class="card-delete" data-type="${type}" data-idx="${index}" title="刪除此卡">✕</button>` +
                 `</div>` +
                 `<input type="text" value="${esc(card.title)}" placeholder="卡片標題" data-type="${type}" data-idx="${index}" data-field="title">` +
@@ -2029,67 +3481,20 @@
 
         /* ---------- Draw Card ---------- */
         function drawCard(type) {
-            const deck = state[type];
-            if (!deck.length) {
-                drawResult.textContent = "此牌堆目前沒有卡片。";
+            var picked = pickRandomCard(type);
+            if (!picked) {
+                showToast("此牌堆目前沒有卡片。");
                 return;
             }
-            const picked = deck[Math.floor(Math.random() * deck.length)];
-            const title = picked.title.trim() || "（未命名卡）";
-            const content = picked.content.trim() || "（尚未輸入內容）";
-            const label = type === "chance" ? "🟡 機會卡" : "🔵 命運卡";
-            drawResult.className = `draw-result ${type}-result reveal`;
-            drawResult.textContent = `${label}：${title} — ${content}`;
-            drawResult.addEventListener("animationend", () => drawResult.classList.remove("reveal"), { once: true });
+            var pid = state.game.currentPlayerIndex;
+            var landedPos = state.game.players[pid].position;
+            showMedalCard(type, picked, function () {
+                applyResolvedCardEffect(pid, type, picked, landedPos);
+            });
         }
 
         document.getElementById("draw-chance").addEventListener("click", () => drawCard("chance"));
         document.getElementById("draw-fate").addEventListener("click", () => drawCard("fate"));
-
-        /* ---------- Toolbar ---------- */
-        document.getElementById("btn-export").addEventListener("click", () => {
-            const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "shanhaijing-monopoly.json";
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast("已匯出 JSON 檔案 📤");
-        });
-
-        const fileInput = document.getElementById("file-import");
-        document.getElementById("btn-import").addEventListener("click", () => {
-            if (onlineMode) {
-                showToast("請先離開線上模式再匯入");
-                return;
-            }
-            fileInput.click();
-        });
-        fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    if (imported.tiles && imported.chance && imported.fate) {
-                        state = normalizeState(imported);
-                        saveState();
-                        renderBoard();
-                        renderCards();
-                        syncRulesTextarea();
-                        renderCenterGameUI();
-                        showToast("匯入成功 📥");
-                    } else {
-                        showToast("JSON 格式不正確 ⚠️");
-                    }
-                } catch (_) {
-                    showToast("檔案解析失敗 ⚠️");
-                }
-            };
-            reader.readAsText(file);
-            fileInput.value = "";
-        });
 
         document.getElementById("btn-reset").addEventListener("click", () => {
             if (onlineMode) {
@@ -2212,12 +3617,137 @@
             }
         })();
 
+        (function wireRestartAndPresets() {
+            var btnRestart = document.getElementById("btn-restart-game");
+            if (btnRestart) btnRestart.addEventListener("click", restartGameSession);
+
+            var presetToggle = document.getElementById("btn-preset-toggle");
+            var presetPop = document.getElementById("board-preset-popover");
+            if (presetToggle && presetPop) {
+                presetToggle.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    setBoardPresetPopoverOpen(!!presetPop.hidden);
+                });
+            }
+            document.addEventListener("mousedown", function (e) {
+                if (!presetPop || presetPop.hidden) return;
+                var t = e.target;
+                if (presetPop.contains(t)) return;
+                if (presetToggle && presetToggle.contains(t)) return;
+                setBoardPresetPopoverOpen(false);
+            });
+
+            var sel = document.getElementById("preset-select");
+            if (sel) sel.addEventListener("change", updateBoardPresetControls);
+
+            var btnSave = document.getElementById("btn-preset-save");
+            if (btnSave) {
+                btnSave.addEventListener("click", function () {
+                    if (!myUserId) {
+                        showToast("請先完成 Google 登入");
+                        return;
+                    }
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可儲存棋盤設定");
+                        return;
+                    }
+                    var input = document.getElementById("preset-name-input");
+                    var name = input && input.value ? String(input.value).trim() : "";
+                    if (!name) {
+                        showToast("請輸入收藏名稱");
+                        return;
+                    }
+                    var root = readBoardPresetsRoot();
+                    if (!root.byUser[myUserId]) root.byUser[myUserId] = [];
+                    var list = root.byUser[myUserId];
+                    var snap = Object.assign(
+                        { id: genPresetId(), name: name, savedAt: Date.now() },
+                        snapshotBoardSettingsOnly()
+                    );
+                    list.unshift(snap);
+                    if (list.length > MAX_BOARD_PRESETS_PER_USER) {
+                        list.length = MAX_BOARD_PRESETS_PER_USER;
+                    }
+                    writeBoardPresetsRoot(root);
+                    fillPresetSelect();
+                    if (input) input.value = "";
+                    showToast("已儲存收藏");
+                    updateBoardPresetControls();
+                });
+            }
+
+            var btnLoad = document.getElementById("btn-preset-load");
+            if (btnLoad) {
+                btnLoad.addEventListener("click", function () {
+                    if (!myUserId) return;
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可載入棋盤");
+                        return;
+                    }
+                    var s = document.getElementById("preset-select");
+                    var id = s && s.value;
+                    if (!id) return;
+                    var root = readBoardPresetsRoot();
+                    var list = root.byUser[myUserId] || [];
+                    var preset = null;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].id === id) {
+                            preset = list[i];
+                            break;
+                        }
+                    }
+                    if (!preset) {
+                        showToast("找不到此收藏");
+                        return;
+                    }
+                    if (
+                        !confirm(
+                            "套用後將取代目前棋盤、機會／命運卡與規則文字，並依目前人數重新開局。確定？"
+                        )
+                    ) {
+                        return;
+                    }
+                    applyBoardPresetPayload(preset);
+                    setBoardPresetPopoverOpen(false);
+                    showToast("已載入「" + (preset.name || "未命名") + "」");
+                });
+            }
+
+            var btnDel = document.getElementById("btn-preset-delete");
+            if (btnDel) {
+                btnDel.addEventListener("click", function () {
+                    if (!myUserId) return;
+                    if (!canEditBoardAndCards()) {
+                        showToast("線上房間僅房主可刪除收藏");
+                        return;
+                    }
+                    var s = document.getElementById("preset-select");
+                    var id = s && s.value;
+                    if (!id) return;
+                    if (!confirm("確定刪除此筆收藏？（不影響目前棋盤）")) return;
+                    var root = readBoardPresetsRoot();
+                    var list = root.byUser[myUserId] || [];
+                    root.byUser[myUserId] = list.filter(function (p) {
+                        return p.id !== id;
+                    });
+                    writeBoardPresetsRoot(root);
+                    fillPresetSelect();
+                    updateBoardPresetControls();
+                    showToast("已刪除收藏");
+                });
+            }
+        })();
+
         /* ---------- Init ---------- */
         syncRulesTextarea();
         renderBoard();
         renderCards();
         renderCenterGameUI();
         updateEditorLocks();
+        refreshMyUser(function () {
+            fillPresetSelect();
+            updateBoardPresetControls();
+        });
     })();
     </script>
 </body>

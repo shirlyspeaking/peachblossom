@@ -144,19 +144,50 @@ export async function buildPdfBuffer(layout: LayoutResult): Promise<PdfBuildResu
     page.drawText(`桃花源字帖 | ${layout.config.mode === "brush" ? "毛筆" : "硬筆"}`, {
       x: margin, y: height - 24, size: 12, font: cjkFont, color: rgb(0.36, 0.36, 0.36),
     });
+    if (layout.config.copybookVariant === "strokeOrderPractice") {
+      page.drawText("筆順練習：1看 2描 3臨 4寫", {
+        x: width - margin - 130,
+        y: height - 24,
+        size: 10,
+        font: cjkFont,
+        color: rgb(0.45, 0.45, 0.45),
+      });
+    }
 
     for (const cell of current.cells) {
       const x = margin + cell.col * cellW;
       const yBottom = height - margin - (cell.row + 1) * cellH;
       const size = Math.min(layout.config.fontSize, cellH * 0.7);
       const textWidth = cjkFont.widthOfTextAtSize(cell.char, size);
+      const step = cell.practiceStep;
+      const stepText =
+        layout.config.copybookVariant === "strokeOrderPractice" && step ? String(step) : null;
+      const drawColor =
+        layout.config.copybookVariant === "strokeOrderPractice"
+          ? step === 1
+            ? rgb(0.1, 0.1, 0.1)
+            : step === 2
+              ? rgb(0.42, 0.42, 0.42)
+              : step === 3
+                ? rgb(0.72, 0.72, 0.72)
+                : rgb(1, 1, 1)
+          : textColor;
       page.drawText(cell.char, {
         x: x + (cellW - textWidth) / 2,
         y: yBottom + (cellH - size) / 2,
         size,
         font: cjkFont,
-        color: textColor,
+        color: drawColor,
       });
+      if (stepText) {
+        page.drawText(stepText, {
+          x: x + 3,
+          y: yBottom + cellH - 10,
+          size: 8,
+          font: cjkFont,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+      }
     }
   }
 

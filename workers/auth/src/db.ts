@@ -1,4 +1,4 @@
-import type { RoleRow, UserRow } from "./types";
+import type { AppRoomMember, AppRoomRow, RoleRow, UserRow } from "./types";
 
 export async function findSessionWithUser(
   db: D1Database,
@@ -131,4 +131,166 @@ export function hasFontAdminAccess(
       (r.role === "global_admin" && r.app_id === "") ||
       (r.role === "font_admin" && (r.app_id === "" || r.app_id === "font-admin"))
   );
+}
+
+export async function createAppRoom(
+  db: D1Database,
+  input: {
+    appId: string;
+    roomCode: string;
+    hostUserId: string;
+    playerCount: number;
+    snapshotJson: string;
+    nowSec: number;
+  }
+): Promise<void> {
+  await db.batch([
+    db
+      .prepare(
+        `INSERT INTO app_rooms (
+          app_id,
+          room_code,
+          host_user_id,
+          player_count,
+          version,
+          snapshot_json,
+          created_at,
+          updated_at,
+          last_active_at
+        ) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)`
+      )
+      .bind(
+        input.appId,
+        input.roomCode,
+        input.hostUserId,
+        input.playerCount,
+        input.snapshotJson,
+        input.nowSec,
+        input.nowSec,
+        input.nowSec
+      ),
+    db
+      .prepare(
+        `INSERT INTO app_room_members (app_id, room_code, user_id, player_index, joined_at)
+         VALUES (?, ?, ?, 0, ?)`
+      )
+      .bind(input.appId, input.roomCode, input.hostUserId, input.nowSec),
+  ]);
+}
+
+export async function findAppRoom(
+  db: D1Database,
+  appId: string,
+  roomCode: string
+): Promise<AppRoomRow | null> {
+  return db
+    .prepare(
+      `SELECT
+        app_id,
+        room_code,
+        host_user_id,
+        player_count,
+        version,
+        snapshot_json,
+        created_at,
+        updated_at,
+        last_active_at
+       FROM app_rooms
+       WHERE app_id = ? AND room_code = ?`
+    )
+    .bind(appId, roomCode)
+    .first<AppRoomRow>();
+}
+
+export async function listAppRoomMembers(
+  db: D1Database,
+  appId: string,
+  roomCode: string
+): Promise<AppRoomMember[]> {
+  const result = await db
+    .prepare(
+      `SELECT
+        rm.user_id as userId,
+        rm.player_index as playerIndex,
+        u.email,
+        u.name,
+        u.picture,
+        rm.joined_at as joinedAt
+       FROM app_room_members rm
+       JOIN users u ON u.id = rm.user_id
+       WHERE rm.app_id = ? AND rm.room_code = ?
+       ORDER BY rm.player_index ASC`
+    )
+    .bind(appId, roomCode)
+    .all<AppRoomMember>();
+  return result.results || [];
+}
+
+export async function addAppRoomMember(
+  db: D1Database,
+  input: {
+    appId: string;
+    roomCode: string;
+    userId: string;
+    playerIndex: number;
+    nowSec: number;
+  }
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO app_room_members (app_id, room_code, user_id, player_index, joined_at)
+       VALUES (?, ?, ?, ?, ?)`
+    )
+    .bind(input.appId, input.roomCode, input.userId, input.playerIndex, input.nowSec)
+    .run();
+}
+
+export async function updateAppRoomSnapshotIfVersionMatches(
+  db: D1Database,
+  input: {
+    appId: string;
+    roomCode: string;
+    expectedVersion: number;
+    nextVersion: number;
+    snapshotJson: string;
+    nowSec: number;
+  }
+): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `UPDATE app_rooms
+       SET version = ?,
+           snapshot_json = ?,
+           updated_at = ?,
+           last_active_at = ?
+       WHERE app_id = ? AND room_code = ? AND version = ?`
+    )
+    .bind(
+      input.nextVersion,
+      input.snapshotJson,
+      input.nowSec,
+      input.nowSec,
+      input.appId,
+      input.roomCode,
+      input.expectedVersion
+    )
+    .run();
+
+  return (result.meta.changes || 0) > 0;
+}
+
+export async function touchAppRoom(
+  db: D1Database,
+  appId: string,
+  roomCode: string,
+  nowSec: number
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE app_rooms
+       SET last_active_at = ?
+       WHERE app_id = ? AND room_code = ?`
+    )
+    .bind(nowSec, appId, roomCode)
+    .run();
 }

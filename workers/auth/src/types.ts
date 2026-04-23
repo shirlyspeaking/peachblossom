@@ -33,3 +33,29 @@ export type OAuthStatePayload = {
   returnTo: string;
   created_at: number;
 };
+
+export type AppRoomMember = {
+  userId: string;
+  playerIndex: number;
+  email: string;
+  name: string | null;
+  picture: string | null;
+  joinedAt: number;
+};
+
+export type AppRoomRow = {
+  app_id: string;
+  room_code: string;
+  host_user_id: string;
+  player_count: number;
+  version: number;
+  snapshot_json: string;
+  created_at: number;
+  updated_at: number;
+  last_active_at: number;
+};
+
+export type AppRoomSnapshot = Record<string, unknown> & {
+  hostUserId: string;
+  members: AppRoomMember[];
+};
