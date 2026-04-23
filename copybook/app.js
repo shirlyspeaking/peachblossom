@@ -103,9 +103,63 @@
         return fontPreset.value.trim();
     }
 
+    function splitCsvLine(line) {
+        var cells = [];
+        var buf = '';
+        var inQuotes = false;
+        for (var i = 0; i < line.length; i++) {
+            var ch = line[i];
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    buf += '"';
+                    i += 1;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === ',' && !inQuotes) {
+                cells.push(buf.trim());
+                buf = '';
+            } else {
+                buf += ch;
+            }
+        }
+        cells.push(buf.trim());
+        return cells;
+    }
+
+    function parseStrokeSourceCsv(text) {
+        var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+        if (lines.length < 2) return '';
+        if (lines[0].indexOf(',') < 0) return '';
+
+        var headers = splitCsvLine(lines[0]).map(function (h) { return h.toLowerCase(); });
+        var hanziIdx = -1;
+        var strokeIdx = -1;
+        for (var i = 0; i < headers.length; i++) {
+            if (hanziIdx < 0 && /^(hanzi|character|char|字|文字)$/.test(headers[i])) hanziIdx = i;
+            if (strokeIdx < 0 && /^(stroke_order|strokes|stroke|筆順|笔顺|筆畫|笔画)$/.test(headers[i])) strokeIdx = i;
+        }
+        if (hanziIdx < 0 || strokeIdx < 0) return '';
+
+        var out = [];
+        for (var li = 1; li < lines.length; li++) {
+            var cells = splitCsvLine(lines[li]);
+            var hanzi = (cells[hanziIdx] || '').trim();
+            var strokes = (cells[strokeIdx] || '').trim();
+            if (!hanzi || !strokes) continue;
+            strokes = strokes.replace(/[，、]/g, ' ').replace(/\s+/g, ' ').trim();
+            out.push(hanzi);
+            out.push(strokes);
+            out.push('');
+        }
+        return out.join('\n').trim();
+    }
+
     function parseStrokeSource(raw) {
         var text = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
         if (!text) return '';
+        var csvParsed = parseStrokeSourceCsv(text);
+        if (csvParsed) return csvParsed;
         var lines = text.split('\n');
         var out = [];
 
@@ -144,7 +198,7 @@
     function onBuildStrokeCopybook() {
         var transformed = parseStrokeSource(strokeSourceInput ? strokeSourceInput.value : '');
         if (!transformed) {
-            window.alert('請先輸入筆順資料，格式如：永: 點、橫、豎、鉤');
+            window.alert('請輸入筆順資料。支援格式：\n1) 永: 點、橫、豎、鉤\n2) CSV（含 hanzi/字 與 stroke_order/筆順 欄）');
             return;
         }
         textInput.value = transformed;
