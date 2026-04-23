@@ -269,6 +269,18 @@ textarea {
     min-height: 160px;
 }
 
+#strokeSourceInput {
+    min-height: 120px;
+}
+
+.btn-secondary {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+    border-radius: 10px;
+}
+
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;

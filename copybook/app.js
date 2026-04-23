@@ -27,6 +27,7 @@
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
+    var strokeSourceInput = document.getElementById('strokeSourceInput');
     var fontPreset = document.getElementById('fontPreset');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
@@ -39,6 +40,7 @@
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
+    var btnBuildStrokeCopybook = document.getElementById('btnBuildStrokeCopybook');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
@@ -99,6 +101,55 @@
 
     function getFontFamily() {
         return fontPreset.value.trim();
+    }
+
+    function parseStrokeSource(raw) {
+        var text = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+        if (!text) return '';
+        var lines = text.split('\n');
+        var out = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var row = lines[i].trim();
+            if (!row) continue;
+            var sep = row.indexOf(':');
+            if (sep < 0) sep = row.indexOf('：');
+            if (sep < 0) continue;
+
+            var hanzi = row.slice(0, sep).trim();
+            var strokes = row.slice(sep + 1).trim();
+            if (!hanzi || !strokes) continue;
+
+            strokes = strokes
+                .replace(/[，、]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            out.push(hanzi);
+            out.push(strokes);
+            out.push('');
+        }
+
+        return out.join('\n').trim();
+    }
+
+    function applyStrokeDefaults() {
+        if (copyStyle) copyStyle.value = 'lightPinkHong';
+        if (gridType) gridType.value = 'tian';
+        if (fontSize) fontSize.value = '34';
+        if (lineHeight) lineHeight.value = '1.2';
+        if (charsPerLine) charsPerLine.value = '8';
+        if (linesPerPage) linesPerPage.value = '10';
+    }
+
+    function onBuildStrokeCopybook() {
+        var transformed = parseStrokeSource(strokeSourceInput ? strokeSourceInput.value : '');
+        if (!transformed) {
+            window.alert('請先輸入筆順資料，格式如：永: 點、橫、豎、鉤');
+            return;
+        }
+        textInput.value = transformed;
+        applyStrokeDefaults();
+        renderNow();
     }
 
     /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
@@ -438,6 +489,7 @@
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
+    if (btnBuildStrokeCopybook) btnBuildStrokeCopybook.addEventListener('click', onBuildStrokeCopybook);
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();
