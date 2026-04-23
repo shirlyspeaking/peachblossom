@@ -27,6 +27,8 @@
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
+    var autoStrokeChars = document.getElementById('autoStrokeChars');
+    var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
     var strokeSourceInput = document.getElementById('strokeSourceInput');
     var fontPreset = document.getElementById('fontPreset');
     var gridType = document.getElementById('gridType');
@@ -155,6 +157,43 @@
         return out.join('\n').trim();
     }
 
+    function uniqHanziChars(text) {
+        var seen = Object.create(null);
+        var out = [];
+        var chars = stringToChars(String(text || '').trim());
+        for (var i = 0; i < chars.length; i++) {
+            var ch = chars[i];
+            if (!/[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch)) continue;
+            if (seen[ch]) continue;
+            seen[ch] = true;
+            out.push(ch);
+        }
+        return out;
+    }
+
+    async function fetchStrokeCount(ch) {
+        var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(ch) + '.json';
+        var res = await fetch(url, { cache: 'force-cache' });
+        if (!res.ok) throw new Error('找不到「' + ch + '」的筆順資料');
+        var data = await res.json();
+        if (!data || !Array.isArray(data.strokes) || data.strokes.length === 0) {
+            throw new Error('「' + ch + '」筆順資料格式不完整');
+        }
+        return data.strokes.length;
+    }
+
+    async function buildStrokeRowsFromChars(chars) {
+        var rows = [];
+        for (var i = 0; i < chars.length; i++) {
+            var ch = chars[i];
+            var count = await fetchStrokeCount(ch);
+            var labels = [];
+            for (var s = 1; s <= count; s++) labels.push('第' + s + '筆');
+            rows.push(ch + ': ' + labels.join('、'));
+        }
+        return rows.join('\n');
+    }
+
     function parseStrokeSource(raw) {
         var text = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
         if (!text) return '';
@@ -204,6 +243,24 @@
         textInput.value = transformed;
         applyStrokeDefaults();
         renderNow();
+    }
+
+    async function onAutoStrokeFromChars() {
+        var chars = uniqHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
+        if (!chars.length) {
+            window.alert('請先輸入至少一個漢字');
+            return;
+        }
+        if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
+        try {
+            var sourceText = await buildStrokeRowsFromChars(chars);
+            if (strokeSourceInput) strokeSourceInput.value = sourceText;
+            onBuildStrokeCopybook();
+        } catch (e) {
+            window.alert('自動拆解失敗：' + (e.message || String(e)));
+        } finally {
+            if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = false;
+        }
     }
 
     /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
@@ -544,6 +601,7 @@
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnBuildStrokeCopybook) btnBuildStrokeCopybook.addEventListener('click', onBuildStrokeCopybook);
+    if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
     renderNow();

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=26">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -35,6 +35,12 @@
             <label for="textInput">字帖內容</label>
             <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
+
+            <div class="field">
+                <label for="autoStrokeChars">自動拆解筆順</label>
+                <input id="autoStrokeChars" type="text" placeholder="輸入漢字（可一次多字，如：永木水）" autocomplete="off">
+                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">自動拆解並生成字帖</button>
+            </div>
 
             <div class="field">
                 <label for="strokeSourceInput">筆順資料</label>
@@ -123,6 +129,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
 </body>
 </html>

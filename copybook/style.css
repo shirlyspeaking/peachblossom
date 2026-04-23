@@ -281,6 +281,10 @@ textarea {
     border-radius: 10px;
 }
 
+#autoStrokeChars {
+    margin-bottom: 2px;
+}
+
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
