@@ -141,47 +141,110 @@ export default function CalligraphyPage() {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <section>
-        <h1 className="font-display text-2xl font-normal tracking-[0.06em] text-primary-900 sm:text-3xl">書法字帖生成平台</h1>
-        <p className="mt-2 text-slate-600">流程：上傳文字材料（或貼上）→ 選擇毛筆/硬筆與字型 → 生成預覽 → 下載 PDF。</p>
-      </section>
+  function updateMode(mode: "brush" | "pen") {
+    setConfig((prev) => ({
+      ...prev,
+      mode,
+      rows: mode === "brush" ? 8 : 12,
+      cols: mode === "brush" ? 8 : 12,
+      fontSize: mode === "brush" ? 46 : 24,
+    }));
+  }
 
-      <div className="grid gap-6 lg:grid-cols-2">
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl sm:text-3xl">書法字帖生成平台</CardTitle>
+          <p className="text-sm text-slate-600">
+            流程：上傳文字材料（或貼上）→ 選擇毛筆/硬筆與字型 → 生成預覽 → 下載 PDF。
+          </p>
+        </CardHeader>
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <Card>
-          <CardHeader><CardTitle>素材與設定</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <textarea className="min-h-36 w-full rounded-xl border border-primary-200/70 bg-white/95 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="貼上詩歌或文字材料..." value={text} onChange={(e) => setText(e.target.value)} />
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setText(SAMPLE_TEXT)}>一鍵帶入示例文本</Button>
+          <CardHeader>
+            <CardTitle>素材與設定</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-800">文字內容</p>
+              <textarea
+                className="min-h-40 w-full rounded-xl border border-primary-200/70 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                placeholder="貼上詩歌或文字材料..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setText(SAMPLE_TEXT)}>
+                  一鍵帶入示例文本
+                </Button>
+              </div>
             </div>
-            <div className="space-y-2">
+
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-800">上傳檔案</p>
               <Input type="file" accept=".txt,.pdf,.png,.jpg,.jpeg,.webp,.docx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <p className="text-xs text-slate-500">docx 會直接解析文字；PDF/圖片將透過 OCR 解析。PDF 下載需伺服器有可嵌入中文字型檔。</p>
+              <p className="text-xs text-slate-500">
+                docx 會直接解析文字；PDF/圖片將透過 OCR 解析。PDF 下載需伺服器有可嵌入中文字型檔。
+              </p>
             </div>
+
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm">類型
-                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.mode} onChange={(e) => setConfig((prev) => ({ ...prev, mode: e.target.value as "brush" | "pen", rows: e.target.value === "brush" ? 8 : 12, cols: e.target.value === "brush" ? 8 : 12, fontSize: e.target.value === "brush" ? 46 : 24 }))}>
-                  <option value="brush">毛筆</option><option value="pen">硬筆</option>
-                </select>
-              </label>
-              <label className="text-sm">格線
-                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.gridType} onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}>
-                  {GRID_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                </select>
-              </label>
-              <label className="text-sm">字型
-                <select className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3" value={config.fontId} onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}>
-                  {FONT_OPTIONS.map((item) => <option key={item.id} value={item.id} disabled={!availableFontIds.includes(item.id)}>{item.label}</option>)}
-                </select>
-              </label>
-              <label className="text-sm">字體大小
-                <Input type="number" min={12} max={96} value={config.fontSize} onChange={(e) => setConfig((prev) => ({ ...prev, fontSize: Number(e.target.value) }))} />
-              </label>
-              <label className="text-sm sm:col-span-2">字帖版本
+              <label className="flex flex-col gap-1 text-sm">
+                類型
                 <select
-                  className="mt-1 h-10 w-full rounded-xl border border-primary-200/70 bg-white/95 px-3"
+                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  value={config.mode}
+                  onChange={(e) => updateMode(e.target.value as "brush" | "pen")}
+                >
+                  <option value="brush">毛筆</option>
+                  <option value="pen">硬筆</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                格線
+                <select
+                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  value={config.gridType}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}
+                >
+                  {GRID_OPTIONS.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                字型
+                <select
+                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  value={config.fontId}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}
+                >
+                  {FONT_OPTIONS.map((item) => (
+                    <option key={item.id} value={item.id} disabled={!availableFontIds.includes(item.id)}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                字體大小
+                <Input
+                  type="number"
+                  min={12}
+                  max={96}
+                  value={config.fontSize}
+                  onChange={(e) => setConfig((prev) => ({ ...prev, fontSize: Number(e.target.value) }))}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+                字帖版本
+                <select
+                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   value={config.copybookVariant}
                   onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}
                 >
@@ -191,18 +254,29 @@ export default function CalligraphyPage() {
                 </select>
               </label>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button disabled={busy} variant="secondary" onClick={parseInput}><Upload className="mr-2 h-4 w-4" />解析上傳內容</Button>
-              <Button disabled={busy} onClick={generatePreview}>生成預覽</Button>
-              <Button disabled={busy || !text.trim()} variant="outline" onClick={downloadPdf}><Download className="mr-2 h-4 w-4" />下載 PDF</Button>
+
+            <div className="flex flex-wrap gap-3 border-t border-primary-100 pt-4">
+              <Button disabled={busy} variant="secondary" onClick={parseInput}>
+                <Upload data-icon="inline-start" />
+                解析上傳內容
+              </Button>
+              <Button disabled={busy} onClick={generatePreview}>
+                生成預覽
+              </Button>
+              <Button disabled={busy || !text.trim()} variant="outline" onClick={downloadPdf}>
+                <Download data-icon="inline-start" />
+                下載 PDF
+              </Button>
             </div>
             {fontCheckMessage ? <p className="text-xs text-slate-500">{fontCheckMessage}</p> : null}
             {message ? <p className="text-sm text-primary-700">{message}</p> : null}
           </CardContent>
         </Card>
 
-        <Card ref={previewRef}>
-          <CardHeader><CardTitle>字帖預覽（第一頁）</CardTitle></CardHeader>
+        <Card ref={previewRef} className="lg:sticky lg:top-6 lg:h-fit">
+          <CardHeader>
+            <CardTitle>字帖預覽（第一頁）</CardTitle>
+          </CardHeader>
           <CardContent>
             {/* 外框單一邊框，左右寬度一致；內格僅用右/下分隔線，避免雙線與欄數變化時外緣粗細不一 */}
             <div
@@ -277,9 +351,7 @@ export default function CalligraphyPage() {
                 })}
               </div>
             </div>
-            {config.copybookVariant === "strokeOrderPractice" ? (
-              <p className="mt-2 text-xs text-slate-500">每字依序展開為 4 格：1 看字形、2 描紅、3 臨寫、4 空格默寫。</p>
-            ) : null}
+            {config.copybookVariant === "strokeOrderPractice" ? <p className="mt-2 text-xs text-slate-500">每字依序展開為 4 格：1 看字形、2 描紅、3 臨寫、4 空格默寫。</p> : null}
           </CardContent>
         </Card>
       </div>
