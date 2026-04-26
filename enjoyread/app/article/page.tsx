@@ -33,6 +33,50 @@ function ArticleContent() {
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [ttsSpeed, setTtsSpeed] = useState(1);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [generating, setGenerating] = useState(false);
+
+  const loadSummaryAndQuiz = async () => {
+    if (!url) {
+      setError("缺少文章網址");
+      setLoading(false);
+      return;
+    }
+
+    setError("");
+    setGenerating(true);
+    try {
+      const fetchRes = await fetch("/api/fetch-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, title: decodeURIComponent(title) }),
+      });
+      const fetchData = await fetchRes.json();
+      if (fetchData.error || !fetchData.content) {
+        setError(fetchData.error || "無法取得文章內容");
+        return;
+      }
+
+      const sumRes = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: fetchData.content, url }),
+      });
+      const sumData = await sumRes.json();
+      setSummary(sumData.summary || fetchData.content.slice(0, 400));
+      setQuestions(sumData.questions || []);
+      setAnswers({});
+      setShowExplanations({});
+      setQuizSubmitted(false);
+      setQuizScore(null);
+
+      addReadArticle({ id, url, title: title || fetchData.title || "文章" });
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setGenerating(false);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!url) {
@@ -43,39 +87,12 @@ function ArticleContent() {
 
     let cancelled = false;
     (async () => {
-      try {
-        const fetchRes = await fetch("/api/fetch-article", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, title: decodeURIComponent(title) }),
-        });
-        const fetchData = await fetchRes.json();
-        if (cancelled) return;
-        if (fetchData.error || !fetchData.content) {
-          setError(fetchData.error || "無法取得文章內容");
-          setLoading(false);
-          return;
-        }
-
-        const sumRes = await fetch("/api/summarize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: fetchData.content, url }),
-        });
-        const sumData = await sumRes.json();
-        if (cancelled) return;
-        setSummary(sumData.summary || fetchData.content.slice(0, 400));
-        setQuestions(sumData.questions || []);
-
-        addReadArticle({ id, url, title: title || fetchData.title || "文章" });
-      } catch (e) {
-        if (!cancelled) setError(String(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      if (cancelled) return;
+      await loadSummaryAndQuiz();
+      if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [url, id, title]);
+  }, [url, id, title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sentences = summary
     .split(/(?<=[。！？\n])/)
@@ -168,6 +185,21 @@ function ArticleContent() {
           </Link>
           <h1 className="flex-1 truncate text-lg font-semibold">{decodeURIComponent(title)}</h1>
           <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={loadSummaryAndQuiz}
+              disabled={generating}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  生成中...
+                </>
+              ) : (
+                "重新生成摘要與測驗"
+              )}
+            </Button>
             <div className="flex rounded-md border">
               {[0.8, 1, 1.2].map((s) => (
                 <button
@@ -201,6 +233,9 @@ function ArticleContent() {
       </header>
 
       <main className="container px-4 py-8 md:px-6">
+        <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-900 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-200">
+          進入此頁後會自動生成「精華短文＋理解測驗」。若想刷新內容，請按右上角「重新生成摘要與測驗」。
+        </div>
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <Card>
             <CardHeader>
