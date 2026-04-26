@@ -44,7 +44,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           className="w-full"
         >
           <Button className="w-full" variant="default">
-            開始閱讀（自動摘要＋出題）
+            開始閱讀（自動摘要＋AI 出題）
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

@@ -197,7 +197,7 @@ function ArticleContent() {
                   生成中...
                 </>
               ) : (
-                "重新生成摘要與測驗"
+                "AI 重新出題"
               )}
             </Button>
             <div className="flex rounded-md border">
@@ -234,7 +234,7 @@ function ArticleContent() {
 
       <main className="container px-4 py-8 md:px-6">
         <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-900 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-200">
-          進入此頁後會自動生成「精華短文＋理解測驗」。若想刷新內容，請按右上角「重新生成摘要與測驗」。
+          進入此頁後會自動生成「精華短文＋AI 出題」。若想重新出題，請按右上角「AI 重新出題」。
         </div>
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <Card>
@@ -262,9 +262,12 @@ function ArticleContent() {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>理解測驗</CardTitle>
+                <CardTitle>AI 出題練習</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                <Button onClick={loadSummaryAndQuiz} disabled={generating} className="w-full">
+                  {generating ? "AI 出題中..." : "AI 重新出題"}
+                </Button>
                 {questions.map((q, qIndex) => (
                   <div key={qIndex} className="space-y-2">
                     <p className="font-medium">{q.question}</p>
