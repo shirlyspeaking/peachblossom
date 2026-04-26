@@ -8,7 +8,7 @@
 - **樣式**: Tailwind CSS
 - **UI**: Shadcn UI、Lucide React
 - **搜尋**: Tavily Search API
-- **AI**: Google Gemini / OpenAI GPT
+- **AI**: DeepSeek / Google Gemini / OpenAI GPT
 - **TTS**: 瀏覽器 Web Speech API
 - **儲存**: LocalStorage (MVP)
 
@@ -29,10 +29,13 @@ npm run dev
 | 變數 | 說明 |
 |------|------|
 | `TAVILY_API_KEY` | Tavily 搜尋 API Key（搜尋功能） |
+| `DEEPSEEK_API_KEY` | DeepSeek API Key（預設優先的摘要與出題） |
+| `DEEPSEEK_BASE_URL` | DeepSeek API Base URL（預設 `https://api.deepseek.com`） |
+| `DEEPSEEK_MODEL` | DeepSeek 模型名稱（預設 `deepseek-chat`） |
 | `GOOGLE_AI_API_KEY` | Google Gemini API Key（摘要與出題） |
 | `OPENAI_API_KEY` | OpenAI API Key（可替代 Gemini） |
 
-未設定 AI Key 時，仍可瀏覽文章與使用 Mock 摘要。
+AI 會依序嘗試：DeepSeek → Gemini → OpenAI；都不可用時，仍可瀏覽文章與使用 Mock 摘要。
 
 ## 功能
 
