@@ -514,6 +514,7 @@
   </div>
 
   <script>
+    const ART_STATE_STORAGE_KEY = "legendary-card-creator-art-state";
     const state = {
       era: "vintage",
       showBack: false,
@@ -643,7 +644,42 @@
       state.artUrl = item.url;
       refs.cardArt.style.background = `url("${item.url}") center / cover`;
       renderArtGallery();
+      persistArtState();
       setStatus("已切換為圖庫中的插畫。");
+    }
+
+    function persistArtState() {
+      try {
+        localStorage.setItem(
+          ART_STATE_STORAGE_KEY,
+          JSON.stringify({
+            artGallery: state.artGallery,
+            activeArtId: state.activeArtId,
+            artUrl: state.artUrl,
+          })
+        );
+      } catch (_) {
+        setStatus("插畫已套用，但儲存空間不足，重新整理後可能不會保留。");
+      }
+    }
+
+    function restoreArtState() {
+      try {
+        const raw = localStorage.getItem(ART_STATE_STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved || !Array.isArray(saved.artGallery)) return;
+        state.artGallery = saved.artGallery.filter((item) => item && item.id && item.url);
+        state.activeArtId = saved.activeArtId || null;
+        state.artUrl = saved.artUrl || null;
+        if (state.artUrl) {
+          refs.cardArt.style.background = `url("${state.artUrl}") center / cover`;
+          refs.uploadName.textContent = "已還原上次插畫";
+          setStatus("已還原先前上傳的插畫。");
+        }
+      } catch (_) {
+        localStorage.removeItem(ART_STATE_STORAGE_KEY);
+      }
     }
 
     function renderCard() {
@@ -781,7 +817,12 @@
     refs.artUpload.onchange = async (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      const url = URL.createObjectURL(file);
+      const url = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("讀取圖片失敗"));
+        reader.readAsDataURL(file);
+      });
       const id = "art-" + Date.now();
       state.artGallery.push({ id: id, url: url });
       state.activeArtId = id;
@@ -789,6 +830,7 @@
       refs.uploadName.textContent = file.name;
       refs.cardArt.style.background = `url("${url}") center / cover`;
       renderArtGallery();
+      persistArtState();
       await applySmartHeaderColor(file);
     };
 
@@ -829,10 +871,10 @@
       state.backArtUrl = null;
       refs.backBg.style.backgroundImage = "none";
       refs.backUploadName.textContent = "尚未上傳卡背背景";
-      state.artGallery.forEach((item) => URL.revokeObjectURL(item.url));
       state.artGallery = [];
       state.activeArtId = null;
       state.artUrl = null;
+      localStorage.removeItem(ART_STATE_STORAGE_KEY);
       refs.cardArt.style.background = DEFAULT_CARD_ART_BG;
       refs.uploadName.textContent = "尚未上傳插畫";
       if (refs.artUpload) refs.artUpload.value = "";
@@ -959,6 +1001,7 @@
       }
     };
 
+    restoreArtState();
     renderEnergyButtons();
     renderArtGallery();
     renderCard();

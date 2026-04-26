@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 type TabKey = "basic" | "visual" | "upload";
 type Era = "vintage" | "modern";
 type EnergyType = "fire" | "water" | "electric" | "grass" | "psychic" | "dark";
+type Locale = "zh" | "en";
 
 const ENERGY_OPTIONS: Array<{ id: EnergyType; symbol: string; swatch: string }> = [
   { id: "fire", symbol: "F", swatch: "from-orange-400 via-red-500 to-rose-500" },
@@ -23,6 +24,101 @@ const ENERGY_OPTIONS: Array<{ id: EnergyType; symbol: string; swatch: string }> 
 
 const inputClassName =
   "h-11 rounded-2xl border border-white/10 bg-slate-950/80 px-4 text-sm text-slate-100 shadow-inner shadow-black/30 placeholder:text-slate-500 focus-visible:ring-yellow-300/40";
+const ART_STORAGE_KEY = "legendary-card-creator-art";
+const LOCALE_STORAGE_KEY = "legendary-card-creator-locale";
+
+const I18N = {
+  zh: {
+    pageTitle: "收藏級電子卡牌工坊",
+    backToHome: "返回桃花源",
+    showFront: "顯示正面",
+    showBack: "翻到背面",
+    exporting: "匯出中...",
+    exportPng: "匯出 PNG",
+    controlPanel: "控制區",
+    tabBasic: "基礎",
+    tabVisual: "視覺",
+    tabUpload: "上傳",
+    cardName: "卡牌名稱",
+    hpPower: "HP / Power",
+    abilityName: "能力名稱",
+    abilityDescription: "能力敘述",
+    illustratorSet: "繪師 / 卡號",
+    quickStyle: "一鍵風格切換",
+    vintageMode: "復古模式",
+    modernMode: "現代模式",
+    shadowless: "Shadowless",
+    shadowlessHint: "關閉插畫邊框陰影",
+    vintageFilter: "Vintage Filter",
+    vintageFilterHint: "低飽和與紙質感",
+    rarity: "稀有度星級",
+    uploadArt: "上傳插畫",
+    noArt: "尚未上傳插畫",
+    energies: "能量符號",
+    reset: "一鍵重置",
+    defaultStatus: "已啟用黃金分割布局（35/65）。",
+    restoringArt: "已還原先前上傳的插畫。",
+    uploadStart: (name: string) => `已上傳 ${name}，正在匹配標題色。`,
+    uploadFailed: "圖片上傳失敗，請稍後再試。",
+    storageFull: "插畫已上傳，但瀏覽器儲存空間不足，重新整理後可能不會保留。",
+    autoColorDone: "已根據插畫主色調自動更新標題欄。",
+    autoColorFail: "插畫已上傳，智能配色未能取得主色。",
+    resetDone: "已還原為預設收藏版樣式。",
+    exportStart: "正在輸出拍賣展示質感 PNG...",
+    exportDone: "PNG 匯出完成。",
+    exportFail: (message: string) => `匯出失敗：${message}`,
+    exportFailGeneric: "匯出失敗。",
+    hpLabel: "HP",
+    firstEdition: "1st Edition",
+    languageSwitched: "已切換介面語言。",
+    langButton: "EN",
+  },
+  en: {
+    pageTitle: "Premium Card Studio",
+    backToHome: "Back to Home",
+    showFront: "Show Front",
+    showBack: "Flip to Back",
+    exporting: "Exporting...",
+    exportPng: "Export PNG",
+    controlPanel: "Control Panel",
+    tabBasic: "Basic",
+    tabVisual: "Visual",
+    tabUpload: "Upload",
+    cardName: "Card Name",
+    hpPower: "HP / Power",
+    abilityName: "Ability Name",
+    abilityDescription: "Ability Description",
+    illustratorSet: "Illustrator / Set No.",
+    quickStyle: "Quick Style Switch",
+    vintageMode: "Vintage",
+    modernMode: "Modern",
+    shadowless: "Shadowless",
+    shadowlessHint: "Disable artwork frame shadow",
+    vintageFilter: "Vintage Filter",
+    vintageFilterHint: "Lower saturation with paper texture",
+    rarity: "Rarity",
+    uploadArt: "Upload Artwork",
+    noArt: "No artwork uploaded",
+    energies: "Energy Symbols",
+    reset: "Reset All",
+    defaultStatus: "Golden ratio layout enabled (35/65).",
+    restoringArt: "Previous uploaded artwork restored.",
+    uploadStart: (name: string) => `${name} uploaded, matching header color...`,
+    uploadFailed: "Upload failed. Please try again.",
+    storageFull: "Artwork uploaded, but browser storage is full and may not persist after refresh.",
+    autoColorDone: "Header color auto-matched from artwork.",
+    autoColorFail: "Artwork uploaded, but smart color matching failed.",
+    resetDone: "Card reset to default collector style.",
+    exportStart: "Exporting high-quality PNG...",
+    exportDone: "PNG export completed.",
+    exportFail: (message: string) => `Export failed: ${message}`,
+    exportFailGeneric: "Export failed.",
+    hpLabel: "HP",
+    firstEdition: "1st Edition",
+    languageSwitched: "Interface language switched.",
+    langButton: "中文",
+  },
+} as const;
 
 function slugify(value: string) {
   return value
@@ -77,7 +173,20 @@ async function getDominantColor(file: File): Promise<{ rgb: string; text: string
   }
 }
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("無法讀取檔案內容"));
+    };
+    reader.onerror = () => reject(new Error("檔案讀取失敗"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassName?: string }) {
+  const [locale, setLocale] = useState<Locale>("zh");
   const [activeTab, setActiveTab] = useState<TabKey>("basic");
   const [era, setEra] = useState<Era>("vintage");
   const [name, setName] = useState("Celestial Emberfox");
@@ -92,8 +201,8 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   const [energies, setEnergies] = useState<EnergyType[]>(["fire", "electric", "psychic"]);
   const [rarity, setRarity] = useState(3);
   const [artUrl, setArtUrl] = useState<string | null>(null);
-  const [artLabel, setArtLabel] = useState("尚未上傳插畫");
-  const [status, setStatus] = useState("已啟用黃金分割布局（35/65）。");
+  const [artLabel, setArtLabel] = useState(I18N.zh.noArt);
+  const [status, setStatus] = useState(I18N.zh.defaultStatus);
   const [headerColor, setHeaderColor] = useState("rgb(51, 65, 85)");
   const [headerText, setHeaderText] = useState("#f8fafc");
   const [pointer, setPointer] = useState({ x: 50, y: 50 });
@@ -103,11 +212,31 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   const previewRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const t = I18N[locale];
+
   useEffect(() => {
-    return () => {
-      if (artUrl?.startsWith("blob:")) URL.revokeObjectURL(artUrl);
-    };
-  }, [artUrl]);
+    const saved = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (saved === "zh" || saved === "en") setLocale(saved);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(ART_STORAGE_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { artUrl?: string; artLabel?: string };
+      if (parsed.artUrl) {
+        setArtUrl(parsed.artUrl);
+        setArtLabel(parsed.artLabel ?? t.noArt);
+        setStatus(t.restoringArt);
+      }
+    } catch {
+      // Ignore invalid storage payload.
+    }
+  }, [t.noArt, t.restoringArt]);
+
+  useEffect(() => {
+    if (!artUrl) setArtLabel(t.noArt);
+  }, [artUrl, t.noArt]);
 
   const isModern = era === "modern";
   const cardShellStyle: CSSProperties = isModern
@@ -132,19 +261,34 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    setArtUrl((current) => {
-      if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
-      return URL.createObjectURL(file);
-    });
+    let dataUrl: string;
+    try {
+      dataUrl = await fileToDataUrl(file);
+    } catch {
+      setStatus(t.uploadFailed);
+      return;
+    }
+    setArtUrl(dataUrl);
     setArtLabel(file.name);
-    setStatus(`已上傳 ${file.name}，正在匹配標題色。`);
+    setStatus(t.uploadStart(file.name));
+    try {
+      localStorage.setItem(
+        ART_STORAGE_KEY,
+        JSON.stringify({
+          artUrl: dataUrl,
+          artLabel: file.name,
+        })
+      );
+    } catch {
+      setStatus(t.storageFull);
+    }
     try {
       const dominant = await getDominantColor(file);
       setHeaderColor(dominant.rgb);
       setHeaderText(dominant.text);
-      setStatus("已根據插畫主色調自動更新標題欄。");
+      setStatus(t.autoColorDone);
     } catch {
-      setStatus("插畫已上傳，智能配色未能取得主色。");
+      setStatus(t.autoColorFail);
     }
   }
 
@@ -177,13 +321,13 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
     setRarity(3);
     setHeaderColor("rgb(51, 65, 85)");
     setHeaderText("#f8fafc");
-    setStatus("已還原為預設收藏版樣式。");
+    setStatus(t.resetDone);
   }
 
   async function exportCard() {
     if (!previewRef.current) return;
     setExporting(true);
-    setStatus("正在輸出拍賣展示質感 PNG...");
+    setStatus(t.exportStart);
     try {
       const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(previewRef.current, {
@@ -196,12 +340,19 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
       link.href = canvas.toDataURL("image/png");
       link.download = `${slugify(name)}.png`;
       link.click();
-      setStatus("PNG 匯出完成。");
+      setStatus(t.exportDone);
     } catch (error) {
-      setStatus(error instanceof Error ? `匯出失敗：${error.message}` : "匯出失敗。");
+      setStatus(error instanceof Error ? t.exportFail(error.message) : t.exportFailGeneric);
     } finally {
       setExporting(false);
     }
+  }
+
+  function toggleLocale() {
+    const nextLocale: Locale = locale === "zh" ? "en" : "zh";
+    setLocale(nextLocale);
+    localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    setStatus(I18N[nextLocale].languageSwitched);
   }
 
   const transformStyle = useMemo(
@@ -218,22 +369,25 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-yellow-300/80">Legendary Card Creator</p>
-              <h1 className={cn("mt-2 text-3xl font-semibold sm:text-4xl", titleFontClassName)}>收藏級電子卡牌工坊</h1>
+              <h1 className={cn("mt-2 text-3xl font-semibold sm:text-4xl", titleFontClassName)}>{t.pageTitle}</h1>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10" onClick={toggleLocale}>
+                {t.langButton}
+              </Button>
               <Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10">
                 <Link href="/../index.html">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  返回桃花源
+                  {t.backToHome}
                 </Link>
               </Button>
               <Button variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10" onClick={() => setShowBack((v) => !v)}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
-                {showBack ? "顯示正面" : "翻到背面"}
+                {showBack ? t.showFront : t.showBack}
               </Button>
               <Button onClick={() => void exportCard()} disabled={exporting} className="bg-[#FFCB05] text-slate-950 hover:bg-yellow-300">
                 <Download className="mr-2 h-4 w-4" />
-                {exporting ? "匯出中..." : "匯出 PNG"}
+                {exporting ? t.exporting : t.exportPng}
               </Button>
             </div>
           </div>
@@ -242,14 +396,14 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
         <div className="grid gap-6 lg:grid-cols-[35%_65%]">
           <aside className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl lg:max-h-[calc(100vh-9.5rem)] lg:overflow-hidden">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className={cn("text-xl", titleFontClassName)}>控制區</h2>
+              <h2 className={cn("text-xl", titleFontClassName)}>{t.controlPanel}</h2>
               <Sparkles className="h-5 w-5 text-yellow-300" />
             </div>
             <div className="mb-4 grid grid-cols-3 gap-2">
               {[
-                { key: "basic", label: "基礎" },
-                { key: "visual", label: "視覺" },
-                { key: "upload", label: "上傳" },
+                { key: "basic", label: t.tabBasic },
+                { key: "visual", label: t.tabVisual },
+                { key: "upload", label: t.tabUpload },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -271,19 +425,19 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
               {activeTab === "basic" ? (
                 <>
                   <label className="block space-y-2 text-sm">
-                    <span>卡牌名稱</span>
+                    <span>{t.cardName}</span>
                     <Input className={inputClassName} value={name} onChange={(e) => setName(e.target.value)} />
                   </label>
                   <label className="block space-y-2 text-sm">
-                    <span>HP / Power</span>
+                    <span>{t.hpPower}</span>
                     <Input className={inputClassName} value={hp} onChange={(e) => setHp(e.target.value)} />
                   </label>
                   <label className="block space-y-2 text-sm">
-                    <span>能力名稱</span>
+                    <span>{t.abilityName}</span>
                     <Input className={inputClassName} value={abilityName} onChange={(e) => setAbilityName(e.target.value)} />
                   </label>
                   <label className="block space-y-2 text-sm">
-                    <span>能力敘述</span>
+                    <span>{t.abilityDescription}</span>
                     <textarea
                       className="min-h-28 w-full rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/30"
                       value={description}
@@ -291,7 +445,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                     />
                   </label>
                   <label className="block space-y-2 text-sm">
-                    <span>繪師 / 卡號</span>
+                    <span>{t.illustratorSet}</span>
                     <div className="grid grid-cols-2 gap-2">
                       <Input className={inputClassName} value={illustrator} onChange={(e) => setIllustrator(e.target.value)} />
                       <Input className={inputClassName} value={setNumber} onChange={(e) => setSetNumber(e.target.value)} />
@@ -303,7 +457,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
               {activeTab === "visual" ? (
                 <>
                   <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                    <p className="mb-2 text-sm text-slate-300">一鍵風格切換</p>
+                    <p className="mb-2 text-sm text-slate-300">{t.quickStyle}</p>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -313,7 +467,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                           era === "vintage" ? "border-yellow-300/70 bg-yellow-400/15 text-yellow-200" : "border-white/10 text-slate-300"
                         )}
                       >
-                        復古模式
+                        {t.vintageMode}
                       </button>
                       <button
                         type="button"
@@ -323,7 +477,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                           era === "modern" ? "border-cyan-300/70 bg-cyan-400/10 text-cyan-100" : "border-white/10 text-slate-300"
                         )}
                       >
-                        現代模式
+                        {t.modernMode}
                       </button>
                     </div>
                   </div>
@@ -331,22 +485,22 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                   <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
                     <div className="mb-3 flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Shadowless</p>
-                        <p className="text-xs text-slate-400">關閉插畫邊框陰影</p>
+                        <p className="text-sm font-medium">{t.shadowless}</p>
+                        <p className="text-xs text-slate-400">{t.shadowlessHint}</p>
                       </div>
                       <Switch checked={shadowless} onCheckedChange={setShadowless} />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Vintage Filter</p>
-                        <p className="text-xs text-slate-400">低飽和與紙質感</p>
+                        <p className="text-sm font-medium">{t.vintageFilter}</p>
+                        <p className="text-xs text-slate-400">{t.vintageFilterHint}</p>
                       </div>
                       <Switch checked={vintageFilter} onCheckedChange={setVintageFilter} />
                     </div>
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                    <p className="mb-2 text-sm text-slate-300">稀有度星級</p>
+                    <p className="mb-2 text-sm text-slate-300">{t.rarity}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {[1, 2, 3].map((value) => (
                         <button
@@ -379,14 +533,14 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                     className="flex w-full items-center justify-between rounded-2xl border border-dashed border-yellow-300/40 bg-yellow-400/10 px-4 py-4"
                   >
                     <div>
-                      <p className="font-medium text-white">上傳插畫</p>
+                      <p className="font-medium text-white">{t.uploadArt}</p>
                       <p className="text-xs text-slate-300">{artLabel}</p>
                     </div>
                     <ImagePlus className="h-5 w-5 text-yellow-300" />
                   </button>
 
                   <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                    <p className="mb-2 text-sm text-slate-300">能量符號</p>
+                    <p className="mb-2 text-sm text-slate-300">{t.energies}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {ENERGY_OPTIONS.map((energy) => (
                         <button
@@ -415,7 +569,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
 
               <Button variant="outline" onClick={resetCard} className="w-full border-white/15 bg-white/5 text-slate-100 hover:bg-white/10">
                 <Wand2 className="mr-2 h-4 w-4" />
-                一鍵重置
+                {t.reset}
               </Button>
             </div>
           </aside>
@@ -470,7 +624,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
                             <div className="flex items-start justify-between gap-3">
                               <p className={cn("text-xl font-bold", titleFontClassName)}>{name}</p>
                               <div className="text-right">
-                                <p className="text-[10px] uppercase tracking-[0.3em]">HP</p>
+                                <p className="text-[10px] uppercase tracking-[0.3em]">{t.hpLabel}</p>
                                 <p className="text-xl font-black text-red-300">{hp}</p>
                               </div>
                             </div>
@@ -519,7 +673,7 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
 
                           {era === "vintage" ? (
                             <div className="absolute bottom-[7.2%] left-[6.5%] rounded-md border border-[#fcd34d] bg-[#1f2937]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#fcd34d]">
-                              1st Edition
+                              {t.firstEdition}
                             </div>
                           ) : null}
 
