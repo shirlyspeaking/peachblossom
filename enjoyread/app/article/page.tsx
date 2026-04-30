@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ArrowLeft, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArticleChat } from "@/components/ArticleChat";
 import { addReadArticle } from "@/lib/storage";
 
 interface QuizQuestion {
@@ -23,10 +22,14 @@ function ArticleContent() {
   const id = searchParams.get("id") || "unknown";
 
   const [summary, setSummary] = useState("");
-  const [articleContent, setArticleContent] = useState("");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [articleContent, setArticleContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [inlineError, setInlineError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [lastGeneratedAt, setLastGeneratedAt] = useState("");
+  const [provider, setProvider] = useState("");
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showExplanations, setShowExplanations] = useState<Record<number, boolean>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -35,6 +38,83 @@ function ArticleContent() {
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [ttsSpeed, setTtsSpeed] = useState(1);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [generating, setGenerating] = useState(false);
+
+  const loadSummaryAndQuiz = async ({ regenerate = false }: { regenerate?: boolean } = {}) => {
+    if (!url) {
+      setError("缺少文章網址");
+      setLoading(false);
+      return;
+    }
+
+    setError("");
+    setInlineError("");
+    setStatusMessage(regenerate ? "AI 正在重新出題，請稍候..." : "AI 正在生成精華短文與題目...");
+    setGenerating(true);
+    try {
+      let contentForQuiz = articleContent;
+      let fetchedTitle = "";
+
+      if (!contentForQuiz) {
+        setStatusMessage("正在讀取文章內容...");
+        const fetchRes = await fetch("/api/fetch-article", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, title: decodeURIComponent(title) }),
+        });
+        const fetchData = await fetchRes.json();
+        if (fetchData.error || !fetchData.content) {
+          setInlineError(fetchData.error || "無法取得文章內容");
+          return;
+        }
+        contentForQuiz = fetchData.content;
+        fetchedTitle = fetchData.title || "";
+        setArticleContent(contentForQuiz);
+      }
+
+      setStatusMessage(regenerate ? "AI 正在重新設計題目..." : "AI 正在摘要並出題...");
+      const sumRes = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: contentForQuiz,
+          url,
+          regenerate,
+          generationId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        }),
+      });
+      const sumData = await sumRes.json();
+      if (sumData.error) {
+        setInlineError(`AI 出題失敗：${sumData.error}`);
+        return;
+      }
+
+      const nextQuestions = Array.isArray(sumData.questions) ? sumData.questions : [];
+      setSummary(sumData.summary || contentForQuiz.slice(0, 400));
+      setQuestions(nextQuestions);
+      setAnswers({});
+      setShowExplanations({});
+      setQuizSubmitted(false);
+      setQuizScore(null);
+      setProvider(sumData.provider || "");
+      setLastGeneratedAt(new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      setStatusMessage(
+        nextQuestions.length > 0
+          ? regenerate
+            ? "已重新生成新的 AI 題目。"
+            : "AI 題目已生成。"
+          : "AI 沒有回傳題目，請再按一次重新出題。"
+      );
+
+      addReadArticle({ id, url, title: title || fetchedTitle || "文章" });
+    } catch (e) {
+      setInlineError(String(e));
+      setStatusMessage("");
+    } finally {
+      setGenerating(false);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!url) {
@@ -45,40 +125,12 @@ function ArticleContent() {
 
     let cancelled = false;
     (async () => {
-      try {
-        const fetchRes = await fetch("/api/fetch-article", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, title: decodeURIComponent(title) }),
-        });
-        const fetchData = await fetchRes.json();
-        if (cancelled) return;
-        if (fetchData.error || !fetchData.content) {
-          setError(fetchData.error || "無法取得文章內容");
-          setLoading(false);
-          return;
-        }
-        setArticleContent(fetchData.content);
-
-        const sumRes = await fetch("/api/summarize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: fetchData.content, url }),
-        });
-        const sumData = await sumRes.json();
-        if (cancelled) return;
-        setSummary(sumData.summary || fetchData.content.slice(0, 400));
-        setQuestions(sumData.questions || []);
-
-        addReadArticle({ id, url, title: title || fetchData.title || "文章" });
-      } catch (e) {
-        if (!cancelled) setError(String(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      if (cancelled) return;
+      await loadSummaryAndQuiz();
+      if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [url, id, title]);
+  }, [url, id, title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sentences = summary
     .split(/(?<=[。！？\n])/)
@@ -171,6 +223,21 @@ function ArticleContent() {
           </Link>
           <h1 className="flex-1 truncate text-lg font-semibold">{decodeURIComponent(title)}</h1>
           <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => loadSummaryAndQuiz({ regenerate: true })}
+              disabled={generating}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  生成中...
+                </>
+              ) : (
+                "AI 重新出題"
+              )}
+            </Button>
             <div className="flex rounded-md border">
               {[0.8, 1, 1.2].map((s) => (
                 <button
@@ -204,7 +271,10 @@ function ArticleContent() {
       </header>
 
       <main className="container px-4 py-8 md:px-6">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-900 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-200">
+          進入此頁後會自動生成「精華短文＋AI 出題」。若想換一組新題目，請按「AI 重新出題」。
+        </div>
+        <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <Card>
             <CardHeader>
               <CardTitle>精華短文</CardTitle>
@@ -228,18 +298,28 @@ function ArticleContent() {
           </Card>
 
           <div className="space-y-4">
-            <ArticleChat
-              articleId={id}
-              articleTitle={decodeURIComponent(title)}
-              articleContent={articleContent}
-            />
             <Card>
               <CardHeader>
-                <CardTitle>理解測驗</CardTitle>
+                <CardTitle>AI 出題練習</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                <Button onClick={() => loadSummaryAndQuiz({ regenerate: true })} disabled={generating} className="w-full">
+                  {generating ? "AI 出題中..." : "AI 重新出題"}
+                </Button>
+                {(statusMessage || inlineError || lastGeneratedAt) && (
+                  <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                    {statusMessage && <p>{statusMessage}</p>}
+                    {lastGeneratedAt && (
+                      <p>
+                        最近生成：{lastGeneratedAt}
+                        {provider ? `（${provider}）` : ""}
+                      </p>
+                    )}
+                    {inlineError && <p className="text-destructive">{inlineError}</p>}
+                  </div>
+                )}
                 {questions.map((q, qIndex) => (
-                  <div key={qIndex} className="space-y-2">
+                  <div key={`${lastGeneratedAt}-${qIndex}`} className="space-y-2">
                     <p className="font-medium">{q.question}</p>
                     <div className="space-y-2">
                       {q.options.map((opt, oIndex) => (

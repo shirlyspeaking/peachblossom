@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 const EDU_KEYWORDS = ["科學", "歷史", "社會", "科技", "教育", "知識", "學習"];
 const EXCLUDE_KEYWORDS = ["成人", "賭博", "暴力", "色情"];
 

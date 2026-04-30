@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function POST(request: NextRequest) {
   const { url, title } = (await request.json()) as { url?: string; title?: string };
   if (!url || typeof url !== "string") {
