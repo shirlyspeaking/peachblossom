@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArticleChat } from "@/components/ArticleChat";
 import { addReadArticle } from "@/lib/storage";
 
 interface QuizQuestion {
@@ -22,6 +23,7 @@ function ArticleContent() {
   const id = searchParams.get("id") || "unknown";
 
   const [summary, setSummary] = useState("");
+  const [articleContent, setArticleContent] = useState("");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,6 +58,7 @@ function ArticleContent() {
           setLoading(false);
           return;
         }
+        setArticleContent(fetchData.content);
 
         const sumRes = await fetch("/api/summarize", {
           method: "POST",
@@ -201,7 +204,7 @@ function ArticleContent() {
       </header>
 
       <main className="container px-4 py-8 md:px-6">
-        <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
           <Card>
             <CardHeader>
               <CardTitle>精華短文</CardTitle>
@@ -225,6 +228,11 @@ function ArticleContent() {
           </Card>
 
           <div className="space-y-4">
+            <ArticleChat
+              articleId={id}
+              articleTitle={decodeURIComponent(title)}
+              articleContent={articleContent}
+            />
             <Card>
               <CardHeader>
                 <CardTitle>理解測驗</CardTitle>

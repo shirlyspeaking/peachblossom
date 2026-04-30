@@ -24,7 +24,7 @@ export function buildSetSessionCookie(
     "Path=/",
     `Max-Age=${maxAgeSec}`,
     "HttpOnly",
-    "SameSite=Lax",
+    "SameSite=None",
   ];
   if (secure) attrs.push("Secure");
   if (domain && domain !== "localhost") attrs.push(`Domain=${domain}`);
@@ -38,7 +38,7 @@ export function buildClearSessionCookie(domain: string, secure: boolean): string
     "Max-Age=0",
     "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
     "HttpOnly",
-    "SameSite=Lax",
+    "SameSite=None",
   ];
   if (secure) attrs.push("Secure");
   if (domain && domain !== "localhost") attrs.push(`Domain=${domain}`);

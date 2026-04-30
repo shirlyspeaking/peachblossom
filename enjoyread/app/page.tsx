@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { ArticleCard } from "@/components/ArticleCard";
@@ -11,16 +11,17 @@ import { getReadingProgress } from "@/lib/storage";
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [articles, setArticles] = useState(MOCK_ARTICLES);
-  const [progressKey, setProgressKey] = useState(0);
-  const progress = useMemo(() => {
-    if (typeof window === "undefined") return { readCount: 0, totalQuizzes: 0, averageScore: 0 };
-    return getReadingProgress();
-  }, [progressKey]);
+  const [progress, setProgress] = useState({
+    readCount: 0,
+    totalQuizzes: 0,
+    averageScore: 0,
+  });
 
   useEffect(() => {
-    const onFocus = () => setProgressKey((k) => k + 1);
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    const refreshProgress = () => setProgress(getReadingProgress());
+    refreshProgress();
+    window.addEventListener("focus", refreshProgress);
+    return () => window.removeEventListener("focus", refreshProgress);
   }, []);
 
   const handleSearch = async () => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { PLAYER_COLORS } from '../config/game'
-import { themeGradientForTileLabel } from '../utils/game'
+import { playerAnimal, themeGradientForTileLabel } from '../utils/game'
 import type { Tile, TileMeta } from '../types/game'
 
 const props = defineProps<{
@@ -60,7 +60,7 @@ const tileStyle = computed(() => ({
         class="board-tile__pawn"
         :style="{ background: PLAYER_COLORS[(pawn - 1) % PLAYER_COLORS.length] }"
       >
-        {{ pawn }}
+        {{ playerAnimal(pawn - 1) }}
       </span>
     </div>
   </article>

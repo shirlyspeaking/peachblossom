@@ -6,9 +6,11 @@ export const MAX_BOARD_PRESETS_PER_USER = 20
 export const DEFAULT_START_MONEY = 1500
 export const PASS_GO_BONUS = 200
 export const LAND_PRICE = 300
+export const DEFAULT_TOLL_FEE = 120
 export const APP_ID = 'shanhaijing-monopoly'
 
 export const PLAYER_COLORS = ['#e63946', '#457b9d', '#2a9d8f', '#e9c46a', '#9b5de5', '#f57dbc']
+export const PLAYER_ANIMALS = ['🐯', '🦊', '🐼', '🐸', '🦄', '🐧']
 
 export const TILE_META: Record<string, TileMeta> = {
   'tile-start': { icon: '🏁', legend: '起點' },

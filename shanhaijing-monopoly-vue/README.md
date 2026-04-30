@@ -1,12 +1,15 @@
-# 山海經大富翁 Vue 重構版
+# 桃源萬象大富翁
 
-這是 `shanhaijing-monopoly` 的現代化重構版本，目標是把原本單一 HTML 檔中的樣式、DOM 操作、遊戲邏輯、線上房間同步與登入整合，拆成可維護的多檔案前端專案。
+這是 `shanhaijing-monopoly` 的現代化重構版本。第一個劇本沿用《山海經》世界觀，目標是把原本單一 HTML 檔中的樣式、DOM 操作、遊戲邏輯、線上房間同步與登入整合，拆成可維護、可擴充到不同故事劇本的多檔案前端專案。
 
 ## 技術棧
 
 - Vue 3
 - TypeScript
 - Vite
+- Pinia
+- Vitest
+- Playwright
 
 ## 目錄結構
 
@@ -15,8 +18,13 @@ src/
 ├── components/      # 畫面元件
 ├── composables/     # 狀態與互動邏輯
 ├── config/          # 常數設定
+├── stores/          # Pinia stores
 ├── types/           # TypeScript 型別
 └── utils/           # 純工具函式
+
+tests/
+├── e2e/             # Playwright 煙霧測試
+└── unit/            # Vitest 單元測試
 ```
 
 ## 已搬移功能
@@ -40,6 +48,13 @@ npm run dev
 
 ```bash
 npm run build
+```
+
+## 測試
+
+```bash
+npm run test:unit
+npm run test:e2e
 ```
 
 ## 說明

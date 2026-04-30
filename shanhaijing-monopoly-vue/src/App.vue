@@ -5,35 +5,39 @@ import BaseDialog from './components/BaseDialog.vue'
 import BoardTile from './components/BoardTile.vue'
 import CardEditorColumn from './components/CardEditorColumn.vue'
 import { PLAYER_COLORS } from './config/game'
-import { useMonopolyGame } from './composables/useMonopolyGame'
-import { login, logout, refreshSession, usePeachAuth } from './composables/usePeachAuth'
+import { login, logout, refreshSession } from './composables/usePeachAuth'
+import { useAuthStore } from './stores/auth'
+import { useGameStore } from './stores/game'
 
-const game = useMonopolyGame()
-const { authState } = usePeachAuth()
+const game = useGameStore().api
+const { authState } = useAuthStore().api
 
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
-  if (game.rulesModalOpen.value) {
-    game.rulesModalOpen.value = false
+  if (game.rulesModalOpen) {
+    game.rulesModalOpen = false
   } else if (game.medalModal.open) {
     game.closeMedalPopup()
   } else if (game.buyLandModal.open) {
     game.closeBuyLandPopup(false)
-  } else if (game.boardPresetPopoverOpen.value) {
-    game.boardPresetPopoverOpen.value = false
+  } else if (game.boardPresetPopoverOpen) {
+    game.boardPresetPopoverOpen = false
   }
 }
 
 const pawnPositions = computed(() =>
-  game.tiles.value.map((tile) =>
-    game.state.value.game.players
+  game.tiles.map((tile) =>
+    game.state.game.players
       .map((player, index) => ({ position: player.position, playerNumber: index + 1 }))
       .filter((item) => item.position === tile.index)
       .map((item) => item.playerNumber),
   ),
 )
 
-const recentTurnLog = computed(() => game.state.value.game.turnLog.slice(-30))
+const recentTurnLog = computed(() => game.state.game.turnLog.slice(-30))
+const activePlayer = computed(() => game.currentPlayer)
+const ownedTileCount = computed(() => game.state.tiles.filter((tile) => tile.owner !== null).length)
+const networkSummary = computed(() => (game.online.mode ? '雲端同步中' : '本機遊玩中'))
 
 onMounted(async () => {
   await game.initialize()
@@ -49,10 +53,10 @@ onBeforeUnmount(() => {
   <div class="app-shell">
     <header class="topbar">
       <div class="topbar__title">
-        <p class="eyebrow">山海經主題桌遊</p>
-        <h1>山海經大富翁</h1>
+        <p class="eyebrow">桃花源劇本桌遊</p>
+        <h1>桃源萬象大富翁</h1>
         <p class="topbar__desc">
-          新版以 Vue 3 + TypeScript 重構，保留舊版玩法，同時把狀態、UI 與線上房間同步拆成多檔模組。
+          以山海經為第一個劇本的可擴充大富翁遊戲，未來可延展成更多中國古代故事與地圖。
         </p>
       </div>
 
@@ -82,13 +86,31 @@ onBeforeUnmount(() => {
       <div class="hero-panel__meta">
         <div class="meta-chip">
           <span class="meta-chip__label">目前回合</span>
-          <strong>{{ game.currentTurnLabel.value }}</strong>
+          <strong>{{ game.currentTurnLabel }}</strong>
         </div>
         <div class="meta-chip" v-if="game.online.mode">
           <span class="meta-chip__label">線上房間</span>
-          <strong>{{ game.onlineStatusText.value }}</strong>
+          <strong>{{ game.onlineStatusText }}</strong>
         </div>
       </div>
+    </section>
+
+    <section class="story-strip">
+      <article class="story-card">
+        <span class="story-card__label">當前劇本</span>
+        <strong>山海經 · 巡遊山海</strong>
+        <p>保留現有地圖與卡牌編輯，同時把底層改造成可再擴充更多古代故事劇本的前端架構。</p>
+      </article>
+      <article class="story-card">
+        <span class="story-card__label">遊戲節奏</span>
+        <strong>{{ networkSummary }}</strong>
+        <p>已佔領 {{ ownedTileCount }} 塊地，{{ game.state.game.playerCount }} 位玩家共同巡遊棋盤。</p>
+      </article>
+      <article class="story-card" v-if="activePlayer">
+        <span class="story-card__label">行動中角色</span>
+        <strong>{{ game.titleForPlayer(game.state.game.currentPlayerIndex) }}</strong>
+        <p>目前持有 {{ activePlayer.money }} 金幣，停留在第 {{ activePlayer.position + 1 }} 格。</p>
+      </article>
     </section>
 
     <section class="online-panel">
@@ -108,8 +130,8 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="game.online.mode" class="online-panel__status">
-        <p>{{ game.onlineStatusText.value }}</p>
-        <a :href="game.onlineRoomShareUrl.value">{{ game.onlineRoomShareUrl.value }}</a>
+        <p>{{ game.onlineStatusText }}</p>
+        <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
       </div>
     </section>
 
@@ -119,9 +141,10 @@ onBeforeUnmount(() => {
           <div>
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
+            <p class="panel-note">左側保留回合節奏與玩家金幣，右側專注於劇本規則與卡片編排。</p>
           </div>
           <div class="panel-actions">
-            <button type="button" class="secondary-btn" @click="game.rulesModalOpen.value = true">規則</button>
+            <button type="button" class="secondary-btn" @click="game.rulesModalOpen = true">規則</button>
             <button type="button" class="secondary-btn" @click="game.restartGameSession">重新開始</button>
             <button type="button" class="danger-btn" @click="game.resetToDefault">重設預設</button>
           </div>
@@ -130,14 +153,14 @@ onBeforeUnmount(() => {
         <div class="board-scroll">
           <div class="board-grid">
             <BoardTile
-              v-for="(tile, index) in game.tiles.value"
+              v-for="(tile, index) in game.tiles"
               :key="index"
               :tile="tile"
               :index="index"
               :row="tile.row"
               :col="tile.col"
               :meta="tile.meta"
-              :disabled="!game.canEditBoardAndCards.value"
+              :disabled="!game.canEditBoardAndCards"
               :pawns="pawnPositions[index]"
               @update-field="game.updateTileField"
             />
@@ -148,7 +171,7 @@ onBeforeUnmount(() => {
                 <div class="inline-field">
                   <span>遊玩人數</span>
                   <select
-                    :value="game.state.value.game.playerCount"
+                    :value="game.state.game.playerCount"
                     :disabled="game.online.mode"
                     @change="game.setPlayerCount(Number(($event.target as HTMLSelectElement).value))"
                   >
@@ -158,18 +181,18 @@ onBeforeUnmount(() => {
 
                 <div class="player-list">
                   <article
-                    v-for="(player, index) in game.state.value.game.players"
+                    v-for="(player, index) in game.state.game.players"
                     :key="player.id"
                     class="player-card"
-                    :class="{ 'player-card--active': index === game.state.value.game.currentPlayerIndex }"
+                    :class="{ 'player-card--active': index === game.state.game.currentPlayerIndex }"
                   >
                     <div class="player-card__identity">
-                      <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">{{ index + 1 }}</span>
+                      <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
+                        {{ game.playerAnimal(index) }}
+                      </span>
                       <div>
-                        <strong>玩家 {{ index + 1 }}</strong>
-                        <p v-if="game.memberAtPlayerIndex(index)">
-                          {{ game.memberAtPlayerIndex(index)?.name || game.memberAtPlayerIndex(index)?.email }}
-                        </p>
+                        <strong>{{ game.titleForPlayer(index) }}</strong>
+                        <p>{{ game.statusForPlayer(index) }}</p>
                       </div>
                     </div>
 
@@ -179,6 +202,7 @@ onBeforeUnmount(() => {
                         type="number"
                         min="0"
                         step="1"
+                        :disabled="!game.canEditPlayerMoney(index)"
                         :value="player.money"
                         @change="game.updatePlayerMoney(index, Number(($event.target as HTMLInputElement).value))"
                       />
@@ -189,11 +213,11 @@ onBeforeUnmount(() => {
 
               <div class="board-center__block board-center__block--dice">
                 <p class="eyebrow">Dice</p>
-                <div class="dice-shell" :class="{ 'dice-shell--rolling': game.isRolling.value }">
+                <div class="dice-shell" :class="{ 'dice-shell--rolling': game.isRolling }">
                   <span class="dice-shell__emoji">🎲</span>
-                  <strong>{{ game.diceValue.value }}</strong>
+                  <strong>{{ game.diceValue }}</strong>
                 </div>
-                <button type="button" class="primary-btn primary-btn--wide" :disabled="game.isRolling.value" @click="game.rollDice">
+                <button type="button" class="primary-btn primary-btn--wide" :disabled="game.isRolling" @click="game.rollDice">
                   擲骰
                 </button>
                 <div class="draw-actions">
@@ -217,22 +241,46 @@ onBeforeUnmount(() => {
         <section class="panel-card">
           <div class="panel-header">
             <div>
+              <p class="eyebrow">Scenario</p>
+              <h2>劇本導覽</h2>
+            </div>
+          </div>
+
+          <div class="scenario-list">
+            <article class="scenario-item">
+              <strong>本局目標</strong>
+              <p>用可編輯的規則、地圖與卡片，快速拼出適合課堂或同樂的桌遊版本。</p>
+            </article>
+            <article class="scenario-item">
+              <strong>重構方向</strong>
+              <p>Pinia 管狀態、Vitest 驗證核心規則、Playwright 做基本端對端煙霧測試。</p>
+            </article>
+            <article class="scenario-item">
+              <strong>建議流程</strong>
+              <p>先調整地塊與規則，再設定卡牌內容，最後建立房間讓不同玩家進入各自座位。</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
               <p class="eyebrow">Rules</p>
               <h2>基本規則與收藏</h2>
             </div>
-            <button type="button" class="secondary-btn" @click="game.boardPresetPopoverOpen.value = !game.boardPresetPopoverOpen.value">
+            <button type="button" class="secondary-btn" @click="game.boardPresetPopoverOpen = !game.boardPresetPopoverOpen">
               棋盤收藏
             </button>
           </div>
 
           <textarea
             class="rules-textarea"
-            :disabled="!game.canEditBoardAndCards.value"
-            :value="game.state.value.rulesText"
+            :disabled="!game.canEditBoardAndCards"
+            :value="game.state.rulesText"
             @input="game.syncRulesText(($event.target as HTMLTextAreaElement).value)"
           />
 
-          <div v-if="game.boardPresetPopoverOpen.value" class="preset-panel">
+          <div v-if="game.boardPresetPopoverOpen" class="preset-panel">
             <template v-if="authState.user">
               <label class="inline-field inline-field--stacked">
                 <span>收藏名稱</span>
@@ -244,15 +292,15 @@ onBeforeUnmount(() => {
                 <span>已儲存棋盤</span>
                 <select v-model="game.selectedPresetId">
                   <option value="">— 請選擇 —</option>
-                  <option v-for="preset in game.boardPresets.value" :key="preset.id" :value="preset.id">
+                  <option v-for="preset in game.boardPresets" :key="preset.id" :value="preset.id">
                     {{ preset.name }} · {{ new Date(preset.savedAt).toLocaleDateString() }}
                   </option>
                 </select>
               </label>
 
               <div class="preset-actions">
-                <button type="button" class="secondary-btn" :disabled="!game.selectedPresetId.value" @click="game.loadPreset">套用至棋盤</button>
-                <button type="button" class="danger-btn" :disabled="!game.selectedPresetId.value" @click="game.deletePreset">刪除</button>
+                <button type="button" class="secondary-btn" :disabled="!game.selectedPresetId" @click="game.loadPreset">套用至棋盤</button>
+                <button type="button" class="danger-btn" :disabled="!game.selectedPresetId" @click="game.deletePreset">刪除</button>
               </div>
             </template>
             <p v-else class="panel-note">請先登入後再使用棋盤收藏。</p>
@@ -265,19 +313,19 @@ onBeforeUnmount(() => {
               <p class="eyebrow">Cards</p>
               <h2>卡片設置</h2>
             </div>
-            <button type="button" class="secondary-btn" @click="game.cardsDrawerCollapsed.value = !game.cardsDrawerCollapsed.value">
-              {{ game.cardsDrawerCollapsed.value ? '展開' : '收合' }}
+            <button type="button" class="secondary-btn" @click="game.cardsDrawerCollapsed = !game.cardsDrawerCollapsed">
+              {{ game.cardsDrawerCollapsed ? '展開' : '收合' }}
             </button>
           </div>
 
-          <div v-if="!game.cardsDrawerCollapsed.value" class="cards-grid">
+          <div v-if="!game.cardsDrawerCollapsed" class="cards-grid">
             <CardEditorColumn
               title="機會卡"
               emoji="🟡"
               accent-class="card-column__title--chance"
-              :cards="game.state.value.chance"
+              :cards="game.state.chance"
               type="chance"
-              :disabled="!game.canEditBoardAndCards.value"
+              :disabled="!game.canEditBoardAndCards"
               @add="game.addCard"
               @update="game.updateCard"
               @delete="game.deleteCard"
@@ -287,9 +335,9 @@ onBeforeUnmount(() => {
               title="命運卡"
               emoji="🔵"
               accent-class="card-column__title--fate"
-              :cards="game.state.value.fate"
+              :cards="game.state.fate"
               type="fate"
-              :disabled="!game.canEditBoardAndCards.value"
+              :disabled="!game.canEditBoardAndCards"
               @add="game.addCard"
               @update="game.updateCard"
               @delete="game.deleteCard"
@@ -299,11 +347,11 @@ onBeforeUnmount(() => {
       </aside>
     </main>
 
-    <BaseDialog :open="game.rulesModalOpen.value" title="基本規則" width="wide" @close="game.rulesModalOpen.value = false">
+    <BaseDialog :open="game.rulesModalOpen" title="基本規則" width="wide" @close="game.rulesModalOpen = false">
       <textarea
         class="rules-textarea rules-textarea--dialog"
-        :disabled="!game.canEditBoardAndCards.value"
-        :value="game.state.value.rulesText"
+        :disabled="!game.canEditBoardAndCards"
+        :value="game.state.rulesText"
         @input="game.syncRulesText(($event.target as HTMLTextAreaElement).value)"
       />
     </BaseDialog>
@@ -327,7 +375,7 @@ onBeforeUnmount(() => {
     </BaseDialog>
 
     <transition name="toast-fade">
-      <div v-if="game.toastMessage.value" class="toast">{{ game.toastMessage.value }}</div>
+      <div v-if="game.toastMessage" class="toast">{{ game.toastMessage }}</div>
     </transition>
   </div>
 </template>

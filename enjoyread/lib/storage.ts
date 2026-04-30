@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   READ_ARTICLES: "enjoyread-read-articles",
   QUIZ_SCORES: "enjoyread-quiz-scores",
+  ARTICLE_CHAT_MESSAGES: "enjoyread-article-chat-messages",
 } as const;
 
 export interface ReadRecord {
@@ -15,6 +16,12 @@ export interface QuizScore {
   score: number;
   total: number;
   completedAt: string;
+}
+
+export interface ArticleChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
 }
 
 function getReadArticles(): ReadRecord[] {
@@ -34,6 +41,16 @@ function getQuizScores(): QuizScore[] {
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
+  }
+}
+
+function getArticleChatStore(): Record<string, ArticleChatMessage[]> {
+  if (typeof window === "undefined") return {};
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.ARTICLE_CHAT_MESSAGES);
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
   }
 }
 
@@ -58,6 +75,32 @@ export function addQuizScore(articleId: string, score: number, total: number) {
     completedAt: new Date().toISOString(),
   });
   localStorage.setItem(STORAGE_KEYS.QUIZ_SCORES, JSON.stringify(scores));
+}
+
+export function getArticleChatMessages(articleId: string): ArticleChatMessage[] {
+  const store = getArticleChatStore();
+  return store[articleId] || [];
+}
+
+export function saveArticleChatMessages(
+  articleId: string,
+  messages: ArticleChatMessage[]
+) {
+  const store = getArticleChatStore();
+  store[articleId] = messages.slice(-20);
+  localStorage.setItem(
+    STORAGE_KEYS.ARTICLE_CHAT_MESSAGES,
+    JSON.stringify(store)
+  );
+}
+
+export function clearArticleChatMessages(articleId: string) {
+  const store = getArticleChatStore();
+  delete store[articleId];
+  localStorage.setItem(
+    STORAGE_KEYS.ARTICLE_CHAT_MESSAGES,
+    JSON.stringify(store)
+  );
 }
 
 export function getReadingProgress() {

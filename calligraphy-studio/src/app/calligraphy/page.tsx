@@ -5,6 +5,8 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { FONT_OPTIONS, type CopybookVariant, type GridType, type PageLayoutConfig } from "@/lib/calligraphy/types";
 
 type PreviewCell = { char: string; row: number; col: number };
@@ -170,7 +172,7 @@ export default function CalligraphyPage() {
           <CardContent className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-slate-800">文字內容</p>
-              <textarea
+              <Textarea
                 className="min-h-40 w-full rounded-xl border border-primary-200/70 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 placeholder="貼上詩歌或文字材料..."
                 value={text}
@@ -194,42 +196,30 @@ export default function CalligraphyPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-sm">
                 類型
-                <select
-                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                  value={config.mode}
-                  onChange={(e) => updateMode(e.target.value as "brush" | "pen")}
-                >
+                <Select value={config.mode} onChange={(e) => updateMode(e.target.value as "brush" | "pen")}>
                   <option value="brush">毛筆</option>
                   <option value="pen">硬筆</option>
-                </select>
+                </Select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 格線
-                <select
-                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                  value={config.gridType}
-                  onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}
-                >
+                <Select value={config.gridType} onChange={(e) => setConfig((prev) => ({ ...prev, gridType: e.target.value as GridType }))}>
                   {GRID_OPTIONS.map((item) => (
                     <option key={item.value} value={item.value}>
                       {item.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 字型
-                <select
-                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                  value={config.fontId}
-                  onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}
-                >
+                <Select value={config.fontId} onChange={(e) => setConfig((prev) => ({ ...prev, fontId: e.target.value }))}>
                   {FONT_OPTIONS.map((item) => (
                     <option key={item.id} value={item.id} disabled={!availableFontIds.includes(item.id)}>
                       {item.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 字體大小
@@ -243,15 +233,11 @@ export default function CalligraphyPage() {
               </label>
               <label className="flex flex-col gap-1 text-sm sm:col-span-2">
                 字帖版本
-                <select
-                  className="h-10 w-full rounded-xl border border-primary-200/70 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                  value={config.copybookVariant}
-                  onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}
-                >
+                <Select value={config.copybookVariant} onChange={(e) => setConfig((prev) => ({ ...prev, copybookVariant: e.target.value as CopybookVariant }))}>
                   {COPYBOOK_VARIANT_OPTIONS.map((item) => (
                     <option key={item.value} value={item.value}>{item.label}</option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
 
