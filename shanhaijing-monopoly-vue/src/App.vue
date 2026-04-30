@@ -35,9 +35,6 @@ const pawnPositions = computed(() =>
 )
 
 const recentTurnLog = computed(() => game.state.game.turnLog.slice(-30))
-const activePlayer = computed(() => game.currentPlayer)
-const ownedTileCount = computed(() => game.state.tiles.filter((tile) => tile.owner !== null).length)
-const networkSummary = computed(() => (game.online.mode ? '雲端同步中' : '本機遊玩中'))
 
 onMounted(async () => {
   await game.initialize()
@@ -53,11 +50,8 @@ onBeforeUnmount(() => {
   <div class="app-shell">
     <header class="topbar">
       <div class="topbar__title">
-        <p class="eyebrow">桃花源劇本桌遊</p>
+        <p class="eyebrow">桃花源 · 劇本桌遊</p>
         <h1>桃源萬象大富翁</h1>
-        <p class="topbar__desc">
-          以山海經為第一個劇本的可擴充大富翁遊戲，未來可延展成更多中國古代故事與地圖。
-        </p>
       </div>
 
       <div class="topbar__actions">
@@ -76,11 +70,20 @@ onBeforeUnmount(() => {
 
     <section class="hero-panel">
       <div class="hero-panel__intro">
-        <h2>多檔案、可維護、可擴充</h2>
+        <p class="eyebrow">Current Scenario</p>
+        <h2>巡遊山海，擲出一場故事棋局</h2>
         <p>
-          這個版本把原本單一 HTML 中混雜的棋盤編輯、卡片管理、遊戲流程、線上房間與登入收藏，
-          拆分為 composables、components、config、types 與 utils。
+          棋盤、卡牌、規則與線上房間都可以在同一個工作台完成。新版保留經典玩法，
+          但把視線集中在「下一步該做什麼」。
         </p>
+      </div>
+
+      <div class="hero-orbit" aria-hidden="true">
+        <span class="hero-orbit__ring"></span>
+        <span class="hero-orbit__beast">龍</span>
+        <span class="hero-orbit__dice">骰</span>
+        <span class="hero-orbit__spark hero-orbit__spark--one"></span>
+        <span class="hero-orbit__spark hero-orbit__spark--two"></span>
       </div>
 
       <div class="hero-panel__meta">
@@ -96,27 +99,17 @@ onBeforeUnmount(() => {
     </section>
 
     <section class="story-strip">
-      <article class="story-card">
-        <span class="story-card__label">當前劇本</span>
-        <strong>山海經 · 巡遊山海</strong>
-        <p>保留現有地圖與卡牌編輯，同時把底層改造成可再擴充更多古代故事劇本的前端架構。</p>
-      </article>
-      <article class="story-card">
-        <span class="story-card__label">遊戲節奏</span>
-        <strong>{{ networkSummary }}</strong>
-        <p>已佔領 {{ ownedTileCount }} 塊地，{{ game.state.game.playerCount }} 位玩家共同巡遊棋盤。</p>
-      </article>
-      <article class="story-card" v-if="activePlayer">
-        <span class="story-card__label">行動中角色</span>
-        <strong>{{ game.titleForPlayer(game.state.game.currentPlayerIndex) }}</strong>
-        <p>目前持有 {{ activePlayer.money }} 金幣，停留在第 {{ activePlayer.position + 1 }} 格。</p>
-      </article>
+      <button type="button" class="story-card story-card--button" @click="game.boardPresetPopoverOpen = true">
+        <span class="story-card__label">棋盤收藏</span>
+        <strong>儲存目前棋盤</strong>
+        <span>保存地塊、規則與卡牌設定，方便下次快速載入。</span>
+      </button>
     </section>
 
     <section class="online-panel">
       <div>
         <h3>線上對戰（Google 登入）</h3>
-        <p class="panel-note">沿用既有 `auth.peachspring.cc` 房間 API，新前端只重構呼叫方式，不改動舊版後端。</p>
+        <p class="panel-note">登入後可以建立房間、分享連結，讓不同裝置一起加入同一局。</p>
       </div>
 
       <div class="online-panel__actions">
@@ -141,7 +134,7 @@ onBeforeUnmount(() => {
           <div>
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
-            <p class="panel-note">左側保留回合節奏與玩家金幣，右側專注於劇本規則與卡片編排。</p>
+            <p class="panel-note">棋盤是主舞台；玩家、骰子與回合紀錄都放在中央，減少來回找功能。</p>
           </div>
           <div class="panel-actions">
             <button type="button" class="secondary-btn" @click="game.rulesModalOpen = true">規則</button>
@@ -249,15 +242,15 @@ onBeforeUnmount(() => {
           <div class="scenario-list">
             <article class="scenario-item">
               <strong>本局目標</strong>
-              <p>用可編輯的規則、地圖與卡片，快速拼出適合課堂或同樂的桌遊版本。</p>
+              <p>讓老師可以快速調整地塊、卡牌與規則，學生一進來就知道目前輪到誰。</p>
             </article>
             <article class="scenario-item">
-              <strong>重構方向</strong>
-              <p>Pinia 管狀態、Vitest 驗證核心規則、Playwright 做基本端對端煙霧測試。</p>
+              <strong>推薦節奏</strong>
+              <p>先決定玩家人數，再擲骰前進；遇到事件時抽卡，購買地塊時即時記錄。</p>
             </article>
             <article class="scenario-item">
-              <strong>建議流程</strong>
-              <p>先調整地塊與規則，再設定卡牌內容，最後建立房間讓不同玩家進入各自座位。</p>
+              <strong>進階編輯</strong>
+              <p>需要改劇本時，再展開規則、棋盤收藏與卡片設置，不干擾主要遊戲流程。</p>
             </article>
           </div>
         </section>
