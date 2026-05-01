@@ -106,9 +106,7 @@
     /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
     function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs) {
         var vb = '0 0 1024 1024';
-        var n = pathDs.length;
-        var density = n > 1 ? Math.max(0.72, 1 - (n - 1) * 0.045) : 1;
-        var sw = Math.max(18, Math.min(72, Math.round((fs || 36) * 1.25 * density)));
+        var sw = Math.max(16, Math.min(56, Math.round((fs || 36) * 0.95)));
         var strokeColor;
         var strokeOpacity = '0.94';
         if (hongMode) {
@@ -137,7 +135,7 @@
             vb +
             '" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
-            '<g transform="translate(512,512) scale(0.9,-0.9) translate(-512,-512)">' +
+            '<g transform="translate(512,512) scale(0.94,-0.94) translate(-512,-512)">' +
             parts +
             '</g>' +
             '</svg>'
@@ -184,7 +182,7 @@
             var ch = chars[ci];
             var data = await fetchHanziWriterData(ch);
             var strokes = data.strokes;
-            var cells = [{ kind: 'ref', ch: ch, total: strokes.length }];
+            var cells = [{ kind: 'ref', ch: ch, total: strokes.length, pathDs: strokes }];
             for (var si = 0; si < strokes.length; si++) {
                 cells.push({
                     kind: 'stroke',
@@ -411,13 +409,12 @@
                         if (item.kind === 'blank') {
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            if (hongMode) {
-                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
-                            } else if (lightPinkHongMode) {
-                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
-                            } else {
-                                innerSp.textContent = item.ch;
-                            }
+                            innerSp.innerHTML = buildStrokePathsSvg(
+                                item.pathDs || [],
+                                hongMode,
+                                lightPinkHongMode,
+                                fs
+                            );
                         } else if (item.kind === 'stroke') {
                             innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
