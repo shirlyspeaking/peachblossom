@@ -104,12 +104,17 @@
     }
 
     /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
-    function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs) {
+    function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs, variant) {
         var vb = '0 0 1024 1024';
         var sw = Math.max(16, Math.min(56, Math.round((fs || 36) * 0.95)));
         var strokeColor;
         var strokeOpacity = '0.94';
-        if (hongMode) {
+        var isReference = variant === 'reference';
+        if (isReference) {
+            strokeColor = '#2f2a28';
+            strokeOpacity = '0.98';
+            sw = Math.max(16, Math.min(64, Math.round(sw * 1.08)));
+        } else if (hongMode) {
             strokeColor = 'rgb(210, 70, 88)';
         } else if (lightPinkHongMode) {
             strokeColor = 'rgb(224, 122, 158)';
@@ -135,8 +140,10 @@
             vb +
             '" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<g transform="translate(0,-34)">' +
             '<g transform="translate(512,512) scale(0.94,-0.94) translate(-512,-512)">' +
             parts +
+            '</g>' +
             '</g>' +
             '</svg>'
         );
@@ -413,14 +420,16 @@
                                 item.pathDs || [],
                                 hongMode,
                                 lightPinkHongMode,
-                                fs
+                                fs,
+                                'reference'
                             );
                         } else if (item.kind === 'stroke') {
                             innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
                                 hongMode,
                                 lightPinkHongMode,
-                                fs
+                                fs,
+                                'trace'
                             );
                         } else {
                             innerSp.innerHTML = '&nbsp;';
