@@ -24,6 +24,146 @@
             --shadow-soft: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
             --ease: cubic-bezier(0.25, 1, 0.5, 1);
         }
+        .app-layout {
+            display: flex;
+            align-items: stretch;
+            min-height: 100vh;
+        }
+        .chat-dock {
+            width: 300px;
+            flex: 0 0 300px;
+            background: color-mix(in oklch, var(--surface) 96%, transparent);
+            border-right: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            height: 100vh;
+            max-height: 100vh;
+            z-index: 50;
+            box-shadow: 4px 0 24px oklch(0.48 0.06 8 / 0.06);
+        }
+        .chat-dock-header {
+            padding: 16px 14px 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--accent-deep);
+            border-bottom: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            font-family: "Noto Serif TC", serif;
+        }
+        .chat-dock-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-soft);
+            margin-top: 6px;
+            line-height: 1.45;
+        }
+        .chat-context-bar {
+            padding: 10px 12px;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+            background: color-mix(in oklch, var(--accent-soft) 15%, var(--bg-soft) 85%);
+            border-bottom: 1px solid color-mix(in oklch, var(--line) 90%, transparent);
+            max-height: 5.2em;
+            overflow: hidden;
+            line-height: 1.45;
+        }
+        .chat-context-bar strong { color: var(--accent-deep); }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 140px;
+        }
+        .chat-bubble {
+            max-width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 75%, var(--accent-deep) 25%) 0%, var(--accent-deep) 100%);
+            color: oklch(0.99 0.01 8);
+        }
+        .chat-bubble.assistant {
+            align-self: stretch;
+            background: color-mix(in oklch, var(--surface) 92%, transparent);
+            border: 1px solid color-mix(in oklch, var(--line) 85%, transparent);
+            color: var(--text);
+        }
+        .chat-form {
+            padding: 12px;
+            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            background: color-mix(in oklch, var(--surface) 88%, transparent);
+        }
+        .chat-form textarea {
+            width: 100%;
+            min-height: 64px;
+            max-height: 140px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
+            font: inherit;
+            font-size: 0.88rem;
+            resize: vertical;
+            margin-bottom: 8px;
+        }
+        .chat-form-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .chat-send-btn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: none;
+            background: var(--accent-deep);
+            color: oklch(0.99 0.01 8);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+        .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .chat-clear-btn {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in oklch, var(--line) 80%, transparent);
+            background: transparent;
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .app-main { flex: 1; min-width: 0; }
+        .chat-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: oklch(0.2 0.02 8 / 0.38);
+            z-index: 90;
+        }
+        .chat-backdrop.show { display: block; }
+        .nav-chat-toggle { display: none; }
+        @media (max-width: 900px) {
+            .nav-chat-toggle { display: inline-flex; align-items: center; }
+            .chat-dock {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                transform: translateX(-105%);
+                transition: transform 0.25s var(--ease);
+                z-index: 100;
+                box-shadow: 8px 0 32px oklch(0.35 0.05 8 / 0.22);
+            }
+            .chat-dock.open { transform: translateX(0); }
+        }
+        @media (min-width: 901px) {
+            .chat-backdrop.show { display: none !important; }
+        }
         body {
             font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
             color: var(--text);
@@ -260,8 +400,29 @@
     </style>
 </head>
 <body>
+    <div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDock()" aria-hidden="true"></div>
+    <div class="app-layout">
+        <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
+            <div class="chat-dock-header">
+                💬 閱讀小助手
+                <div class="chat-dock-sub">DeepSeek：字詞、句意、成語、英文怎麼說等，會參考下方「目前參考」文章的摘要（若已生成 AI 精華短文也會一併納入）。</div>
+            </div>
+            <div class="chat-context-bar" id="chatContextBar">
+                <strong>目前參考：</strong><span id="chatContextTitle">載入中…</span>
+            </div>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            <form class="chat-form" id="chatForm" onsubmit="submitChat(event)">
+                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
+                <div class="chat-form-actions">
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出</button>
+                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話</button>
+                </div>
+            </form>
+        </aside>
+        <div class="app-main">
     <nav class="navbar">
         <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
+        <button type="button" class="nav-history-btn nav-chat-toggle" id="btnChatToggle" onclick="toggleChatDock()">💬 小助手</button>
         <div class="nav-actions">
             <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 悅讀歷史</button>
             <button type="button" class="nav-history-btn hidden" id="btnBackFeed" onclick="closeHistoryView()">← 返回文章列表</button>
@@ -274,7 +435,7 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要。點「普通話朗讀摘要」可聆聽；點「AI 閱讀題」會依該篇內容生成精華短文與 3 題選擇題（需後端已設定 DeepSeek API）。</p>
+            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要。左側可向 DeepSeek 小助手提問（字詞、句意、英文說法等）；點「普通話朗讀摘要」可聆聽；點「AI 閱讀題」可獲精華短文與 3 題（需已設定 API）。手機版請用導覽列「小助手」開啟對話欄。</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
@@ -300,6 +461,8 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
 
     <script>
         const SUMMARY_LENGTH = 150; // 約 150 字
@@ -307,6 +470,7 @@
         const MAX_HISTORY = 50;
         const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
         const ENJOYREAD_QUIZ_API = 'https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev';
+        const ENJOYREAD_CHAT_API = ENJOYREAD_QUIZ_API + '/chat';
         const QUIZ_CACHE_KEY = 'enjoyread-quiz-cache-v1';
 
         function getReadHistory() {
@@ -552,7 +716,7 @@
                     ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" onclick="onArticleLinkClick(${idx})">${esc(a.title)}</a>` 
                     : esc(a.title);
                 return `
-                <div class="article-card" data-idx="${idx}">
+                <div class="article-card" data-idx="${idx}" onclick="setChatContextFromCard(${idx})">
                     <div class="article-source">${esc(a.source)}</div>
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
@@ -574,9 +738,14 @@
             `;
             }).join('');
             document.getElementById('contentArea').innerHTML = html;
+            if (articles.length) {
+                if (chatContextIdx < 0 || chatContextIdx >= articles.length) chatContextIdx = 0;
+                updateChatContextDisplay();
+            }
         }
 
         function onArticleLinkClick(idx) {
+            setChatContextFromCard(idx);
             const a = articles[idx];
             if (a) addToHistory(a);
         }
@@ -630,6 +799,7 @@
         async function loadReadingQuiz(idx, regenerate) {
             const a = articles[idx];
             if (!a) return;
+            setChatContextFromCard(idx);
             const loadBtn = document.getElementById('quizLoadBtn' + idx);
             const regenBtn = document.getElementById('quizRegenBtn' + idx);
             const statusEl = document.getElementById('quizStatus' + idx);
@@ -772,6 +942,138 @@
             if (submitBtn) submitBtn.disabled = true;
         }
 
+        let chatContextIdx = 0;
+        let chatTurns = [];
+
+        function buildArticleContextForChat(idx) {
+            const a = articles[idx];
+            if (!a) {
+                return { title: '', content: '（尚無文章）' };
+            }
+            const lines = [
+                '【來源】' + (a.source || ''),
+                '【標題】' + a.title,
+                '【列表摘要】' + a.summary,
+            ];
+            const cached = getQuizCache(a);
+            if (cached && cached.summary) {
+                lines.push('【AI 精華短文】\n' + cached.summary);
+            }
+            return { title: a.title, content: lines.join('\n\n') };
+        }
+
+        function setChatContextFromCard(idx) {
+            if (typeof idx !== 'number' || idx < 0 || !articles[idx]) {
+                return;
+            }
+            chatContextIdx = idx;
+            updateChatContextDisplay();
+        }
+
+        function updateChatContextDisplay() {
+            const el = document.getElementById('chatContextTitle');
+            if (!el) return;
+            const a = articles[chatContextIdx];
+            if (!a) {
+                el.textContent = '請先載入文章列表';
+                return;
+            }
+            const short = a.title.length > 40 ? a.title.slice(0, 40) + '…' : a.title;
+            el.textContent = short + '（' + (a.source || '') + '）';
+        }
+
+        function seedChatWelcome() {
+            const box = document.getElementById('chatMessages');
+            if (!box || box.dataset.seeded === '1') {
+                return;
+            }
+            box.innerHTML = '<div class="chat-bubble assistant">你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。</div>';
+            box.dataset.seeded = '1';
+            chatTurns = [];
+        }
+
+        function appendChatBubble(role, text) {
+            const box = document.getElementById('chatMessages');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'assistant');
+            div.textContent = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function clearChat() {
+            chatTurns = [];
+            const box = document.getElementById('chatMessages');
+            if (box) {
+                box.innerHTML = '';
+                delete box.dataset.seeded;
+            }
+            seedChatWelcome();
+        }
+
+        async function submitChat(ev) {
+            ev.preventDefault();
+            const input = document.getElementById('chatInput');
+            const text = (input && input.value || '').trim();
+            if (!text) return;
+            const ctx = buildArticleContextForChat(chatContextIdx);
+            if (!ctx.content || ctx.content === '（尚無文章）') {
+                alert('請等待文章載入後再提問。');
+                return;
+            }
+
+            appendChatBubble('user', text);
+            chatTurns.push({ role: 'user', content: text });
+            if (input) input.value = '';
+
+            const btn = document.getElementById('chatSendBtn');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch(ENJOYREAD_CHAT_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        articleTitle: ctx.title,
+                        articleContent: ctx.content,
+                        messages: chatTurns,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const errText = data.error || ('HTTP ' + res.status);
+                    appendChatBubble('assistant', '抱歉，目前無法取得回覆：' + errText);
+                    chatTurns.push({ role: 'assistant', content: errText });
+                    return;
+                }
+                const answer = data.answer || data.error || '沒有取得回覆。';
+                appendChatBubble('assistant', answer);
+                chatTurns.push({ role: 'assistant', content: answer });
+            } catch (e) {
+                const msg = e && e.message ? e.message : '未知錯誤';
+                appendChatBubble('assistant', '連線失敗：' + msg);
+                chatTurns.push({ role: 'assistant', content: msg });
+            } finally {
+                if (btn) btn.disabled = false;
+                if (input) input.focus();
+            }
+        }
+
+        function toggleChatDock() {
+            const dock = document.getElementById('chatDock');
+            const back = document.getElementById('chatBackdrop');
+            if (!dock || !back) return;
+            const open = dock.classList.toggle('open');
+            back.classList.toggle('show', open);
+        }
+
+        function closeChatDock() {
+            const dock = document.getElementById('chatDock');
+            const back = document.getElementById('chatBackdrop');
+            if (dock) dock.classList.remove('open');
+            if (back) back.classList.remove('show');
+        }
+
         let articles = [];
         let currentPlayingIdx = -1;
         let currentAudio = null;
@@ -779,6 +1081,7 @@
         async function readSummary(idx) {
             const btn = document.getElementById('ttsBtn' + idx);
             if (!btn) return;
+            setChatContextFromCard(idx);
             if (currentPlayingIdx === idx) {
                 stopCurrentSpeech();
                 return;
@@ -921,6 +1224,7 @@
         }
 
         async function init() {
+            seedChatWelcome();
             await loadAndRenderArticles('正在搜集最新文章...');
         }
 
