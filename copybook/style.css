@@ -488,6 +488,13 @@ button:hover {
     background-repeat: no-repeat;
 }
 
+.field-hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.38;
+    color: var(--label-color);
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 980px) {

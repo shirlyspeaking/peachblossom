@@ -186,6 +186,77 @@
             font: inherit;
         }
         .voice-note { font-size: 0.82rem; color: var(--text-soft); }
+        .quiz-section {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+        }
+        .quiz-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .quiz-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 55%, transparent);
+            background: color-mix(in oklch, var(--surface) 94%, transparent);
+            color: var(--accent-deep);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s var(--ease), box-shadow 0.15s;
+        }
+        .quiz-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px oklch(0.5 0.08 10 / 0.1); }
+        .quiz-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .quiz-btn-primary {
+            background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 35%, var(--surface) 65%) 0%, var(--surface) 100%);
+            border-color: color-mix(in oklch, var(--accent) 40%, var(--line) 60%);
+        }
+        .quiz-status { font-size: 0.85rem; color: var(--text-soft); min-height: 1.2em; margin-bottom: 10px; }
+        .quiz-status.err { color: oklch(0.46 0.16 24); }
+        .ai-summary-block {
+            font-size: 0.92rem;
+            line-height: 1.75;
+            color: var(--text);
+            background: color-mix(in oklch, var(--accent-soft) 22%, var(--surface) 78%);
+            border: 1px solid color-mix(in oklch, var(--line) 82%, transparent);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .ai-summary-block h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 8px; }
+        .quiz-q { margin-bottom: 18px; }
+        .quiz-q-title { font-weight: 600; color: var(--accent-deep); margin-bottom: 10px; line-height: 1.5; }
+        .quiz-options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklch, var(--line) 85%, transparent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: var(--text);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .quiz-options label:hover { background: color-mix(in oklch, var(--surface) 70%, var(--accent-soft) 30%); }
+        .quiz-options label input { margin-top: 3px; flex-shrink: 0; }
+        .quiz-options label.reveal-correct { border-color: oklch(0.55 0.14 145); background: color-mix(in oklch, oklch(0.93 0.05 145) 75%, transparent); }
+        .quiz-options label.reveal-wrong { border-color: oklch(0.55 0.18 25); background: color-mix(in oklch, oklch(0.95 0.04 25) 70%, transparent); }
+        .quiz-explanation {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: color-mix(in oklch, var(--bg-soft) 88%, transparent);
+            display: none;
+        }
+        .quiz-explanation.show { display: block; }
+        .quiz-submit-row { margin-top: 8px; }
+        .quiz-score { font-weight: 600; color: var(--accent-deep); margin-top: 12px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
@@ -203,7 +274,7 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「普通話朗讀」即可聆聽。</p>
+            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要。點「普通話朗讀摘要」可聆聽；點「AI 閱讀題」會依該篇內容生成精華短文與 3 題選擇題（需後端已設定 DeepSeek API）。</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
@@ -235,6 +306,8 @@
         const READ_HISTORY_KEY = 'enjoyread-read-history';
         const MAX_HISTORY = 50;
         const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
+        const ENJOYREAD_QUIZ_API = 'https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev';
+        const QUIZ_CACHE_KEY = 'enjoyread-quiz-cache-v1';
 
         function getReadHistory() {
             try {
@@ -484,9 +557,19 @@
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
+                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
                         🔊 普通話朗讀摘要
                     </button>
+                    <div class="quiz-section">
+                        <div class="quiz-toolbar">
+                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 AI 閱讀題（3 題）</button>
+                            <button type="button" class="quiz-btn hidden" onclick="loadReadingQuiz(${idx}, true)" id="quizRegenBtn${idx}">🔄 重新出題</button>
+                        </div>
+                        <p class="quiz-status" id="quizStatus${idx}" aria-live="polite"></p>
+                        <div id="aiSummary${idx}" class="hidden"></div>
+                        <div id="quizQuestions${idx}"></div>
+                        <div id="quizScoreRow${idx}"></div>
+                    </div>
                 </div>
             `;
             }).join('');
@@ -496,6 +579,197 @@
         function onArticleLinkClick(idx) {
             const a = articles[idx];
             if (a) addToHistory(a);
+        }
+
+        function quizCacheKey(a) {
+            return (a.link || '') + '\n' + (a.title || '');
+        }
+
+        function getQuizCache(a) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                return all[quizCacheKey(a)] || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function setQuizCache(a, payload) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                all[quizCacheKey(a)] = payload;
+                sessionStorage.setItem(QUIZ_CACHE_KEY, JSON.stringify(all));
+            } catch (e) {
+                /* quota */
+            }
+        }
+
+        function clearQuizCacheEntry(a) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                delete all[quizCacheKey(a)];
+                sessionStorage.setItem(QUIZ_CACHE_KEY, JSON.stringify(all));
+            } catch (e) {
+                /* ignore */
+            }
+        }
+
+        function stableGenId(a) {
+            const s = quizCacheKey(a);
+            let h = 0;
+            for (let i = 0; i < s.length; i++) {
+                h = ((h << 5) - h) + s.charCodeAt(i);
+                h |= 0;
+            }
+            return 'g' + String(h);
+        }
+
+        async function loadReadingQuiz(idx, regenerate) {
+            const a = articles[idx];
+            if (!a) return;
+            const loadBtn = document.getElementById('quizLoadBtn' + idx);
+            const regenBtn = document.getElementById('quizRegenBtn' + idx);
+            const statusEl = document.getElementById('quizStatus' + idx);
+            const aiBox = document.getElementById('aiSummary' + idx);
+            const qBox = document.getElementById('quizQuestions' + idx);
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+
+            const setBusy = (busy) => {
+                if (loadBtn) loadBtn.disabled = busy;
+                if (regenBtn) regenBtn.disabled = busy;
+            };
+
+            if (!regenerate) {
+                const cached = getQuizCache(a);
+                if (cached && cached.questions && cached.questions.length >= 3) {
+                    statusEl.textContent = '已從本機載入本題組。';
+                    statusEl.classList.remove('err');
+                    aiBox.classList.remove('hidden');
+                    regenBtn.classList.remove('hidden');
+                    renderQuizUi(idx, cached);
+                    return;
+                }
+            } else {
+                clearQuizCacheEntry(a);
+            }
+
+            statusEl.classList.remove('err');
+            statusEl.textContent = regenerate ? 'AI 正在重新出題…' : 'AI 正在生成精華短文與題目…';
+            setBusy(true);
+            aiBox.classList.add('hidden');
+            aiBox.innerHTML = '';
+            qBox.innerHTML = '';
+            scoreRow.innerHTML = '';
+
+            try {
+                const res = await fetch(ENJOYREAD_QUIZ_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: a.title,
+                        summary: a.summary,
+                        regenerate: Boolean(regenerate),
+                        generationId: regenerate
+                            ? ('r' + Date.now() + Math.random().toString(36).slice(2))
+                            : stableGenId(a),
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.error || ('HTTP ' + res.status));
+                }
+                if (data.error && (!data.questions || data.questions.length < 3)) {
+                    throw new Error(data.error);
+                }
+                if (!data.questions || data.questions.length < 3) {
+                    throw new Error('題目資料不完整，請稍後再試。');
+                }
+                setQuizCache(a, {
+                    summary: data.summary || a.summary,
+                    questions: data.questions,
+                    provider: data.provider,
+                });
+                statusEl.textContent = '已完成。請閱讀上方精華短文並作答。';
+                regenBtn.classList.remove('hidden');
+                renderQuizUi(idx, data);
+            } catch (e) {
+                statusEl.textContent = '無法取得題目：' + (e.message || '未知錯誤');
+                statusEl.classList.add('err');
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        function renderQuizUi(idx, data) {
+            const aiBox = document.getElementById('aiSummary' + idx);
+            const qBox = document.getElementById('quizQuestions' + idx);
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+
+            const aiText = (data.summary || '').trim();
+            if (aiText) {
+                aiBox.innerHTML = '<div class="ai-summary-block"><h4>AI 精華短文</h4><p>' + esc(aiText).replace(/\n/g, '<br>') + '</p></div>';
+                aiBox.classList.remove('hidden');
+            } else {
+                aiBox.classList.add('hidden');
+            }
+
+            scoreRow.innerHTML = '';
+            const qs = data.questions || [];
+            qBox.innerHTML = qs.map((q, qIdx) => {
+                const opts = (q.options || []).slice(0, 4);
+                const optHtml = opts.map((opt, oIdx) => `
+            <label class="quiz-opt-label" data-o="${oIdx}">
+                <input type="radio" name="quiz_${idx}_${qIdx}" value="${oIdx}" />
+                <span>${esc(opt)}</span>
+            </label>
+        `).join('');
+                return `
+            <div class="quiz-q" id="quizQ_${idx}_${qIdx}">
+                <div class="quiz-q-title">${qIdx + 1}. ${esc(q.question || '')}</div>
+                <div class="quiz-options">${optHtml}</div>
+                <div class="quiz-explanation" id="quizExpl_${idx}_${qIdx}">${esc(q.explanation || '')}</div>
+            </div>
+        `;
+            }).join('');
+
+            qBox.innerHTML += `<div class="quiz-submit-row"><button type="button" class="quiz-btn quiz-btn-primary" onclick="submitReadingQuiz(${idx})">✓ 交卷對答案</button></div>`;
+        }
+
+        function submitReadingQuiz(idx) {
+            const a = articles[idx];
+            if (!a) return;
+            const cached = getQuizCache(a);
+            const qs = cached && cached.questions ? cached.questions : [];
+            if (!qs.length) return;
+
+            let correct = 0;
+            qs.forEach((q, qIdx) => {
+                const sel = document.querySelector(`input[name="quiz_${idx}_${qIdx}"]:checked`);
+                const picked = sel ? Number(sel.value) : -1;
+                if (picked === q.correctIndex) correct += 1;
+
+                const wrap = document.getElementById('quizQ_' + idx + '_' + qIdx);
+                if (!wrap) return;
+                const labels = wrap.querySelectorAll('.quiz-opt-label');
+                labels.forEach((lb) => {
+                    const o = Number(lb.getAttribute('data-o'));
+                    lb.classList.remove('reveal-correct', 'reveal-wrong');
+                    if (o === q.correctIndex) lb.classList.add('reveal-correct');
+                    if (picked === o && o !== q.correctIndex) lb.classList.add('reveal-wrong');
+                });
+                const expl = document.getElementById('quizExpl_' + idx + '_' + qIdx);
+                if (expl) expl.classList.add('show');
+            });
+
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+            const pct = Math.round((correct / qs.length) * 100);
+            scoreRow.innerHTML = '<div class="quiz-score">得分：' + correct + ' / ' + qs.length + '（' + pct + '%）</div>';
+
+            const submitBtn = document.querySelector('#quizQuestions' + idx + ' .quiz-submit-row button');
+            if (submitBtn) submitBtn.disabled = true;
         }
 
         let articles = [];
