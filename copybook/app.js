@@ -107,7 +107,9 @@
     /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
     function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs) {
         var vb = '0 0 1024 1024';
-        var sw = Math.max(22, Math.min(72, Math.round((fs || 36) * 1.25)));
+        var n = pathDs.length;
+        var density = n > 1 ? Math.max(0.72, 1 - (n - 1) * 0.045) : 1;
+        var sw = Math.max(18, Math.min(72, Math.round((fs || 36) * 1.25 * density)));
         var strokeColor;
         var strokeOpacity = '0.94';
         if (hongMode) {
@@ -239,7 +241,7 @@
                     ch: ch,
                     index: si + 1,
                     total: strokes.length,
-                    pathDs: [strokes[si]]
+                    pathDs: strokes.slice(0, si + 1)
                 });
             }
             if (ci < chars.length - 1) {
