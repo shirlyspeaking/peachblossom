@@ -163,6 +163,29 @@
         }
         .refresh-articles-btn:hover { transform: translateY(-1px); opacity: 0.96; }
         .refresh-articles-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: -14px 0 28px;
+            padding: 12px 14px;
+            border: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            border-radius: 16px;
+            background: color-mix(in oklch, var(--surface) 90%, transparent);
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+        .voice-controls select {
+            min-width: 180px;
+            padding: 8px 12px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 50%, transparent);
+            border-radius: 999px;
+            background: color-mix(in oklch, var(--surface) 96%, transparent);
+            color: var(--text);
+            font: inherit;
+        }
+        .voice-note { font-size: 0.82rem; color: var(--text-soft); }
     </style>
 </head>
 <body>
@@ -180,7 +203,17 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
+            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「普通話朗讀」即可聆聽。</p>
+            <div class="voice-controls">
+                <label for="mandarinVoice">普通話音色</label>
+                <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
+                    <option value="auto">自動選擇普通話</option>
+                    <option value="female">女聲（普通話）</option>
+                    <option value="male">男聲（普通話）</option>
+                    <option value="young">年輕聲線（普通話）</option>
+                </select>
+                <span class="voice-note">若裝置沒有指定音色，系統會自動選擇可用的普通話聲音。</span>
+            </div>
         </div>
 
         <div id="historyHeader" class="hidden">
@@ -449,8 +482,8 @@
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 語音朗讀摘要" data-stop-text="⏸ 停止朗讀">
-                        🔊 語音朗讀摘要
+                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
+                        🔊 普通話朗讀摘要
                     </button>
                 </div>
             `;
@@ -476,7 +509,7 @@
                 speechSynthesis.cancel();
                 currentPlayingIdx = -1;
                 btn.classList.remove('playing');
-                btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要';
+                btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
                 return;
             }
             speechSynthesis.cancel();
@@ -488,17 +521,49 @@
 
             document.querySelectorAll('.tts-btn').forEach(b => {
                 b.classList.remove('playing');
-                b.textContent = b.dataset.defaultText || '🔊 語音朗讀摘要';
+                b.textContent = b.dataset.defaultText || '🔊 普通話朗讀摘要';
             });
             btn.classList.add('playing');
             btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
 
             const u = new SpeechSynthesisUtterance(summary);
-            u.lang = 'zh-TW';
+            u.lang = 'zh-CN';
+            const voice = pickMandarinVoice();
+            if (voice) u.voice = voice;
             u.rate = 1;
-            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
-            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
+            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要'; };
+            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要'; };
             speechSynthesis.speak(u);
+        }
+
+        function getVoicePreference() {
+            return document.getElementById('mandarinVoice')?.value || 'auto';
+        }
+
+        function pickMandarinVoice() {
+            const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+            if (!voices.length) return null;
+            const preference = getVoicePreference();
+            const mandarinVoices = voices.filter((voice) => {
+                const lang = (voice.lang || '').toLowerCase();
+                const name = (voice.name || '').toLowerCase();
+                return lang.includes('zh-cn') || lang.includes('zh-hans') || name.includes('mandarin') || name.includes('普通话') || name.includes('xiaoxiao') || name.includes('yun');
+            });
+
+            const list = mandarinVoices.length ? mandarinVoices : voices;
+            const matchers = {
+                female: ['xiaoxiao', 'xiaoyi', 'huihui', 'female', 'woman', '女'],
+                male: ['yunxi', 'yunyang', 'yunjian', 'male', 'man', '男'],
+                young: ['yunxi', 'xiaoyi', 'xiaoxiao', 'young', 'child', '少年'],
+                auto: ['xiaoxiao', 'yunxi', 'mandarin', '普通话'],
+            }[preference] || [];
+
+            const preferred = list.find((voice) => {
+                const text = `${voice.name} ${voice.lang}`.toLowerCase();
+                return matchers.some((matcher) => text.includes(matcher));
+            });
+
+            return preferred || mandarinVoices[0] || null;
         }
 
         function showLoadingMessage(msg) {

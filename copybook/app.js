@@ -131,7 +131,13 @@
                     strokeColor +
                     '" fill-opacity="' +
                     strokeOpacity +
-                    '" stroke="none"/>';
+                    '" fill-rule="nonzero" stroke="' +
+                    strokeColor +
+                    '" stroke-opacity="' +
+                    strokeOpacity +
+                    '" stroke-width="' +
+                    Math.max(10, Math.round(sw * 0.45)) +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
             } else {
                 parts +=
                     '<path d="' +
@@ -150,7 +156,7 @@
             vb +
             '" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
-            '<g transform="translate(0,-96)">' +
+            '<g transform="translate(0,-116)">' +
             '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
             parts +
             '</g>' +
