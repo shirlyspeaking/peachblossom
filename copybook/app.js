@@ -27,9 +27,9 @@
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
+    var btnGenerate = document.getElementById('btnGenerate');
     var autoStrokeChars = document.getElementById('autoStrokeChars');
     var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
-    var strokeSourceInput = document.getElementById('strokeSourceInput');
     var fontPreset = document.getElementById('fontPreset');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
@@ -42,7 +42,6 @@
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
-    var btnBuildStrokeCopybook = document.getElementById('btnBuildStrokeCopybook');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
 
     var debounceTimer = null;
@@ -147,58 +146,6 @@
         return fontPreset.value.trim();
     }
 
-    function splitCsvLine(line) {
-        var cells = [];
-        var buf = '';
-        var inQuotes = false;
-        for (var i = 0; i < line.length; i++) {
-            var ch = line[i];
-            if (ch === '"') {
-                if (inQuotes && line[i + 1] === '"') {
-                    buf += '"';
-                    i += 1;
-                } else {
-                    inQuotes = !inQuotes;
-                }
-            } else if (ch === ',' && !inQuotes) {
-                cells.push(buf.trim());
-                buf = '';
-            } else {
-                buf += ch;
-            }
-        }
-        cells.push(buf.trim());
-        return cells;
-    }
-
-    function parseStrokeSourceCsv(text) {
-        var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-        if (lines.length < 2) return '';
-        if (lines[0].indexOf(',') < 0) return '';
-
-        var headers = splitCsvLine(lines[0]).map(function (h) { return h.toLowerCase(); });
-        var hanziIdx = -1;
-        var strokeIdx = -1;
-        for (var i = 0; i < headers.length; i++) {
-            if (hanziIdx < 0 && /^(hanzi|character|char|字|文字)$/.test(headers[i])) hanziIdx = i;
-            if (strokeIdx < 0 && /^(stroke_order|strokes|stroke|筆順|笔顺|筆畫|笔画)$/.test(headers[i])) strokeIdx = i;
-        }
-        if (hanziIdx < 0 || strokeIdx < 0) return '';
-
-        var out = [];
-        for (var li = 1; li < lines.length; li++) {
-            var cells = splitCsvLine(lines[li]);
-            var hanzi = (cells[hanziIdx] || '').trim();
-            var strokes = (cells[strokeIdx] || '').trim();
-            if (!hanzi || !strokes) continue;
-            strokes = strokes.replace(/[，、]/g, ' ').replace(/\s+/g, ' ').trim();
-            out.push(hanzi);
-            out.push(strokes);
-            out.push('');
-        }
-        return out.join('\n').trim();
-    }
-
     function uniqHanziChars(text) {
         var seen = Object.create(null);
         var out = [];
@@ -229,14 +176,15 @@
     }
 
     async function buildStrokePathLayoutRows(chars) {
-        var rows = [];
+        var blocks = [];
+        var totalCells = 0;
         for (var ci = 0; ci < chars.length; ci++) {
             var ch = chars[ci];
             var data = await fetchHanziWriterData(ch);
             var strokes = data.strokes;
-            rows.push({ kind: 'ref', ch: ch, total: strokes.length });
+            var cells = [{ kind: 'ref', ch: ch, total: strokes.length }];
             for (var si = 0; si < strokes.length; si++) {
-                rows.push({
+                cells.push({
                     kind: 'stroke',
                     ch: ch,
                     index: si + 1,
@@ -244,11 +192,28 @@
                     pathDs: strokes.slice(0, si + 1)
                 });
             }
-            if (ci < chars.length - 1) {
-                rows.push({ kind: 'blank' });
-            }
+            totalCells += cells.length;
+            blocks.push(cells);
         }
-        return rows;
+
+        var avgCells = blocks.length ? totalCells / blocks.length : 1;
+        var targetGridPerRow = 18;
+        var charsPerRow = Math.max(1, Math.min(6, Math.floor(targetGridPerRow / avgCells) || 1));
+        var rows = [];
+        var maxCols = 1;
+
+        for (var i = 0; i < blocks.length; i += charsPerRow) {
+            var rowBlocks = blocks.slice(i, i + charsPerRow);
+            var rowCells = [];
+            for (var bi = 0; bi < rowBlocks.length; bi++) {
+                if (bi > 0) rowCells.push({ kind: 'blank' });
+                rowCells = rowCells.concat(rowBlocks[bi]);
+            }
+            if (rowCells.length > maxCols) maxCols = rowCells.length;
+            rows.push(rowCells);
+        }
+
+        return { rows: rows, cpl: maxCols, charsPerRow: charsPerRow };
     }
 
     function applyStrokePathDefaults() {
@@ -269,58 +234,6 @@
         return pages;
     }
 
-    function parseStrokeSource(raw) {
-        var text = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-        if (!text) return '';
-        var csvParsed = parseStrokeSourceCsv(text);
-        if (csvParsed) return csvParsed;
-        var lines = text.split('\n');
-        var out = [];
-
-        for (var i = 0; i < lines.length; i++) {
-            var row = lines[i].trim();
-            if (!row) continue;
-            var sep = row.indexOf(':');
-            if (sep < 0) sep = row.indexOf('：');
-            if (sep < 0) continue;
-
-            var hanzi = row.slice(0, sep).trim();
-            var strokes = row.slice(sep + 1).trim();
-            if (!hanzi || !strokes) continue;
-
-            strokes = strokes
-                .replace(/[，、]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-            out.push(hanzi);
-            out.push(strokes);
-            out.push('');
-        }
-
-        return out.join('\n').trim();
-    }
-
-    function applyStrokeDefaults() {
-        if (copyStyle) copyStyle.value = 'lightPinkHong';
-        if (gridType) gridType.value = 'tian';
-        if (fontSize) fontSize.value = '34';
-        if (lineHeight) lineHeight.value = '1.2';
-        if (charsPerLine) charsPerLine.value = '8';
-        if (linesPerPage) linesPerPage.value = '10';
-    }
-
-    function onBuildStrokeCopybook() {
-        clearStrokePathLayout();
-        var transformed = parseStrokeSource(strokeSourceInput ? strokeSourceInput.value : '');
-        if (!transformed) {
-            window.alert('請輸入筆順資料。支援格式：\n1) 永: 點、橫、豎、鉤\n2) CSV（含 hanzi/字 與 stroke_order/筆順 欄）');
-            return;
-        }
-        textInput.value = transformed;
-        applyStrokeDefaults();
-        renderNow();
-    }
-
     async function onAutoStrokeFromChars() {
         var chars = uniqHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
         if (!chars.length) {
@@ -329,11 +242,11 @@
         }
         if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
         try {
-            var rows = await buildStrokePathLayoutRows(chars);
-            strokePathLayout = { rows: rows, cpl: 1 };
+            var layout = await buildStrokePathLayoutRows(chars);
+            strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
             if (textInput) textInput.value = '';
-            if (strokeSourceInput) strokeSourceInput.value = '';
             applyStrokePathDefaults();
+            if (charsPerLine) charsPerLine.value = String(layout.charsPerRow);
             renderNow();
         } catch (e) {
             window.alert('筆畫拆解失敗：' + (e.message || String(e)));
@@ -473,46 +386,49 @@
 
                 if (useStrokePaths) {
                     var layoutCpl = strokePathLayout.cpl || 1;
-                    var item = pageRows[r];
+                    var rowCells = pageRows[r] || [];
                     grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
                     grid.style.gridTemplateRows = cellSize + 'px';
 
-                    var cell = document.createElement('div');
-                    cell.className = cellClassForGrid(gtype);
-                    cell.style.width = cellSize + 'px';
-                    cell.style.minWidth = cellSize + 'px';
-                    cell.style.height = cellSize + 'px';
-                    cell.style.minHeight = cellSize + 'px';
-                    if (layoutCpl - 1 === 0) cell.classList.add('col-last');
-                    if (r === pageRows.length - 1) cell.classList.add('row-last');
+                    for (var sc = 0; sc < layoutCpl; sc++) {
+                        var item = rowCells[sc] || { kind: 'blank' };
+                        var cell = document.createElement('div');
+                        cell.className = cellClassForGrid(gtype);
+                        cell.style.width = cellSize + 'px';
+                        cell.style.minWidth = cellSize + 'px';
+                        cell.style.height = cellSize + 'px';
+                        cell.style.minHeight = cellSize + 'px';
+                        if (sc === layoutCpl - 1) cell.classList.add('col-last');
+                        if (r === pageRows.length - 1) cell.classList.add('row-last');
 
-                    var innerSp = document.createElement('span');
-                    innerSp.className = 'cell-inner cell-inner--hong';
-                    innerSp.style.fontSize = fs + 'px';
-                    innerSp.style.lineHeight = String(lh);
-                    innerSp.style.fontFamily = font;
-                    if (item.kind === 'blank') {
-                        innerSp.innerHTML = '&nbsp;';
-                    } else if (item.kind === 'ref') {
-                        if (hongMode) {
-                            innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
-                        } else if (lightPinkHongMode) {
-                            innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
+                        var innerSp = document.createElement('span');
+                        innerSp.className = 'cell-inner cell-inner--hong';
+                        innerSp.style.fontSize = fs + 'px';
+                        innerSp.style.lineHeight = String(lh);
+                        innerSp.style.fontFamily = font;
+                        if (item.kind === 'blank') {
+                            innerSp.innerHTML = '&nbsp;';
+                        } else if (item.kind === 'ref') {
+                            if (hongMode) {
+                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
+                            } else if (lightPinkHongMode) {
+                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
+                            } else {
+                                innerSp.textContent = item.ch;
+                            }
+                        } else if (item.kind === 'stroke') {
+                            innerSp.innerHTML = buildStrokePathsSvg(
+                                item.pathDs,
+                                hongMode,
+                                lightPinkHongMode,
+                                fs
+                            );
                         } else {
-                            innerSp.textContent = item.ch;
+                            innerSp.innerHTML = '&nbsp;';
                         }
-                    } else if (item.kind === 'stroke') {
-                        innerSp.innerHTML = buildStrokePathsSvg(
-                            item.pathDs,
-                            hongMode,
-                            lightPinkHongMode,
-                            fs
-                        );
-                    } else {
-                        innerSp.innerHTML = '&nbsp;';
+                        cell.appendChild(innerSp);
+                        grid.appendChild(cell);
                     }
-                    cell.appendChild(innerSp);
-                    grid.appendChild(cell);
                 } else {
                     var rowStr = pageRows[r];
                     var chars = padRowToLength(rowStr, cpl);
@@ -735,10 +651,13 @@
         });
         textInput.addEventListener('change', scheduleRender);
     }
+    if (btnGenerate) btnGenerate.addEventListener('click', function () {
+        clearStrokePathLayout();
+        renderNow();
+    });
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
-    if (btnBuildStrokeCopybook) btnBuildStrokeCopybook.addEventListener('click', onBuildStrokeCopybook);
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 

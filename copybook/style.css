@@ -269,8 +269,11 @@ textarea {
     min-height: 160px;
 }
 
-#strokeSourceInput {
-    min-height: 120px;
+.btn-generate {
+    margin-top: 8px;
+    width: 100%;
+    background: linear-gradient(135deg, #e03b4f, #b82035);
+    color: #fff;
 }
 
 .btn-secondary {
