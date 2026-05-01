@@ -103,6 +103,23 @@
         );
     }
 
+    function buildReferenceFontSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(80, Math.max(46, Math.round(54 + (fs - 24) * 0.72)));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<text x="50" y="52" font-size="' +
+            fontSizeU +
+            '" font-family="' +
+            ff +
+            '" text-anchor="middle" dominant-baseline="middle" fill="#2f2a28">' +
+            body +
+            '</text></svg>'
+        );
+    }
+
     /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
     function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs, variant) {
         var vb = '0 0 1024 1024';
@@ -432,13 +449,7 @@
                         if (item.kind === 'blank') {
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.innerHTML = buildStrokePathsSvg(
-                                item.pathDs || [],
-                                hongMode,
-                                lightPinkHongMode,
-                                fs,
-                                'reference'
-                            );
+                            innerSp.innerHTML = buildReferenceFontSvgChar(item.ch, font, fs);
                         } else if (item.kind === 'stroke') {
                             innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
