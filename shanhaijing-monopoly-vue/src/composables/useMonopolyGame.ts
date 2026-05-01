@@ -14,12 +14,15 @@ import {
   buildDefaultPlayers,
   deepClone,
   defaultState,
+  getTileTollFee,
   initialTurnLogLine,
   isChanceTile,
   isFateTile,
   isPurchasableLandTile,
-  memberLabel,
   normalizeState,
+  playerAnimal,
+  playerStatusText,
+  playerTitle,
   readBoardPresetsRoot,
   roomsBaseUrl,
 } from '../utils/game'
@@ -119,11 +122,7 @@ export function useMonopolyGame() {
   const currentTurnLabel = computed(() => {
     const turnIndex = state.value.game.currentPlayerIndex
     const member = memberAtPlayerIndex(turnIndex)
-    let label = `輪到：玩家 ${turnIndex + 1}`
-    const suffix = memberLabel(member?.name, member?.email)
-    if (suffix) {
-      label += `（${suffix}）`
-    }
+    let label = `現在出發：${playerTitle(turnIndex, member)}`
     label += `（共 ${state.value.game.playerCount} 人）`
     if (online.mode && !lobbyFull.value) {
       label += ' — 等待玩家加入中，尚不可擲骰'
@@ -185,6 +184,24 @@ export function useMonopolyGame() {
 
   function memberAtPlayerIndex(index: number) {
     return (online.meta?.members ?? []).find((member) => member.playerIndex === index) ?? null
+  }
+
+  function titleForPlayer(index: number) {
+    return playerTitle(index, online.mode ? memberAtPlayerIndex(index) : null)
+  }
+
+  function statusForPlayer(index: number) {
+    const member = online.mode ? memberAtPlayerIndex(index) : null
+    if (online.mode && !member) {
+      return '等待加入'
+    }
+    return playerStatusText(index, member)
+  }
+
+  function canEditPlayerMoney(index: number) {
+    if (!online.mode) return true
+    const member = memberAtPlayerIndex(index)
+    return !!(member?.userId && authState.user?.id && member.userId === authState.user.id)
   }
 
   function buildServerSnapshot(): ServerSnapshot {
@@ -308,6 +325,10 @@ export function useMonopolyGame() {
 
   function updatePlayerMoney(index: number, value: number) {
     if (!state.value.game.players[index]) return
+    if (!canEditPlayerMoney(index)) {
+      showToast('線上模式只能調整自己的金幣')
+      return
+    }
     state.value.game.players[index].money = Math.max(0, Math.floor(value || 0))
     debouncedSave()
   }
@@ -334,7 +355,7 @@ export function useMonopolyGame() {
         tile.owner = null
       }
     })
-    pushTurnLog(`人數設為 ${count} 人：棋子回到起點，資金重置為每位 ${DEFAULT_START_MONEY}。`)
+    pushTurnLog(`這局改成 ${count} 隻靈獸，大家回到起點並拿回 ${DEFAULT_START_MONEY} 金幣。`)
     saveState()
     showToast('已更新遊玩人數')
   }
@@ -569,9 +590,9 @@ export function useMonopolyGame() {
     player.position = 0
     if (grantPass) {
       player.money += PASS_GO_BONUS
-      pushTurnLog(`玩家 ${playerId + 1} 依「${title || '卡片'}」效果移至起點，並領取經過起點 ${PASS_GO_BONUS} 金幣。`)
+      pushTurnLog(`${titleForPlayer(playerId)} 依「${title || '卡片'}」效果移至起點，並領取經過起點 ${PASS_GO_BONUS} 金幣。`)
     } else {
-      pushTurnLog(`玩家 ${playerId + 1} 依「${title || '卡片'}」效果立刻移至起點（不領經過起點獎勵）。`)
+      pushTurnLog(`${titleForPlayer(playerId)} 依「${title || '卡片'}」效果立刻移至起點（不領經過起點獎勵）。`)
     }
 
     if (online.mode) {
@@ -584,7 +605,7 @@ export function useMonopolyGame() {
 
   function advanceTurnAfterLand(playerId: number) {
     state.value.game.currentPlayerIndex = (playerId + 1) % state.value.game.playerCount
-    pushTurnLog(`下一位：玩家 ${state.value.game.currentPlayerIndex + 1}。`)
+    pushTurnLog(`下一位出發：${titleForPlayer(state.value.game.currentPlayerIndex)}。`)
     if (online.mode) {
       void pushOnlineSnapshot()
     } else {
@@ -592,10 +613,43 @@ export function useMonopolyGame() {
     }
   }
 
+  function settleOwnedLandToll(playerId: number, tileIndex: number) {
+    const tile = state.value.tiles[tileIndex]
+    if (!tile) return false
+
+    const owner = Number.parseInt(String(tile.owner), 10)
+    if (Number.isNaN(owner) || owner < 0 || owner >= state.value.game.players.length || owner === playerId) {
+      return false
+    }
+
+    const traveler = state.value.game.players[playerId]
+    const landlord = state.value.game.players[owner]
+    const fee = getTileTollFee(tile)
+    const paid = Math.max(0, Math.min(traveler.money, fee))
+    if (paid > 0) {
+      traveler.money -= paid
+      landlord.money += paid
+    }
+
+    if (paid < fee) {
+      pushTurnLog(
+        `${titleForPlayer(playerId)} 走到「${tile.label}」，應付過路費 ${fee}，但只剩 ${paid}；已全數付給 ${titleForPlayer(owner)}。`,
+      )
+    } else {
+      pushTurnLog(`${titleForPlayer(playerId)} 走到「${tile.label}」，支付過路費 ${paid} 給 ${titleForPlayer(owner)}。`)
+    }
+    return true
+  }
+
   function tryPurchaseOrFinish(playerId: number, tileIndex: number) {
     const tile = state.value.tiles[tileIndex]
     const player = state.value.game.players[playerId]
     const unowned = tile.owner == null
+
+    if (settleOwnedLandToll(playerId, tileIndex)) {
+      advanceTurnAfterLand(playerId)
+      return
+    }
 
     if (!isPurchasableLandTile(tile) || !unowned) {
       advanceTurnAfterLand(playerId)
@@ -607,12 +661,12 @@ export function useMonopolyGame() {
       (accepted) => {
         if (accepted) {
           if (player.money < LAND_PRICE) {
-            pushTurnLog(`玩家 ${playerId + 1} 金幣不足，無法購買「${tile.label}」。`)
+            pushTurnLog(`${titleForPlayer(playerId)} 金幣不夠，沒辦法買下「${tile.label}」。`)
             showToast('金幣不足')
           } else {
             player.money -= LAND_PRICE
             tile.owner = playerId
-            pushTurnLog(`玩家 ${playerId + 1} 以 ${LAND_PRICE} 金幣購得「${tile.label}」。`)
+            pushTurnLog(`${titleForPlayer(playerId)} 用 ${LAND_PRICE} 金幣買下「${tile.label}」。`)
             if (online.mode) {
               scheduleOnlinePushAfterEdit()
             } else {
@@ -620,7 +674,7 @@ export function useMonopolyGame() {
             }
           }
         } else {
-          pushTurnLog(`玩家 ${playerId + 1} 放棄購買「${tile.label}」。`)
+          pushTurnLog(`${titleForPlayer(playerId)} 先不買「${tile.label}」。`)
         }
         advanceTurnAfterLand(playerId)
       },
@@ -635,8 +689,8 @@ export function useMonopolyGame() {
       const picked = pickRandomCard('chance')
       pushTurnLog(
         picked
-          ? `玩家 ${playerId + 1} 抽到機會卡：「${picked.title.trim()}」— ${picked.content.trim()}`
-          : `玩家 ${playerId + 1} 停在機會格，但牌堆尚無卡片。`,
+          ? `${titleForPlayer(playerId)} 抽到機會卡：「${picked.title.trim()}」— ${picked.content.trim()}`
+          : `${titleForPlayer(playerId)} 停在機會格，但牌堆還沒有卡片。`,
       )
       showMedalCard(
         'chance',
@@ -656,8 +710,8 @@ export function useMonopolyGame() {
       const picked = pickRandomCard('fate')
       pushTurnLog(
         picked
-          ? `玩家 ${playerId + 1} 抽到命運卡：「${picked.title.trim()}」— ${picked.content.trim()}`
-          : `玩家 ${playerId + 1} 停在命運格，但牌堆尚無卡片。`,
+          ? `${titleForPlayer(playerId)} 抽到命運卡：「${picked.title.trim()}」— ${picked.content.trim()}`
+          : `${titleForPlayer(playerId)} 停在命運格，但牌堆還沒有卡片。`,
       )
       showMedalCard(
         'fate',
@@ -685,7 +739,7 @@ export function useMonopolyGame() {
       }
       const member = memberAtPlayerIndex(state.value.game.currentPlayerIndex)
       if (!member || !authState.user?.id || member.userId !== authState.user.id) {
-        showToast(`目前輪到座位「玩家 ${state.value.game.currentPlayerIndex + 1}」，請由該位玩家操作`)
+        showToast(`現在輪到 ${titleForPlayer(state.value.game.currentPlayerIndex)} 行動`)
         return
       }
     }
@@ -714,7 +768,7 @@ export function useMonopolyGame() {
       }
 
       const tileName = state.value.tiles[player.position]?.label ?? '？'
-      let message = `玩家 ${playerId + 1} 擲出 ${roll} 點 →「${tileName}」（第 ${player.position + 1} 格）`
+      let message = `${titleForPlayer(playerId)} 擲出 ${roll} 點，走到「${tileName}」`
       if (crossedGo) {
         message += `；經過起點 +${PASS_GO_BONUS}`
       }
@@ -854,6 +908,10 @@ export function useMonopolyGame() {
     lobbyFull,
     initialize,
     memberAtPlayerIndex,
+    playerAnimal,
+    titleForPlayer,
+    statusForPlayer,
+    canEditPlayerMoney,
     syncRulesText,
     updateTileField,
     updatePlayerMoney,

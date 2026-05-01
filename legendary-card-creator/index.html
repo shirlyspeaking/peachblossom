@@ -372,91 +372,92 @@
   <div class="page">
     <div class="topbar">
       <div>
-        <small style="color:#fcd34d;letter-spacing:.12em;">Legendary Card Creator · 傳奇卡牌工坊</small>
-        <h1>收藏級電子卡牌工坊</h1>
+        <small style="color:#fcd34d;letter-spacing:.12em;" data-i18n="brand">Legendary Card Creator · 傳奇卡牌工坊</small>
+        <h1 data-i18n="pageTitle">收藏級電子卡牌工坊</h1>
       </div>
       <div class="btns">
-        <a class="btn" href="../index.html">返回桃花源</a>
-        <button class="btn" id="btnFlip">翻到背面</button>
-        <button class="btn primary" id="btnExport">匯出 PNG</button>
+        <button class="btn" id="btnLocale" type="button">EN</button>
+        <a class="btn" href="../index.html" data-i18n="backToHome">返回桃花源</a>
+        <button class="btn" id="btnFlip" type="button">翻到背面</button>
+        <button class="btn primary" id="btnExport" type="button">匯出 PNG</button>
       </div>
     </div>
 
     <div class="layout">
       <aside class="panel">
         <div class="tabs">
-          <button class="tab active" data-tab="front">正面</button>
-          <button class="tab" data-tab="back">背面</button>
+          <button class="tab active" data-tab="front" data-i18n="tabFront">正面</button>
+          <button class="tab" data-tab="back" data-i18n="tabBack">背面</button>
         </div>
 
         <section class="tab-content active" id="tab-front">
-          <div class="field"><label>卡牌名稱</label><input id="name" class="input" value="星焰靈狐" /></div>
-          <div class="field"><label>生命值／戰力</label><input id="hp" class="input" value="320" /></div>
-          <div class="field"><label>能力名稱</label><input id="ability" class="input" value="星光爆裂" /></div>
-          <div class="field"><label>能力敘述</label><textarea id="desc" class="textarea">引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。</textarea></div>
+          <div class="field"><label data-i18n="cardName">卡牌名稱</label><input id="name" class="input" value="星焰靈狐" /></div>
+          <div class="field"><label data-i18n="hpPower">生命值／戰力</label><input id="hp" class="input" value="320" /></div>
+          <div class="field"><label data-i18n="abilityName">能力名稱</label><input id="ability" class="input" value="星光爆裂" /></div>
+          <div class="field"><label data-i18n="abilityDescription">能力敘述</label><textarea id="desc" class="textarea">引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。</textarea></div>
           <div class="field row">
-            <div><label>繪師</label><input id="illustrator" class="input" value="張老師" /></div>
-            <div><label>卡號</label><input id="setNumber" class="input" value="桃-001／異畫" /></div>
+            <div><label data-i18n="illustrator">繪師</label><input id="illustrator" class="input" value="張老師" /></div>
+            <div><label data-i18n="setNumber">卡號</label><input id="setNumber" class="input" value="桃-001／異畫" /></div>
           </div>
           <div class="field">
-            <label>能量符號</label>
+            <label data-i18n="energies">能量符號</label>
             <div class="chip-row" id="energyWrap"></div>
           </div>
           <div class="field">
-            <label>一鍵風格</label>
+            <label data-i18n="quickStyle">一鍵風格</label>
             <div class="row">
-              <button class="chip active" id="btnVintage">復古模式</button>
-              <button class="chip" id="btnModern">現代模式</button>
+              <button class="chip active" id="btnVintage" type="button">復古模式</button>
+              <button class="chip" id="btnModern" type="button">現代模式</button>
             </div>
           </div>
           <div class="field">
-            <label>邊框材質</label>
+            <label data-i18n="frameTexture">邊框材質</label>
             <div class="chip-row" style="grid-template-columns: repeat(4,1fr);">
-              <button class="chip" data-texture="none">無</button>
-              <button class="chip active" data-texture="brushed">拉絲</button>
-              <button class="chip" data-texture="carbon">碳纖維</button>
-              <button class="chip" data-texture="diamond">鑽切</button>
+              <button class="chip" data-texture="none" type="button">無</button>
+              <button class="chip active" data-texture="brushed" type="button">拉絲</button>
+              <button class="chip" data-texture="carbon" type="button">碳纖維</button>
+              <button class="chip" data-texture="diamond" type="button">鑽切</button>
             </div>
           </div>
           <div class="field">
-            <label>邊框色調</label>
+            <label data-i18n="borderTint">邊框色調</label>
             <input id="borderTint" class="input" type="color" value="#ffcb05" />
           </div>
           <div class="field">
-            <label>稀有度星級</label>
+            <label data-i18n="rarity">稀有度星級</label>
             <div class="chip-row">
-              <button class="chip" data-rarity="1">★</button>
-              <button class="chip" data-rarity="2">★★</button>
-              <button class="chip active" data-rarity="3">★★★</button>
+              <button class="chip" data-rarity="1" type="button">★</button>
+              <button class="chip" data-rarity="2" type="button">★★</button>
+              <button class="chip active" data-rarity="3" type="button">★★★</button>
             </div>
           </div>
         </section>
 
         <section class="tab-content" id="tab-back">
           <div class="field">
-            <label>卡背標題／副標</label>
+            <label data-i18n="backTitleSubtitle">卡背標題／副標</label>
             <div class="row">
               <input id="backTitle" class="input" value="傳奇" />
               <input id="backSubtitle" class="input" value="經典軌道" />
             </div>
           </div>
           <div class="field">
-            <label>卡背配色（外環／核心光）</label>
+            <label data-i18n="backColors">卡背配色（外環／核心光）</label>
             <div class="row">
               <input id="backRingColor" class="input" type="color" value="#bae6fd" />
               <input id="backCoreColor" class="input" type="color" value="#ffcb05" />
             </div>
           </div>
           <div class="field">
-            <label>卡背徽章文字</label>
+            <label data-i18n="backBadgeText">卡背徽章文字</label>
             <input id="backBadgeText" class="input" value="收藏家版" />
           </div>
           <div class="field">
-            <label>卡背背景圖（選填）</label>
+            <label data-i18n="backBackground">卡背背景圖（選填）</label>
             <input id="backUpload" type="file" class="input" accept="image/*" />
             <small id="backUploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳卡背背景</small>
           </div>
-          <button class="btn" id="btnReset" style="width:100%;">一鍵重置全部</button>
+          <button class="btn" id="btnReset" style="width:100%;" type="button">一鍵重置全部</button>
         </section>
       </aside>
 
@@ -501,8 +502,8 @@
             </div>
           </div>
           <aside class="c-art-panel">
-            <h3>卡牌C位插畫</h3>
-            <p class="hint">上傳正面主視覺插畫；下方圖庫可點選切換為目前卡面插畫。</p>
+            <h3 data-i18n="centerArt">卡牌C位插畫</h3>
+            <p class="hint" data-i18n="centerArtHint">上傳正面主視覺插畫；下方圖庫可點選切換為目前卡面插畫。</p>
             <input id="artUpload" type="file" class="input" accept="image/*" />
             <small id="uploadName" style="display:block;margin-top:6px;color:#94a3b8;">尚未上傳插畫</small>
             <div class="art-gallery" id="artGallery"></div>
@@ -515,9 +516,177 @@
 
   <script>
     const ART_STATE_STORAGE_KEY = "legendary-card-creator-art-state";
+    const LOCALE_STORAGE_KEY = "legendary-card-creator-locale";
+    const I18N = {
+      zh: {
+        documentTitle: "Legendary Card Creator · 傳奇卡牌工坊",
+        brand: "Legendary Card Creator · 傳奇卡牌工坊",
+        pageTitle: "收藏級電子卡牌工坊",
+        langButton: "EN",
+        languageLabel: "切換為英文",
+        backToHome: "返回桃花源",
+        showFront: "顯示正面",
+        showBack: "翻到背面",
+        exporting: "匯出中...",
+        exportPng: "匯出 PNG",
+        tabFront: "正面",
+        tabBack: "背面",
+        cardName: "卡牌名稱",
+        hpPower: "生命值／戰力",
+        abilityName: "能力名稱",
+        abilityDescription: "能力敘述",
+        illustrator: "繪師",
+        illustratorPrefix: "繪師　",
+        setNumber: "卡號",
+        energies: "能量符號",
+        quickStyle: "一鍵風格",
+        vintageMode: "復古模式",
+        modernMode: "現代模式",
+        frameTexture: "邊框材質",
+        textures: {
+          none: "無",
+          brushed: "拉絲",
+          carbon: "碳纖維",
+          diamond: "鑽切",
+        },
+        borderTint: "邊框色調",
+        rarity: "稀有度星級",
+        backTitleSubtitle: "卡背標題／副標",
+        backColors: "卡背配色（外環／核心光）",
+        backBadgeText: "卡背徽章文字",
+        backBackground: "卡背背景圖（選填）",
+        noBackArt: "尚未上傳卡背背景",
+        reset: "一鍵重置全部",
+        hpLabel: "戰力",
+        firstEdition: "首版",
+        centerArt: "卡牌C位插畫",
+        centerArtHint: "上傳正面主視覺插畫；下方圖庫可點選切換為目前卡面插畫。",
+        noArt: "尚未上傳插畫",
+        restoredArtName: "已還原上次插畫",
+        defaultStatus: "就緒。請從左側編輯正面／背面，或在此上傳 C 位插畫。",
+        languageSwitched: "已切換介面語言。",
+        galleryTitle: "設為卡面插畫",
+        gallerySelected: "已切換為圖庫中的插畫。",
+        storageFull: "插畫已套用，但儲存空間不足，重新整理後可能不會保留。",
+        restoredArt: "已還原先前上傳的插畫。",
+        unnamed: "未命名",
+        fallbackAbility: "能力",
+        fallbackBackTitle: "傳奇",
+        fallbackBackSubtitle: "經典軌道",
+        fallbackBackBadge: "收藏家版",
+        autoColorDone: "已依插畫主色調自動調整標題欄顏色。",
+        autoColorFail: "圖片已載入，智能配色未成功。",
+        imageReadFail: "讀取圖片失敗",
+        backArtUpdated: "已更新卡背背景。",
+        resetDone: "已重置為預設範例與樣式。",
+        nodeMissing: "找不到卡牌節點。",
+        exportLibMissing: "圖片匯出程式庫未載入（請確認網路可連 CDN）。",
+        exportStart: "正在輸出 PNG...",
+        htmlToImageTimeout: "html-to-image 逾時",
+        html2CanvasTimeout: "html2canvas 逾時",
+        pngCreateFail: "無法建立 PNG 檔案",
+        pngGenerateFail: "無法產生圖檔",
+        operationTimeout: "操作逾時",
+        exportDone: "PNG 匯出完成。",
+        exportFail: "PNG 匯出失敗：",
+        defaults: {
+          name: "星焰靈狐",
+          ability: "星光爆裂",
+          desc: "引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。",
+          illustrator: "張老師",
+          setNumber: "桃-001／異畫",
+          backTitle: "傳奇",
+          backSubtitle: "經典軌道",
+          backBadge: "收藏家版",
+        },
+      },
+      en: {
+        documentTitle: "Legendary Card Creator · Premium Card Studio",
+        brand: "Legendary Card Creator · Premium Card Studio",
+        pageTitle: "Premium Card Studio",
+        langButton: "中文",
+        languageLabel: "Switch to Chinese",
+        backToHome: "Back to Home",
+        showFront: "Show Front",
+        showBack: "Flip to Back",
+        exporting: "Exporting...",
+        exportPng: "Export PNG",
+        tabFront: "Front",
+        tabBack: "Back",
+        cardName: "Card Name",
+        hpPower: "HP / Power",
+        abilityName: "Ability Name",
+        abilityDescription: "Ability Description",
+        illustrator: "Illustrator",
+        illustratorPrefix: "Illus. ",
+        setNumber: "Set No.",
+        energies: "Energy Symbols",
+        quickStyle: "Quick Style",
+        vintageMode: "Vintage",
+        modernMode: "Modern",
+        frameTexture: "Frame Texture",
+        textures: {
+          none: "None",
+          brushed: "Brushed",
+          carbon: "Carbon",
+          diamond: "Diamond",
+        },
+        borderTint: "Frame Tint",
+        rarity: "Rarity",
+        backTitleSubtitle: "Back Title / Subtitle",
+        backColors: "Back Colors (Ring / Core)",
+        backBadgeText: "Back Badge Text",
+        backBackground: "Back Background (optional)",
+        noBackArt: "No back background uploaded",
+        reset: "Reset All",
+        hpLabel: "HP",
+        firstEdition: "1st Edition",
+        centerArt: "Hero Artwork",
+        centerArtHint: "Upload the main front artwork. Select a thumbnail below to use it on the card.",
+        noArt: "No artwork uploaded",
+        restoredArtName: "Previous artwork restored",
+        defaultStatus: "Ready. Edit the front/back on the left, or upload hero artwork here.",
+        languageSwitched: "Interface language switched.",
+        galleryTitle: "Use as card artwork",
+        gallerySelected: "Selected artwork from gallery.",
+        storageFull: "Artwork applied, but browser storage is full and may not persist after refresh.",
+        restoredArt: "Previous uploaded artwork restored.",
+        unnamed: "Untitled",
+        fallbackAbility: "Ability",
+        fallbackBackTitle: "Legendary",
+        fallbackBackSubtitle: "Classic Orbit",
+        fallbackBackBadge: "Collector Edition",
+        autoColorDone: "Header color auto-matched from artwork.",
+        autoColorFail: "Image loaded, but smart color matching failed.",
+        imageReadFail: "Image read failed",
+        backArtUpdated: "Back background updated.",
+        resetDone: "Card reset to default sample and style.",
+        nodeMissing: "Card node not found.",
+        exportLibMissing: "PNG export libraries did not load. Check CDN network access.",
+        exportStart: "Exporting PNG...",
+        htmlToImageTimeout: "html-to-image timed out",
+        html2CanvasTimeout: "html2canvas timed out",
+        pngCreateFail: "Unable to create PNG file",
+        pngGenerateFail: "Unable to generate image",
+        operationTimeout: "Operation timed out",
+        exportDone: "PNG export completed.",
+        exportFail: "PNG export failed: ",
+        defaults: {
+          name: "Celestial Emberfox",
+          ability: "Astral Burst",
+          desc: "Channel prismatic flames across the field: draw 2 cards, then deal splash damage to one opposing target.",
+          illustrator: "Shirly Zhang",
+          setNumber: "PB-001 / ALT",
+          backTitle: "Legendary",
+          backSubtitle: "Classic Orbit",
+          backBadge: "Collector Edition",
+        },
+      },
+    };
     const state = {
       era: "vintage",
       showBack: false,
+      locale: "zh",
       rarity: 3,
       energies: ["fire", "electric", "psychic"],
       artUrl: null,
@@ -562,6 +731,7 @@
       textureBtns: document.querySelectorAll("[data-texture]"),
       btnVintage: document.getElementById("btnVintage"),
       btnModern: document.getElementById("btnModern"),
+      btnLocale: document.getElementById("btnLocale"),
       btnFlip: document.getElementById("btnFlip"),
       btnExport: document.getElementById("btnExport"),
       artUpload: document.getElementById("artUpload"),
@@ -583,6 +753,7 @@
       backCore: document.getElementById("backCore"),
       backBg: document.getElementById("backBg"),
       artGallery: document.getElementById("artGallery"),
+      btnReset: document.getElementById("btnReset"),
     };
 
     const ENERGY_META = {
@@ -594,7 +765,78 @@
       dark: { symbol: "D", gradient: "linear-gradient(135deg,#64748b,#0f172a)" },
     };
 
+    function t() {
+      return I18N[state.locale];
+    }
+
     function setStatus(text) { refs.status.textContent = text; }
+
+    function syncDefaultCardText(previousLocale) {
+      const previous = I18N[previousLocale || "zh"].defaults;
+      const next = t().defaults;
+      const pairs = [
+        [refs.name, "name"],
+        [refs.ability, "ability"],
+        [refs.desc, "desc"],
+        [refs.illustrator, "illustrator"],
+        [refs.setNumber, "setNumber"],
+        [refs.backTitle, "backTitle"],
+        [refs.backSubtitle, "backSubtitle"],
+        [refs.backBadgeText, "backBadge"],
+      ];
+      pairs.forEach(([node, key]) => {
+        if (node.value === previous[key]) node.value = next[key];
+      });
+    }
+
+    function applyLocale(options = {}) {
+      const copy = t();
+      if (options.previousLocale) syncDefaultCardText(options.previousLocale);
+      document.documentElement.lang = state.locale === "zh" ? "zh-Hant" : "en";
+      document.title = copy.documentTitle;
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
+        const key = node.dataset.i18n;
+        if (key && typeof copy[key] === "string") node.textContent = copy[key];
+      });
+      refs.btnLocale.textContent = copy.langButton;
+      refs.btnLocale.setAttribute("aria-label", copy.languageLabel);
+      refs.btnFlip.textContent = state.showBack ? copy.showFront : copy.showBack;
+      refs.btnExport.textContent = copy.exportPng;
+      refs.btnReset.textContent = copy.reset;
+      refs.btnVintage.textContent = copy.vintageMode;
+      refs.btnModern.textContent = copy.modernMode;
+      refs.textureBtns.forEach((button) => {
+        button.textContent = copy.textures[button.dataset.texture] || button.textContent;
+      });
+      refs.backUploadName.textContent = refs.backUpload.files && refs.backUpload.files[0] ? refs.backUpload.files[0].name : copy.noBackArt;
+      refs.uploadName.textContent = refs.artUpload.files && refs.artUpload.files[0] ? refs.artUpload.files[0].name : (state.artUrl ? copy.restoredArtName : copy.noArt);
+      refs.edition.textContent = copy.firstEdition;
+      refs.cardHeader.querySelector("small").textContent = copy.hpLabel;
+      if (options.resetStatus) setStatus(copy.languageSwitched);
+      else if (!refs.status.textContent || refs.status.textContent === I18N.zh.defaultStatus || refs.status.textContent === I18N.en.defaultStatus) {
+        setStatus(copy.defaultStatus);
+      }
+      renderCard();
+      renderArtGallery();
+    }
+
+    function restoreLocale() {
+      try {
+        const saved = localStorage.getItem(LOCALE_STORAGE_KEY);
+        if (saved === "zh" || saved === "en") state.locale = saved;
+      } catch (_) {
+        state.locale = "zh";
+      }
+    }
+
+    function toggleLocale() {
+      const previousLocale = state.locale;
+      state.locale = state.locale === "zh" ? "en" : "zh";
+      try {
+        localStorage.setItem(LOCALE_STORAGE_KEY, state.locale);
+      } catch (_) {}
+      applyLocale({ resetStatus: true, previousLocale });
+    }
 
     function renderEnergyButtons() {
       refs.energyWrap.innerHTML = "";
@@ -633,7 +875,7 @@
         btn.type = "button";
         btn.className = "art-thumb" + (item.id === state.activeArtId ? " active" : "");
         btn.style.backgroundImage = `url("${item.url}")`;
-        btn.title = "設為卡面插畫";
+        btn.title = t().galleryTitle;
         btn.onclick = () => selectArtFromGallery(item);
         refs.artGallery.appendChild(btn);
       });
@@ -645,7 +887,7 @@
       refs.cardArt.style.background = `url("${item.url}") center / cover`;
       renderArtGallery();
       persistArtState();
-      setStatus("已切換為圖庫中的插畫。");
+      setStatus(t().gallerySelected);
     }
 
     function persistArtState() {
@@ -659,7 +901,7 @@
           })
         );
       } catch (_) {
-        setStatus("插畫已套用，但儲存空間不足，重新整理後可能不會保留。");
+        setStatus(t().storageFull);
       }
     }
 
@@ -674,8 +916,8 @@
         state.artUrl = saved.artUrl || null;
         if (state.artUrl) {
           refs.cardArt.style.background = `url("${state.artUrl}") center / cover`;
-          refs.uploadName.textContent = "已還原上次插畫";
-          setStatus("已還原先前上傳的插畫。");
+          refs.uploadName.textContent = t().restoredArtName;
+          setStatus(t().restoredArt);
         }
       } catch (_) {
         localStorage.removeItem(ART_STATE_STORAGE_KEY);
@@ -683,11 +925,11 @@
     }
 
     function renderCard() {
-      refs.vName.textContent = refs.name.value || "未命名";
+      refs.vName.textContent = refs.name.value || t().unnamed;
       refs.vHp.textContent = refs.hp.value || "0";
-      refs.vAbility.textContent = refs.ability.value || "能力";
+      refs.vAbility.textContent = refs.ability.value || t().fallbackAbility;
       refs.vDesc.textContent = refs.desc.value || "";
-      refs.vIllustrator.textContent = "繪師　" + (refs.illustrator.value || "—");
+      refs.vIllustrator.textContent = t().illustratorPrefix + (refs.illustrator.value || "—");
       refs.vSet.textContent = refs.setNumber.value || "—";
       refs.vRarity.textContent = Array.from({ length: state.rarity }).map(() => "★").join(" ");
       renderCardEnergy();
@@ -713,9 +955,9 @@
         ? "frame-texture " + state.frameTexture
         : "frame-texture none";
 
-      refs.vBackTitle.textContent = refs.backTitle.value || "傳奇";
-      refs.vBackSubtitle.textContent = refs.backSubtitle.value || "經典軌道";
-      refs.vBackBadge.textContent = refs.backBadgeText.value || "收藏家版";
+      refs.vBackTitle.textContent = refs.backTitle.value || t().fallbackBackTitle;
+      refs.vBackSubtitle.textContent = refs.backSubtitle.value || t().fallbackBackSubtitle;
+      refs.vBackBadge.textContent = refs.backBadgeText.value || t().fallbackBackBadge;
       refs.backRing.style.borderColor = refs.backRingColor.value;
       refs.backCore.style.background = `radial-gradient(circle, ${refs.backCoreColor.value} 0%, ${refs.backCoreColor.value}cc 38%, rgba(255,255,255,.2) 39%, rgba(255,255,255,.05) 60%, transparent 61%)`;
     }
@@ -751,9 +993,9 @@
         const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
         refs.cardHeader.style.background = `rgb(${r},${g},${b})`;
         refs.cardHeader.style.color = lum > 0.62 ? "#0f172a" : "#f8fafc";
-        setStatus("已依插畫主色調自動調整標題欄顏色。");
+        setStatus(t().autoColorDone);
       } catch (_) {
-        setStatus("圖片已載入，智能配色未成功。");
+        setStatus(t().autoColorFail);
       } finally {
         URL.revokeObjectURL(url);
       }
@@ -761,6 +1003,7 @@
 
     refs.tabs.forEach((node) => node.addEventListener("click", () => activateTab(node.dataset.tab)));
     [refs.name, refs.hp, refs.ability, refs.desc, refs.illustrator, refs.setNumber, refs.backTitle, refs.backSubtitle, refs.backBadgeText, refs.backRingColor, refs.backCoreColor, refs.borderTint].forEach((node) => node.addEventListener("input", renderCard));
+    refs.btnLocale.onclick = toggleLocale;
 
     refs.btnVintage.onclick = () => {
       state.era = "vintage";
@@ -794,7 +1037,7 @@
     refs.btnFlip.onclick = () => {
       state.showBack = !state.showBack;
       refs.card3d.style.transform = state.showBack ? "rotateY(180deg)" : "rotateY(0deg)";
-      refs.btnFlip.textContent = state.showBack ? "顯示正面" : "翻到背面";
+      refs.btnFlip.textContent = state.showBack ? t().showFront : t().showBack;
     };
 
     refs.scene.addEventListener("mousemove", (event) => {
@@ -820,7 +1063,7 @@
       const url = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("讀取圖片失敗"));
+        reader.onerror = () => reject(new Error(t().imageReadFail));
         reader.readAsDataURL(file);
       });
       const id = "art-" + Date.now();
@@ -841,16 +1084,17 @@
       state.backArtUrl = URL.createObjectURL(file);
       refs.backUploadName.textContent = file.name;
       refs.backBg.style.backgroundImage = `url("${state.backArtUrl}")`;
-      setStatus("已更新卡背背景。");
+      setStatus(t().backArtUpdated);
     };
 
     refs.btnReset.onclick = () => {
-      refs.name.value = "星焰靈狐";
+      const defaults = t().defaults;
+      refs.name.value = defaults.name;
       refs.hp.value = "320";
-      refs.ability.value = "星光爆裂";
-      refs.desc.value = "引導棱鏡烈焰掃過戰場：抽兩張牌，再指定一個對手目標造成輻射濺射傷害。";
-      refs.illustrator.value = "張老師";
-      refs.setNumber.value = "桃-001／異畫";
+      refs.ability.value = defaults.ability;
+      refs.desc.value = defaults.desc;
+      refs.illustrator.value = defaults.illustrator;
+      refs.setNumber.value = defaults.setNumber;
       state.frameTexture = "brushed";
       refs.textureBtns.forEach((b) => b.classList.toggle("active", b.dataset.texture === "brushed"));
       refs.borderTint.value = "#ffcb05";
@@ -862,26 +1106,26 @@
       refs.btnModern.classList.remove("active");
       refs.cardHeader.style.background = "rgb(51,65,85)";
       refs.cardHeader.style.color = "#f8fafc";
-      refs.backTitle.value = "傳奇";
-      refs.backSubtitle.value = "經典軌道";
-      refs.backBadgeText.value = "收藏家版";
+      refs.backTitle.value = defaults.backTitle;
+      refs.backSubtitle.value = defaults.backSubtitle;
+      refs.backBadgeText.value = defaults.backBadge;
       refs.backRingColor.value = "#bae6fd";
       refs.backCoreColor.value = "#ffcb05";
       if (state.backArtUrl) URL.revokeObjectURL(state.backArtUrl);
       state.backArtUrl = null;
       refs.backBg.style.backgroundImage = "none";
-      refs.backUploadName.textContent = "尚未上傳卡背背景";
+      refs.backUploadName.textContent = t().noBackArt;
       state.artGallery = [];
       state.activeArtId = null;
       state.artUrl = null;
       localStorage.removeItem(ART_STATE_STORAGE_KEY);
       refs.cardArt.style.background = DEFAULT_CARD_ART_BG;
-      refs.uploadName.textContent = "尚未上傳插畫";
+      refs.uploadName.textContent = t().noArt;
       if (refs.artUpload) refs.artUpload.value = "";
       renderArtGallery();
       renderEnergyButtons();
       renderCard();
-      setStatus("已重置為預設範例與樣式。");
+      setStatus(t().resetDone);
     };
 
     function sanitizeFilenameBase(name) {
@@ -897,7 +1141,7 @@
       return Promise.race([
         promise,
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(message || "操作逾時")), ms)
+          setTimeout(() => reject(new Error(message || t().operationTimeout)), ms)
         ),
       ]);
     }
@@ -917,21 +1161,21 @@
     refs.btnExport.onclick = async () => {
       const target = refs.card3d;
       if (!target) {
-        setStatus("找不到卡牌節點。");
+        setStatus(t().nodeMissing);
         return;
       }
       const hasH2c = typeof window.html2canvas === "function";
       const hasHti =
         window.htmlToImage && typeof window.htmlToImage.toBlob === "function";
       if (!hasH2c && !hasHti) {
-        setStatus("圖片匯出程式庫未載入（請確認網路可連 CDN）。");
+        setStatus(t().exportLibMissing);
         return;
       }
 
       const previousTransform = refs.card3d.style.transform;
       refs.btnExport.disabled = true;
-      refs.btnExport.textContent = "匯出中...";
-      setStatus("正在輸出 PNG...");
+      refs.btnExport.textContent = t().exporting;
+      setStatus(t().exportStart);
       document.body.classList.add("export-snapshot");
 
       try {
@@ -948,7 +1192,7 @@
                 skipFonts: true,
               }),
               45000,
-              "html-to-image 逾時"
+              t().htmlToImageTimeout
             );
           } catch (e) {
             console.warn("html-to-image:", e);
@@ -975,36 +1219,38 @@
               },
             }),
             45000,
-            "html2canvas 逾時"
+            t().html2CanvasTimeout
           );
           blob = await new Promise((resolve, reject) => {
             canvas.toBlob((b) => {
-              if (!b) reject(new Error("無法建立 PNG 檔案"));
+              if (!b) reject(new Error(t().pngCreateFail));
               else resolve(b);
             }, "image/png");
           });
         }
 
-        if (!blob) throw new Error("無法產生圖檔");
+        if (!blob) throw new Error(t().pngGenerateFail);
 
         triggerDownload(blob, sanitizeFilenameBase(refs.name.value) + ".png");
-        setStatus("PNG 匯出完成。");
+        setStatus(t().exportDone);
       } catch (error) {
         const msg = error && error.message ? error.message : String(error);
-        setStatus("PNG 匯出失敗：" + msg);
+        setStatus(t().exportFail + msg);
         console.error(error);
       } finally {
         document.body.classList.remove("export-snapshot");
         refs.card3d.style.transform = previousTransform;
         refs.btnExport.disabled = false;
-        refs.btnExport.textContent = "匯出 PNG";
+        refs.btnExport.textContent = t().exportPng;
       }
     };
 
+    restoreLocale();
     restoreArtState();
     renderEnergyButtons();
     renderArtGallery();
     renderCard();
+    applyLocale({ previousLocale: "zh" });
   </script>
 </body>
 </html>

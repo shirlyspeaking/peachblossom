@@ -3,11 +3,13 @@ import {
   DEFAULT_FATE,
   DEFAULT_RULES_TEXT,
   DEFAULT_START_MONEY,
+  DEFAULT_TOLL_FEE,
+  PLAYER_ANIMALS,
   DEFAULT_TILES,
   PASS_GO_BONUS,
   POSITIONS,
 } from '../config/game'
-import type { BoardPresetRoot, CardItem, GameSession, GameState, Tile } from '../types/game'
+import type { BoardPresetRoot, CardItem, GameSession, GameState, RoomMember, Tile } from '../types/game'
 
 export const NUM_TILES = POSITIONS.length
 
@@ -40,7 +42,7 @@ export function buildDefaultPlayers(count: number) {
 }
 
 export function initialTurnLogLine() {
-  return `歡迎來到山海經大富翁。可調整人數，每位玩家起始 ${DEFAULT_START_MONEY} 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 ${PASS_GO_BONUS} 金幣。`
+  return `歡迎來到桃源萬象大富翁。可調整人數，每位玩家起始 ${DEFAULT_START_MONEY} 金幣；擲骰後沿外圈棋盤前進，經過起點可獲得 ${PASS_GO_BONUS} 金幣。`
 }
 
 export function defaultGame(): GameSession {
@@ -194,6 +196,33 @@ export function isPurchasableLandTile(tile: Tile) {
   return String(tile.effect || '').includes('可購買地塊')
 }
 
+export function getTileTollFee(tile: Tile) {
+  const matched = String(tile.effect || '').match(/(\d+)\s*金幣/)
+  if (!matched?.[1]) {
+    return DEFAULT_TOLL_FEE
+  }
+
+  const fee = Number.parseInt(matched[1], 10)
+  return Number.isFinite(fee) && fee > 0 ? fee : DEFAULT_TOLL_FEE
+}
+
 export function memberLabel(name?: string | null, email?: string | null) {
   return name || email || ''
+}
+
+export function playerAnimal(index: number) {
+  return PLAYER_ANIMALS[index % PLAYER_ANIMALS.length] ?? '🐾'
+}
+
+export function playerTitle(index: number, member?: RoomMember | null) {
+  const name = memberLabel(member?.name, member?.email)
+  return `${playerAnimal(index)} ${name || `玩家${index + 1}`}`
+}
+
+export function playerStatusText(index: number, member?: RoomMember | null) {
+  if (!member) {
+    return `本機玩家 ${index + 1}`
+  }
+
+  return member.email ? `已加入 · ${member.email}` : '已加入線上房間'
 }

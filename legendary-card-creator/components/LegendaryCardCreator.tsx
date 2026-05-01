@@ -71,6 +71,7 @@ const I18N = {
     hpLabel: "HP",
     firstEdition: "1st Edition",
     languageSwitched: "已切換介面語言。",
+    languageLabel: "切換為英文",
     langButton: "EN",
   },
   en: {
@@ -116,6 +117,7 @@ const I18N = {
     hpLabel: "HP",
     firstEdition: "1st Edition",
     languageSwitched: "Interface language switched.",
+    languageLabel: "Switch to Chinese",
     langButton: "中文",
   },
 } as const;
@@ -201,8 +203,8 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   const [energies, setEnergies] = useState<EnergyType[]>(["fire", "electric", "psychic"]);
   const [rarity, setRarity] = useState(3);
   const [artUrl, setArtUrl] = useState<string | null>(null);
-  const [artLabel, setArtLabel] = useState(I18N.zh.noArt);
-  const [status, setStatus] = useState(I18N.zh.defaultStatus);
+  const [artLabel, setArtLabel] = useState<string>(I18N.zh.noArt);
+  const [status, setStatus] = useState<string>(I18N.zh.defaultStatus);
   const [headerColor, setHeaderColor] = useState("rgb(51, 65, 85)");
   const [headerText, setHeaderText] = useState("#f8fafc");
   const [pointer, setPointer] = useState({ x: 50, y: 50 });
@@ -218,6 +220,10 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
     const saved = localStorage.getItem(LOCALE_STORAGE_KEY);
     if (saved === "zh" || saved === "en") setLocale(saved);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale === "zh" ? "zh-Hant" : "en";
+  }, [locale]);
 
   useEffect(() => {
     try {
@@ -351,7 +357,11 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
   function toggleLocale() {
     const nextLocale: Locale = locale === "zh" ? "en" : "zh";
     setLocale(nextLocale);
-    localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    } catch {
+      // Language still changes for this session even if storage is unavailable.
+    }
     setStatus(I18N[nextLocale].languageSwitched);
   }
 
@@ -372,7 +382,12 @@ export function LegendaryCardCreator({ titleFontClassName }: { titleFontClassNam
               <h1 className={cn("mt-2 text-3xl font-semibold sm:text-4xl", titleFontClassName)}>{t.pageTitle}</h1>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10" onClick={toggleLocale}>
+              <Button
+                variant="outline"
+                className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10"
+                onClick={toggleLocale}
+                aria-label={t.languageLabel}
+              >
                 {t.langButton}
               </Button>
               <Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-100 hover:bg-white/10">
