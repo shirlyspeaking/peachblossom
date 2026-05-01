@@ -48,6 +48,9 @@
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
 
+    /** 筆畫分解描紅：每格一筆（path），由 hanzi-writer-data 提供 SVG path */
+    var strokePathLayout = null;
+
     function setStatus() {}
 
     function escapeSvgText(s) {
@@ -98,6 +101,43 @@
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
             '<text ' + attrs + '>' + body + '</text></svg>'
+        );
+    }
+
+    /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
+    function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs) {
+        var vb = '0 0 1024 1024';
+        var sw = Math.max(22, Math.min(72, Math.round((fs || 36) * 1.25)));
+        var strokeColor;
+        var strokeOpacity = '0.94';
+        if (hongMode) {
+            strokeColor = 'rgb(210, 70, 88)';
+        } else if (lightPinkHongMode) {
+            strokeColor = 'rgb(224, 122, 158)';
+        } else {
+            strokeColor = '#3a2f35';
+            strokeOpacity = '0.92';
+        }
+        var parts = '';
+        for (var i = 0; i < pathDs.length; i++) {
+            parts +=
+                '<path d="' +
+                escapeSvgAttr(pathDs[i]) +
+                '" fill="none" stroke="' +
+                strokeColor +
+                '" stroke-opacity="' +
+                strokeOpacity +
+                '" stroke-width="' +
+                sw +
+                '" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
+            vb +
+            '" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            parts +
+            '</svg>'
         );
     }
 
@@ -171,27 +211,60 @@
         return out;
     }
 
-    async function fetchStrokeCount(ch) {
-        var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(ch) + '.json';
-        var res = await fetch(url, { cache: 'force-cache' });
-        if (!res.ok) throw new Error('找不到「' + ch + '」的筆順資料');
-        var data = await res.json();
-        if (!data || !Array.isArray(data.strokes) || data.strokes.length === 0) {
-            throw new Error('「' + ch + '」筆順資料格式不完整');
-        }
-        return data.strokes.length;
+    function clearStrokePathLayout() {
+        strokePathLayout = null;
     }
 
-    async function buildStrokeRowsFromChars(chars) {
-        var rows = [];
-        for (var i = 0; i < chars.length; i++) {
-            var ch = chars[i];
-            var count = await fetchStrokeCount(ch);
-            var labels = [];
-            for (var s = 1; s <= count; s++) labels.push('第' + s + '筆');
-            rows.push(ch + ': ' + labels.join('、'));
+    async function fetchHanziWriterData(ch) {
+        var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(ch) + '.json';
+        var res = await fetch(url, { cache: 'force-cache' });
+        if (!res.ok) throw new Error('找不到「' + ch + '」的筆畫資料（字庫無此字）');
+        var data = await res.json();
+        if (!data || !Array.isArray(data.strokes) || data.strokes.length === 0) {
+            throw new Error('「' + ch + '」筆畫資料不完整');
         }
-        return rows.join('\n');
+        return data;
+    }
+
+    async function buildStrokePathLayoutRows(chars) {
+        var rows = [];
+        for (var ci = 0; ci < chars.length; ci++) {
+            var ch = chars[ci];
+            var data = await fetchHanziWriterData(ch);
+            var strokes = data.strokes;
+            rows.push({ kind: 'ref', ch: ch, total: strokes.length });
+            for (var si = 0; si < strokes.length; si++) {
+                rows.push({
+                    kind: 'stroke',
+                    ch: ch,
+                    index: si + 1,
+                    total: strokes.length,
+                    pathDs: [strokes[si]]
+                });
+            }
+            if (ci < chars.length - 1) {
+                rows.push({ kind: 'blank' });
+            }
+        }
+        return rows;
+    }
+
+    function applyStrokePathDefaults() {
+        if (copyStyle) copyStyle.value = 'hong';
+        if (gridType) gridType.value = 'tian';
+        if (fontSize) fontSize.value = '40';
+        if (lineHeight) lineHeight.value = '1.15';
+        if (charsPerLine) charsPerLine.value = '1';
+        if (linesPerPage) linesPerPage.value = '10';
+    }
+
+    function chunkLayoutRows(rows, lpp) {
+        var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
+        var pages = [];
+        for (var i = 0; i < rows.length; i += n) {
+            pages.push(rows.slice(i, i + n));
+        }
+        return pages;
     }
 
     function parseStrokeSource(raw) {
@@ -235,6 +308,7 @@
     }
 
     function onBuildStrokeCopybook() {
+        clearStrokePathLayout();
         var transformed = parseStrokeSource(strokeSourceInput ? strokeSourceInput.value : '');
         if (!transformed) {
             window.alert('請輸入筆順資料。支援格式：\n1) 永: 點、橫、豎、鉤\n2) CSV（含 hanzi/字 與 stroke_order/筆順 欄）');
@@ -253,11 +327,14 @@
         }
         if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
         try {
-            var sourceText = await buildStrokeRowsFromChars(chars);
-            if (strokeSourceInput) strokeSourceInput.value = sourceText;
-            onBuildStrokeCopybook();
+            var rows = await buildStrokePathLayoutRows(chars);
+            strokePathLayout = { rows: rows, cpl: 1 };
+            if (textInput) textInput.value = '';
+            if (strokeSourceInput) strokeSourceInput.value = '';
+            applyStrokePathDefaults();
+            renderNow();
         } catch (e) {
-            window.alert('自動拆解失敗：' + (e.message || String(e)));
+            window.alert('筆畫拆解失敗：' + (e.message || String(e)));
         } finally {
             if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = false;
         }
@@ -275,7 +352,7 @@
     function buildRows(text, cpl) {
         var lines = text.split('\n');
         var rows = [];
-        var c = Math.max(4, Math.min(20, parseInt(cpl, 10) || 12));
+        var c = Math.max(1, Math.min(20, parseInt(cpl, 10) || 12));
 
         for (var li = 0; li < lines.length; li++) {
             var line = lines[li];
@@ -315,7 +392,7 @@
     }
 
     function chunkPages(rows, lpp) {
-        var n = Math.max(4, Math.min(20, parseInt(lpp, 10) || 12));
+        var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
         for (var i = 0; i < rows.length; i += n) {
             pages.push(rows.slice(i, i + n));
@@ -333,8 +410,8 @@
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         var raw = textInput.value;
         var text = normalizeText(raw);
-        var cpl = parseInt(charsPerLine.value, 10) || 12;
-        var lpp = parseInt(linesPerPage.value, 10) || 12;
+        var cpl = Math.max(1, Math.min(20, parseInt(charsPerLine.value, 10) || 12));
+        var lpp = Math.max(1, Math.min(20, parseInt(linesPerPage.value, 10) || 12));
         var fsMin = parseInt(fontSize.getAttribute('min'), 10);
         var fsMax = parseInt(fontSize.getAttribute('max'), 10);
         if (!Number.isFinite(fsMin)) fsMin = 18;
@@ -358,8 +435,16 @@
             (copyStyle.value === 'hong' || copyStyle.value === 'trace');
         var lightPinkHongMode = copyStyle && copyStyle.value === 'lightPinkHong';
 
-        var rows = buildRows(text, cpl);
-        var pages = chunkPages(rows, lpp);
+        var useStrokePaths =
+            strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
+        var rows;
+        var pages;
+        if (useStrokePaths) {
+            pages = chunkLayoutRows(strokePathLayout.rows, lpp);
+        } else {
+            rows = buildRows(text, cpl);
+            pages = chunkPages(rows, lpp);
+        }
 
         preview.innerHTML = '';
         preview.className =
@@ -380,49 +465,93 @@
             pageEl.appendChild(title);
 
             for (var r = 0; r < pageRows.length; r++) {
-                var rowStr = pageRows[r];
-                var chars = padRowToLength(rowStr, cpl);
                 var grid = document.createElement('div');
                 grid.className = 'grid';
-                /* 方格邊長隨字級與行高倍率一併變化，避免只拉高、寬度仍被 1fr 拉扁 */
                 var cellSize = Math.max(Math.round(fs * lh), fs + 8);
-                grid.style.gridTemplateColumns = 'repeat(' + cpl + ', ' + cellSize + 'px)';
-                grid.style.gridTemplateRows = cellSize + 'px';
 
-                for (var c = 0; c < chars.length; c++) {
-                    var ch = chars[c];
+                if (useStrokePaths) {
+                    var layoutCpl = strokePathLayout.cpl || 1;
+                    var item = pageRows[r];
+                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
+                    grid.style.gridTemplateRows = cellSize + 'px';
+
                     var cell = document.createElement('div');
                     cell.className = cellClassForGrid(gtype);
                     cell.style.width = cellSize + 'px';
                     cell.style.minWidth = cellSize + 'px';
                     cell.style.height = cellSize + 'px';
                     cell.style.minHeight = cellSize + 'px';
+                    if (layoutCpl - 1 === 0) cell.classList.add('col-last');
+                    if (r === pageRows.length - 1) cell.classList.add('row-last');
 
-                    var isLastCol = c === cpl - 1;
-                    var isLastRow = r === pageRows.length - 1;
-                    if (isLastCol) cell.classList.add('col-last');
-                    if (isLastRow) cell.classList.add('row-last');
-
-                    var inner = document.createElement('span');
-                    inner.className = 'cell-inner';
-                    inner.style.fontSize = fs + 'px';
-                    inner.style.lineHeight = String(lh);
-                    inner.style.fontFamily = font;
-                    if (ch === ' ') {
-                        inner.innerHTML = '&nbsp;';
-                    } else if (ch === '') {
-                        inner.innerHTML = '&nbsp;';
-                    } else if (hongMode) {
-                        inner.className = 'cell-inner cell-inner--hong';
-                        inner.innerHTML = buildHongSvgChar(ch, font, fs);
-                    } else if (lightPinkHongMode) {
-                        inner.className = 'cell-inner cell-inner--hong';
-                        inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
+                    var innerSp = document.createElement('span');
+                    innerSp.className = 'cell-inner cell-inner--hong';
+                    innerSp.style.fontSize = fs + 'px';
+                    innerSp.style.lineHeight = String(lh);
+                    innerSp.style.fontFamily = font;
+                    if (item.kind === 'blank') {
+                        innerSp.innerHTML = '&nbsp;';
+                    } else if (item.kind === 'ref') {
+                        if (hongMode) {
+                            innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
+                        } else if (lightPinkHongMode) {
+                            innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
+                        } else {
+                            innerSp.textContent = item.ch;
+                        }
+                    } else if (item.kind === 'stroke') {
+                        innerSp.innerHTML = buildStrokePathsSvg(
+                            item.pathDs,
+                            hongMode,
+                            lightPinkHongMode,
+                            fs
+                        );
                     } else {
-                        inner.textContent = ch;
+                        innerSp.innerHTML = '&nbsp;';
                     }
-                    cell.appendChild(inner);
+                    cell.appendChild(innerSp);
                     grid.appendChild(cell);
+                } else {
+                    var rowStr = pageRows[r];
+                    var chars = padRowToLength(rowStr, cpl);
+                    grid.style.gridTemplateColumns = 'repeat(' + cpl + ', ' + cellSize + 'px)';
+                    grid.style.gridTemplateRows = cellSize + 'px';
+
+                    for (var c = 0; c < chars.length; c++) {
+                        var ch = chars[c];
+                        var cell2 = document.createElement('div');
+                        cell2.className = cellClassForGrid(gtype);
+                        cell2.style.width = cellSize + 'px';
+                        cell2.style.minWidth = cellSize + 'px';
+                        cell2.style.height = cellSize + 'px';
+                        cell2.style.minHeight = cellSize + 'px';
+
+                        var isLastCol = c === cpl - 1;
+                        var isLastRow = r === pageRows.length - 1;
+                        if (isLastCol) cell2.classList.add('col-last');
+                        if (isLastRow) cell2.classList.add('row-last');
+
+                        var inner = document.createElement('span');
+                        inner.className = 'cell-inner';
+                        inner.style.fontSize = fs + 'px';
+                        inner.style.lineHeight = String(lh);
+                        inner.style.fontFamily = font;
+                        if (ch === ' ') {
+                            inner.innerHTML = '&nbsp;';
+                        } else if (ch === '') {
+                            inner.innerHTML = '&nbsp;';
+                        } else if (hongMode) {
+                            inner.className = 'cell-inner cell-inner--hong';
+                            inner.innerHTML = buildHongSvgChar(ch, font, fs);
+                        } else if (lightPinkHongMode) {
+                            inner.className = 'cell-inner cell-inner--hong';
+                            inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
+                        } else {
+                            inner.textContent = ch;
+                        }
+                        cell2.appendChild(inner);
+                        grid.appendChild(cell2);
+                    }
                 }
                 pageEl.appendChild(grid);
             }
@@ -589,7 +718,7 @@
     }
 
     var inputs = [
-        textInput, fontPreset, gridType, copyStyle, fontSize, lineHeight,
+        fontPreset, gridType, copyStyle, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {
@@ -597,6 +726,13 @@
         el.addEventListener('input', scheduleRender);
         el.addEventListener('change', scheduleRender);
     });
+    if (textInput) {
+        textInput.addEventListener('input', function () {
+            clearStrokePathLayout();
+            scheduleRender();
+        });
+        textInput.addEventListener('change', scheduleRender);
+    }
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });

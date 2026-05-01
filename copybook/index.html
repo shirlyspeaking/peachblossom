@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=26">
+    <link rel="stylesheet" href="style.css?v=27">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -38,8 +38,8 @@
 
             <div class="field">
                 <label for="autoStrokeChars">自動拆解筆順</label>
-                <input id="autoStrokeChars" type="text" placeholder="輸入漢字（可一次多字，如：永木水）" autocomplete="off">
-                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">自動拆解並生成字帖</button>
+                <input id="autoStrokeChars" type="text" placeholder="輸入漢字；每筆一格描紅（例：永）" autocomplete="off">
+                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">逐筆畫田字格描紅</button>
             </div>
 
             <div class="field">
@@ -108,11 +108,11 @@
             <div class="row">
                 <div class="field">
                     <label for="charsPerLine">每行字數</label>
-                    <input id="charsPerLine" type="number" min="4" max="20" value="12">
+                    <input id="charsPerLine" type="number" min="1" max="20" value="12">
                 </div>
                 <div class="field">
                     <label for="linesPerPage">每頁行數</label>
-                    <input id="linesPerPage" type="number" min="4" max="20" value="12">
+                    <input id="linesPerPage" type="number" min="1" max="20" value="12">
                 </div>
             </div>
 
@@ -129,6 +129,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=22"></script>
+    <script src="app.js?v=23"></script>
 </body>
 </html>
