@@ -137,7 +137,9 @@
             vb +
             '" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<g transform="translate(0,900) scale(1,-1)">' +
             parts +
+            '</g>' +
             '</svg>'
         );
     }
