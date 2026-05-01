@@ -257,7 +257,6 @@
     }
 
     function applyStrokePathDefaults() {
-        if (copyStyle) copyStyle.value = 'hong';
         if (gridType) gridType.value = 'tian';
         if (fontSize) fontSize.value = '40';
         if (lineHeight) lineHeight.value = '1.15';
@@ -449,7 +448,11 @@
                         if (item.kind === 'blank') {
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.innerHTML = buildReferenceFontSvgChar(item.ch, font, fs);
+                            innerSp.className = 'cell-inner stroke-ref-char';
+                            innerSp.textContent = item.ch;
+                            innerSp.style.color = '#2f2a28';
+                            innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
+                            innerSp.style.fontWeight = '600';
                         } else if (item.kind === 'stroke') {
                             innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
