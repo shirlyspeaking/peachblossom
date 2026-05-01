@@ -25,16 +25,32 @@ export async function POST(request: NextRequest) {
     ? voice
     : "zh-CN-XiaoxiaoNeural";
   const rate = Number.isFinite(speed) ? Math.min(2, Math.max(0.5, speed || 1)) : 1;
+  const ratePercent = Math.round((rate - 1) * 100);
+  const rateText = `${ratePercent >= 0 ? "+" : ""}${ratePercent}%`;
+  const apiKey = process.env.FREETTS_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      {
+        error:
+          "FREETTS_API_KEY is not configured. Falling back to browser speech.",
+      },
+      { status: 503 }
+    );
+  }
 
   try {
-    const res = await fetch("https://freetts.org/api/tts", {
+    const res = await fetch("https://freetts.org/api/v1/tts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
       body: JSON.stringify({
         text: cleanText,
         voice: selectedVoice,
-        rate,
-        pitch: 0,
+        rate: rateText,
+        pitch: "+0Hz",
       }),
     });
 

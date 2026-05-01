@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,13 @@ interface QuizQuestion {
   correctIndex: number;
   explanation: string;
 }
+
+const NATURAL_VOICES = [
+  { id: "zh-CN-XiaoxiaoNeural", label: "女聲（溫柔）" },
+  { id: "zh-CN-XiaoyiNeural", label: "女聲（甜美）" },
+  { id: "zh-CN-YunxiNeural", label: "男聲（年輕）" },
+  { id: "zh-CN-YunyangNeural", label: "男聲（穩定）" },
+];
 
 function ArticleContent() {
   const searchParams = useSearchParams();
@@ -38,7 +45,12 @@ function ArticleContent() {
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [ttsSpeed, setTtsSpeed] = useState(1);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [naturalVoice, setNaturalVoice] = useState(NATURAL_VOICES[0].id);
+  const [naturalPlaying, setNaturalPlaying] = useState(false);
+  const [naturalLoading, setNaturalLoading] = useState(false);
+  const [naturalStatus, setNaturalStatus] = useState("");
   const [generating, setGenerating] = useState(false);
+  const naturalAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const loadSummaryAndQuiz = async ({ regenerate = false }: { regenerate?: boolean } = {}) => {
     if (!url) {
@@ -136,19 +148,22 @@ function ArticleContent() {
     .split(/(?<=[。！？\n])/)
     .filter((s) => s.trim().length > 0);
 
-  const handleTtsToggle = () => {
+  const stopNaturalAudio = () => {
+    if (naturalAudioRef.current) {
+      naturalAudioRef.current.pause();
+      naturalAudioRef.current.currentTime = 0;
+      naturalAudioRef.current = null;
+    }
+    setNaturalPlaying(false);
+  };
+
+  const startBrowserTts = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     const synth = window.speechSynthesis;
-    if (ttsPlaying) {
-      synth.cancel();
-      setTtsPlaying(false);
-      setHighlightIndex(-1);
-      return;
-    }
+    synth.cancel();
     const utterance = new SpeechSynthesisUtterance(summary);
     utterance.rate = ttsSpeed;
     utterance.lang = "zh-TW";
-    let idx = 0;
     utterance.onboundary = (e) => {
       if (e.name === "sentence" || e.charIndex > 0) {
         const charCount = e.charIndex;
@@ -168,6 +183,77 @@ function ArticleContent() {
     };
     synth.speak(utterance);
     setTtsPlaying(true);
+  };
+
+  const handleTtsToggle = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    if (ttsPlaying) {
+      synth.cancel();
+      setTtsPlaying(false);
+      setHighlightIndex(-1);
+      return;
+    }
+    stopNaturalAudio();
+    startBrowserTts();
+  };
+
+  const handleNaturalTtsToggle = async () => {
+    if (naturalPlaying || naturalLoading) {
+      stopNaturalAudio();
+      setNaturalLoading(false);
+      setNaturalStatus("");
+      return;
+    }
+
+    if (!summary.trim()) {
+      setNaturalStatus("尚無可朗讀的精華短文。");
+      return;
+    }
+
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setTtsPlaying(false);
+      setHighlightIndex(-1);
+    }
+
+    setNaturalLoading(true);
+    setNaturalStatus("正在生成自然人聲...");
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: summary,
+          voice: naturalVoice,
+          speed: ttsSpeed,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.audioUrl) {
+        throw new Error(data.error || "自然人聲生成失敗");
+      }
+
+      const audio = new Audio(data.audioUrl);
+      naturalAudioRef.current = audio;
+      audio.onended = () => {
+        setNaturalPlaying(false);
+        setNaturalStatus("自然人聲朗讀完成。");
+      };
+      audio.onerror = () => {
+        setNaturalPlaying(false);
+        setNaturalStatus("自然人聲播放失敗，已改用瀏覽器朗讀。");
+        startBrowserTts();
+      };
+      await audio.play();
+      setNaturalPlaying(true);
+      setNaturalStatus("正在播放自然人聲。");
+    } catch {
+      setNaturalStatus("自然人聲暫時不可用，已改用瀏覽器朗讀。");
+      startBrowserTts();
+    } finally {
+      setNaturalLoading(false);
+    }
   };
 
   const handleAnswer = (qIndex: number, optionIndex: number) => {
@@ -249,6 +335,41 @@ function ArticleContent() {
                 </button>
               ))}
             </div>
+            <select
+              value={naturalVoice}
+              onChange={(e) => setNaturalVoice(e.target.value)}
+              className="h-9 rounded-md border bg-background px-2 text-sm"
+              aria-label="選擇自然人聲"
+            >
+              {NATURAL_VOICES.map((voice) => (
+                <option key={voice.id} value={voice.id}>
+                  {voice.label}
+                </option>
+              ))}
+            </select>
+            <Button
+              variant={naturalPlaying ? "destructive" : "default"}
+              size="sm"
+              onClick={handleNaturalTtsToggle}
+              disabled={naturalLoading}
+            >
+              {naturalLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  生成語音...
+                </>
+              ) : naturalPlaying ? (
+                <>
+                  <VolumeX className="mr-2 h-4 w-4" />
+                  停止人聲
+                </>
+              ) : (
+                <>
+                  <Volume2 className="mr-2 h-4 w-4" />
+                  自然人聲
+                </>
+              )}
+            </Button>
             <Button
               variant={ttsPlaying ? "destructive" : "default"}
               size="sm"
@@ -262,7 +383,7 @@ function ArticleContent() {
               ) : (
                 <>
                   <Volume2 className="mr-2 h-4 w-4" />
-                  語音朗讀
+                  瀏覽器朗讀
                 </>
               )}
             </Button>
@@ -273,6 +394,7 @@ function ArticleContent() {
       <main className="container px-4 py-8 md:px-6">
         <div className="mb-4 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-900 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-200">
           進入此頁後會自動生成「精華短文＋AI 出題」。若想換一組新題目，請按「AI 重新出題」。
+          {naturalStatus && <p className="mt-2">{naturalStatus}</p>}
         </div>
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           <Card>
