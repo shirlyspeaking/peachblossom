@@ -1,0 +1,6 @@
+name = "peachblossom-edge-tts"
+main = "worker.js"
+compatibility_date = "2026-05-01"
+
+[observability]
+enabled = true

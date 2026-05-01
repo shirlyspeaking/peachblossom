@@ -207,12 +207,13 @@
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
-                    <option value="auto">自動選擇普通話</option>
-                    <option value="female">女聲（普通話）</option>
-                    <option value="male">男聲（普通話）</option>
-                    <option value="young">年輕聲線（普通話）</option>
+                    <option value="shimmer">女聲（溫柔普通話）</option>
+                    <option value="onyx">女聲（活潑普通話）</option>
+                    <option value="alloy">男聲（穩定普通話）</option>
+                    <option value="nova">男聲（年輕普通話）</option>
+                    <option value="child">童聲（普通話）</option>
                 </select>
-                <span class="voice-note">若裝置沒有指定音色，系統會自動選擇可用的普通話聲音。</span>
+                <span class="voice-note">優先使用自然普通話；若服務暫時不可用，會自動改用瀏覽器普通話朗讀。</span>
             </div>
         </div>
 
@@ -233,6 +234,7 @@
         const SUMMARY_LENGTH = 150; // 約 150 字
         const READ_HISTORY_KEY = 'enjoyread-read-history';
         const MAX_HISTORY = 50;
+        const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
 
         function getReadHistory() {
             try {
@@ -498,21 +500,16 @@
 
         let articles = [];
         let currentPlayingIdx = -1;
+        let currentAudio = null;
 
-        function readSummary(idx) {
-            if (!('speechSynthesis' in window)) {
-                alert('您的瀏覽器不支援語音朗讀');
-                return;
-            }
+        async function readSummary(idx) {
             const btn = document.getElementById('ttsBtn' + idx);
+            if (!btn) return;
             if (currentPlayingIdx === idx) {
-                speechSynthesis.cancel();
-                currentPlayingIdx = -1;
-                btn.classList.remove('playing');
-                btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
+                stopCurrentSpeech();
                 return;
             }
-            speechSynthesis.cancel();
+            stopCurrentSpeech();
             currentPlayingIdx = idx;
             const summary = articles[idx]?.summary;
             if (!summary) return;
@@ -524,15 +521,81 @@
                 b.textContent = b.dataset.defaultText || '🔊 普通話朗讀摘要';
             });
             btn.classList.add('playing');
-            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+            btn.textContent = '⏳ 生成普通話...';
 
+            try {
+                const res = await fetch(EDGE_TTS_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'tts-1',
+                        input: summary,
+                        voice: getVoicePreference(),
+                        speed: 1
+                    })
+                });
+                if (!res.ok) throw new Error('Edge TTS failed: ' + res.status);
+                const blob = await res.blob();
+                currentAudio = new Audio(URL.createObjectURL(blob));
+                btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+                currentAudio.onended = () => {
+                    if (currentAudio && currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                        try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                    }
+                    currentAudio = null;
+                    resetTtsButton(btn);
+                };
+                currentAudio.onerror = () => {
+                    if (currentAudio && currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                        try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                    }
+                    currentAudio = null;
+                    resetTtsButton(btn);
+                    readWithBrowserMandarin(summary, btn);
+                };
+                await currentAudio.play();
+            } catch (e) {
+                readWithBrowserMandarin(summary, btn);
+            }
+        }
+
+        function stopCurrentSpeech() {
+            speechSynthesis.cancel();
+            if (currentAudio) {
+                if (currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                    try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                }
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (currentPlayingIdx >= 0) {
+                const oldBtn = document.getElementById('ttsBtn' + currentPlayingIdx);
+                if (oldBtn) resetTtsButton(oldBtn);
+            }
+            currentPlayingIdx = -1;
+        }
+
+        function resetTtsButton(btn) {
+            currentPlayingIdx = -1;
+            btn.classList.remove('playing');
+            btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
+        }
+
+        function readWithBrowserMandarin(summary, btn) {
+            if (!('speechSynthesis' in window)) {
+                alert('無法連線至朗讀服務，且您的瀏覽器不支援離線朗讀。請稍後再試或換用其他瀏覽器。');
+                resetTtsButton(btn);
+                return;
+            }
             const u = new SpeechSynthesisUtterance(summary);
             u.lang = 'zh-CN';
             const voice = pickMandarinVoice();
             if (voice) u.voice = voice;
             u.rate = 1;
-            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要'; };
-            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要'; };
+            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+            u.onend = () => resetTtsButton(btn);
+            u.onerror = () => resetTtsButton(btn);
             speechSynthesis.speak(u);
         }
 
@@ -552,10 +615,11 @@
 
             const list = mandarinVoices.length ? mandarinVoices : voices;
             const matchers = {
-                female: ['xiaoxiao', 'xiaoyi', 'huihui', 'female', 'woman', '女'],
-                male: ['yunxi', 'yunyang', 'yunjian', 'male', 'man', '男'],
-                young: ['yunxi', 'xiaoyi', 'xiaoxiao', 'young', 'child', '少年'],
-                auto: ['xiaoxiao', 'yunxi', 'mandarin', '普通话'],
+                shimmer: ['xiaoxiao', 'female', 'woman', '女'],
+                onyx: ['xiaoyi', 'xiaoxiao', 'female', 'woman', '女'],
+                alloy: ['yunyang', 'yunjian', 'male', 'man', '男'],
+                nova: ['yunxi', 'young', 'male', 'man', '男'],
+                child: ['xiaoshuang', 'kid', 'child', '童', 'children'],
             }[preference] || [];
 
             const preferred = list.find((voice) => {

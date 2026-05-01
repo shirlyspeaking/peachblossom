@@ -448,11 +448,20 @@
                         if (item.kind === 'blank') {
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.className = 'cell-inner stroke-ref-char';
-                            innerSp.textContent = item.ch;
-                            innerSp.style.color = '#2f2a28';
-                            innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
-                            innerSp.style.fontWeight = '600';
+                            innerSp.style.fontSize = fs + 'px';
+                            if (hongMode) {
+                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
+                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
+                            } else if (lightPinkHongMode) {
+                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
+                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
+                            } else {
+                                innerSp.className = 'cell-inner stroke-ref-char';
+                                innerSp.textContent = item.ch;
+                                innerSp.style.color = '#2f2a28';
+                                innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
+                                innerSp.style.fontWeight = '600';
+                            }
                         } else if (item.kind === 'stroke') {
                             innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
