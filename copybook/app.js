@@ -51,9 +51,9 @@
     var strokePathLayout = null;
 
     /**
-     * hanzi-writer path 外層縱向平移（與原 -116 相比數值愈大＝字形愈偏下、格內較居中）。
+     * hanzi-writer path 外層縱向平移（值愈接近 0 則字形愈偏下）。
      */
-    var STROKE_PATH_TRANSLATE_Y = -52;
+    var STROKE_PATH_TRANSLATE_Y = -38;
 
     function setStatus() {}
 
@@ -125,54 +125,25 @@
         );
     }
 
-    /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
-    function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs, variant) {
+    /** 筆順字帖專用：實心筆塊＋同色外廓，不依「字帖版本」上色 */
+    function buildStrokePathsSvg(pathDs, fs) {
         var vb = '0 0 1024 1024';
-        var sw = Math.max(13, Math.min(48, Math.round((fs || 36) * 0.82)));
-        var strokeColor;
-        var strokeOpacity = '0.94';
+        var sw = Math.max(14, Math.min(52, Math.round(((fs || 36) + 4) * 0.82)));
         var ty = STROKE_PATH_TRANSLATE_Y;
-        var isReference = variant === 'reference';
-        if (isReference) {
-            strokeColor = '#2f2a28';
-            strokeOpacity = '0.98';
-        } else if (hongMode) {
-            strokeColor = 'rgb(210, 70, 88)';
-        } else if (lightPinkHongMode) {
-            strokeColor = 'rgb(224, 122, 158)';
-        } else {
-            strokeColor = '#3a2f35';
-            strokeOpacity = '0.92';
-        }
+        var strokeColor = '#1d191c';
+        var outlineW = Math.max(14, Math.round(sw * 0.5));
         var parts = '';
         for (var i = 0; i < pathDs.length; i++) {
-            if (isReference) {
-                parts +=
-                    '<path d="' +
-                    escapeSvgAttr(pathDs[i]) +
-                    '" fill="' +
-                    strokeColor +
-                    '" fill-opacity="' +
-                    strokeOpacity +
-                    '" fill-rule="nonzero" stroke="' +
-                    strokeColor +
-                    '" stroke-opacity="' +
-                    strokeOpacity +
-                    '" stroke-width="' +
-                    Math.max(10, Math.round(sw * 0.45)) +
-                    '" stroke-linecap="round" stroke-linejoin="round"/>';
-            } else {
-                parts +=
-                    '<path d="' +
-                    escapeSvgAttr(pathDs[i]) +
-                    '" fill="none" stroke="' +
-                    strokeColor +
-                    '" stroke-opacity="' +
-                    strokeOpacity +
-                    '" stroke-width="' +
-                    sw +
-                    '" stroke-linecap="round" stroke-linejoin="round"/>';
-            }
+            parts +=
+                '<path d="' +
+                escapeSvgAttr(pathDs[i]) +
+                '" fill="' +
+                strokeColor +
+                '" fill-opacity="1" fill-rule="nonzero" stroke="' +
+                strokeColor +
+                '" stroke-opacity="1" stroke-width="' +
+                outlineW +
+                '" stroke-linecap="round" stroke-linejoin="round"/>';
         }
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
@@ -410,11 +381,18 @@
         }
 
         preview.innerHTML = '';
+        var previewHongish =
+            !useStrokePaths &&
+            copyStyle &&
+            (copyStyle.value === 'hong' ||
+                copyStyle.value === 'trace' ||
+                copyStyle.value === 'lightPinkHong');
+        var previewLightPink = !useStrokePaths && copyStyle && copyStyle.value === 'lightPinkHong';
         preview.className =
             'preview preview--' +
             psize +
-            (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
-            (lightPinkHongMode ? ' preview--light-pink-hong' : '');
+            (previewHongish ? ' preview--hong' : '') +
+            (previewLightPink ? ' preview--light-pink-hong' : '');
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -450,35 +428,16 @@
                         if (r === pageRows.length - 1) cell.classList.add('row-last');
 
                         var innerSp = document.createElement('span');
-                        innerSp.className = 'cell-inner cell-inner--hong';
+                        innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
                         innerSp.style.fontSize = fs + 'px';
                         innerSp.style.lineHeight = String(lh);
                         innerSp.style.fontFamily = font;
                         if (item.kind === 'blank') {
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.style.fontSize = fs + 'px';
-                            if (hongMode) {
-                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
-                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
-                            } else if (lightPinkHongMode) {
-                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
-                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
-                            } else {
-                                innerSp.className = 'cell-inner stroke-ref-char';
-                                innerSp.textContent = item.ch;
-                                innerSp.style.color = '#2f2a28';
-                                innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
-                                innerSp.style.fontWeight = '600';
-                            }
+                            innerSp.innerHTML = buildStrokePathsSvg(item.pathDs, fs);
                         } else if (item.kind === 'stroke') {
-                            innerSp.innerHTML = buildStrokePathsSvg(
-                                item.pathDs,
-                                hongMode,
-                                lightPinkHongMode,
-                                fs,
-                                'trace'
-                            );
+                            innerSp.innerHTML = buildStrokePathsSvg(item.pathDs, fs);
                         } else {
                             innerSp.innerHTML = '&nbsp;';
                         }
