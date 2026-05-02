@@ -4,12 +4,25 @@ type Student = {
   id: string;
   name: string;
   avatarUrl: string;
+  score: number;
 };
 
 type Phase = 'idle' | 'spinning' | 'slowing' | 'finished';
 
 const STORAGE_KEY = 'class_monster_demo_students';
+const RULES_ADD_KEY = 'class_monster_demo_rules_add';
+const RULES_DEDUCT_KEY = 'class_monster_demo_rules_deduct';
 const DEFAULT_NAMES = ['小桃', '阿源', '春花', '青山', '白鹿', '星河', '阿竹', '小雲'];
+
+const DEFAULT_RULES_ADD = `範例（可自行修改）：
+• 主動回答 +2
+• 作業准时完成 +1
+• 協助同儕 +2`;
+
+const DEFAULT_RULES_DEDUCT = `範例（可自行修改）：
+• 遲到 −1
+• 未帶指定用品 −1
+• 影響課堂秩序 −2`;
 
 function createId() {
   if ('crypto' in window && 'randomUUID' in crypto) {
@@ -19,29 +32,60 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function createStudents(rawNames: string[]): Student[] {
-  const nameCounts = new Map<string, number>();
-
-  return rawNames.map((name) => {
-    const baseName = name.trim();
-    const currentCount = (nameCounts.get(baseName) ?? 0) + 1;
-    nameCounts.set(baseName, currentCount);
-
-    const finalName = currentCount > 1 ? `${baseName}${currentCount}` : baseName;
-
-    return {
-      id: createId(),
-      name: finalName,
-      avatarUrl: `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${encodeURIComponent(finalName)}`
-    };
-  });
-}
-
 function parseNames(input: string) {
   return input
     .split(/[\n,，、]/)
     .map((name) => name.trim())
     .filter(Boolean);
+}
+
+function makeUniqueName(base: string, taken: Set<string>): string {
+  if (!taken.has(base)) return base;
+  let n = 2;
+  while (taken.has(`${base}${n}`)) n += 1;
+  return `${base}${n}`;
+}
+
+function studentsFromNames(parsed: string[]): Student[] {
+  const taken = new Set<string>();
+  return parsed.map((raw) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    const finalName = makeUniqueName(trimmed, taken);
+    taken.add(finalName);
+    return {
+      id: createId(),
+      name: finalName,
+      avatarUrl: `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${encodeURIComponent(finalName)}`,
+      score: 0,
+    };
+  }).filter(Boolean) as Student[];
+}
+
+function mergeNewStudents(existing: Student[], parsed: string[]): Student[] {
+  const taken = new Set(existing.map((s) => s.name));
+  const additions = parsed
+    .map((raw) => raw.trim())
+    .filter(Boolean)
+    .map((trimmed) => {
+      const finalName = makeUniqueName(trimmed, taken);
+      taken.add(finalName);
+      return {
+        id: createId(),
+        name: finalName,
+        avatarUrl: `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${encodeURIComponent(finalName)}`,
+        score: 0,
+      };
+    });
+  return [...existing, ...additions];
+}
+
+function normalizeStoredStudent(raw: unknown): Student | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  if (typeof o.id !== 'string' || typeof o.name !== 'string' || typeof o.avatarUrl !== 'string') return null;
+  const score = typeof o.score === 'number' && Number.isFinite(o.score) ? o.score : 0;
+  return { id: o.id, name: o.name, avatarUrl: o.avatarUrl, score };
 }
 
 function shuffleStudents(students: Student[]) {
@@ -50,7 +94,12 @@ function shuffleStudents(students: Student[]) {
 
 function App() {
   const [students, setStudents] = useState<Student[]>([]);
-  const [namesInput, setNamesInput] = useState(DEFAULT_NAMES.join('\n'));
+  const [ruleAddText, setRuleAddText] = useState(DEFAULT_RULES_ADD);
+  const [ruleDeductText, setRuleDeductText] = useState(DEFAULT_RULES_DEDUCT);
+  const [singleNameInput, setSingleNameInput] = useState('');
+  const [batchInput, setBatchInput] = useState(DEFAULT_NAMES.join('\n'));
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [pickCount, setPickCount] = useState(1);
   const [activeIndex, setActiveIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -61,22 +110,46 @@ function App() {
 
   const activeStudent = students[activeIndex] ?? students[0];
   const hasClass = students.length > 0;
-  const parsedNameCount = useMemo(() => parseNames(namesInput).length, [namesInput]);
+  const batchParsedCount = useMemo(() => parseNames(batchInput).length, [batchInput]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-
-    try {
-      const restoredStudents = JSON.parse(saved) as Student[];
-      if (Array.isArray(restoredStudents) && restoredStudents.length > 0) {
-        setStudents(restoredStudents);
-        setNamesInput(restoredStudents.map((student) => student.name).join('\n'));
+    const savedStudents = localStorage.getItem(STORAGE_KEY);
+    if (savedStudents) {
+      try {
+        const parsed = JSON.parse(savedStudents) as unknown[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const restored = parsed.map(normalizeStoredStudent).filter(Boolean) as Student[];
+          if (restored.length > 0) {
+            setStudents(restored);
+            setBatchInput(restored.map((s) => s.name).join('\n'));
+          }
+        }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
       }
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
     }
+
+    const ra = localStorage.getItem(RULES_ADD_KEY);
+    const rd = localStorage.getItem(RULES_DEDUCT_KEY);
+    if (typeof ra === 'string' && ra.trim()) setRuleAddText(ra);
+    if (typeof rd === 'string' && rd.trim()) setRuleDeductText(rd);
   }, []);
+
+  useEffect(() => {
+    if (students.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+  }, [students]);
+
+  useEffect(() => {
+    localStorage.setItem(RULES_ADD_KEY, ruleAddText);
+  }, [ruleAddText]);
+
+  useEffect(() => {
+    localStorage.setItem(RULES_DEDUCT_KEY, ruleDeductText);
+  }, [ruleDeductText]);
 
   useEffect(() => {
     if (phase !== 'spinning' && phase !== 'slowing') return undefined;
@@ -108,31 +181,123 @@ function App() {
     };
   }, [phase, pickCount, students]);
 
-  const generateClass = () => {
-    const names = parseNames(namesInput);
+  const replaceClassFromBatch = () => {
+    const names = parseNames(batchInput);
     if (names.length === 0) {
-      setError('請至少輸入一位學生。');
+      setError('清單中至少需要一位姓名。');
       return;
     }
 
-    const nextStudents = createStudents(names);
+    const nextStudents = studentsFromNames(names);
     setStudents(nextStudents);
     setPickCount(1);
     setActiveIndex(0);
     setWinners([]);
     setPhase('idle');
     setError('');
+    setSelectedIds(new Set());
+    setSelectionMode(false);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextStudents));
+  };
+
+  const addSingleStudent = () => {
+    const name = singleNameInput.trim();
+    if (!name) {
+      setError('請輸入姓名。');
+      return;
+    }
+    setStudents((prev) => {
+      const next = mergeNewStudents(prev, [name]);
+      setBatchInput(next.map((s) => s.name).join('\n'));
+      return next;
+    });
+    setSingleNameInput('');
+    setError('');
+    setWinners([]);
+    setPhase('idle');
+  };
+
+  const addBatchStudents = () => {
+    const names = parseNames(batchInput);
+    if (names.length === 0) {
+      setError('批量欄位中沒有有效姓名。');
+      return;
+    }
+    setStudents((prev) => {
+      const next = mergeNewStudents(prev, names);
+      setBatchInput(next.map((s) => s.name).join('\n'));
+      return next;
+    });
+    setError('');
+    setWinners([]);
+    setPhase('idle');
+  };
+
+  const removeStudent = (id: string) => {
+    setStudents((prev) => {
+      const next = prev.filter((s) => s.id !== id);
+      setBatchInput(next.map((s) => s.name).join('\n'));
+      return next;
+    });
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setWinners((w) => w.filter((s) => s.id !== id));
+    setPhase('idle');
+  };
+
+  const toggleSelectStudent = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllStudents = () => {
+    setSelectedIds(new Set(students.map((s) => s.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const deleteSelectedStudents = () => {
+    if (selectedIds.size === 0) return;
+    const ok = window.confirm(`確定要從班級移除選取的 ${selectedIds.size} 位同學嗎？`);
+    if (!ok) return;
+    const removeSet = selectedIds;
+    setStudents((prev) => {
+      const next = prev.filter((s) => !removeSet.has(s.id));
+      setBatchInput(next.map((s) => s.name).join('\n'));
+      return next;
+    });
+    setWinners((w) => w.filter((s) => !removeSet.has(s.id)));
+    setSelectedIds(new Set());
+    setPhase('idle');
+    setSelectionMode(false);
+  };
+
+  const adjustScore = (id: string, delta: number) => {
+    setStudents((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, score: s.score + delta } : s))
+    );
   };
 
   const resetClass = () => {
     window.speechSynthesis?.cancel();
     localStorage.removeItem(STORAGE_KEY);
     setStudents([]);
-    setNamesInput(DEFAULT_NAMES.join('\n'));
+    setBatchInput(DEFAULT_NAMES.join('\n'));
     setPickCount(1);
     setWinners([]);
     setPhase('idle');
+    setError('');
+    setSelectedIds(new Set());
+    setSelectionMode(false);
   };
 
   const startRollCall = () => {
@@ -165,7 +330,7 @@ function App() {
           <p className="eyebrow">Demo only · 不會部署到桃花源</p>
           <h1>班級小怪獸點名</h1>
           <p className="hero-copy">
-            先用獨立 Demo 做出「輸入名單 → 生成怪獸卡 → 隨機點名」的互動感，再決定要不要整合到桃花源。
+            建立名單、設定加分／扣分規則參考，並為每位同學記分。支援單人加入、批量加入，以及從清單覆蓋重建。
           </p>
         </div>
         <div className="hero-monster" aria-hidden="true">
@@ -176,36 +341,108 @@ function App() {
       <section className="workspace">
         <aside className="setup-card">
           <div className="section-heading">
-            <span>1</span>
+            <span>★</span>
             <div>
-              <h2>建立班級</h2>
-              <p>可用換行、逗號或頓號分隔姓名。</p>
+              <h2>加分 · 扣分規則</h2>
+              <p>寫給全班看的說明，僅作參考，不會自動幫學生加減分。</p>
             </div>
           </div>
 
+          <label className="field-label" htmlFor="rules-add">
+            加分規則
+          </label>
           <textarea
-            value={namesInput}
-            onChange={(event) => setNamesInput(event.target.value)}
+            id="rules-add"
+            className="rules-textarea"
+            value={ruleAddText}
+            onChange={(e) => setRuleAddText(e.target.value)}
+            placeholder="例如：舉手回答 +2"
+          />
+
+          <label className="field-label" htmlFor="rules-deduct">
+            扣分規則
+          </label>
+          <textarea
+            id="rules-deduct"
+            className="rules-textarea rules-textarea--deduct"
+            value={ruleDeductText}
+            onChange={(e) => setRuleDeductText(e.target.value)}
+            placeholder="例如：遲到 −1"
+          />
+
+          <div className="section-heading section-heading--spaced">
+            <span>1</span>
+            <div>
+              <h2>學生姓名管理</h2>
+              <p>單筆加入、批量加入，或在卡片上刪除。</p>
+            </div>
+          </div>
+
+          <label className="field-label" htmlFor="single-name">
+            單人加入
+          </label>
+          <div className="single-add-row">
+            <input
+              id="single-name"
+              type="text"
+              value={singleNameInput}
+              onChange={(e) => setSingleNameInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addSingleStudent()}
+              placeholder="輸入姓名後按加入"
+              maxLength={32}
+            />
+            <button className="inline-button" type="button" onClick={addSingleStudent}>
+              加入
+            </button>
+          </div>
+
+          <label className="field-label" htmlFor="batch-names">
+            批量輸入（換行、逗號、頓號皆可）
+          </label>
+          <textarea
+            id="batch-names"
+            className="batch-textarea"
+            value={batchInput}
+            onChange={(e) => setBatchInput(e.target.value)}
             placeholder="小桃&#10;阿源&#10;春花"
           />
 
           <div className="input-meta">
-            <span>{parsedNameCount} 位姓名</span>
+            <span>清單中約 {batchParsedCount} 位姓名</span>
             {error && <strong>{error}</strong>}
           </div>
 
-          <button className="primary-button" type="button" onClick={generateClass}>
-            生成班級怪獸
+          <button className="secondary-button" type="button" onClick={addBatchStudents} disabled={!batchInput.trim()}>
+            批量加入（追加到現有名單）
           </button>
+
+          <button className="primary-button" type="button" onClick={replaceClassFromBatch}>
+            以清單覆蓋重建班級
+          </button>
+          <p className="hint-text">覆蓋重建會重置所有同學的怪獸頭像與分數為 0。</p>
 
           {hasClass && (
             <button className="ghost-button" type="button" onClick={resetClass}>
-              清空 Demo 名單
+              清空全班名單
             </button>
           )}
         </aside>
 
         <section className="class-board">
+          <details className="rules-board-summary">
+            <summary>加分／扣分規則（點開查看）</summary>
+            <div className="rules-board-columns">
+              <div>
+                <strong>加分</strong>
+                <pre className="rules-board-pre">{ruleAddText || '（尚未填寫）'}</pre>
+              </div>
+              <div>
+                <strong>扣分</strong>
+                <pre className="rules-board-pre rules-board-pre--deduct">{ruleDeductText || '（尚未填寫）'}</pre>
+              </div>
+            </div>
+          </details>
+
           <div className="board-header">
             <div>
               <p className="eyebrow">Class Board</p>
@@ -225,6 +462,39 @@ function App() {
             </label>
           </div>
 
+          {hasClass && (
+            <div className="bulk-actions-bar">
+              <button
+                type="button"
+                className={selectionMode ? 'chip-button chip-button--active' : 'chip-button'}
+                onClick={() => {
+                  setSelectionMode((v) => !v);
+                  setSelectedIds(new Set());
+                }}
+              >
+                {selectionMode ? '結束批次選取' : '批次選取'}
+              </button>
+              {selectionMode && (
+                <>
+                  <button type="button" className="chip-button" onClick={selectAllStudents}>
+                    全選
+                  </button>
+                  <button type="button" className="chip-button" onClick={clearSelection}>
+                    清除勾選
+                  </button>
+                  <button
+                    type="button"
+                    className="chip-button chip-button--danger"
+                    disabled={selectedIds.size === 0}
+                    onClick={deleteSelectedStudents}
+                  >
+                    刪除選取（{selectedIds.size}）
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
           {hasClass ? (
             <div className="student-grid">
               {students.map((student, index) => (
@@ -234,13 +504,18 @@ function App() {
                   isActive={phase !== 'idle' && student.id === activeStudent?.id}
                   isWinner={winners.some((winner) => winner.id === student.id)}
                   style={{ animationDelay: `${index * 35}ms` }}
+                  selectionMode={selectionMode}
+                  selected={selectedIds.has(student.id)}
+                  onToggleSelect={() => toggleSelectStudent(student.id)}
+                  onDelete={() => removeStudent(student.id)}
+                  onAdjustScore={(delta) => adjustScore(student.id, delta)}
                 />
               ))}
             </div>
           ) : (
             <div className="empty-state">
               <span>🎒</span>
-              <p>左邊輸入名單後，這裡會出現每位同學的小怪獸卡片。</p>
+              <p>左側加入學生後，這裡會出現每位同學的小怪獸卡片。</p>
             </div>
           )}
         </section>
@@ -268,7 +543,15 @@ function App() {
             <h2>恭喜中選同學</h2>
             <div className="winner-grid">
               {winners.map((winner) => (
-                <StudentCard key={winner.id} student={winner} isWinner size="large" />
+                <StudentCard
+                  key={winner.id}
+                  student={winner}
+                  isWinner
+                  size="large"
+                  onDelete={() => {}}
+                  onAdjustScore={() => {}}
+                  hideControls
+                />
               ))}
             </div>
             <button className="primary-button" type="button" onClick={closeResult}>
@@ -286,20 +569,72 @@ function StudentCard({
   isActive = false,
   isWinner = false,
   size = 'normal',
-  style
+  style,
+  selectionMode = false,
+  selected = false,
+  onToggleSelect,
+  onDelete,
+  onAdjustScore,
+  hideControls = false,
 }: {
   student: Student;
   isActive?: boolean;
   isWinner?: boolean;
   size?: 'normal' | 'large';
   style?: React.CSSProperties;
+  selectionMode?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+  onDelete: () => void;
+  onAdjustScore: (delta: number) => void;
+  hideControls?: boolean;
 }) {
   return (
-    <article className={`student-card ${isActive ? 'is-active' : ''} ${isWinner ? 'is-winner' : ''} ${size}`} style={style}>
+    <article
+      className={`student-card ${isActive ? 'is-active' : ''} ${isWinner ? 'is-winner' : ''} ${selected ? 'is-selected' : ''} ${size}`}
+      style={style}
+    >
+      {!hideControls && selectionMode && (
+        <label className="card-select">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect?.()}
+            aria-label={`選取 ${student.name}`}
+          />
+        </label>
+      )}
+      {!hideControls && (
+        <button
+          type="button"
+          className="card-delete"
+          aria-label={`刪除 ${student.name}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(`確定移除「${student.name}」嗎？`)) onDelete();
+          }}
+        >
+          ×
+        </button>
+      )}
       <div className="avatar-ring">
         <img src={student.avatarUrl} alt={`${student.name} 的小怪獸頭像`} />
       </div>
       <h3>{student.name}</h3>
+      <div className={`score-badge ${student.score > 0 ? 'positive' : student.score < 0 ? 'negative' : ''}`}>
+        積分 {student.score > 0 ? '+' : ''}
+        {student.score}
+      </div>
+      {!hideControls && (
+        <div className="card-score-actions">
+          <button type="button" className="score-btn score-btn--minus" onClick={() => onAdjustScore(-1)}>
+            −1
+          </button>
+          <button type="button" className="score-btn score-btn--plus" onClick={() => onAdjustScore(1)}>
+            +1
+          </button>
+        </div>
+      )}
     </article>
   );
 }
