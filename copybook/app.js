@@ -51,9 +51,9 @@
     var strokePathLayout = null;
 
     /**
-     * hanzi-writer path 外層縱向平移（值愈接近 0 則字形愈偏下）。
+     * hanzi-writer path 外層縱向平移（數值愈小（愈負）則字形愈偏上）。
      */
-    var STROKE_PATH_TRANSLATE_Y = -38;
+    var STROKE_PATH_TRANSLATE_Y = -46;
 
     function setStatus() {}
 
@@ -125,25 +125,54 @@
         );
     }
 
-    /** 筆順字帖專用：實心筆塊＋同色外廓，不依「字帖版本」上色 */
-    function buildStrokePathsSvg(pathDs, fs) {
+    /**
+     * 筆順累進格：path 樣式與「字帖版本」一致（描紅空心／淺粉實心／標準實心），筆畫略加粗便於辨識。
+     */
+    function buildStrokePathsSvg(pathDs, fs, hongMode, lightPinkHongMode) {
         var vb = '0 0 1024 1024';
-        var sw = Math.max(14, Math.min(52, Math.round(((fs || 36) + 4) * 0.82)));
+        var sw = Math.max(15, Math.min(54, Math.round(((fs || 36) + 4) * 0.85)));
         var ty = STROKE_PATH_TRANSLATE_Y;
-        var strokeColor = '#1d191c';
-        var outlineW = Math.max(14, Math.round(sw * 0.5));
         var parts = '';
-        for (var i = 0; i < pathDs.length; i++) {
-            parts +=
-                '<path d="' +
-                escapeSvgAttr(pathDs[i]) +
-                '" fill="' +
-                strokeColor +
-                '" fill-opacity="1" fill-rule="nonzero" stroke="' +
-                strokeColor +
-                '" stroke-opacity="1" stroke-width="' +
-                outlineW +
-                '" stroke-linecap="round" stroke-linejoin="round"/>';
+        var i;
+        if (hongMode) {
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.96" stroke-width="' +
+                    sw +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
+        } else if (lightPinkHongMode) {
+            var pc = 'rgb(224, 122, 158)';
+            var ow = Math.max(12, Math.round(sw * 0.48));
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="' +
+                    pc +
+                    '" fill-opacity="1" fill-rule="nonzero" stroke="' +
+                    pc +
+                    '" stroke-opacity="1" stroke-width="' +
+                    ow +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
+        } else {
+            var dk = '#2a2428';
+            var dow = Math.max(12, Math.round(sw * 0.48));
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="' +
+                    dk +
+                    '" fill-opacity="1" fill-rule="nonzero" stroke="' +
+                    dk +
+                    '" stroke-opacity="1" stroke-width="' +
+                    dow +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
         }
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
@@ -381,18 +410,11 @@
         }
 
         preview.innerHTML = '';
-        var previewHongish =
-            !useStrokePaths &&
-            copyStyle &&
-            (copyStyle.value === 'hong' ||
-                copyStyle.value === 'trace' ||
-                copyStyle.value === 'lightPinkHong');
-        var previewLightPink = !useStrokePaths && copyStyle && copyStyle.value === 'lightPinkHong';
         preview.className =
             'preview preview--' +
             psize +
-            (previewHongish ? ' preview--hong' : '') +
-            (previewLightPink ? ' preview--light-pink-hong' : '');
+            (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
+            (lightPinkHongMode ? ' preview--light-pink-hong' : '');
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -428,17 +450,37 @@
                         if (r === pageRows.length - 1) cell.classList.add('row-last');
 
                         var innerSp = document.createElement('span');
-                        innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
                         innerSp.style.fontSize = fs + 'px';
                         innerSp.style.lineHeight = String(lh);
                         innerSp.style.fontFamily = font;
                         if (item.kind === 'blank') {
+                            innerSp.className = 'cell-inner';
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.innerHTML = buildStrokePathsSvg(item.pathDs, fs);
+                            innerSp.style.fontSize = fs + 'px';
+                            if (hongMode) {
+                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
+                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
+                            } else if (lightPinkHongMode) {
+                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
+                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
+                            } else {
+                                innerSp.className = 'cell-inner stroke-ref-char';
+                                innerSp.textContent = item.ch;
+                                innerSp.style.color = '#2f2a28';
+                                innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
+                                innerSp.style.fontWeight = '600';
+                            }
                         } else if (item.kind === 'stroke') {
-                            innerSp.innerHTML = buildStrokePathsSvg(item.pathDs, fs);
+                            innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
+                            innerSp.innerHTML = buildStrokePathsSvg(
+                                item.pathDs,
+                                fs,
+                                hongMode,
+                                lightPinkHongMode
+                            );
                         } else {
+                            innerSp.className = 'cell-inner';
                             innerSp.innerHTML = '&nbsp;';
                         }
                         cell.appendChild(innerSp);
