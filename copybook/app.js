@@ -50,8 +50,10 @@
     /** 筆畫分解描紅：每格一筆（path），由 hanzi-writer-data 提供 SVG path */
     var strokePathLayout = null;
 
-    /** 每次 render 重設；SVG mask id 在整份 HTML 文件內須全域唯一 */
-    var strokeMaskSeq = 0;
+    /**
+     * hanzi-writer path 外層縱向平移（與原 -116 相比數值愈大＝字形愈偏下、格內較居中）。
+     */
+    var STROKE_PATH_TRANSLATE_Y = -52;
 
     function setStatus() {}
 
@@ -76,7 +78,7 @@
         var ff = escapeSvgAttr(fontFamily);
         var body = escapeSvgText(ch);
         var attrs =
-            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'x="50" y="54" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
             'text-anchor="middle" dominant-baseline="middle" ' +
             'fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.95" ' +
             'stroke-width="' + strokeWU.toFixed(2) + '" stroke-linejoin="round" stroke-linecap="round"';
@@ -96,7 +98,7 @@
         var ff = escapeSvgAttr(fontFamily);
         var body = escapeSvgText(ch);
         var attrs =
-            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'x="50" y="54" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
             'text-anchor="middle" dominant-baseline="middle" ' +
             'fill="rgb(224, 122, 158)" fill-opacity="0.98" stroke="none"';
         return (
@@ -113,7 +115,7 @@
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
-            '<text x="50" y="52" font-size="' +
+            '<text x="50" y="54" font-size="' +
             fontSizeU +
             '" font-family="' +
             ff +
@@ -123,64 +125,68 @@
         );
     }
 
-    /**
-     * 筆順格：用 hanzi-writer 的筆畫封閉區當 mask，只露出所選字型的字形局部。
-     * 形狀仍由筆順庫界定，但像「套」在用戶字體上，比純 path 描紅更接近字體外觀。
-     */
-    function buildStrokeFontMaskedSvg(ch, fontFamily, pathDs, hongMode, lightPinkHongMode, fs, maskId) {
+    /** 筆畫 path 描紅／實色：viewBox 與 hanzi-writer-data 一致 */
+    function buildStrokePathsSvg(pathDs, hongMode, lightPinkHongMode, fs, variant) {
         var vb = '0 0 1024 1024';
-        var ff = escapeSvgAttr(fontFamily);
-        var body = escapeSvgText(ch);
-        var fz = Math.max(560, Math.min(880, Math.round(620 + ((fs || 36) - 24) * 14)));
-        var mid = escapeSvgAttr(maskId);
-        var fillAttr;
-        var strokeAttrs = '';
-        if (hongMode) {
-            var swHong = Math.max(10, Math.min(44, Math.round(fz / 36)));
-            fillAttr = 'fill="none"';
-            strokeAttrs =
-                ' stroke="rgb(210, 70, 88)" stroke-opacity="0.95" stroke-width="' +
-                swHong +
-                '" stroke-linejoin="round" stroke-linecap="round"';
+        var sw = Math.max(13, Math.min(48, Math.round((fs || 36) * 0.82)));
+        var strokeColor;
+        var strokeOpacity = '0.94';
+        var ty = STROKE_PATH_TRANSLATE_Y;
+        var isReference = variant === 'reference';
+        if (isReference) {
+            strokeColor = '#2f2a28';
+            strokeOpacity = '0.98';
+        } else if (hongMode) {
+            strokeColor = 'rgb(210, 70, 88)';
         } else if (lightPinkHongMode) {
-            fillAttr = 'fill="rgb(224, 122, 158)" fill-opacity="0.98"';
+            strokeColor = 'rgb(224, 122, 158)';
         } else {
-            fillAttr = 'fill="#3a2f35" fill-opacity="0.92"';
+            strokeColor = '#3a2f35';
+            strokeOpacity = '0.92';
         }
-        var maskPaths = '';
+        var parts = '';
         for (var i = 0; i < pathDs.length; i++) {
-            maskPaths +=
-                '<path d="' +
-                escapeSvgAttr(pathDs[i]) +
-                '" fill="white" fill-rule="nonzero"/>';
+            if (isReference) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="' +
+                    strokeColor +
+                    '" fill-opacity="' +
+                    strokeOpacity +
+                    '" fill-rule="nonzero" stroke="' +
+                    strokeColor +
+                    '" stroke-opacity="' +
+                    strokeOpacity +
+                    '" stroke-width="' +
+                    Math.max(10, Math.round(sw * 0.45)) +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            } else {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="none" stroke="' +
+                    strokeColor +
+                    '" stroke-opacity="' +
+                    strokeOpacity +
+                    '" stroke-width="' +
+                    sw +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
         }
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
             vb +
             '" preserveAspectRatio="xMidYMid meet" ' +
             'width="100%" height="100%" aria-hidden="true" focusable="false">' +
-            '<defs>' +
-            '<mask id="' +
-            mid +
-            '" maskUnits="userSpaceOnUse" x="-400" y="-400" width="1824" height="1824">' +
-            '<rect x="-400" y="-400" width="1824" height="1824" fill="black"/>' +
-            '<g transform="translate(0,-116)">' +
-            '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
-            maskPaths +
-            '</g></g></mask></defs>' +
-            '<g transform="translate(0,-116)" mask="url(#' +
-            mid +
+            '<g transform="translate(0,' +
+            ty +
             ')">' +
-            '<text x="512" y="532" font-size="' +
-            fz +
-            '" font-family="' +
-            ff +
-            '" text-anchor="middle" dominant-baseline="middle" ' +
-            fillAttr +
-            strokeAttrs +
-            '>' +
-            body +
-            '</text></g></svg>'
+            '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
+            parts +
+            '</g>' +
+            '</g>' +
+            '</svg>'
         );
     }
 
@@ -288,11 +294,6 @@
             if (textInput) textInput.value = '';
             applyStrokePathDefaults();
             if (charsPerLine) charsPerLine.value = String(layout.charsPerRow);
-            if (document.fonts && document.fonts.ready) {
-                try {
-                    await document.fonts.ready;
-                } catch (_) {}
-            }
             renderNow();
         } catch (e) {
             window.alert('筆畫拆解失敗：' + (e.message || String(e)));
@@ -399,8 +400,6 @@
         var useStrokePaths =
             strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
 
-        strokeMaskSeq = 0;
-
         var rows;
         var pages;
         if (useStrokePaths) {
@@ -473,14 +472,12 @@
                                 innerSp.style.fontWeight = '600';
                             }
                         } else if (item.kind === 'stroke') {
-                            innerSp.innerHTML = buildStrokeFontMaskedSvg(
-                                item.ch,
-                                font,
+                            innerSp.innerHTML = buildStrokePathsSvg(
                                 item.pathDs,
                                 hongMode,
                                 lightPinkHongMode,
                                 fs,
-                                'hbStrokeMask' + String(++strokeMaskSeq)
+                                'trace'
                             );
                         } else {
                             innerSp.innerHTML = '&nbsp;';
