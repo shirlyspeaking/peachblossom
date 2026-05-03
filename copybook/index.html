@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=30">
+    <link rel="stylesheet" href="style.css?v=31">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -72,6 +72,28 @@
 
             <div class="row">
                 <div class="field">
+                    <label for="pageBackground">字帖背景</label>
+                    <select id="pageBackground" name="pageBackground">
+                        <option value="none">無（紙色）</option>
+                        <option value="xuan">宣紙／藏經紙</option>
+                        <option value="letter">古代信箋</option>
+                        <option value="scroll">仿古捲軸</option>
+                        <option value="redLines">朱絲欄紋</option>
+                        <option value="cloud">祥雲紋</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cellBackground">格子底色</label>
+                    <select id="cellBackground" name="cellBackground">
+                        <option value="white">白底（最清晰）</option>
+                        <option value="translucent">半透明白</option>
+                        <option value="transparent">透明</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
                     <label for="gridType">格線樣式</label>
                     <select id="gridType">
                         <option value="tian">田字格</option>
@@ -124,6 +146,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=39"></script>
+    <script src="app.js?v=40"></script>
 </body>
 </html>
