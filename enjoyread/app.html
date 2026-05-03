@@ -104,6 +104,15 @@
             display: flex;
             align-items: flex-end;
             gap: 8px;
+        }
+        /* 避免 .wa-bubble-col 用 % 參照 .wa-inner 寬度時形成循環，被算成 0 寬而只見頭像 */
+        .wa-row--bot .wa-inner {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+        }
+        .wa-row--user .wa-inner {
             max-width: 94%;
         }
         .wa-emoji-av {
@@ -121,7 +130,14 @@
         }
         .wa-row--user .wa-emoji-av { background: #d3ebff; }
         .wa-row--bot .wa-emoji-av { background: #f0e6ff; }
-        .wa-bubble-col { min-width: 0; max-width: calc(100% - 44px); }
+        .wa-bubble-col { min-width: 0; }
+        .wa-row--bot .wa-bubble-col {
+            flex: 1 1 auto;
+        }
+        .wa-row--user .wa-bubble-col {
+            flex: 0 1 auto;
+            max-width: calc(100% - 44px);
+        }
         .wa-bubble {
             padding: 8px 11px 9px;
             border-radius: 14px;
@@ -1142,7 +1158,15 @@
                     chatTurns.push({ role: 'assistant', content: errText });
                     return;
                 }
-                const answer = data.answer || data.error || '沒有取得回覆。';
+                let answer =
+                    typeof data.answer === 'string'
+                        ? data.answer
+                        : data.answer != null
+                          ? String(data.answer)
+                          : typeof data.error === 'string'
+                            ? data.error
+                            : '';
+                answer = answer.trim() || '沒有取得回覆。';
                 appendChatRow('assistant', answer);
                 chatTurns.push({ role: 'assistant', content: answer });
             } catch (e) {

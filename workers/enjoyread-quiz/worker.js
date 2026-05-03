@@ -141,6 +141,25 @@ ${articleContent}`;
   }
 }
 
+/** OpenAI 相容：content 可為字串或 [{ type, text }] 陣列 */
+function extractChatCompletionText(data) {
+  const msg = data?.choices?.[0]?.message;
+  if (!msg || typeof msg !== "object") return "";
+  const c = msg.content;
+  if (typeof c === "string") return c.trim();
+  if (Array.isArray(c)) {
+    const joined = c
+      .map((p) => {
+        if (typeof p === "string") return p;
+        if (p && typeof p === "object" && typeof p.text === "string") return p.text;
+        return "";
+      })
+      .join("");
+    return joined.trim();
+  }
+  return "";
+}
+
 async function chatDeepSeekConversation(env, systemPrompt, messages) {
   const baseUrl = (env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
   const model = env.DEEPSEEK_MODEL || "deepseek-chat";
@@ -162,7 +181,7 @@ async function chatDeepSeekConversation(env, systemPrompt, messages) {
     throw new Error(`DeepSeek HTTP ${res.status}: ${t.slice(0, 500)}`);
   }
   const data = await res.json();
-  const text = data.choices?.[0]?.message?.content?.trim() || "";
+  const text = extractChatCompletionText(data);
   if (!text) throw new Error("DeepSeek 回傳為空");
   return text;
 }
@@ -328,7 +347,7 @@ async function chatDeepSeek(env, systemPrompt, userContent, regenerate) {
     throw new Error(`DeepSeek HTTP ${res.status}: ${t.slice(0, 500)}`);
   }
   const data = await res.json();
-  const text = data.choices?.[0]?.message?.content?.trim() || "";
+  const text = extractChatCompletionText(data);
   if (!text) throw new Error("DeepSeek 回傳為空");
   return text;
 }
