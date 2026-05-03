@@ -43,6 +43,8 @@
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
+    var pageBackground = document.getElementById('pageBackground');
+    var cellBackground = document.getElementById('cellBackground');
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
@@ -444,11 +446,26 @@
         }
 
         preview.innerHTML = '';
+        var rawBg = pageBackground && pageBackground.value ? pageBackground.value : 'none';
+        var rawCellBg = cellBackground && cellBackground.value ? cellBackground.value : 'white';
+        var bgVal =
+            rawBg === 'xuan' ||
+            rawBg === 'letter' ||
+            rawBg === 'scroll' ||
+            rawBg === 'redLines' ||
+            rawBg === 'cloud'
+                ? rawBg
+                : 'none';
+        var cellBgVal =
+            rawCellBg === 'translucent' || rawCellBg === 'transparent' ? rawCellBg : 'white';
         preview.className =
             'preview preview--' +
             psize +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
-            (lightPinkHongMode ? ' preview--light-pink-hong' : '');
+            (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
+            (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
+            ' preview--cellbg-' +
+            cellBgVal;
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -617,7 +634,7 @@
             var canvas = await window.html2canvas(pageEls[i], {
                 scale: s,
                 useCORS: true,
-                backgroundColor: '#fffdf8',
+                backgroundColor: null,
                 logging: false
             });
             blobs.push(await canvasToBlob(canvas));
@@ -715,7 +732,7 @@
     }
 
     var inputs = [
-        fontPreset, gridType, copyStyle, fontSize, lineHeight,
+        fontPreset, gridType, copyStyle, pageBackground, cellBackground, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {
