@@ -126,9 +126,9 @@
     }
 
     /**
-     * 筆順第一格樣例：與 buildStrokePathsSvg 同 viewBox／縱向平移，字級對齊 path 字身，格內視覺大小與累進格一致。
+     * 筆順第一格樣例：一律黑色實心；版型與 buildStrokePathsSvg 同 viewBox／縱向平移，字級對齊 path。
      */
-    function buildStrokeWorksheetSampleSvg(ch, fontFamily, fs, hongMode, lightPinkHongMode) {
+    function buildStrokeWorksheetSampleSvg(ch, fontFamily, fs) {
         var vb = '0 0 1024 1024';
         var ty = STROKE_PATH_TRANSLATE_Y;
         var ff = escapeSvgAttr(fontFamily);
@@ -136,18 +136,7 @@
         var fsN = fs || 36;
         var fz = Math.round(Math.max(688, Math.min(806, 726 + (fsN - 36) * 2.35)));
         var yTxt = 542;
-        var textAttrs;
-        if (hongMode) {
-            var swT = Math.max(22, Math.min(50, Math.round(fz / 26)));
-            textAttrs =
-                'fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.96" stroke-width="' +
-                swT +
-                '" stroke-linejoin="round" stroke-linecap="round"';
-        } else if (lightPinkHongMode) {
-            textAttrs = 'fill="rgb(224, 122, 158)" fill-opacity="0.99" stroke="none"';
-        } else {
-            textAttrs = 'fill="#2a2428" stroke="none"';
-        }
+        var textAttrs = 'fill="#1a1719" stroke="none"';
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
             vb +
@@ -503,13 +492,7 @@
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
                             innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
-                            innerSp.innerHTML = buildStrokeWorksheetSampleSvg(
-                                item.ch,
-                                font,
-                                fs,
-                                hongMode,
-                                lightPinkHongMode
-                            );
+                            innerSp.innerHTML = buildStrokeWorksheetSampleSvg(item.ch, font, fs);
                         } else if (item.kind === 'stroke') {
                             innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
                             innerSp.innerHTML = buildStrokePathsSvg(
