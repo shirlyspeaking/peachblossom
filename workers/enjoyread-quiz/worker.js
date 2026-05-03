@@ -10,9 +10,13 @@ export default {
 };
 
 function corsOrigin(request) {
-  const origin = request.headers.get("Origin") || "";
+  const raw = request.headers.get("Origin");
+  // file://、部分 WebView 或反向代理可能沒有 Origin，或為字串 "null"
+  if (raw == null || raw === "" || raw === "null") {
+    return "*";
+  }
   try {
-    const h = new URL(origin).hostname;
+    const h = new URL(raw).hostname;
     if (
       h === "peachspring.cc" ||
       h === "www.peachspring.cc" ||
@@ -20,10 +24,10 @@ function corsOrigin(request) {
       h === "localhost" ||
       h === "127.0.0.1"
     ) {
-      return origin || "*";
+      return raw;
     }
   } catch (_) {
-    /* ignore */
+    return "*";
   }
   return "*";
 }

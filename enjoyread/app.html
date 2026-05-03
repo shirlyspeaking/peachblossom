@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 若你自建 Worker，可改此網址；或在瀏覽器主控台執行：localStorage.setItem('enjoyread_quiz_api_base','https://你的網域') 後重新整理 -->
+    <meta name="enjoyread-quiz-api" content="https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev" />
     <title>悅讀 EnjoyRead - 最新有趣文章</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,9 +32,9 @@
             min-height: 100vh;
         }
         .chat-dock {
-            width: 300px;
-            flex: 0 0 300px;
-            background: color-mix(in oklch, var(--surface) 96%, transparent);
+            width: min(340px, 100vw);
+            flex: 0 0 min(340px, 100vw);
+            background: #efeae2;
             border-right: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
             display: flex;
             flex-direction: column;
@@ -45,59 +47,99 @@
             box-shadow: 4px 0 24px oklch(0.48 0.06 8 / 0.06);
         }
         .chat-dock-header {
-            padding: 16px 14px 12px;
+            flex-shrink: 0;
+            padding: 14px 12px 10px;
             font-weight: 700;
             font-size: 0.95rem;
             color: var(--accent-deep);
-            border-bottom: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             font-family: "Noto Serif TC", serif;
-        }
-        .chat-dock-sub {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-soft);
-            margin-top: 6px;
-            line-height: 1.45;
+            background: color-mix(in oklch, var(--surface) 94%, transparent);
         }
         .chat-context-bar {
-            padding: 10px 12px;
-            font-size: 0.78rem;
+            flex-shrink: 0;
+            padding: 8px 10px;
+            font-size: 0.75rem;
             color: var(--text-soft);
-            background: color-mix(in oklch, var(--accent-soft) 15%, var(--bg-soft) 85%);
-            border-bottom: 1px solid color-mix(in oklch, var(--line) 90%, transparent);
-            max-height: 5.2em;
+            background: color-mix(in oklch, var(--accent-soft) 12%, #fff 88%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            max-height: 4.6em;
             overflow: hidden;
-            line-height: 1.45;
+            line-height: 1.4;
         }
         .chat-context-bar strong { color: var(--accent-deep); }
+        .chat-api-hint {
+            flex-shrink: 0;
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: oklch(0.38 0.12 25);
+            background: color-mix(in oklch, oklch(0.96 0.04 25) 92%, transparent);
+            border-bottom: 1px solid color-mix(in oklch, oklch(0.88 0.06 25) 55%, transparent);
+        }
+        .chat-api-hint summary { cursor: pointer; font-weight: 700; color: var(--accent-deep); }
+        .chat-api-hint code { font-size: 0.68rem; word-break: break-all; }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            overflow-x: hidden;
+            padding: 10px 8px 14px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            min-height: 140px;
+            gap: 0;
+            min-height: 120px;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.04) 2px, rgba(255, 255, 255, 0.04) 4px),
+                #e6ded4;
         }
-        .chat-bubble {
-            max-width: 100%;
-            padding: 10px 12px;
+        .wa-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .wa-row--user { justify-content: flex-end; }
+        .wa-row--bot { justify-content: flex-start; }
+        .wa-inner {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            max-width: 94%;
+        }
+        .wa-emoji-av {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+            line-height: 1;
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        .wa-row--user .wa-emoji-av { background: #d3ebff; }
+        .wa-row--bot .wa-emoji-av { background: #f0e6ff; }
+        .wa-bubble-col { min-width: 0; max-width: calc(100% - 44px); }
+        .wa-bubble {
+            padding: 8px 11px 9px;
             border-radius: 14px;
-            font-size: 0.88rem;
-            line-height: 1.55;
+            font-size: 0.86rem;
+            line-height: 1.52;
             white-space: pre-wrap;
             word-break: break-word;
+            box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
         }
-        .chat-bubble.user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 75%, var(--accent-deep) 25%) 0%, var(--accent-deep) 100%);
-            color: oklch(0.99 0.01 8);
+        .wa-bubble--user {
+            background: #dcf8c6;
+            color: #111b21;
+            border-radius: 14px 14px 4px 14px;
         }
-        .chat-bubble.assistant {
-            align-self: stretch;
-            background: color-mix(in oklch, var(--surface) 92%, transparent);
-            border: 1px solid color-mix(in oklch, var(--line) 85%, transparent);
-            color: var(--text);
+        .wa-bubble--bot {
+            background: #fff;
+            color: #111b21;
+            border-radius: 14px 14px 14px 4px;
         }
         .chat-form {
             padding: 12px;
@@ -325,7 +367,6 @@
             color: var(--text);
             font: inherit;
         }
-        .voice-note { font-size: 0.82rem; color: var(--text-soft); }
         .quiz-section {
             margin-top: 18px;
             padding-top: 18px;
@@ -403,13 +444,16 @@
     <div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDock()" aria-hidden="true"></div>
     <div class="app-layout">
         <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
-            <div class="chat-dock-header">
-                💬 閱讀小助手
-                <div class="chat-dock-sub">DeepSeek：字詞、句意、成語、英文怎麼說等，會參考下方「目前參考」文章的摘要（若已生成 AI 精華短文也會一併納入）。</div>
-            </div>
+            <div class="chat-dock-header">💬 閱讀小助手</div>
             <div class="chat-context-bar" id="chatContextBar">
                 <strong>目前參考：</strong><span id="chatContextTitle">載入中…</span>
             </div>
+            <details class="chat-api-hint" id="chatApiHint">
+                <summary>AI 無法回覆？點此查看常見原因與設定方式</summary>
+                <p style="margin:8px 0 4px">多數情況是 Cloudflare Worker 尚未設定 DeepSeek 金鑰，或 API 網址與你的網域不符。</p>
+                <p style="margin:0 0 4px"><strong>步驟：</strong>在專案目錄執行 <code>npx wrangler secret put DEEPSEEK_API_KEY</code>（綁定 Worker <code>peachblossom-enjoyread-quiz</code>），貼上與 Next 悅讀相同的 Key，再重新整理本頁。</p>
+                <p style="margin:0">若 Worker 網址不同，可改頁首 <code>&lt;meta name="enjoyread-quiz-api"&gt;</code>，或在主控台設定 <code>localStorage.setItem('enjoyread_quiz_api_base','https://…')</code> 後重新整理。</p>
+            </details>
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-form" id="chatForm" onsubmit="submitChat(event)">
                 <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
@@ -435,7 +479,6 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要。左側可向 DeepSeek 小助手提問（字詞、句意、英文說法等）；點「普通話朗讀摘要」可聆聽；點「AI 閱讀題」可獲精華短文與 3 題（需已設定 API）。手機版請用導覽列「小助手」開啟對話欄。</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
@@ -445,7 +488,6 @@
                     <option value="nova">男聲（年輕普通話）</option>
                     <option value="child">童聲（普通話）</option>
                 </select>
-                <span class="voice-note">優先使用自然普通話；若服務暫時不可用，會自動改用瀏覽器普通話朗讀。</span>
             </div>
         </div>
 
@@ -469,9 +511,34 @@
         const READ_HISTORY_KEY = 'enjoyread-read-history';
         const MAX_HISTORY = 50;
         const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
-        const ENJOYREAD_QUIZ_API = 'https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev';
+        function getQuizApiBase() {
+            try {
+                const ls = localStorage.getItem('enjoyread_quiz_api_base');
+                if (ls && /^https:\/\//i.test(ls.trim())) {
+                    return ls.trim().replace(/\/$/, '');
+                }
+            } catch (e) { /* ignore */ }
+            const meta = document.querySelector('meta[name="enjoyread-quiz-api"]');
+            const c = meta && meta.getAttribute('content');
+            if (c && /^https:\/\//i.test(c.trim())) {
+                return c.trim().replace(/\/$/, '');
+            }
+            return 'https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev';
+        }
+        const ENJOYREAD_QUIZ_API = getQuizApiBase();
         const ENJOYREAD_CHAT_API = ENJOYREAD_QUIZ_API + '/chat';
         const QUIZ_CACHE_KEY = 'enjoyread-quiz-cache-v1';
+
+        function openChatApiHint() {
+            const d = document.getElementById('chatApiHint');
+            if (d && d.tagName === 'DETAILS') d.open = true;
+        }
+
+        function maybeExplainApiFailure(status, errBody) {
+            if (status === 503 || (errBody && /DEEPSEEK_API_KEY|未設定|503/i.test(String(errBody)))) {
+                openChatApiHint();
+            }
+        }
 
         function getReadHistory() {
             try {
@@ -849,9 +916,11 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
+                    maybeExplainApiFailure(res.status, data.error);
                     throw new Error(data.error || ('HTTP ' + res.status));
                 }
                 if (data.error && (!data.questions || data.questions.length < 3)) {
+                    maybeExplainApiFailure(503, data.error);
                     throw new Error(data.error);
                 }
                 if (!data.questions || data.questions.length < 3) {
@@ -987,18 +1056,40 @@
             if (!box || box.dataset.seeded === '1') {
                 return;
             }
-            box.innerHTML = '<div class="chat-bubble assistant">你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。</div>';
+            appendChatRow(
+                'assistant',
+                '你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。'
+            );
             box.dataset.seeded = '1';
             chatTurns = [];
         }
 
-        function appendChatBubble(role, text) {
+        function appendChatRow(role, text) {
             const box = document.getElementById('chatMessages');
             if (!box) return;
-            const div = document.createElement('div');
-            div.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'assistant');
-            div.textContent = text;
-            box.appendChild(div);
+            const row = document.createElement('div');
+            row.className = 'wa-row ' + (role === 'user' ? 'wa-row--user' : 'wa-row--bot');
+            const inner = document.createElement('div');
+            inner.className = 'wa-inner';
+            const av = document.createElement('div');
+            av.className = 'wa-emoji-av';
+            av.setAttribute('aria-hidden', 'true');
+            av.textContent = role === 'user' ? '🧑‍🎓' : '🤖';
+            const col = document.createElement('div');
+            col.className = 'wa-bubble-col';
+            const bubble = document.createElement('div');
+            bubble.className = 'wa-bubble ' + (role === 'user' ? 'wa-bubble--user' : 'wa-bubble--bot');
+            bubble.textContent = text;
+            if (role === 'user') {
+                col.appendChild(bubble);
+                inner.appendChild(col);
+                inner.appendChild(av);
+            } else {
+                inner.appendChild(av);
+                inner.appendChild(col);
+            }
+            row.appendChild(inner);
+            box.appendChild(row);
             box.scrollTop = box.scrollHeight;
         }
 
@@ -1023,7 +1114,7 @@
                 return;
             }
 
-            appendChatBubble('user', text);
+            appendChatRow('user', text);
             chatTurns.push({ role: 'user', content: text });
             if (input) input.value = '';
 
@@ -1042,16 +1133,22 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
                     const errText = data.error || ('HTTP ' + res.status);
-                    appendChatBubble('assistant', '抱歉，目前無法取得回覆：' + errText);
+                    maybeExplainApiFailure(res.status, errText);
+                    const shown =
+                        '抱歉，目前無法取得回覆：' +
+                        errText +
+                        (res.status === 503 ? '\n\n請展開上方「AI 無法回覆」區塊，依說明設定 Worker 的 DEEPSEEK_API_KEY。' : '');
+                    appendChatRow('assistant', shown);
                     chatTurns.push({ role: 'assistant', content: errText });
                     return;
                 }
                 const answer = data.answer || data.error || '沒有取得回覆。';
-                appendChatBubble('assistant', answer);
+                appendChatRow('assistant', answer);
                 chatTurns.push({ role: 'assistant', content: answer });
             } catch (e) {
                 const msg = e && e.message ? e.message : '未知錯誤';
-                appendChatBubble('assistant', '連線失敗：' + msg);
+                appendChatRow('assistant', '連線失敗：' + msg + '\n\n請確認網路，或展開上方說明檢查 API 網址與金鑰設定。');
+                openChatApiHint();
                 chatTurns.push({ role: 'assistant', content: msg });
             } finally {
                 if (btn) btn.disabled = false;

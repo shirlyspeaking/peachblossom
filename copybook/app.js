@@ -126,6 +126,51 @@
     }
 
     /**
+     * 筆順第一格樣例：與 buildStrokePathsSvg 同 viewBox／縱向平移，字級對齊 path 字身，格內視覺大小與累進格一致。
+     */
+    function buildStrokeWorksheetSampleSvg(ch, fontFamily, fs, hongMode, lightPinkHongMode) {
+        var vb = '0 0 1024 1024';
+        var ty = STROKE_PATH_TRANSLATE_Y;
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        var fsN = fs || 36;
+        var fz = Math.round(Math.max(688, Math.min(806, 726 + (fsN - 36) * 2.35)));
+        var yTxt = 542;
+        var textAttrs;
+        if (hongMode) {
+            var swT = Math.max(22, Math.min(50, Math.round(fz / 26)));
+            textAttrs =
+                'fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.96" stroke-width="' +
+                swT +
+                '" stroke-linejoin="round" stroke-linecap="round"';
+        } else if (lightPinkHongMode) {
+            textAttrs = 'fill="rgb(224, 122, 158)" fill-opacity="0.99" stroke="none"';
+        } else {
+            textAttrs = 'fill="#2a2428" stroke="none"';
+        }
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
+            vb +
+            '" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<g transform="translate(0,' +
+            ty +
+            ')">' +
+            '<text x="512" y="' +
+            yTxt +
+            '" font-size="' +
+            fz +
+            '" font-family="' +
+            ff +
+            '" text-anchor="middle" dominant-baseline="middle" ' +
+            textAttrs +
+            '>' +
+            body +
+            '</text></g></svg>'
+        );
+    }
+
+    /**
      * 筆順累進格：path 樣式與「字帖版本」一致（描紅空心／淺粉實心／標準實心），筆畫略加粗便於辨識。
      */
     function buildStrokePathsSvg(pathDs, fs, hongMode, lightPinkHongMode) {
@@ -457,20 +502,14 @@
                             innerSp.className = 'cell-inner';
                             innerSp.innerHTML = '&nbsp;';
                         } else if (item.kind === 'ref') {
-                            innerSp.style.fontSize = fs + 'px';
-                            if (hongMode) {
-                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
-                                innerSp.innerHTML = buildHongSvgChar(item.ch, font, fs);
-                            } else if (lightPinkHongMode) {
-                                innerSp.className = 'cell-inner cell-inner--hong stroke-ref-char';
-                                innerSp.innerHTML = buildLightPinkSolidSvgChar(item.ch, font, fs);
-                            } else {
-                                innerSp.className = 'cell-inner stroke-ref-char';
-                                innerSp.textContent = item.ch;
-                                innerSp.style.color = '#2f2a28';
-                                innerSp.style.fontSize = Math.round(cellSize * 0.72) + 'px';
-                                innerSp.style.fontWeight = '600';
-                            }
+                            innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
+                            innerSp.innerHTML = buildStrokeWorksheetSampleSvg(
+                                item.ch,
+                                font,
+                                fs,
+                                hongMode,
+                                lightPinkHongMode
+                            );
                         } else if (item.kind === 'stroke') {
                             innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
                             innerSp.innerHTML = buildStrokePathsSvg(
