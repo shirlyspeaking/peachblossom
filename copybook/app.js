@@ -27,9 +27,9 @@
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
+    var btnGenerate = document.getElementById('btnGenerate');
     var autoStrokeChars = document.getElementById('autoStrokeChars');
     var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
-    var strokeSourceInput = document.getElementById('strokeSourceInput');
     var fontPreset = document.getElementById('fontPreset');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
@@ -42,11 +42,20 @@
     var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
-    var btnBuildStrokeCopybook = document.getElementById('btnBuildStrokeCopybook');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
+    var pageBackground = document.getElementById('pageBackground');
+    var cellBackground = document.getElementById('cellBackground');
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
+
+    /** 筆畫分解描紅：每格一筆（path），由 hanzi-writer-data 提供 SVG path */
+    var strokePathLayout = null;
+
+    /**
+     * hanzi-writer path 外層縱向平移（數值愈小（愈負）則字形愈偏上）。
+     */
+    var STROKE_PATH_TRANSLATE_Y = -46;
 
     function setStatus() {}
 
@@ -71,7 +80,7 @@
         var ff = escapeSvgAttr(fontFamily);
         var body = escapeSvgText(ch);
         var attrs =
-            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'x="50" y="54" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
             'text-anchor="middle" dominant-baseline="middle" ' +
             'fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.95" ' +
             'stroke-width="' + strokeWU.toFixed(2) + '" stroke-linejoin="round" stroke-linecap="round"';
@@ -91,7 +100,7 @@
         var ff = escapeSvgAttr(fontFamily);
         var body = escapeSvgText(ch);
         var attrs =
-            'x="50" y="52" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
+            'x="50" y="54" font-size="' + fontSizeU + '" font-family="' + ff + '" ' +
             'text-anchor="middle" dominant-baseline="middle" ' +
             'fill="rgb(224, 122, 158)" fill-opacity="0.98" stroke="none"';
         return (
@@ -101,60 +110,124 @@
         );
     }
 
-    function getFontFamily() {
-        return fontPreset.value.trim();
+    function buildReferenceFontSvgChar(ch, fontFamily, fs) {
+        var fontSizeU = Math.min(80, Math.max(46, Math.round(54 + (fs - 24) * 0.72)));
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<text x="50" y="54" font-size="' +
+            fontSizeU +
+            '" font-family="' +
+            ff +
+            '" text-anchor="middle" dominant-baseline="middle" fill="#2f2a28">' +
+            body +
+            '</text></svg>'
+        );
     }
 
-    function splitCsvLine(line) {
-        var cells = [];
-        var buf = '';
-        var inQuotes = false;
-        for (var i = 0; i < line.length; i++) {
-            var ch = line[i];
-            if (ch === '"') {
-                if (inQuotes && line[i + 1] === '"') {
-                    buf += '"';
-                    i += 1;
-                } else {
-                    inQuotes = !inQuotes;
-                }
-            } else if (ch === ',' && !inQuotes) {
-                cells.push(buf.trim());
-                buf = '';
-            } else {
-                buf += ch;
+    /**
+     * 筆順第一格樣例：一律黑色實心；版型與 buildStrokePathsSvg 同 viewBox／縱向平移，字級對齊 path。
+     */
+    function buildStrokeWorksheetSampleSvg(ch, fontFamily, fs) {
+        var vb = '0 0 1024 1024';
+        var ty = STROKE_PATH_TRANSLATE_Y;
+        var ff = escapeSvgAttr(fontFamily);
+        var body = escapeSvgText(ch);
+        var fsN = fs || 36;
+        var fz = Math.round(Math.max(688, Math.min(806, 726 + (fsN - 36) * 2.35)));
+        var yTxt = 542;
+        var textAttrs = 'fill="#1a1719" stroke="none"';
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
+            vb +
+            '" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<g transform="translate(0,' +
+            ty +
+            ')">' +
+            '<text x="512" y="' +
+            yTxt +
+            '" font-size="' +
+            fz +
+            '" font-family="' +
+            ff +
+            '" text-anchor="middle" dominant-baseline="middle" ' +
+            textAttrs +
+            '>' +
+            body +
+            '</text></g></svg>'
+        );
+    }
+
+    /**
+     * 筆順累進格：path 樣式與「字帖版本」一致（描紅空心／淺粉實心／標準實心），筆畫略加粗便於辨識。
+     */
+    function buildStrokePathsSvg(pathDs, fs, hongMode, lightPinkHongMode) {
+        var vb = '0 0 1024 1024';
+        var sw = Math.max(15, Math.min(54, Math.round(((fs || 36) + 4) * 0.85)));
+        var ty = STROKE_PATH_TRANSLATE_Y;
+        var parts = '';
+        var i;
+        if (hongMode) {
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="none" stroke="rgb(210, 70, 88)" stroke-opacity="0.96" stroke-width="' +
+                    sw +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
+        } else if (lightPinkHongMode) {
+            var pc = 'rgb(224, 122, 158)';
+            var ow = Math.max(12, Math.round(sw * 0.48));
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="' +
+                    pc +
+                    '" fill-opacity="1" fill-rule="nonzero" stroke="' +
+                    pc +
+                    '" stroke-opacity="1" stroke-width="' +
+                    ow +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
+            }
+        } else {
+            var dk = '#2a2428';
+            var dow = Math.max(12, Math.round(sw * 0.48));
+            for (i = 0; i < pathDs.length; i++) {
+                parts +=
+                    '<path d="' +
+                    escapeSvgAttr(pathDs[i]) +
+                    '" fill="' +
+                    dk +
+                    '" fill-opacity="1" fill-rule="nonzero" stroke="' +
+                    dk +
+                    '" stroke-opacity="1" stroke-width="' +
+                    dow +
+                    '" stroke-linecap="round" stroke-linejoin="round"/>';
             }
         }
-        cells.push(buf.trim());
-        return cells;
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
+            vb +
+            '" preserveAspectRatio="xMidYMid meet" ' +
+            'width="100%" height="100%" aria-hidden="true" focusable="false">' +
+            '<g transform="translate(0,' +
+            ty +
+            ')">' +
+            '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
+            parts +
+            '</g>' +
+            '</g>' +
+            '</svg>'
+        );
     }
 
-    function parseStrokeSourceCsv(text) {
-        var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-        if (lines.length < 2) return '';
-        if (lines[0].indexOf(',') < 0) return '';
-
-        var headers = splitCsvLine(lines[0]).map(function (h) { return h.toLowerCase(); });
-        var hanziIdx = -1;
-        var strokeIdx = -1;
-        for (var i = 0; i < headers.length; i++) {
-            if (hanziIdx < 0 && /^(hanzi|character|char|字|文字)$/.test(headers[i])) hanziIdx = i;
-            if (strokeIdx < 0 && /^(stroke_order|strokes|stroke|筆順|笔顺|筆畫|笔画)$/.test(headers[i])) strokeIdx = i;
-        }
-        if (hanziIdx < 0 || strokeIdx < 0) return '';
-
-        var out = [];
-        for (var li = 1; li < lines.length; li++) {
-            var cells = splitCsvLine(lines[li]);
-            var hanzi = (cells[hanziIdx] || '').trim();
-            var strokes = (cells[strokeIdx] || '').trim();
-            if (!hanzi || !strokes) continue;
-            strokes = strokes.replace(/[，、]/g, ' ').replace(/\s+/g, ' ').trim();
-            out.push(hanzi);
-            out.push(strokes);
-            out.push('');
-        }
-        return out.join('\n').trim();
+    function getFontFamily() {
+        return fontPreset.value.trim();
     }
 
     function uniqHanziChars(text) {
@@ -171,78 +244,77 @@
         return out;
     }
 
-    async function fetchStrokeCount(ch) {
+    function clearStrokePathLayout() {
+        strokePathLayout = null;
+    }
+
+    async function fetchHanziWriterData(ch) {
         var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(ch) + '.json';
         var res = await fetch(url, { cache: 'force-cache' });
-        if (!res.ok) throw new Error('找不到「' + ch + '」的筆順資料');
+        if (!res.ok) throw new Error('找不到「' + ch + '」的筆畫資料（字庫無此字）');
         var data = await res.json();
         if (!data || !Array.isArray(data.strokes) || data.strokes.length === 0) {
-            throw new Error('「' + ch + '」筆順資料格式不完整');
+            throw new Error('「' + ch + '」筆畫資料不完整');
         }
-        return data.strokes.length;
+        return data;
     }
 
-    async function buildStrokeRowsFromChars(chars) {
+    async function buildStrokePathLayoutRows(chars) {
+        var blocks = [];
+        var totalCells = 0;
+        for (var ci = 0; ci < chars.length; ci++) {
+            var ch = chars[ci];
+            var data = await fetchHanziWriterData(ch);
+            var strokes = data.strokes;
+            var cells = [{ kind: 'ref', ch: ch, total: strokes.length, pathDs: strokes }];
+            for (var si = 0; si < strokes.length; si++) {
+                cells.push({
+                    kind: 'stroke',
+                    ch: ch,
+                    index: si + 1,
+                    total: strokes.length,
+                    pathDs: strokes.slice(0, si + 1)
+                });
+            }
+            totalCells += cells.length;
+            blocks.push(cells);
+        }
+
+        var avgCells = blocks.length ? totalCells / blocks.length : 1;
+        var targetGridPerRow = 18;
+        var charsPerRow = Math.max(1, Math.min(6, Math.floor(targetGridPerRow / avgCells) || 1));
         var rows = [];
-        for (var i = 0; i < chars.length; i++) {
-            var ch = chars[i];
-            var count = await fetchStrokeCount(ch);
-            var labels = [];
-            for (var s = 1; s <= count; s++) labels.push('第' + s + '筆');
-            rows.push(ch + ': ' + labels.join('、'));
-        }
-        return rows.join('\n');
-    }
+        var maxCols = 1;
 
-    function parseStrokeSource(raw) {
-        var text = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-        if (!text) return '';
-        var csvParsed = parseStrokeSourceCsv(text);
-        if (csvParsed) return csvParsed;
-        var lines = text.split('\n');
-        var out = [];
-
-        for (var i = 0; i < lines.length; i++) {
-            var row = lines[i].trim();
-            if (!row) continue;
-            var sep = row.indexOf(':');
-            if (sep < 0) sep = row.indexOf('：');
-            if (sep < 0) continue;
-
-            var hanzi = row.slice(0, sep).trim();
-            var strokes = row.slice(sep + 1).trim();
-            if (!hanzi || !strokes) continue;
-
-            strokes = strokes
-                .replace(/[，、]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-            out.push(hanzi);
-            out.push(strokes);
-            out.push('');
+        for (var i = 0; i < blocks.length; i += charsPerRow) {
+            var rowBlocks = blocks.slice(i, i + charsPerRow);
+            var rowCells = [];
+            for (var bi = 0; bi < rowBlocks.length; bi++) {
+                if (bi > 0) rowCells.push({ kind: 'blank' });
+                rowCells = rowCells.concat(rowBlocks[bi]);
+            }
+            if (rowCells.length > maxCols) maxCols = rowCells.length;
+            rows.push(rowCells);
         }
 
-        return out.join('\n').trim();
+        return { rows: rows, cpl: maxCols, charsPerRow: charsPerRow };
     }
 
-    function applyStrokeDefaults() {
-        if (copyStyle) copyStyle.value = 'lightPinkHong';
+    function applyStrokePathDefaults() {
         if (gridType) gridType.value = 'tian';
-        if (fontSize) fontSize.value = '34';
-        if (lineHeight) lineHeight.value = '1.2';
-        if (charsPerLine) charsPerLine.value = '8';
+        if (fontSize) fontSize.value = '40';
+        if (lineHeight) lineHeight.value = '1.15';
+        if (charsPerLine) charsPerLine.value = '1';
         if (linesPerPage) linesPerPage.value = '10';
     }
 
-    function onBuildStrokeCopybook() {
-        var transformed = parseStrokeSource(strokeSourceInput ? strokeSourceInput.value : '');
-        if (!transformed) {
-            window.alert('請輸入筆順資料。支援格式：\n1) 永: 點、橫、豎、鉤\n2) CSV（含 hanzi/字 與 stroke_order/筆順 欄）');
-            return;
+    function chunkLayoutRows(rows, lpp) {
+        var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
+        var pages = [];
+        for (var i = 0; i < rows.length; i += n) {
+            pages.push(rows.slice(i, i + n));
         }
-        textInput.value = transformed;
-        applyStrokeDefaults();
-        renderNow();
+        return pages;
     }
 
     async function onAutoStrokeFromChars() {
@@ -253,11 +325,14 @@
         }
         if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
         try {
-            var sourceText = await buildStrokeRowsFromChars(chars);
-            if (strokeSourceInput) strokeSourceInput.value = sourceText;
-            onBuildStrokeCopybook();
+            var layout = await buildStrokePathLayoutRows(chars);
+            strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
+            if (textInput) textInput.value = '';
+            applyStrokePathDefaults();
+            if (charsPerLine) charsPerLine.value = String(layout.charsPerRow);
+            renderNow();
         } catch (e) {
-            window.alert('自動拆解失敗：' + (e.message || String(e)));
+            window.alert('筆畫拆解失敗：' + (e.message || String(e)));
         } finally {
             if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = false;
         }
@@ -275,7 +350,7 @@
     function buildRows(text, cpl) {
         var lines = text.split('\n');
         var rows = [];
-        var c = Math.max(4, Math.min(20, parseInt(cpl, 10) || 12));
+        var c = Math.max(1, Math.min(20, parseInt(cpl, 10) || 12));
 
         for (var li = 0; li < lines.length; li++) {
             var line = lines[li];
@@ -315,7 +390,7 @@
     }
 
     function chunkPages(rows, lpp) {
-        var n = Math.max(4, Math.min(20, parseInt(lpp, 10) || 12));
+        var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
         for (var i = 0; i < rows.length; i += n) {
             pages.push(rows.slice(i, i + n));
@@ -333,8 +408,8 @@
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         var raw = textInput.value;
         var text = normalizeText(raw);
-        var cpl = parseInt(charsPerLine.value, 10) || 12;
-        var lpp = parseInt(linesPerPage.value, 10) || 12;
+        var cpl = Math.max(1, Math.min(20, parseInt(charsPerLine.value, 10) || 12));
+        var lpp = Math.max(1, Math.min(20, parseInt(linesPerPage.value, 10) || 12));
         var fsMin = parseInt(fontSize.getAttribute('min'), 10);
         var fsMax = parseInt(fontSize.getAttribute('max'), 10);
         if (!Number.isFinite(fsMin)) fsMin = 18;
@@ -358,15 +433,39 @@
             (copyStyle.value === 'hong' || copyStyle.value === 'trace');
         var lightPinkHongMode = copyStyle && copyStyle.value === 'lightPinkHong';
 
-        var rows = buildRows(text, cpl);
-        var pages = chunkPages(rows, lpp);
+        var useStrokePaths =
+            strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
+
+        var rows;
+        var pages;
+        if (useStrokePaths) {
+            pages = chunkLayoutRows(strokePathLayout.rows, lpp);
+        } else {
+            rows = buildRows(text, cpl);
+            pages = chunkPages(rows, lpp);
+        }
 
         preview.innerHTML = '';
+        var rawBg = pageBackground && pageBackground.value ? pageBackground.value : 'none';
+        var rawCellBg = cellBackground && cellBackground.value ? cellBackground.value : 'white';
+        var bgVal =
+            rawBg === 'xuan' ||
+            rawBg === 'letter' ||
+            rawBg === 'scroll' ||
+            rawBg === 'redLines' ||
+            rawBg === 'cloud'
+                ? rawBg
+                : 'none';
+        var cellBgVal =
+            rawCellBg === 'translucent' || rawCellBg === 'transparent' ? rawCellBg : 'white';
         preview.className =
             'preview preview--' +
             psize +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
-            (lightPinkHongMode ? ' preview--light-pink-hong' : '');
+            (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
+            (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
+            ' preview--cellbg-' +
+            cellBgVal;
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -380,49 +479,93 @@
             pageEl.appendChild(title);
 
             for (var r = 0; r < pageRows.length; r++) {
-                var rowStr = pageRows[r];
-                var chars = padRowToLength(rowStr, cpl);
                 var grid = document.createElement('div');
                 grid.className = 'grid';
-                /* 方格邊長隨字級與行高倍率一併變化，避免只拉高、寬度仍被 1fr 拉扁 */
                 var cellSize = Math.max(Math.round(fs * lh), fs + 8);
-                grid.style.gridTemplateColumns = 'repeat(' + cpl + ', ' + cellSize + 'px)';
-                grid.style.gridTemplateRows = cellSize + 'px';
 
-                for (var c = 0; c < chars.length; c++) {
-                    var ch = chars[c];
-                    var cell = document.createElement('div');
-                    cell.className = cellClassForGrid(gtype);
-                    cell.style.width = cellSize + 'px';
-                    cell.style.minWidth = cellSize + 'px';
-                    cell.style.height = cellSize + 'px';
-                    cell.style.minHeight = cellSize + 'px';
+                if (useStrokePaths) {
+                    var layoutCpl = strokePathLayout.cpl || 1;
+                    var rowCells = pageRows[r] || [];
+                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
+                    grid.style.gridTemplateRows = cellSize + 'px';
 
-                    var isLastCol = c === cpl - 1;
-                    var isLastRow = r === pageRows.length - 1;
-                    if (isLastCol) cell.classList.add('col-last');
-                    if (isLastRow) cell.classList.add('row-last');
+                    for (var sc = 0; sc < layoutCpl; sc++) {
+                        var item = rowCells[sc] || { kind: 'blank' };
+                        var cell = document.createElement('div');
+                        cell.className = cellClassForGrid(gtype);
+                        cell.style.width = cellSize + 'px';
+                        cell.style.minWidth = cellSize + 'px';
+                        cell.style.height = cellSize + 'px';
+                        cell.style.minHeight = cellSize + 'px';
+                        if (sc === layoutCpl - 1) cell.classList.add('col-last');
+                        if (r === pageRows.length - 1) cell.classList.add('row-last');
 
-                    var inner = document.createElement('span');
-                    inner.className = 'cell-inner';
-                    inner.style.fontSize = fs + 'px';
-                    inner.style.lineHeight = String(lh);
-                    inner.style.fontFamily = font;
-                    if (ch === ' ') {
-                        inner.innerHTML = '&nbsp;';
-                    } else if (ch === '') {
-                        inner.innerHTML = '&nbsp;';
-                    } else if (hongMode) {
-                        inner.className = 'cell-inner cell-inner--hong';
-                        inner.innerHTML = buildHongSvgChar(ch, font, fs);
-                    } else if (lightPinkHongMode) {
-                        inner.className = 'cell-inner cell-inner--hong';
-                        inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
-                    } else {
-                        inner.textContent = ch;
+                        var innerSp = document.createElement('span');
+                        innerSp.style.fontSize = fs + 'px';
+                        innerSp.style.lineHeight = String(lh);
+                        innerSp.style.fontFamily = font;
+                        if (item.kind === 'blank') {
+                            innerSp.className = 'cell-inner';
+                            innerSp.innerHTML = '&nbsp;';
+                        } else if (item.kind === 'ref') {
+                            innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
+                            innerSp.innerHTML = buildStrokeWorksheetSampleSvg(item.ch, font, fs);
+                        } else if (item.kind === 'stroke') {
+                            innerSp.className = 'cell-inner cell-inner--hong stroke-worksheet-char';
+                            innerSp.innerHTML = buildStrokePathsSvg(
+                                item.pathDs,
+                                fs,
+                                hongMode,
+                                lightPinkHongMode
+                            );
+                        } else {
+                            innerSp.className = 'cell-inner';
+                            innerSp.innerHTML = '&nbsp;';
+                        }
+                        cell.appendChild(innerSp);
+                        grid.appendChild(cell);
                     }
-                    cell.appendChild(inner);
-                    grid.appendChild(cell);
+                } else {
+                    var rowStr = pageRows[r];
+                    var chars = padRowToLength(rowStr, cpl);
+                    grid.style.gridTemplateColumns = 'repeat(' + cpl + ', ' + cellSize + 'px)';
+                    grid.style.gridTemplateRows = cellSize + 'px';
+
+                    for (var c = 0; c < chars.length; c++) {
+                        var ch = chars[c];
+                        var cell2 = document.createElement('div');
+                        cell2.className = cellClassForGrid(gtype);
+                        cell2.style.width = cellSize + 'px';
+                        cell2.style.minWidth = cellSize + 'px';
+                        cell2.style.height = cellSize + 'px';
+                        cell2.style.minHeight = cellSize + 'px';
+
+                        var isLastCol = c === cpl - 1;
+                        var isLastRow = r === pageRows.length - 1;
+                        if (isLastCol) cell2.classList.add('col-last');
+                        if (isLastRow) cell2.classList.add('row-last');
+
+                        var inner = document.createElement('span');
+                        inner.className = 'cell-inner';
+                        inner.style.fontSize = fs + 'px';
+                        inner.style.lineHeight = String(lh);
+                        inner.style.fontFamily = font;
+                        if (ch === ' ') {
+                            inner.innerHTML = '&nbsp;';
+                        } else if (ch === '') {
+                            inner.innerHTML = '&nbsp;';
+                        } else if (hongMode) {
+                            inner.className = 'cell-inner cell-inner--hong';
+                            inner.innerHTML = buildHongSvgChar(ch, font, fs);
+                        } else if (lightPinkHongMode) {
+                            inner.className = 'cell-inner cell-inner--hong';
+                            inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
+                        } else {
+                            inner.textContent = ch;
+                        }
+                        cell2.appendChild(inner);
+                        grid.appendChild(cell2);
+                    }
                 }
                 pageEl.appendChild(grid);
             }
@@ -491,7 +634,7 @@
             var canvas = await window.html2canvas(pageEls[i], {
                 scale: s,
                 useCORS: true,
-                backgroundColor: '#fffdf8',
+                backgroundColor: null,
                 logging: false
             });
             blobs.push(await canvasToBlob(canvas));
@@ -589,7 +732,7 @@
     }
 
     var inputs = [
-        textInput, fontPreset, gridType, copyStyle, fontSize, lineHeight,
+        fontPreset, gridType, copyStyle, pageBackground, cellBackground, fontSize, lineHeight,
         pageSize, charsPerLine, linesPerPage
     ];
     inputs.forEach(function (el) {
@@ -597,10 +740,20 @@
         el.addEventListener('input', scheduleRender);
         el.addEventListener('change', scheduleRender);
     });
+    if (textInput) {
+        textInput.addEventListener('input', function () {
+            clearStrokePathLayout();
+            scheduleRender();
+        });
+        textInput.addEventListener('change', scheduleRender);
+    }
+    if (btnGenerate) btnGenerate.addEventListener('click', function () {
+        clearStrokePathLayout();
+        renderNow();
+    });
     if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
-    if (btnBuildStrokeCopybook) btnBuildStrokeCopybook.addEventListener('click', onBuildStrokeCopybook);
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=26">
+    <link rel="stylesheet" href="style.css?v=32">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -35,17 +35,12 @@
             <label for="textInput">字帖內容</label>
             <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
+            <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
 
             <div class="field">
-                <label for="autoStrokeChars">自動拆解筆順</label>
-                <input id="autoStrokeChars" type="text" placeholder="輸入漢字（可一次多字，如：永木水）" autocomplete="off">
-                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">自動拆解並生成字帖</button>
-            </div>
-
-            <div class="field">
-                <label for="strokeSourceInput">筆順資料</label>
-                <textarea id="strokeSourceInput" rows="7" placeholder="支援兩種格式：&#10;1) 每行一字：永: 點、橫、豎、鉤、提、撇、撇、捺&#10;2) CSV：hanzi,stroke_order"></textarea>
-                <button id="btnBuildStrokeCopybook" type="button" class="btn-secondary">一鍵生成筆順字帖</button>
+                <label for="autoStrokeChars">筆順字帖輸入</label>
+                <input id="autoStrokeChars" type="text" placeholder="輸入漢字；累進式描紅（例：永）" autocomplete="off">
+                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">筆順字帖</button>
             </div>
 
             <div class="field">
@@ -71,6 +66,28 @@
                         <option value="standard">標準墨色</option>
                         <option value="hong">描紅（紅框鏤空）</option>
                         <option value="lightPinkHong">淺粉色描紅</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label for="pageBackground">字帖背景</label>
+                    <select id="pageBackground" name="pageBackground">
+                        <option value="none">無（紙色）</option>
+                        <option value="xuan">宣紙／藏經紙</option>
+                        <option value="letter">古代信箋</option>
+                        <option value="scroll">仿古捲軸</option>
+                        <option value="redLines">朱絲欄紋</option>
+                        <option value="cloud">祥雲紋</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cellBackground">格子底色</label>
+                    <select id="cellBackground" name="cellBackground">
+                        <option value="white">白底（最清晰）</option>
+                        <option value="translucent">半透明白</option>
+                        <option value="transparent">透明</option>
                     </select>
                 </div>
             </div>
@@ -108,11 +125,11 @@
             <div class="row">
                 <div class="field">
                     <label for="charsPerLine">每行字數</label>
-                    <input id="charsPerLine" type="number" min="4" max="20" value="12">
+                    <input id="charsPerLine" type="number" min="1" max="20" value="12">
                 </div>
                 <div class="field">
                     <label for="linesPerPage">每頁行數</label>
-                    <input id="linesPerPage" type="number" min="4" max="20" value="12">
+                    <input id="linesPerPage" type="number" min="1" max="20" value="12">
                 </div>
             </div>
 
@@ -129,6 +146,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=22"></script>
+    <script src="app.js?v=40"></script>
 </body>
 </html>

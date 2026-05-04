@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 若你自建 Worker，可改此網址；或在瀏覽器主控台執行：localStorage.setItem('enjoyread_quiz_api_base','https://你的網域') 後重新整理 -->
+    <meta name="enjoyread-quiz-api" content="https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev" />
     <title>悅讀 EnjoyRead - 最新有趣文章</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +25,202 @@
             --line-strong: oklch(0.72 0.06 10 / 0.55);
             --shadow-soft: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
             --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .app-layout {
+            display: flex;
+            align-items: stretch;
+            min-height: 100vh;
+        }
+        .chat-dock {
+            width: min(340px, 100vw);
+            flex: 0 0 min(340px, 100vw);
+            background: #efeae2;
+            border-right: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            height: 100vh;
+            max-height: 100vh;
+            z-index: 50;
+            box-shadow: 4px 0 24px oklch(0.48 0.06 8 / 0.06);
+        }
+        .chat-dock-header {
+            flex-shrink: 0;
+            padding: 14px 12px 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--accent-deep);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            font-family: "Noto Serif TC", serif;
+            background: color-mix(in oklch, var(--surface) 94%, transparent);
+        }
+        .chat-context-bar {
+            flex-shrink: 0;
+            padding: 8px 10px;
+            font-size: 0.75rem;
+            color: var(--text-soft);
+            background: color-mix(in oklch, var(--accent-soft) 12%, #fff 88%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            max-height: 4.6em;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        .chat-context-bar strong { color: var(--accent-deep); }
+        .chat-api-hint {
+            flex-shrink: 0;
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: oklch(0.38 0.12 25);
+            background: color-mix(in oklch, oklch(0.96 0.04 25) 92%, transparent);
+            border-bottom: 1px solid color-mix(in oklch, oklch(0.88 0.06 25) 55%, transparent);
+        }
+        .chat-api-hint summary { cursor: pointer; font-weight: 700; color: var(--accent-deep); }
+        .chat-api-hint code { font-size: 0.68rem; word-break: break-all; }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 10px 8px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            min-height: 120px;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.04) 2px, rgba(255, 255, 255, 0.04) 4px),
+                #e6ded4;
+        }
+        .wa-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .wa-row--user { justify-content: flex-end; }
+        .wa-row--bot { justify-content: flex-start; }
+        .wa-inner {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        /* 避免 .wa-bubble-col 用 % 參照 .wa-inner 寬度時形成循環，被算成 0 寬而只見頭像 */
+        .wa-row--bot .wa-inner {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+        }
+        .wa-row--user .wa-inner {
+            max-width: 94%;
+        }
+        .wa-emoji-av {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+            line-height: 1;
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        .wa-row--user .wa-emoji-av { background: #d3ebff; }
+        .wa-row--bot .wa-emoji-av { background: #f0e6ff; }
+        .wa-bubble-col { min-width: 0; }
+        .wa-row--bot .wa-bubble-col {
+            flex: 1 1 auto;
+        }
+        .wa-row--user .wa-bubble-col {
+            flex: 0 1 auto;
+            max-width: calc(100% - 44px);
+        }
+        .wa-bubble {
+            padding: 8px 11px 9px;
+            border-radius: 14px;
+            font-size: 0.86rem;
+            line-height: 1.52;
+            white-space: pre-wrap;
+            word-break: break-word;
+            box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        }
+        .wa-bubble--user {
+            background: #dcf8c6;
+            color: #111b21;
+            border-radius: 14px 14px 4px 14px;
+        }
+        .wa-bubble--bot {
+            background: #fff;
+            color: #111b21;
+            border-radius: 14px 14px 14px 4px;
+        }
+        .chat-form {
+            padding: 12px;
+            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            background: color-mix(in oklch, var(--surface) 88%, transparent);
+        }
+        .chat-form textarea {
+            width: 100%;
+            min-height: 64px;
+            max-height: 140px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
+            font: inherit;
+            font-size: 0.88rem;
+            resize: vertical;
+            margin-bottom: 8px;
+        }
+        .chat-form-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .chat-send-btn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: none;
+            background: var(--accent-deep);
+            color: oklch(0.99 0.01 8);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+        .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .chat-clear-btn {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in oklch, var(--line) 80%, transparent);
+            background: transparent;
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .app-main { flex: 1; min-width: 0; }
+        .chat-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: oklch(0.2 0.02 8 / 0.38);
+            z-index: 90;
+        }
+        .chat-backdrop.show { display: block; }
+        .nav-chat-toggle { display: none; }
+        @media (max-width: 900px) {
+            .nav-chat-toggle { display: inline-flex; align-items: center; }
+            .chat-dock {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                transform: translateX(-105%);
+                transition: transform 0.25s var(--ease);
+                z-index: 100;
+                box-shadow: 8px 0 32px oklch(0.35 0.05 8 / 0.22);
+            }
+            .chat-dock.open { transform: translateX(0); }
+        }
+        @media (min-width: 901px) {
+            .chat-backdrop.show { display: none !important; }
         }
         body {
             font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -163,11 +361,128 @@
         }
         .refresh-articles-btn:hover { transform: translateY(-1px); opacity: 0.96; }
         .refresh-articles-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: -14px 0 28px;
+            padding: 12px 14px;
+            border: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+            border-radius: 16px;
+            background: color-mix(in oklch, var(--surface) 90%, transparent);
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+        .voice-controls select {
+            min-width: 180px;
+            padding: 8px 12px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 50%, transparent);
+            border-radius: 999px;
+            background: color-mix(in oklch, var(--surface) 96%, transparent);
+            color: var(--text);
+            font: inherit;
+        }
+        .quiz-section {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
+        }
+        .quiz-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .quiz-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in oklch, var(--line-strong) 55%, transparent);
+            background: color-mix(in oklch, var(--surface) 94%, transparent);
+            color: var(--accent-deep);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s var(--ease), box-shadow 0.15s;
+        }
+        .quiz-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px oklch(0.5 0.08 10 / 0.1); }
+        .quiz-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .quiz-btn-primary {
+            background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 35%, var(--surface) 65%) 0%, var(--surface) 100%);
+            border-color: color-mix(in oklch, var(--accent) 40%, var(--line) 60%);
+        }
+        .quiz-status { font-size: 0.85rem; color: var(--text-soft); min-height: 1.2em; margin-bottom: 10px; }
+        .quiz-status.err { color: oklch(0.46 0.16 24); }
+        .ai-summary-block {
+            font-size: 0.92rem;
+            line-height: 1.75;
+            color: var(--text);
+            background: color-mix(in oklch, var(--accent-soft) 22%, var(--surface) 78%);
+            border: 1px solid color-mix(in oklch, var(--line) 82%, transparent);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .ai-summary-block h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 8px; }
+        .quiz-q { margin-bottom: 18px; }
+        .quiz-q-title { font-weight: 600; color: var(--accent-deep); margin-bottom: 10px; line-height: 1.5; }
+        .quiz-options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklch, var(--line) 85%, transparent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: var(--text);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .quiz-options label:hover { background: color-mix(in oklch, var(--surface) 70%, var(--accent-soft) 30%); }
+        .quiz-options label input { margin-top: 3px; flex-shrink: 0; }
+        .quiz-options label.reveal-correct { border-color: oklch(0.55 0.14 145); background: color-mix(in oklch, oklch(0.93 0.05 145) 75%, transparent); }
+        .quiz-options label.reveal-wrong { border-color: oklch(0.55 0.18 25); background: color-mix(in oklch, oklch(0.95 0.04 25) 70%, transparent); }
+        .quiz-explanation {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: color-mix(in oklch, var(--bg-soft) 88%, transparent);
+            display: none;
+        }
+        .quiz-explanation.show { display: block; }
+        .quiz-submit-row { margin-top: 8px; }
+        .quiz-score { font-weight: 600; color: var(--accent-deep); margin-top: 12px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
+    <div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDock()" aria-hidden="true"></div>
+    <div class="app-layout">
+        <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
+            <div class="chat-dock-header">💬 閱讀小助手</div>
+            <div class="chat-context-bar" id="chatContextBar">
+                <strong>目前參考：</strong><span id="chatContextTitle">載入中…</span>
+            </div>
+            <details class="chat-api-hint" id="chatApiHint">
+                <summary>AI 無法回覆？點此查看常見原因與設定方式</summary>
+                <p style="margin:8px 0 4px">多數情況是 Cloudflare Worker 尚未設定 DeepSeek 金鑰，或 API 網址與你的網域不符。</p>
+                <p style="margin:0 0 4px"><strong>步驟：</strong>在專案目錄執行 <code>npx wrangler secret put DEEPSEEK_API_KEY</code>（綁定 Worker <code>peachblossom-enjoyread-quiz</code>），貼上與 Next 悅讀相同的 Key，再重新整理本頁。</p>
+                <p style="margin:0">若 Worker 網址不同，可改頁首 <code>&lt;meta name="enjoyread-quiz-api"&gt;</code>，或在主控台設定 <code>localStorage.setItem('enjoyread_quiz_api_base','https://…')</code> 後重新整理。</p>
+            </details>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            <form class="chat-form" id="chatForm" onsubmit="submitChat(event)">
+                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
+                <div class="chat-form-actions">
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出</button>
+                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話</button>
+                </div>
+            </form>
+        </aside>
+        <div class="app-main">
     <nav class="navbar">
         <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
+        <button type="button" class="nav-history-btn nav-chat-toggle" id="btnChatToggle" onclick="toggleChatDock()">💬 小助手</button>
         <div class="nav-actions">
             <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 悅讀歷史</button>
             <button type="button" class="nav-history-btn hidden" id="btnBackFeed" onclick="closeHistoryView()">← 返回文章列表</button>
@@ -180,7 +495,16 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc">從網上主要閱讀平台精選文章，每篇附有約 150 字摘要，點擊「語音朗讀」即可聆聽。</p>
+            <div class="voice-controls">
+                <label for="mandarinVoice">普通話音色</label>
+                <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
+                    <option value="shimmer">女聲（溫柔普通話）</option>
+                    <option value="onyx">女聲（活潑普通話）</option>
+                    <option value="alloy">男聲（穩定普通話）</option>
+                    <option value="nova">男聲（年輕普通話）</option>
+                    <option value="child">童聲（普通話）</option>
+                </select>
+            </div>
         </div>
 
         <div id="historyHeader" class="hidden">
@@ -195,11 +519,42 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
 
     <script>
         const SUMMARY_LENGTH = 150; // 約 150 字
         const READ_HISTORY_KEY = 'enjoyread-read-history';
         const MAX_HISTORY = 50;
+        const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
+        function getQuizApiBase() {
+            try {
+                const ls = localStorage.getItem('enjoyread_quiz_api_base');
+                if (ls && /^https:\/\//i.test(ls.trim())) {
+                    return ls.trim().replace(/\/$/, '');
+                }
+            } catch (e) { /* ignore */ }
+            const meta = document.querySelector('meta[name="enjoyread-quiz-api"]');
+            const c = meta && meta.getAttribute('content');
+            if (c && /^https:\/\//i.test(c.trim())) {
+                return c.trim().replace(/\/$/, '');
+            }
+            return 'https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev';
+        }
+        const ENJOYREAD_QUIZ_API = getQuizApiBase();
+        const ENJOYREAD_CHAT_API = ENJOYREAD_QUIZ_API + '/chat';
+        const QUIZ_CACHE_KEY = 'enjoyread-quiz-cache-v1';
+
+        function openChatApiHint() {
+            const d = document.getElementById('chatApiHint');
+            if (d && d.tagName === 'DETAILS') d.open = true;
+        }
+
+        function maybeExplainApiFailure(status, errBody) {
+            if (status === 503 || (errBody && /DEEPSEEK_API_KEY|未設定|503/i.test(String(errBody)))) {
+                openChatApiHint();
+            }
+        }
 
         function getReadHistory() {
             try {
@@ -444,42 +799,415 @@
                     ? `<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" onclick="onArticleLinkClick(${idx})">${esc(a.title)}</a>` 
                     : esc(a.title);
                 return `
-                <div class="article-card" data-idx="${idx}">
+                <div class="article-card" data-idx="${idx}" onclick="setChatContextFromCard(${idx})">
                     <div class="article-source">${esc(a.source)}</div>
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 語音朗讀摘要" data-stop-text="⏸ 停止朗讀">
-                        🔊 語音朗讀摘要
+                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
+                        🔊 普通話朗讀摘要
                     </button>
+                    <div class="quiz-section">
+                        <div class="quiz-toolbar">
+                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 AI 閱讀題（3 題）</button>
+                            <button type="button" class="quiz-btn hidden" onclick="loadReadingQuiz(${idx}, true)" id="quizRegenBtn${idx}">🔄 重新出題</button>
+                        </div>
+                        <p class="quiz-status" id="quizStatus${idx}" aria-live="polite"></p>
+                        <div id="aiSummary${idx}" class="hidden"></div>
+                        <div id="quizQuestions${idx}"></div>
+                        <div id="quizScoreRow${idx}"></div>
+                    </div>
                 </div>
             `;
             }).join('');
             document.getElementById('contentArea').innerHTML = html;
+            if (articles.length) {
+                if (chatContextIdx < 0 || chatContextIdx >= articles.length) chatContextIdx = 0;
+                updateChatContextDisplay();
+            }
         }
 
         function onArticleLinkClick(idx) {
+            setChatContextFromCard(idx);
             const a = articles[idx];
             if (a) addToHistory(a);
         }
 
+        function quizCacheKey(a) {
+            return (a.link || '') + '\n' + (a.title || '');
+        }
+
+        function getQuizCache(a) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                return all[quizCacheKey(a)] || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function setQuizCache(a, payload) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                all[quizCacheKey(a)] = payload;
+                sessionStorage.setItem(QUIZ_CACHE_KEY, JSON.stringify(all));
+            } catch (e) {
+                /* quota */
+            }
+        }
+
+        function clearQuizCacheEntry(a) {
+            try {
+                const raw = sessionStorage.getItem(QUIZ_CACHE_KEY);
+                const all = raw ? JSON.parse(raw) : {};
+                delete all[quizCacheKey(a)];
+                sessionStorage.setItem(QUIZ_CACHE_KEY, JSON.stringify(all));
+            } catch (e) {
+                /* ignore */
+            }
+        }
+
+        function stableGenId(a) {
+            const s = quizCacheKey(a);
+            let h = 0;
+            for (let i = 0; i < s.length; i++) {
+                h = ((h << 5) - h) + s.charCodeAt(i);
+                h |= 0;
+            }
+            return 'g' + String(h);
+        }
+
+        async function loadReadingQuiz(idx, regenerate) {
+            const a = articles[idx];
+            if (!a) return;
+            setChatContextFromCard(idx);
+            const loadBtn = document.getElementById('quizLoadBtn' + idx);
+            const regenBtn = document.getElementById('quizRegenBtn' + idx);
+            const statusEl = document.getElementById('quizStatus' + idx);
+            const aiBox = document.getElementById('aiSummary' + idx);
+            const qBox = document.getElementById('quizQuestions' + idx);
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+
+            const setBusy = (busy) => {
+                if (loadBtn) loadBtn.disabled = busy;
+                if (regenBtn) regenBtn.disabled = busy;
+            };
+
+            if (!regenerate) {
+                const cached = getQuizCache(a);
+                if (cached && cached.questions && cached.questions.length >= 3) {
+                    statusEl.textContent = '已從本機載入本題組。';
+                    statusEl.classList.remove('err');
+                    aiBox.classList.remove('hidden');
+                    regenBtn.classList.remove('hidden');
+                    renderQuizUi(idx, cached);
+                    return;
+                }
+            } else {
+                clearQuizCacheEntry(a);
+            }
+
+            statusEl.classList.remove('err');
+            statusEl.textContent = regenerate ? 'AI 正在重新出題…' : 'AI 正在生成精華短文與題目…';
+            setBusy(true);
+            aiBox.classList.add('hidden');
+            aiBox.innerHTML = '';
+            qBox.innerHTML = '';
+            scoreRow.innerHTML = '';
+
+            try {
+                const res = await fetch(ENJOYREAD_QUIZ_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: a.title,
+                        summary: a.summary,
+                        regenerate: Boolean(regenerate),
+                        generationId: regenerate
+                            ? ('r' + Date.now() + Math.random().toString(36).slice(2))
+                            : stableGenId(a),
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    maybeExplainApiFailure(res.status, data.error);
+                    throw new Error(data.error || ('HTTP ' + res.status));
+                }
+                if (data.error && (!data.questions || data.questions.length < 3)) {
+                    maybeExplainApiFailure(503, data.error);
+                    throw new Error(data.error);
+                }
+                if (!data.questions || data.questions.length < 3) {
+                    throw new Error('題目資料不完整，請稍後再試。');
+                }
+                setQuizCache(a, {
+                    summary: data.summary || a.summary,
+                    questions: data.questions,
+                    provider: data.provider,
+                });
+                statusEl.textContent = '已完成。請閱讀上方精華短文並作答。';
+                regenBtn.classList.remove('hidden');
+                renderQuizUi(idx, data);
+            } catch (e) {
+                statusEl.textContent = '無法取得題目：' + (e.message || '未知錯誤');
+                statusEl.classList.add('err');
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        function renderQuizUi(idx, data) {
+            const aiBox = document.getElementById('aiSummary' + idx);
+            const qBox = document.getElementById('quizQuestions' + idx);
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+
+            const aiText = (data.summary || '').trim();
+            if (aiText) {
+                aiBox.innerHTML = '<div class="ai-summary-block"><h4>AI 精華短文</h4><p>' + esc(aiText).replace(/\n/g, '<br>') + '</p></div>';
+                aiBox.classList.remove('hidden');
+            } else {
+                aiBox.classList.add('hidden');
+            }
+
+            scoreRow.innerHTML = '';
+            const qs = data.questions || [];
+            qBox.innerHTML = qs.map((q, qIdx) => {
+                const opts = (q.options || []).slice(0, 4);
+                const optHtml = opts.map((opt, oIdx) => `
+            <label class="quiz-opt-label" data-o="${oIdx}">
+                <input type="radio" name="quiz_${idx}_${qIdx}" value="${oIdx}" />
+                <span>${esc(opt)}</span>
+            </label>
+        `).join('');
+                return `
+            <div class="quiz-q" id="quizQ_${idx}_${qIdx}">
+                <div class="quiz-q-title">${qIdx + 1}. ${esc(q.question || '')}</div>
+                <div class="quiz-options">${optHtml}</div>
+                <div class="quiz-explanation" id="quizExpl_${idx}_${qIdx}">${esc(q.explanation || '')}</div>
+            </div>
+        `;
+            }).join('');
+
+            qBox.innerHTML += `<div class="quiz-submit-row"><button type="button" class="quiz-btn quiz-btn-primary" onclick="submitReadingQuiz(${idx})">✓ 交卷對答案</button></div>`;
+        }
+
+        function submitReadingQuiz(idx) {
+            const a = articles[idx];
+            if (!a) return;
+            const cached = getQuizCache(a);
+            const qs = cached && cached.questions ? cached.questions : [];
+            if (!qs.length) return;
+
+            let correct = 0;
+            qs.forEach((q, qIdx) => {
+                const sel = document.querySelector(`input[name="quiz_${idx}_${qIdx}"]:checked`);
+                const picked = sel ? Number(sel.value) : -1;
+                if (picked === q.correctIndex) correct += 1;
+
+                const wrap = document.getElementById('quizQ_' + idx + '_' + qIdx);
+                if (!wrap) return;
+                const labels = wrap.querySelectorAll('.quiz-opt-label');
+                labels.forEach((lb) => {
+                    const o = Number(lb.getAttribute('data-o'));
+                    lb.classList.remove('reveal-correct', 'reveal-wrong');
+                    if (o === q.correctIndex) lb.classList.add('reveal-correct');
+                    if (picked === o && o !== q.correctIndex) lb.classList.add('reveal-wrong');
+                });
+                const expl = document.getElementById('quizExpl_' + idx + '_' + qIdx);
+                if (expl) expl.classList.add('show');
+            });
+
+            const scoreRow = document.getElementById('quizScoreRow' + idx);
+            const pct = Math.round((correct / qs.length) * 100);
+            scoreRow.innerHTML = '<div class="quiz-score">得分：' + correct + ' / ' + qs.length + '（' + pct + '%）</div>';
+
+            const submitBtn = document.querySelector('#quizQuestions' + idx + ' .quiz-submit-row button');
+            if (submitBtn) submitBtn.disabled = true;
+        }
+
+        let chatContextIdx = 0;
+        let chatTurns = [];
+
+        function buildArticleContextForChat(idx) {
+            const a = articles[idx];
+            if (!a) {
+                return { title: '', content: '（尚無文章）' };
+            }
+            const lines = [
+                '【來源】' + (a.source || ''),
+                '【標題】' + a.title,
+                '【列表摘要】' + a.summary,
+            ];
+            const cached = getQuizCache(a);
+            if (cached && cached.summary) {
+                lines.push('【AI 精華短文】\n' + cached.summary);
+            }
+            return { title: a.title, content: lines.join('\n\n') };
+        }
+
+        function setChatContextFromCard(idx) {
+            if (typeof idx !== 'number' || idx < 0 || !articles[idx]) {
+                return;
+            }
+            chatContextIdx = idx;
+            updateChatContextDisplay();
+        }
+
+        function updateChatContextDisplay() {
+            const el = document.getElementById('chatContextTitle');
+            if (!el) return;
+            const a = articles[chatContextIdx];
+            if (!a) {
+                el.textContent = '請先載入文章列表';
+                return;
+            }
+            const short = a.title.length > 40 ? a.title.slice(0, 40) + '…' : a.title;
+            el.textContent = short + '（' + (a.source || '') + '）';
+        }
+
+        function seedChatWelcome() {
+            const box = document.getElementById('chatMessages');
+            if (!box || box.dataset.seeded === '1') {
+                return;
+            }
+            appendChatRow(
+                'assistant',
+                '你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。'
+            );
+            box.dataset.seeded = '1';
+            chatTurns = [];
+        }
+
+        function appendChatRow(role, text) {
+            const box = document.getElementById('chatMessages');
+            if (!box) return;
+            const row = document.createElement('div');
+            row.className = 'wa-row ' + (role === 'user' ? 'wa-row--user' : 'wa-row--bot');
+            const inner = document.createElement('div');
+            inner.className = 'wa-inner';
+            const av = document.createElement('div');
+            av.className = 'wa-emoji-av';
+            av.setAttribute('aria-hidden', 'true');
+            av.textContent = role === 'user' ? '🧑‍🎓' : '🤖';
+            const col = document.createElement('div');
+            col.className = 'wa-bubble-col';
+            const bubble = document.createElement('div');
+            bubble.className = 'wa-bubble ' + (role === 'user' ? 'wa-bubble--user' : 'wa-bubble--bot');
+            bubble.textContent = text;
+            if (role === 'user') {
+                col.appendChild(bubble);
+                inner.appendChild(col);
+                inner.appendChild(av);
+            } else {
+                inner.appendChild(av);
+                inner.appendChild(col);
+            }
+            row.appendChild(inner);
+            box.appendChild(row);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function clearChat() {
+            chatTurns = [];
+            const box = document.getElementById('chatMessages');
+            if (box) {
+                box.innerHTML = '';
+                delete box.dataset.seeded;
+            }
+            seedChatWelcome();
+        }
+
+        async function submitChat(ev) {
+            ev.preventDefault();
+            const input = document.getElementById('chatInput');
+            const text = (input && input.value || '').trim();
+            if (!text) return;
+            const ctx = buildArticleContextForChat(chatContextIdx);
+            if (!ctx.content || ctx.content === '（尚無文章）') {
+                alert('請等待文章載入後再提問。');
+                return;
+            }
+
+            appendChatRow('user', text);
+            chatTurns.push({ role: 'user', content: text });
+            if (input) input.value = '';
+
+            const btn = document.getElementById('chatSendBtn');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch(ENJOYREAD_CHAT_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        articleTitle: ctx.title,
+                        articleContent: ctx.content,
+                        messages: chatTurns,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const errText = data.error || ('HTTP ' + res.status);
+                    maybeExplainApiFailure(res.status, errText);
+                    const shown =
+                        '抱歉，目前無法取得回覆：' +
+                        errText +
+                        (res.status === 503 ? '\n\n請展開上方「AI 無法回覆」區塊，依說明設定 Worker 的 DEEPSEEK_API_KEY。' : '');
+                    appendChatRow('assistant', shown);
+                    chatTurns.push({ role: 'assistant', content: errText });
+                    return;
+                }
+                let answer =
+                    typeof data.answer === 'string'
+                        ? data.answer
+                        : data.answer != null
+                          ? String(data.answer)
+                          : typeof data.error === 'string'
+                            ? data.error
+                            : '';
+                answer = answer.trim() || '沒有取得回覆。';
+                appendChatRow('assistant', answer);
+                chatTurns.push({ role: 'assistant', content: answer });
+            } catch (e) {
+                const msg = e && e.message ? e.message : '未知錯誤';
+                appendChatRow('assistant', '連線失敗：' + msg + '\n\n請確認網路，或展開上方說明檢查 API 網址與金鑰設定。');
+                openChatApiHint();
+                chatTurns.push({ role: 'assistant', content: msg });
+            } finally {
+                if (btn) btn.disabled = false;
+                if (input) input.focus();
+            }
+        }
+
+        function toggleChatDock() {
+            const dock = document.getElementById('chatDock');
+            const back = document.getElementById('chatBackdrop');
+            if (!dock || !back) return;
+            const open = dock.classList.toggle('open');
+            back.classList.toggle('show', open);
+        }
+
+        function closeChatDock() {
+            const dock = document.getElementById('chatDock');
+            const back = document.getElementById('chatBackdrop');
+            if (dock) dock.classList.remove('open');
+            if (back) back.classList.remove('show');
+        }
+
         let articles = [];
         let currentPlayingIdx = -1;
+        let currentAudio = null;
 
-        function readSummary(idx) {
-            if (!('speechSynthesis' in window)) {
-                alert('您的瀏覽器不支援語音朗讀');
-                return;
-            }
+        async function readSummary(idx) {
             const btn = document.getElementById('ttsBtn' + idx);
+            if (!btn) return;
+            setChatContextFromCard(idx);
             if (currentPlayingIdx === idx) {
-                speechSynthesis.cancel();
-                currentPlayingIdx = -1;
-                btn.classList.remove('playing');
-                btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要';
+                stopCurrentSpeech();
                 return;
             }
-            speechSynthesis.cancel();
+            stopCurrentSpeech();
             currentPlayingIdx = idx;
             const summary = articles[idx]?.summary;
             if (!summary) return;
@@ -488,17 +1216,116 @@
 
             document.querySelectorAll('.tts-btn').forEach(b => {
                 b.classList.remove('playing');
-                b.textContent = b.dataset.defaultText || '🔊 語音朗讀摘要';
+                b.textContent = b.dataset.defaultText || '🔊 普通話朗讀摘要';
             });
             btn.classList.add('playing');
-            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+            btn.textContent = '⏳ 生成普通話...';
 
+            try {
+                const res = await fetch(EDGE_TTS_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'tts-1',
+                        input: summary,
+                        voice: getVoicePreference(),
+                        speed: 1
+                    })
+                });
+                if (!res.ok) throw new Error('Edge TTS failed: ' + res.status);
+                const blob = await res.blob();
+                currentAudio = new Audio(URL.createObjectURL(blob));
+                btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+                currentAudio.onended = () => {
+                    if (currentAudio && currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                        try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                    }
+                    currentAudio = null;
+                    resetTtsButton(btn);
+                };
+                currentAudio.onerror = () => {
+                    if (currentAudio && currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                        try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                    }
+                    currentAudio = null;
+                    resetTtsButton(btn);
+                    readWithBrowserMandarin(summary, btn);
+                };
+                await currentAudio.play();
+            } catch (e) {
+                readWithBrowserMandarin(summary, btn);
+            }
+        }
+
+        function stopCurrentSpeech() {
+            speechSynthesis.cancel();
+            if (currentAudio) {
+                if (currentAudio.src && currentAudio.src.startsWith('blob:')) {
+                    try { URL.revokeObjectURL(currentAudio.src); } catch (e) { /* ignore */ }
+                }
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (currentPlayingIdx >= 0) {
+                const oldBtn = document.getElementById('ttsBtn' + currentPlayingIdx);
+                if (oldBtn) resetTtsButton(oldBtn);
+            }
+            currentPlayingIdx = -1;
+        }
+
+        function resetTtsButton(btn) {
+            currentPlayingIdx = -1;
+            btn.classList.remove('playing');
+            btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
+        }
+
+        function readWithBrowserMandarin(summary, btn) {
+            if (!('speechSynthesis' in window)) {
+                alert('無法連線至朗讀服務，且您的瀏覽器不支援離線朗讀。請稍後再試或換用其他瀏覽器。');
+                resetTtsButton(btn);
+                return;
+            }
             const u = new SpeechSynthesisUtterance(summary);
-            u.lang = 'zh-TW';
+            u.lang = 'zh-CN';
+            const voice = pickMandarinVoice();
+            if (voice) u.voice = voice;
             u.rate = 1;
-            u.onend = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
-            u.onerror = () => { currentPlayingIdx = -1; btn.classList.remove('playing'); btn.textContent = btn.dataset.defaultText || '🔊 語音朗讀摘要'; };
+            btn.textContent = btn.dataset.stopText || '⏸ 停止朗讀';
+            u.onend = () => resetTtsButton(btn);
+            u.onerror = () => resetTtsButton(btn);
             speechSynthesis.speak(u);
+        }
+
+        function getVoicePreference() {
+            return document.getElementById('mandarinVoice')?.value || 'auto';
+        }
+
+        function pickMandarinVoice() {
+            const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+            if (!voices.length) return null;
+            const preference = getVoicePreference();
+            const mandarinVoices = voices.filter((voice) => {
+                const lang = (voice.lang || '').toLowerCase();
+                const name = (voice.name || '').toLowerCase();
+                return lang.includes('zh-cn') || lang.includes('zh-hans') || name.includes('mandarin') || name.includes('普通话') || name.includes('xiaoxiao') || name.includes('yun');
+            });
+
+            const list = mandarinVoices.length ? mandarinVoices : voices;
+            const matchers = {
+                shimmer: ['xiaoxiao', 'female', 'woman', '女'],
+                onyx: ['xiaoyi', 'xiaoxiao', 'female', 'woman', '女'],
+                alloy: ['yunyang', 'yunjian', 'male', 'man', '男'],
+                nova: ['yunxi', 'young', 'male', 'man', '男'],
+                child: ['xiaoshuang', 'kid', 'child', '童', 'children'],
+            }[preference] || [];
+
+            const preferred = list.find((voice) => {
+                const text = `${voice.name} ${voice.lang}`.toLowerCase();
+                return matchers.some((matcher) => text.includes(matcher));
+            });
+
+            return preferred || mandarinVoices[0] || null;
         }
 
         function showLoadingMessage(msg) {
@@ -518,6 +1345,7 @@
         }
 
         async function init() {
+            seedChatWelcome();
             await loadAndRenderArticles('正在搜集最新文章...');
         }
 

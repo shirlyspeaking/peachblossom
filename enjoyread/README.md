@@ -4,12 +4,12 @@
 
 ## 技術棧
 
-- **框架**: Next.js 14 (App Router)
+- **框架**: Next.js 15 (App Router)
 - **樣式**: Tailwind CSS
 - **UI**: Shadcn UI、Lucide React
 - **搜尋**: Tavily Search API
 - **AI**: DeepSeek / Google Gemini / OpenAI GPT
-- **TTS**: 瀏覽器 Web Speech API
+- **TTS**: FreeTTS 自然人聲 / 瀏覽器 Web Speech API fallback
 - **儲存**: LocalStorage (MVP)
 
 ## 快速開始
@@ -34,6 +34,7 @@ npm run dev
 | `DEEPSEEK_MODEL` | DeepSeek 模型名稱（預設 `deepseek-chat`） |
 | `GOOGLE_AI_API_KEY` | Google Gemini API Key（摘要與出題） |
 | `OPENAI_API_KEY` | OpenAI API Key（可替代 Gemini） |
+| `FREETTS_API_KEY` | FreeTTS API Key（自然人聲朗讀，可選） |
 
 AI 會依序嘗試：DeepSeek → Gemini → OpenAI；都不可用時，仍可瀏覽文章與使用 Mock 摘要。
 
@@ -43,5 +44,5 @@ AI 會依序嘗試：DeepSeek → Gemini → OpenAI；都不可用時，仍可�
 - ✅ 深色模式
 - ✅ Tavily 搜尋整合
 - ✅ 文章正文抓取、AI 精華摘要、自動出題
-- ✅ TTS 語音朗讀、語速調整、句子高亮
+- ✅ 自然人聲朗讀、瀏覽器朗讀 fallback、語速調整、句子高亮
 - ✅ LocalStorage 閱讀進度、測驗分數、統計圖表
