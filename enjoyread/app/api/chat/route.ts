@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge";
-
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -30,6 +28,7 @@ function extractAssistantAnswer(data: unknown): string | null {
   const d = data as {
     choices?: Array<{
       finish_reason?: string;
+      text?: unknown;
       message?: {
         role?: string;
         content?: unknown;
@@ -40,13 +39,16 @@ function extractAssistantAnswer(data: unknown): string | null {
 
   const choice = d.choices?.[0];
   const msg = choice?.message;
-  if (!msg) return null;
+  if (msg) {
+    const content = coerceMessageText(msg.content).trim();
+    const reasoning = coerceMessageText(msg.reasoning_content).trim();
 
-  const content = coerceMessageText(msg.content).trim();
-  const reasoning = coerceMessageText(msg.reasoning_content).trim();
+    if (content) return content;
+    if (reasoning) return reasoning;
+  }
 
-  if (content) return content;
-  if (reasoning) return reasoning;
+  const legacyText = coerceMessageText(choice?.text).trim();
+  if (legacyText) return legacyText;
 
   if (choice?.finish_reason === "content_filter") {
     return "內容因安全規範被略過，無法顯示完整回覆。";

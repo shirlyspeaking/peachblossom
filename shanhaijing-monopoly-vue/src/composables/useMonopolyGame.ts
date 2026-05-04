@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import {
   BOARD_PRESETS_KEY,
   DEFAULT_START_MONEY,
@@ -30,6 +30,8 @@ import type { BoardPreset, GameState, OnlineMeta, RoomPayload, ServerSnapshot } 
 
 const TOAST_DURATION = 2200
 
+export type SideDrawerId = 'presets' | 'cards'
+
 export function useMonopolyGame() {
   const { authState } = usePeachAuth()
 
@@ -37,9 +39,8 @@ export function useMonopolyGame() {
   const toastMessage = ref('')
   const diceValue = ref(1)
   const isRolling = ref(false)
-  const cardsDrawerCollapsed = ref(loadCardsDrawerPreference())
   const rulesModalOpen = ref(false)
-  const boardPresetPopoverOpen = ref(false)
+  const sideDrawer = ref<SideDrawerId | null>(null)
   const selectedPresetId = ref('')
   const presetNameInput = ref('')
   const roomCodeInput = ref('')
@@ -130,23 +131,11 @@ export function useMonopolyGame() {
     return label
   })
 
-  watch(cardsDrawerCollapsed, (value) => {
-    localStorage.setItem(`${STORAGE_KEY}-cards-drawer`, value ? '1' : '0')
-  })
-
   function loadState() {
     try {
       return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'))
     } catch {
       return defaultState()
-    }
-  }
-
-  function loadCardsDrawerPreference() {
-    try {
-      return localStorage.getItem(`${STORAGE_KEY}-cards-drawer`) !== '0'
-    } catch {
-      return true
     }
   }
 
@@ -511,7 +500,7 @@ export function useMonopolyGame() {
       return
     }
     applyBoardPresetPayload(preset)
-    boardPresetPopoverOpen.value = false
+    sideDrawer.value = null
     showToast(`已載入「${preset.name || '未命名'}」`)
   }
 
@@ -883,15 +872,24 @@ export function useMonopolyGame() {
     await refreshSession()
   }
 
+  function toggleSideDrawer(which: SideDrawerId) {
+    sideDrawer.value = sideDrawer.value === which ? null : which
+  }
+
+  function closeSideDrawer() {
+    sideDrawer.value = null
+  }
+
   return {
     state,
     tiles,
     toastMessage,
     diceValue,
     isRolling,
-    cardsDrawerCollapsed,
     rulesModalOpen,
-    boardPresetPopoverOpen,
+    sideDrawer,
+    toggleSideDrawer,
+    closeSideDrawer,
     selectedPresetId,
     presetNameInput,
     roomCodeInput,
