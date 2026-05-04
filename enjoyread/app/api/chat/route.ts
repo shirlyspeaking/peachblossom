@@ -5,6 +5,53 @@ interface ChatMessage {
   content: string;
 }
 
+/** DeepSeek/OpenAI-compat：thinking 模式下可能將文字放在 reasoning_content */
+function coerceMessageText(raw: unknown): string {
+  if (typeof raw === "string") return raw;
+  if (raw == null) return "";
+  if (Array.isArray(raw)) {
+    return raw
+      .map((part) => {
+        if (!part || typeof part !== "object") return "";
+        const p = part as { type?: string; text?: string };
+        if (typeof p.text === "string") return p.text;
+        return "";
+      })
+      .join("")
+      .trim();
+  }
+  return "";
+}
+
+function extractAssistantAnswer(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as {
+    choices?: Array<{
+      finish_reason?: string;
+      message?: {
+        role?: string;
+        content?: unknown;
+        reasoning_content?: unknown;
+      };
+    }>;
+  };
+
+  const choice = d.choices?.[0];
+  const msg = choice?.message;
+  if (!msg) return null;
+
+  const content = coerceMessageText(msg.content).trim();
+  const reasoning = coerceMessageText(msg.reasoning_content).trim();
+
+  if (content) return content;
+  if (reasoning) return reasoning;
+
+  if (choice?.finish_reason === "content_filter") {
+    return "內容因安全規範被略過，無法顯示完整回覆。";
+  }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const {
@@ -92,12 +139,13 @@ ${articleContent.slice(0, 9000)}`;
     }
 
     const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content?.trim();
+    const extracted = extractAssistantAnswer(data);
+    const answer =
+      extracted?.trim() ||
+      "我暫時沒有取得有效回答。你可以換個問法，或問我文章中的某一段。";
 
     return NextResponse.json({
-      answer:
-        answer ||
-        "我暫時沒有取得有效回答。你可以換個問法，或問我文章中的某一段。",
+      answer,
     });
   } catch (err) {
     console.error("DeepSeek chat error:", err);

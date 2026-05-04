@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MessageCircle, Send, Sparkles, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,10 +34,18 @@ export function ArticleChat({
   const [loading, setLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const messagesRef = useRef<ArticleChatMessage[]>([]);
+
   useEffect(() => {
-    setMessages(getArticleChatMessages(articleId));
+    const loaded = getArticleChatMessages(articleId);
+    messagesRef.current = loaded;
+    setMessages(loaded);
     setMobileOpen(false);
   }, [articleId]);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const sendMessage = async (content: string) => {
     const question = content.trim();
@@ -48,8 +56,10 @@ export function ArticleChat({
       content: question,
       createdAt: new Date().toISOString(),
     };
-    const nextMessages = [...messages, userMessage];
+    const prev = messagesRef.current;
+    const nextMessages = [...prev, userMessage];
 
+    messagesRef.current = nextMessages;
     setMessages(nextMessages);
     saveArticleChatMessages(articleId, nextMessages);
     setInput("");
@@ -66,15 +76,26 @@ export function ArticleChat({
           messages: nextMessages.map(({ role, content }) => ({ role, content })),
         }),
       });
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: { answer?: unknown } = {};
+      try {
+        data = rawText.trim() ? (JSON.parse(rawText) as { answer?: unknown }) : {};
+      } catch {
+        data = {};
+      }
+      const answerStr =
+        typeof data.answer === "string"
+          ? data.answer
+          : rawText.trim().slice(0, 600);
       const assistantMessage: ArticleChatMessage = {
         role: "assistant",
         content:
-          data.answer ||
+          answerStr.trim() ||
           "我暫時無法回答這個問題。你可以換個問法，或指定文章中的某一句。",
         createdAt: new Date().toISOString(),
       };
       const updatedMessages = [...nextMessages, assistantMessage];
+      messagesRef.current = updatedMessages;
       setMessages(updatedMessages);
       saveArticleChatMessages(articleId, updatedMessages);
     } catch {
@@ -86,6 +107,7 @@ export function ArticleChat({
           createdAt: new Date().toISOString(),
         },
       ];
+      messagesRef.current = updatedMessages;
       setMessages(updatedMessages);
       saveArticleChatMessages(articleId, updatedMessages);
     } finally {
@@ -99,6 +121,7 @@ export function ArticleChat({
   };
 
   const handleClear = () => {
+    messagesRef.current = [];
     setMessages([]);
     clearArticleChatMessages(articleId);
   };
