@@ -264,13 +264,13 @@ export default function CalligraphyPage() {
             <CardTitle>字帖預覽（第一頁）</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* 外框單一邊框，左右寬度一致；內格僅用右/下分隔線，避免雙線與欄數變化時外緣粗細不一 */}
+            {/* 外框單一邊框；內側留白避免圓角裁字；勿用 inset shadow，以免邊界視覺壓過格內字型 */}
             <div
-              className="w-full overflow-hidden rounded-xl border-2 border-primary-300/90 bg-white shadow-inner"
+              className="w-full rounded-xl border-2 border-primary-300/90 bg-white p-1 shadow-[0_1px_3px_rgb(15_23_42/0.06)]"
               style={{ aspectRatio: `${config.cols} / ${config.rows}` }}
             >
               <div
-                className="grid h-full w-full"
+                className="grid h-full min-h-0 w-full overflow-hidden rounded-lg"
                 style={{ gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${config.rows}, minmax(0, 1fr))` }}
               >
                 {Array.from({ length: config.rows * config.cols }).map((_, idx) => {
