@@ -57,6 +57,11 @@
      */
     var STROKE_PATH_TRANSLATE_Y = -46;
 
+    /**
+     * 僅筆順第一格樣例字：在 path 共用平移上再下移（正值＝視覺下移），不影響累進格。
+     */
+    var STROKE_SAMPLE_TRANSLATE_EXTRA_Y = 14;
+
     function setStatus() {}
 
     function escapeSvgText(s) {
@@ -132,12 +137,12 @@
      */
     function buildStrokeWorksheetSampleSvg(ch, fontFamily, fs) {
         var vb = '0 0 1024 1024';
-        var ty = STROKE_PATH_TRANSLATE_Y;
+        var ty = STROKE_PATH_TRANSLATE_Y + STROKE_SAMPLE_TRANSLATE_EXTRA_Y;
         var ff = escapeSvgAttr(fontFamily);
         var body = escapeSvgText(ch);
         var fsN = fs || 36;
         var fz = Math.round(Math.max(688, Math.min(806, 726 + (fsN - 36) * 2.35)));
-        var yTxt = 542;
+        var yTxt = 550;
         var textAttrs = 'fill="#1a1719" stroke="none"';
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' +
