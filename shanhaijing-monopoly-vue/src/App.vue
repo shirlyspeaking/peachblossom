@@ -68,7 +68,7 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <section class="hero-panel hero-panel--orbit-only" aria-label="裝飾動畫">
+    <section class="hero-panel hero-panel--orbit-only" aria-hidden="true">
       <div class="hero-orbit" aria-hidden="true">
         <span class="hero-orbit__ring"></span>
         <span class="hero-orbit__beast">龍</span>
