@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArticleChat } from "@/components/ArticleChat";
 import { addReadArticle } from "@/lib/storage";
 
 interface QuizQuestion {
@@ -396,7 +397,7 @@ function ArticleContent() {
           進入此頁後會自動生成「精華短文＋AI 出題」。若想換一組新題目，請按「AI 重新出題」。
           {naturalStatus && <p className="mt-2">{naturalStatus}</p>}
         </div>
-        <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
           <Card>
             <CardHeader>
               <CardTitle>精華短文</CardTitle>
@@ -420,6 +421,11 @@ function ArticleContent() {
           </Card>
 
           <div className="space-y-4">
+            <ArticleChat
+              articleId={id}
+              articleTitle={decodeURIComponent(title)}
+              articleContent={articleContent}
+            />
             <Card>
               <CardHeader>
                 <CardTitle>AI 出題練習</CardTitle>

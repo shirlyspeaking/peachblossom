@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "sync:taoyuan": "npm run build && rm -rf ../taoyuan-wanxiang-monopoly/assets && cp -r dist/. ../taoyuan-wanxiang-monopoly/",
     "preview": "vite preview",
     "test": "npm run test:unit",
     "test:unit": "vitest run --coverage",

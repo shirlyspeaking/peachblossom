@@ -20,8 +20,8 @@ const onKeydown = (event: KeyboardEvent) => {
     game.closeMedalPopup()
   } else if (game.buyLandModal.open) {
     game.closeBuyLandPopup(false)
-  } else if (game.boardPresetPopoverOpen) {
-    game.boardPresetPopoverOpen = false
+  } else if (game.sideDrawer) {
+    game.closeSideDrawer()
   }
 }
 
@@ -71,11 +71,7 @@ onBeforeUnmount(() => {
     <section class="hero-panel">
       <div class="hero-panel__intro">
         <p class="eyebrow">Current Scenario</p>
-        <h2>巡遊山海，擲出一場故事棋局</h2>
-        <p>
-          棋盤、卡牌、規則與線上房間都可以在同一個工作台完成。新版保留經典玩法，
-          但把視線集中在「下一步該做什麼」。
-        </p>
+        <h2>山海大巡遊</h2>
       </div>
 
       <div class="hero-orbit" aria-hidden="true">
@@ -96,14 +92,6 @@ onBeforeUnmount(() => {
           <strong>{{ game.onlineStatusText }}</strong>
         </div>
       </div>
-    </section>
-
-    <section class="story-strip">
-      <button type="button" class="story-card story-card--button" @click="game.boardPresetPopoverOpen = true">
-        <span class="story-card__label">棋盤收藏</span>
-        <strong>儲存目前棋盤</strong>
-        <span>保存地塊、規則與卡牌設定，方便下次快速載入。</span>
-      </button>
     </section>
 
     <section class="online-panel">
@@ -128,7 +116,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <main class="workspace-grid">
+    <main class="workspace-shell">
       <section class="board-panel">
         <div class="panel-header">
           <div>
@@ -230,114 +218,111 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <aside class="side-panel">
-        <section class="panel-card">
-          <div class="panel-header">
+      <div class="drawer-rail" role="toolbar" aria-label="側邊工具">
+        <button
+          type="button"
+          class="drawer-rail__btn"
+          :class="{ 'drawer-rail__btn--active': game.sideDrawer === 'presets' }"
+          :aria-pressed="game.sideDrawer === 'presets'"
+          @click="game.toggleSideDrawer('presets')"
+        >
+          <span class="drawer-rail__label">棋盤收藏</span>
+        </button>
+        <button
+          type="button"
+          class="drawer-rail__btn"
+          :class="{ 'drawer-rail__btn--active': game.sideDrawer === 'cards' }"
+          :aria-pressed="game.sideDrawer === 'cards'"
+          @click="game.toggleSideDrawer('cards')"
+        >
+          <span class="drawer-rail__label">卡片設置</span>
+        </button>
+      </div>
+
+      <Transition name="drawer-backdrop">
+        <div
+          v-if="game.sideDrawer"
+          class="drawer-backdrop"
+          aria-hidden="true"
+          @click="game.closeSideDrawer"
+        />
+      </Transition>
+
+      <Transition name="drawer-panel">
+        <aside
+          v-if="game.sideDrawer"
+          class="drawer-panel"
+          role="dialog"
+          :aria-labelledby="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'"
+        >
+          <div class="drawer-panel__header panel-header">
             <div>
-              <p class="eyebrow">Scenario</p>
-              <h2>劇本導覽</h2>
+              <p class="eyebrow">{{ game.sideDrawer === 'presets' ? 'Presets' : 'Cards' }}</p>
+              <h2 :id="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'">
+                {{ game.sideDrawer === 'presets' ? '棋盤收藏' : '卡片設置' }}
+              </h2>
             </div>
+            <button type="button" class="secondary-btn" @click="game.closeSideDrawer">關閉</button>
           </div>
 
-          <div class="scenario-list">
-            <article class="scenario-item">
-              <strong>本局目標</strong>
-              <p>讓老師可以快速調整地塊、卡牌與規則，學生一進來就知道目前輪到誰。</p>
-            </article>
-            <article class="scenario-item">
-              <strong>推薦節奏</strong>
-              <p>先決定玩家人數，再擲骰前進；遇到事件時抽卡，購買地塊時即時記錄。</p>
-            </article>
-            <article class="scenario-item">
-              <strong>進階編輯</strong>
-              <p>需要改劇本時，再展開規則、棋盤收藏與卡片設置，不干擾主要遊戲流程。</p>
-            </article>
-          </div>
-        </section>
+          <div class="drawer-panel__body">
+            <template v-if="game.sideDrawer === 'presets'">
+              <p class="panel-note drawer-panel__lede">保存地塊、規則與卡牌設定，方便下次快速載入。</p>
+              <div class="preset-panel">
+                <template v-if="authState.user">
+                  <label class="inline-field inline-field--stacked">
+                    <span>收藏名稱</span>
+                    <input v-model="game.presetNameInput" type="text" maxlength="40" placeholder="例如：春節親子版" />
+                  </label>
+                  <button type="button" class="secondary-btn" @click="game.savePreset">儲存目前設定</button>
 
-        <section class="panel-card">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Rules</p>
-              <h2>基本規則與收藏</h2>
-            </div>
-            <button type="button" class="secondary-btn" @click="game.boardPresetPopoverOpen = !game.boardPresetPopoverOpen">
-              棋盤收藏
-            </button>
-          </div>
+                  <label class="inline-field inline-field--stacked">
+                    <span>已儲存棋盤</span>
+                    <select v-model="game.selectedPresetId">
+                      <option value="">— 請選擇 —</option>
+                      <option v-for="preset in game.boardPresets" :key="preset.id" :value="preset.id">
+                        {{ preset.name }} · {{ new Date(preset.savedAt).toLocaleDateString() }}
+                      </option>
+                    </select>
+                  </label>
 
-          <textarea
-            class="rules-textarea"
-            :disabled="!game.canEditBoardAndCards"
-            :value="game.state.rulesText"
-            @input="game.syncRulesText(($event.target as HTMLTextAreaElement).value)"
-          />
-
-          <div v-if="game.boardPresetPopoverOpen" class="preset-panel">
-            <template v-if="authState.user">
-              <label class="inline-field inline-field--stacked">
-                <span>收藏名稱</span>
-                <input v-model="game.presetNameInput" type="text" maxlength="40" placeholder="例如：春節親子版" />
-              </label>
-              <button type="button" class="secondary-btn" @click="game.savePreset">儲存目前設定</button>
-
-              <label class="inline-field inline-field--stacked">
-                <span>已儲存棋盤</span>
-                <select v-model="game.selectedPresetId">
-                  <option value="">— 請選擇 —</option>
-                  <option v-for="preset in game.boardPresets" :key="preset.id" :value="preset.id">
-                    {{ preset.name }} · {{ new Date(preset.savedAt).toLocaleDateString() }}
-                  </option>
-                </select>
-              </label>
-
-              <div class="preset-actions">
-                <button type="button" class="secondary-btn" :disabled="!game.selectedPresetId" @click="game.loadPreset">套用至棋盤</button>
-                <button type="button" class="danger-btn" :disabled="!game.selectedPresetId" @click="game.deletePreset">刪除</button>
+                  <div class="preset-actions">
+                    <button type="button" class="secondary-btn" :disabled="!game.selectedPresetId" @click="game.loadPreset">套用至棋盤</button>
+                    <button type="button" class="danger-btn" :disabled="!game.selectedPresetId" @click="game.deletePreset">刪除</button>
+                  </div>
+                </template>
+                <p v-else class="panel-note">請先登入後再使用棋盤收藏。</p>
               </div>
             </template>
-            <p v-else class="panel-note">請先登入後再使用棋盤收藏。</p>
-          </div>
-        </section>
 
-        <section class="panel-card">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Cards</p>
-              <h2>卡片設置</h2>
+            <div v-else class="cards-grid cards-grid--drawer">
+              <CardEditorColumn
+                title="機會卡"
+                emoji="🟡"
+                accent-class="card-column__title--chance"
+                :cards="game.state.chance"
+                type="chance"
+                :disabled="!game.canEditBoardAndCards"
+                @add="game.addCard"
+                @update="game.updateCard"
+                @delete="game.deleteCard"
+              />
+
+              <CardEditorColumn
+                title="命運卡"
+                emoji="🔵"
+                accent-class="card-column__title--fate"
+                :cards="game.state.fate"
+                type="fate"
+                :disabled="!game.canEditBoardAndCards"
+                @add="game.addCard"
+                @update="game.updateCard"
+                @delete="game.deleteCard"
+              />
             </div>
-            <button type="button" class="secondary-btn" @click="game.cardsDrawerCollapsed = !game.cardsDrawerCollapsed">
-              {{ game.cardsDrawerCollapsed ? '展開' : '收合' }}
-            </button>
           </div>
-
-          <div v-if="!game.cardsDrawerCollapsed" class="cards-grid">
-            <CardEditorColumn
-              title="機會卡"
-              emoji="🟡"
-              accent-class="card-column__title--chance"
-              :cards="game.state.chance"
-              type="chance"
-              :disabled="!game.canEditBoardAndCards"
-              @add="game.addCard"
-              @update="game.updateCard"
-              @delete="game.deleteCard"
-            />
-
-            <CardEditorColumn
-              title="命運卡"
-              emoji="🔵"
-              accent-class="card-column__title--fate"
-              :cards="game.state.fate"
-              type="fate"
-              :disabled="!game.canEditBoardAndCards"
-              @add="game.addCard"
-              @update="game.updateCard"
-              @delete="game.deleteCard"
-            />
-          </div>
-        </section>
-      </aside>
+        </aside>
+      </Transition>
     </main>
 
     <BaseDialog :open="game.rulesModalOpen" title="基本規則" width="wide" @close="game.rulesModalOpen = false">
