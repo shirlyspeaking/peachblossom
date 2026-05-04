@@ -180,7 +180,6 @@ a {
 
 .topbar__title h1,
 .panel-header h2,
-.hero-panel h2,
 .online-panel h3,
 .dialog-header h2 {
   margin: 0;
@@ -204,7 +203,6 @@ a {
 }
 
 .topbar__actions,
-.hero-panel__meta,
 .panel-actions,
 .online-panel__actions,
 .buy-panel__actions,
@@ -358,12 +356,15 @@ a {
 .hero-panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(180px, 0.42fr) minmax(230px, 0.52fr);
-  gap: clamp(var(--space-lg), 3vw, var(--space-2xl));
-  align-items: center;
-  min-height: 260px;
+  place-items: center;
+  grid-template-columns: 1fr;
+  min-height: 220px;
   overflow: hidden;
   animation: riseIn 760ms var(--ease-out-quint) 100ms both;
+}
+
+.hero-panel--orbit-only {
+  padding-block: clamp(14px, 2vw, 22px);
 }
 
 .hero-panel::before {
@@ -376,21 +377,6 @@ a {
   animation: softGlow 8s var(--ease-out-quint) infinite alternate;
 }
 
-.hero-panel__intro {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: var(--space-md);
-  max-width: 68ch;
-}
-
-.hero-panel__intro h2 {
-  max-width: 11ch;
-  font-size: clamp(2.3rem, 4.6vw, 5.4rem);
-  letter-spacing: 0.04em;
-}
-
-.hero-panel__intro p:last-child,
 .panel-note,
 .hero-panel p,
 .online-panel__status,
@@ -475,12 +461,6 @@ a {
   height: 9px;
   background: var(--blossom);
   animation: sparkDrift 7.5s var(--ease-out-quint) -2s infinite;
-}
-
-.hero-panel__meta {
-  position: relative;
-  z-index: 1;
-  justify-content: flex-end;
 }
 
 .meta-chip {
@@ -1290,13 +1270,8 @@ a {
 
 @media (max-width: 1280px) {
   .hero-panel {
-    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.42fr);
+    min-height: 200px;
   }
-
-  .hero-orbit {
-    display: none;
-  }
-
 }
 
 @media (max-width: 920px) {
@@ -1311,7 +1286,6 @@ a {
   }
 
   .topbar__actions,
-  .hero-panel__meta,
   .online-panel__actions {
     justify-content: flex-start;
   }
@@ -1340,11 +1314,6 @@ a {
 
   .topbar__title h1 {
     font-size: clamp(2.4rem, 16vw, 3.4rem);
-  }
-
-  .hero-panel__intro h2 {
-    max-width: 100%;
-    font-size: clamp(2rem, 12vw, 3.2rem);
   }
 
   .board-scroll {

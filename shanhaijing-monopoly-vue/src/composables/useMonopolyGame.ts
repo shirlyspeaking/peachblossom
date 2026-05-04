@@ -120,17 +120,6 @@ export function useMonopolyGame() {
     return (online.meta.members ?? []).length >= state.value.game.playerCount
   })
 
-  const currentTurnLabel = computed(() => {
-    const turnIndex = state.value.game.currentPlayerIndex
-    const member = memberAtPlayerIndex(turnIndex)
-    let label = `現在出發：${playerTitle(turnIndex, member)}`
-    label += `（共 ${state.value.game.playerCount} 人）`
-    if (online.mode && !lobbyFull.value) {
-      label += ' — 等待玩家加入中，尚不可擲骰'
-    }
-    return label
-  })
-
   function loadState() {
     try {
       return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'))
@@ -898,7 +887,6 @@ export function useMonopolyGame() {
     online,
     canEditBoardAndCards,
     currentPlayer,
-    currentTurnLabel,
     boardPresets,
     onlineRoomShareUrl,
     onlineStatusText,

@@ -68,12 +68,7 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <section class="hero-panel">
-      <div class="hero-panel__intro">
-        <p class="eyebrow">Current Scenario</p>
-        <h2>山海大巡遊</h2>
-      </div>
-
+    <section class="hero-panel hero-panel--orbit-only" aria-label="裝飾動畫">
       <div class="hero-orbit" aria-hidden="true">
         <span class="hero-orbit__ring"></span>
         <span class="hero-orbit__beast">龍</span>
@@ -81,23 +76,11 @@ onBeforeUnmount(() => {
         <span class="hero-orbit__spark hero-orbit__spark--one"></span>
         <span class="hero-orbit__spark hero-orbit__spark--two"></span>
       </div>
-
-      <div class="hero-panel__meta">
-        <div class="meta-chip">
-          <span class="meta-chip__label">目前回合</span>
-          <strong>{{ game.currentTurnLabel }}</strong>
-        </div>
-        <div class="meta-chip" v-if="game.online.mode">
-          <span class="meta-chip__label">線上房間</span>
-          <strong>{{ game.onlineStatusText }}</strong>
-        </div>
-      </div>
     </section>
 
     <section class="online-panel">
       <div>
         <h3>線上對戰（Google 登入）</h3>
-        <p class="panel-note">登入後可以建立房間、分享連結，讓不同裝置一起加入同一局。</p>
       </div>
 
       <div class="online-panel__actions">
@@ -122,7 +105,6 @@ onBeforeUnmount(() => {
           <div>
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
-            <p class="panel-note">棋盤是主舞台；玩家、骰子與回合紀錄都放在中央，減少來回找功能。</p>
           </div>
           <div class="panel-actions">
             <button type="button" class="secondary-btn" @click="game.rulesModalOpen = true">規則</button>
