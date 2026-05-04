@@ -49,9 +49,19 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-shell">
     <header class="topbar">
-      <div class="topbar__title">
-        <p class="eyebrow">桃花源 · 劇本桌遊</p>
-        <h1>桃源萬象大富翁</h1>
+      <div class="topbar__lead">
+        <div class="topbar__title">
+          <p class="eyebrow">桃花源 · 劇本桌遊</p>
+          <h1>桃源萬象大富翁</h1>
+        </div>
+
+        <div class="topbar-orbit hero-orbit" aria-hidden="true">
+          <span class="hero-orbit__ring"></span>
+          <span class="hero-orbit__beast">龍</span>
+          <span class="hero-orbit__dice">骰</span>
+          <span class="hero-orbit__spark hero-orbit__spark--one"></span>
+          <span class="hero-orbit__spark hero-orbit__spark--two"></span>
+        </div>
       </div>
 
       <div class="topbar__actions">
@@ -67,16 +77,6 @@ onBeforeUnmount(() => {
         <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
       </div>
     </header>
-
-    <section class="hero-panel hero-panel--orbit-only" aria-hidden="true">
-      <div class="hero-orbit" aria-hidden="true">
-        <span class="hero-orbit__ring"></span>
-        <span class="hero-orbit__beast">龍</span>
-        <span class="hero-orbit__dice">骰</span>
-        <span class="hero-orbit__spark hero-orbit__spark--one"></span>
-        <span class="hero-orbit__spark hero-orbit__spark--two"></span>
-      </div>
-    </section>
 
     <section class="online-panel">
       <div>

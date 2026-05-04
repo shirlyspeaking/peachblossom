@@ -128,6 +128,45 @@ body[data-theme="silver"] {
     --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%237a7a88' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%237a7a88' stroke-opacity='0.35' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
+/* 自訂：只覆寫頁面外殼（主色、整頁漸層、標題／連結／Label／按鈕）；字帖內 --paper／格線等沿用 :root 桃花預設 */
+body[data-theme="custom"] {
+    --accent-mid: var(--user-accent, #c94b7c);
+    --accent-dark: color-mix(in srgb, var(--user-accent, #c94b7c) 68%, #1a1a1a 32%);
+    --label-color: color-mix(in srgb, var(--user-accent, #c94b7c) 52%, #444 48%);
+    --page-title-color: color-mix(in srgb, var(--user-accent, #c94b7c) 72%, #2a2a2a 28%);
+    --bg:
+        radial-gradient(
+            circle at 12% 14%,
+            color-mix(in srgb, var(--user-bg, #fff7f0) 92%, white 8%) 0%,
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 86% 10%,
+            color-mix(in srgb, var(--user-bg, #fff7f0) 70%, white 30%) 0%,
+            transparent 26%
+        ),
+        linear-gradient(
+            180deg,
+            var(--user-bg, #fff7f0) 0%,
+            color-mix(in srgb, var(--user-bg, #fff7f0) 88%, white 12%) 100%
+        );
+}
+
+body[data-theme="custom"] .site-header {
+    border-bottom-color: color-mix(in srgb, var(--user-accent, #c94b7c) 28%, transparent);
+    background: color-mix(in srgb, var(--user-bg, #fff7f0) 90%, white 10%);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--user-accent, #c94b7c) 14%, transparent);
+}
+
+body[data-theme="custom"] .panel {
+    background: color-mix(in srgb, var(--user-bg, #fff7f0) 94%, white 6%);
+    box-shadow: 0 24px 60px color-mix(in srgb, var(--user-accent, #c94b7c) 10%, transparent);
+}
+
+body[data-theme="custom"] .btn-generate {
+    background: linear-gradient(135deg, var(--accent-mid), var(--accent-dark));
+}
+
 /* ===== Reset ===== */
 
 * {
@@ -176,6 +215,13 @@ body {
 
 /* ===== Theme Picker ===== */
 
+.theme-picker-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 .theme-picker {
     display: flex;
     align-items: center;
@@ -220,6 +266,63 @@ body {
 .theme-dot--green  { background: linear-gradient(135deg, #e2ebe3, #9bb5a0); }
 .theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
 .theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
+.theme-dot--custom {
+    background: conic-gradient(from 210deg, #f5c6d6, #c4d6ec, #e2ebe3, #d4d4da, #f5c6d6);
+}
+
+.custom-theme-popover {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    z-index: 50;
+    min-width: 200px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--ui-border);
+    background: var(--paper);
+    box-shadow: 0 12px 36px var(--page-shadow);
+}
+
+.custom-theme-popover__hint {
+    margin: 0 0 10px;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--label-color);
+    opacity: 0.92;
+}
+
+.custom-theme-popover__row {
+    display: block;
+    margin: 6px 0 4px;
+    font-size: 0.82rem;
+    color: var(--label-color);
+}
+
+.custom-theme-popover input[type="color"] {
+    width: 100%;
+    height: 36px;
+    padding: 2px;
+    cursor: pointer;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.btn-custom-theme-reset {
+    margin-top: 12px;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-mid), var(--accent-dark));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-custom-theme-reset:hover {
+    filter: brightness(1.05);
+}
 
 /* ===== Layout ===== */
 

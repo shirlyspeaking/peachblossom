@@ -4,26 +4,119 @@
     /* ---- Theme Picker ---- */
     var themeDots = document.querySelectorAll('.theme-dot');
     var THEME_KEY = 'copybook-theme';
+    var CUSTOM_ACCENT_KEY = 'copybook-custom-accent';
+    var CUSTOM_BG_KEY = 'copybook-custom-bg';
+
+    function clearCustomColorVars() {
+        document.documentElement.style.removeProperty('--user-accent');
+        document.documentElement.style.removeProperty('--user-bg');
+    }
+
+    function applyCustomColorsFromStorage() {
+        var a = '#c94b7c';
+        var b = '#fff7f0';
+        try {
+            var sa = localStorage.getItem(CUSTOM_ACCENT_KEY);
+            var sb = localStorage.getItem(CUSTOM_BG_KEY);
+            if (sa) a = sa;
+            if (sb) b = sb;
+        } catch (_) {}
+        document.documentElement.style.setProperty('--user-accent', a);
+        document.documentElement.style.setProperty('--user-bg', b);
+        var inputA = document.getElementById('customAccent');
+        var inputB = document.getElementById('customBg');
+        if (inputA) inputA.value = a;
+        if (inputB) inputB.value = b;
+    }
+
+    function setCustomPopoverOpen(open) {
+        var pop = document.getElementById('customThemePopover');
+        if (!pop) return;
+        if (open) pop.removeAttribute('hidden');
+        else pop.setAttribute('hidden', '');
+    }
 
     function applyTheme(name) {
+        if (name !== 'custom') {
+            clearCustomColorVars();
+        } else {
+            applyCustomColorsFromStorage();
+        }
         document.body.setAttribute('data-theme', name);
         themeDots.forEach(function (dot) {
             dot.classList.toggle('active', dot.getAttribute('data-theme') === name);
         });
-        try { localStorage.setItem(THEME_KEY, name); } catch (_) {}
+        try {
+            localStorage.setItem(THEME_KEY, name);
+        } catch (_) {}
     }
 
     (function initTheme() {
         var saved = null;
-        try { saved = localStorage.getItem(THEME_KEY); } catch (_) {}
+        try {
+            saved = localStorage.getItem(THEME_KEY);
+        } catch (_) {}
         applyTheme(saved || 'pink');
     })();
 
     themeDots.forEach(function (dot) {
-        dot.addEventListener('click', function () {
-            applyTheme(dot.getAttribute('data-theme'));
+        dot.addEventListener('click', function (ev) {
+            var name = dot.getAttribute('data-theme');
+            if (name !== 'custom') {
+                setCustomPopoverOpen(false);
+                applyTheme(name);
+                return;
+            }
+            ev.stopPropagation();
+            var wasCustom = document.body.getAttribute('data-theme') === 'custom';
+            var pop = document.getElementById('customThemePopover');
+            var popOpen = pop && !pop.hasAttribute('hidden');
+            applyTheme('custom');
+            if (wasCustom && popOpen) setCustomPopoverOpen(false);
+            else setCustomPopoverOpen(true);
         });
     });
+
+    document.addEventListener('click', function (e) {
+        var wrap = document.querySelector('.theme-picker-wrap');
+        if (!wrap || wrap.contains(e.target)) return;
+        setCustomPopoverOpen(false);
+    });
+
+    (function initCustomThemeInputs() {
+        var accentEl = document.getElementById('customAccent');
+        var bgEl = document.getElementById('customBg');
+        var btnReset = document.getElementById('btnCustomThemeReset');
+        if (accentEl) {
+            accentEl.addEventListener('input', function () {
+                try {
+                    localStorage.setItem(CUSTOM_ACCENT_KEY, accentEl.value);
+                } catch (_) {}
+                document.documentElement.style.setProperty('--user-accent', accentEl.value);
+                if (document.body.getAttribute('data-theme') !== 'custom') applyTheme('custom');
+            });
+        }
+        if (bgEl) {
+            bgEl.addEventListener('input', function () {
+                try {
+                    localStorage.setItem(CUSTOM_BG_KEY, bgEl.value);
+                } catch (_) {}
+                document.documentElement.style.setProperty('--user-bg', bgEl.value);
+                if (document.body.getAttribute('data-theme') !== 'custom') applyTheme('custom');
+            });
+        }
+        if (btnReset) {
+            btnReset.addEventListener('click', function () {
+                try {
+                    localStorage.removeItem(CUSTOM_ACCENT_KEY);
+                    localStorage.removeItem(CUSTOM_BG_KEY);
+                } catch (_) {}
+                clearCustomColorVars();
+                setCustomPopoverOpen(false);
+                applyTheme('pink');
+            });
+        }
+    })();
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');

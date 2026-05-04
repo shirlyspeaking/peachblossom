@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=33">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -21,12 +21,23 @@
             <a href="../index.html" class="back-link">← 返回桃花源</a>
             <h1>書法字帖生成平台</h1>
         </div>
-        <div class="theme-picker">
-            <span class="theme-label">配色</span>
-            <button type="button" class="theme-dot theme-dot--pink active" data-theme="pink" title="桃花"></button>
-            <button type="button" class="theme-dot theme-dot--green" data-theme="green" title="藕綠"></button>
-            <button type="button" class="theme-dot theme-dot--blue" data-theme="blue" title="汝窯"></button>
-            <button type="button" class="theme-dot theme-dot--silver" data-theme="silver" title="月白"></button>
+        <div class="theme-picker-wrap">
+            <div class="theme-picker">
+                <span class="theme-label">配色</span>
+                <button type="button" class="theme-dot theme-dot--pink active" data-theme="pink" title="桃花"></button>
+                <button type="button" class="theme-dot theme-dot--green" data-theme="green" title="藕綠"></button>
+                <button type="button" class="theme-dot theme-dot--blue" data-theme="blue" title="汝窯"></button>
+                <button type="button" class="theme-dot theme-dot--silver" data-theme="silver" title="月白"></button>
+                <button type="button" class="theme-dot theme-dot--custom" data-theme="custom" title="自訂頁面色"></button>
+            </div>
+            <div id="customThemePopover" class="custom-theme-popover" hidden>
+                <p class="custom-theme-popover__hint">僅影響頁面外殼；字帖紙色與格線墨色不變。</p>
+                <label class="custom-theme-popover__row" for="customAccent">主色</label>
+                <input id="customAccent" type="color" value="#c94b7c" aria-label="主色" />
+                <label class="custom-theme-popover__row" for="customBg">底色</label>
+                <input id="customBg" type="color" value="#fff7f0" aria-label="頁面底色" />
+                <button type="button" id="btnCustomThemeReset" class="btn-custom-theme-reset">重設為桃花</button>
+            </div>
         </div>
     </header>
 
@@ -146,6 +157,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=41"></script>
+    <script src="app.js?v=42"></script>
 </body>
 </html>

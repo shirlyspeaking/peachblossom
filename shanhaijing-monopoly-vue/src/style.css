@@ -144,7 +144,6 @@ a {
 }
 
 .topbar,
-.hero-panel,
 .online-panel,
 .panel-card,
 .board-panel {
@@ -158,7 +157,6 @@ a {
 }
 
 .topbar,
-.hero-panel,
 .online-panel,
 .panel-card {
   border-radius: var(--radius-xl);
@@ -169,8 +167,35 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-xl);
-  align-items: start;
+  align-items: center;
   animation: riseIn 680ms var(--ease-out-quint) both;
+}
+
+.topbar__lead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(var(--space-md), 3vw, var(--space-2xl));
+  min-width: 0;
+}
+
+.topbar__lead::before {
+  content: '';
+  position: absolute;
+  inset: -55% -12% auto 22%;
+  height: 11rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.84 0.09 23 / 0.24), transparent 70%);
+  animation: softGlow 8s var(--ease-out-quint) infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.topbar__lead > .topbar__title,
+.topbar__lead > .topbar-orbit {
+  position: relative;
+  z-index: 1;
 }
 
 .topbar__title {
@@ -353,32 +378,7 @@ a {
   transform: translateY(1px) scale(0.98);
 }
 
-.hero-panel {
-  position: relative;
-  display: grid;
-  place-items: center;
-  grid-template-columns: 1fr;
-  min-height: 220px;
-  overflow: hidden;
-  animation: riseIn 760ms var(--ease-out-quint) 100ms both;
-}
-
-.hero-panel--orbit-only {
-  padding-block: clamp(14px, 2vw, 22px);
-}
-
-.hero-panel::before {
-  content: '';
-  position: absolute;
-  inset: -30% 52% auto -10%;
-  height: 22rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.84 0.09 23 / 0.28), transparent 70%);
-  animation: softGlow 8s var(--ease-out-quint) infinite alternate;
-}
-
 .panel-note,
-.hero-panel p,
 .online-panel__status,
 .player-card p {
   color: var(--ink-soft);
@@ -461,6 +461,51 @@ a {
   height: 9px;
   background: var(--blossom);
   animation: sparkDrift 7.5s var(--ease-out-quint) -2s infinite;
+}
+
+.topbar-orbit.hero-orbit {
+  flex-shrink: 0;
+  width: 128px;
+  height: 128px;
+  min-height: 0;
+}
+
+.topbar-orbit .hero-orbit__ring {
+  width: 118px;
+  height: 118px;
+  box-shadow:
+    inset 0 0 0 12px oklch(0.98 0.02 80 / 0.34),
+    0 16px 40px oklch(0.42 0.08 24 / 0.12);
+}
+
+.topbar-orbit .hero-orbit__beast {
+  width: 72px;
+  height: 72px;
+  font-size: 2.25rem;
+}
+
+.topbar-orbit .hero-orbit__dice {
+  right: 2px;
+  bottom: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.topbar-orbit .hero-orbit__spark--one {
+  left: 6px;
+  top: 34px;
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 0 0 5px oklch(0.75 0.12 72 / 0.16);
+}
+
+.topbar-orbit .hero-orbit__spark--two {
+  right: 16px;
+  top: 12px;
+  width: 7px;
+  height: 7px;
 }
 
 .meta-chip {
@@ -1268,19 +1313,12 @@ a {
   }
 }
 
-@media (max-width: 1280px) {
-  .hero-panel {
-    min-height: 200px;
-  }
-}
-
 @media (max-width: 920px) {
   #app {
     width: min(100vw, calc(100vw - 16px));
   }
 
   .topbar,
-  .hero-panel,
   .online-panel {
     grid-template-columns: 1fr;
   }
@@ -1305,7 +1343,6 @@ a {
   }
 
   .topbar,
-  .hero-panel,
   .online-panel,
   .panel-card,
   .board-panel {
