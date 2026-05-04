@@ -12,6 +12,7 @@ function coerceMessageText(raw: unknown): string {
   if (Array.isArray(raw)) {
     return raw
       .map((part) => {
+        if (typeof part === "string") return part;
         if (!part || typeof part !== "object") return "";
         const p = part as { type?: string; text?: string };
         if (typeof p.text === "string") return p.text;
@@ -120,15 +121,18 @@ export async function POST(request: NextRequest) {
 文章內容：
 ${articleContent.slice(0, 9000)}`;
 
+  const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
+  const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+
   try {
-    const res = await fetch("https://api.deepseek.com/chat/completions", {
+    const res = await fetch(`${baseUrl}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           ...safeMessages,
