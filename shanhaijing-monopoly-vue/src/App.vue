@@ -71,11 +71,7 @@ onBeforeUnmount(() => {
     <section class="hero-panel">
       <div class="hero-panel__intro">
         <p class="eyebrow">Current Scenario</p>
-        <h2>巡遊山海，擲出一場故事棋局</h2>
-        <p>
-          棋盤、卡牌、規則與線上房間都可以在同一個工作台完成。新版保留經典玩法，
-          但把視線集中在「下一步該做什麼」。
-        </p>
+        <h2>山海大巡遊</h2>
       </div>
 
       <div class="hero-orbit" aria-hidden="true">
