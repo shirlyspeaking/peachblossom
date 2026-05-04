@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AuthBar from './components/AuthBar.vue'
 import BaseDialog from './components/BaseDialog.vue'
 import BoardTile from './components/BoardTile.vue'
@@ -12,10 +12,12 @@ import { useGameStore } from './stores/game'
 const game = useGameStore().api
 const { authState } = useAuthStore().api
 
+const turnLogOpen = ref(false)
+
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
-  if (game.rulesModalOpen) {
-    game.rulesModalOpen = false
+  if (turnLogOpen.value) {
+    turnLogOpen.value = false
   } else if (game.medalModal.open) {
     game.closeMedalPopup()
   } else if (game.buyLandModal.open) {
@@ -101,15 +103,15 @@ onBeforeUnmount(() => {
 
     <main class="workspace-shell">
       <section class="board-panel">
-        <div class="panel-header">
-          <div>
+        <div class="panel-header panel-header--board">
+          <div class="panel-header__lead">
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
           </div>
-          <div class="panel-actions">
-            <button type="button" class="secondary-btn" @click="game.rulesModalOpen = true">規則</button>
-            <button type="button" class="secondary-btn" @click="game.restartGameSession">重新開始</button>
-            <button type="button" class="danger-btn" @click="game.resetToDefault">重設預設</button>
+          <div class="board-toolbar">
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="turnLogOpen = true">回合記錄</button>
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="game.restartGameSession">重新開始</button>
+            <button type="button" class="danger-btn danger-btn--toolbar" @click="game.resetToDefault">重設預設</button>
           </div>
         </div>
 
@@ -188,13 +190,6 @@ onBeforeUnmount(() => {
                   <button type="button" class="secondary-btn" @click="game.drawCard('fate')">抽命運卡</button>
                 </div>
               </div>
-
-              <div class="board-center__block">
-                <p class="eyebrow">Turn Log</p>
-                <div class="turn-log">
-                  <p v-for="(line, index) in recentTurnLog" :key="`${index}-${line}`">{{ line }}</p>
-                </div>
-              </div>
             </section>
           </div>
         </div>
@@ -238,7 +233,7 @@ onBeforeUnmount(() => {
           :aria-labelledby="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'"
         >
           <div class="drawer-panel__header panel-header">
-            <div>
+            <div class="panel-header__lead">
               <p class="eyebrow">{{ game.sideDrawer === 'presets' ? 'Presets' : 'Cards' }}</p>
               <h2 :id="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'">
                 {{ game.sideDrawer === 'presets' ? '棋盤收藏' : '卡片設置' }}
@@ -307,13 +302,10 @@ onBeforeUnmount(() => {
       </Transition>
     </main>
 
-    <BaseDialog :open="game.rulesModalOpen" title="基本規則" width="wide" @close="game.rulesModalOpen = false">
-      <textarea
-        class="rules-textarea rules-textarea--dialog"
-        :disabled="!game.canEditBoardAndCards"
-        :value="game.state.rulesText"
-        @input="game.syncRulesText(($event.target as HTMLTextAreaElement).value)"
-      />
+    <BaseDialog :open="turnLogOpen" title="回合記錄" width="medium" @close="turnLogOpen = false">
+      <div class="turn-log turn-log--dialog">
+        <p v-for="(line, index) in recentTurnLog" :key="`${index}-${line}`">{{ line }}</p>
+      </div>
     </BaseDialog>
 
     <BaseDialog :open="game.medalModal.open" :title="game.medalModal.type === 'chance' ? '機會卡' : '命運卡'" width="narrow" @close="game.closeMedalPopup">

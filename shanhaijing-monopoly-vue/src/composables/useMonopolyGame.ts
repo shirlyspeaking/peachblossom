@@ -39,7 +39,6 @@ export function useMonopolyGame() {
   const toastMessage = ref('')
   const diceValue = ref(1)
   const isRolling = ref(false)
-  const rulesModalOpen = ref(false)
   const sideDrawer = ref<SideDrawerId | null>(null)
   const selectedPresetId = ref('')
   const presetNameInput = ref('')
@@ -875,7 +874,6 @@ export function useMonopolyGame() {
     toastMessage,
     diceValue,
     isRolling,
-    rulesModalOpen,
     sideDrawer,
     toggleSideDrawer,
     closeSideDrawer,
