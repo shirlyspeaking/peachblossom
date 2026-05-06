@@ -13,10 +13,13 @@ const game = useGameStore().api
 const { authState } = useAuthStore().api
 
 const turnLogOpen = ref(false)
+const playersModalOpen = ref(false)
 
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
-  if (turnLogOpen.value) {
+  if (playersModalOpen.value) {
+    playersModalOpen.value = false
+  } else if (turnLogOpen.value) {
     turnLogOpen.value = false
   } else if (game.medalModal.open) {
     game.closeMedalPopup()
@@ -109,6 +112,7 @@ onBeforeUnmount(() => {
             <h2>巡遊棋盤</h2>
           </div>
           <div class="board-toolbar">
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="playersModalOpen = true">玩家設定</button>
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="turnLogOpen = true">回合記錄</button>
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="game.restartGameSession">重新開始</button>
             <button type="button" class="danger-btn danger-btn--toolbar" @click="game.resetToDefault">重設預設</button>
@@ -131,35 +135,6 @@ onBeforeUnmount(() => {
             />
 
             <section class="board-center">
-              <div class="board-center__block">
-                <p class="eyebrow">Players</p>
-                <div class="player-pills">
-                  <article
-                    v-for="index in [0, 1, 2, 3]"
-                    :key="index"
-                    class="player-pill"
-                    :class="{ 'player-pill--active': index === game.state.game.currentPlayerIndex }"
-                  >
-                    <div class="player-pill__head">
-                      <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
-                        {{ game.playerAnimal(index) }}
-                      </span>
-                    </div>
-                    <label class="player-pill__name">
-                      <span class="sr-only">玩家名稱</span>
-                      <input
-                        type="text"
-                        maxlength="20"
-                        :disabled="!game.state.game.players[index]"
-                        :value="game.state.game.players[index]?.name || `玩家 ${index + 1}`"
-                        @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
-                      />
-                    </label>
-                    <span class="player-pill__money">💰 {{ game.state.game.players[index]?.money ?? 0 }}</span>
-                  </article>
-                </div>
-              </div>
-
               <div class="board-center__block board-center__block--dice">
                 <p class="eyebrow">Dice</p>
                 <div
@@ -300,6 +275,32 @@ onBeforeUnmount(() => {
     <BaseDialog :open="turnLogOpen" title="回合記錄" width="medium" @close="turnLogOpen = false">
       <div class="turn-log turn-log--dialog">
         <p v-for="(line, index) in recentTurnLog" :key="`${index}-${line}`">{{ line }}</p>
+      </div>
+    </BaseDialog>
+
+    <BaseDialog :open="playersModalOpen" title="玩家設定" width="medium" @close="playersModalOpen = false">
+      <div class="player-modal-grid">
+        <article
+          v-for="index in [0, 1, 2, 3]"
+          :key="index"
+          class="player-modal-item"
+          :class="{ 'player-modal-item--active': index === game.state.game.currentPlayerIndex }"
+        >
+          <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
+            {{ game.playerAnimal(index) }}
+          </span>
+          <label class="player-modal-item__name">
+            <span>玩家 {{ index + 1 }}</span>
+            <input
+              type="text"
+              maxlength="20"
+              :disabled="!game.state.game.players[index]"
+              :value="game.state.game.players[index]?.name || `玩家 ${index + 1}`"
+              @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
+            />
+          </label>
+          <span class="player-modal-item__money">💰 {{ game.state.game.players[index]?.money ?? 0 }}</span>
+        </article>
       </div>
     </BaseDialog>
 
