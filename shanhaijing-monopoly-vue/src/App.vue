@@ -135,8 +135,8 @@ onBeforeUnmount(() => {
                 <p class="eyebrow">Players</p>
                 <div class="player-pills">
                   <article
-                    v-for="(player, index) in game.state.game.players.slice(0, 4)"
-                    :key="player.id"
+                    v-for="index in [0, 1, 2, 3]"
+                    :key="index"
                     class="player-pill"
                     :class="{ 'player-pill--active': index === game.state.game.currentPlayerIndex }"
                   >
@@ -150,11 +150,12 @@ onBeforeUnmount(() => {
                       <input
                         type="text"
                         maxlength="20"
-                        :value="player.name"
+                        :disabled="!game.state.game.players[index]"
+                        :value="game.state.game.players[index]?.name || `玩家 ${index + 1}`"
                         @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
                       />
                     </label>
-                    <span class="player-pill__money">💰 {{ player.money }}</span>
+                    <span class="player-pill__money">💰 {{ game.state.game.players[index]?.money ?? 0 }}</span>
                   </article>
                 </div>
               </div>
