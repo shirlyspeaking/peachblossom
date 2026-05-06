@@ -133,54 +133,48 @@ onBeforeUnmount(() => {
             <section class="board-center">
               <div class="board-center__block">
                 <p class="eyebrow">Players</p>
-                <div class="inline-field">
-                  <span>遊玩人數</span>
-                  <select
-                    :value="game.state.game.playerCount"
-                    :disabled="game.online.mode"
-                    @change="game.setPlayerCount(Number(($event.target as HTMLSelectElement).value))"
-                  >
-                    <option v-for="count in [2, 3, 4, 5, 6]" :key="count" :value="count">{{ count }} 人</option>
-                  </select>
-                </div>
-
-                <div class="player-list">
+                <div class="player-pills">
                   <article
-                    v-for="(player, index) in game.state.game.players"
+                    v-for="(player, index) in game.state.game.players.slice(0, 4)"
                     :key="player.id"
-                    class="player-card"
-                    :class="{ 'player-card--active': index === game.state.game.currentPlayerIndex }"
+                    class="player-pill"
+                    :class="{ 'player-pill--active': index === game.state.game.currentPlayerIndex }"
                   >
-                    <div class="player-card__identity">
+                    <div class="player-pill__head">
                       <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
                         {{ game.playerAnimal(index) }}
                       </span>
-                      <div>
-                        <strong>{{ game.titleForPlayer(index) }}</strong>
-                        <p>{{ game.statusForPlayer(index) }}</p>
-                      </div>
                     </div>
-
-                    <label class="inline-field inline-field--stacked">
-                      <span>金幣</span>
+                    <label class="player-pill__name">
+                      <span class="sr-only">玩家名稱</span>
                       <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        :disabled="!game.canEditPlayerMoney(index)"
-                        :value="player.money"
-                        @change="game.updatePlayerMoney(index, Number(($event.target as HTMLInputElement).value))"
+                        type="text"
+                        maxlength="20"
+                        :value="player.name"
+                        @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
                       />
                     </label>
+                    <span class="player-pill__money">💰 {{ player.money }}</span>
                   </article>
                 </div>
               </div>
 
               <div class="board-center__block board-center__block--dice">
                 <p class="eyebrow">Dice</p>
-                <div class="dice-shell" :class="{ 'dice-shell--rolling': game.isRolling }">
-                  <span class="dice-shell__emoji">🎲</span>
-                  <strong>{{ game.diceValue }}</strong>
+                <div
+                  class="dice-shell"
+                  :class="{ 'dice-shell--rolling': game.isRolling }"
+                  :style="`--dice-rotation: var(--dice-face-${game.diceValue});`"
+                >
+                  <div class="dice-cube">
+                    <span class="dice-face dice-face--front">1</span>
+                    <span class="dice-face dice-face--back">6</span>
+                    <span class="dice-face dice-face--right">3</span>
+                    <span class="dice-face dice-face--left">4</span>
+                    <span class="dice-face dice-face--top">2</span>
+                    <span class="dice-face dice-face--bottom">5</span>
+                  </div>
+                  <strong class="dice-shell__value">{{ game.diceValue }}</strong>
                 </div>
                 <button type="button" class="primary-btn primary-btn--wide" :disabled="game.isRolling" @click="game.rollDice">
                   擲骰

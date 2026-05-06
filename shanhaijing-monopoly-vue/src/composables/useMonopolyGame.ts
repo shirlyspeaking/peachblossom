@@ -164,7 +164,11 @@ export function useMonopolyGame() {
   }
 
   function titleForPlayer(index: number) {
-    return playerTitle(index, online.mode ? memberAtPlayerIndex(index) : null)
+    const localPlayer = state.value.game.players[index]
+    if (!online.mode) {
+      return `${playerAnimal(index)} ${localPlayer?.name || `玩家 ${index + 1}`}`
+    }
+    return playerTitle(index, memberAtPlayerIndex(index))
   }
 
   function statusForPlayer(index: number) {
@@ -307,6 +311,13 @@ export function useMonopolyGame() {
       return
     }
     state.value.game.players[index].money = Math.max(0, Math.floor(value || 0))
+    debouncedSave()
+  }
+
+  function updatePlayerName(index: number, value: string) {
+    if (!state.value.game.players[index]) return
+    const normalized = value.trim().slice(0, 20) || `玩家 ${index + 1}`
+    state.value.game.players[index].name = normalized
     debouncedSave()
   }
 
@@ -899,6 +910,7 @@ export function useMonopolyGame() {
     syncRulesText,
     updateTileField,
     updatePlayerMoney,
+    updatePlayerName,
     setPlayerCount,
     restartGameSession,
     resetToDefault,
