@@ -1066,7 +1066,7 @@ a {
 
 .player-modal-item {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) minmax(118px, auto);
   align-items: center;
   gap: var(--space-sm);
   padding: 10px 12px;
@@ -1103,13 +1103,30 @@ a {
 }
 
 .player-modal-item__money {
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklch, var(--line-strong) 68%, transparent);
-  background: oklch(0.99 0.016 76 / 0.96);
-  color: var(--ink-soft);
+  display: grid;
+  gap: 4px;
+}
+
+.player-modal-item__money span {
+  color: var(--ink-muted);
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.player-modal-item__money input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklch, var(--line-strong) 72%, transparent);
+  background: oklch(0.995 0.006 76 / 0.92);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.player-modal-item__money input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .panel-card {

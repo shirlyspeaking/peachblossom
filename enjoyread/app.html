@@ -56,30 +56,6 @@
             font-family: "Noto Serif TC", serif;
             background: color-mix(in oklch, var(--surface) 94%, transparent);
         }
-        .chat-context-bar {
-            flex-shrink: 0;
-            padding: 8px 10px;
-            font-size: 0.75rem;
-            color: var(--text-soft);
-            background: color-mix(in oklch, var(--accent-soft) 12%, #fff 88%);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            max-height: 4.6em;
-            overflow: hidden;
-            line-height: 1.4;
-        }
-        .chat-context-bar strong { color: var(--accent-deep); }
-        .chat-api-hint {
-            flex-shrink: 0;
-            margin: 0;
-            padding: 8px 10px;
-            font-size: 0.72rem;
-            line-height: 1.45;
-            color: oklch(0.38 0.12 25);
-            background: color-mix(in oklch, oklch(0.96 0.04 25) 92%, transparent);
-            border-bottom: 1px solid color-mix(in oklch, oklch(0.88 0.06 25) 55%, transparent);
-        }
-        .chat-api-hint summary { cursor: pointer; font-weight: 700; color: var(--accent-deep); }
-        .chat-api-hint code { font-size: 0.68rem; word-break: break-all; }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -461,15 +437,6 @@
     <div class="app-layout">
         <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
             <div class="chat-dock-header">💬 閱讀小助手</div>
-            <div class="chat-context-bar" id="chatContextBar">
-                <strong>目前參考：</strong><span id="chatContextTitle">載入中…</span>
-            </div>
-            <details class="chat-api-hint" id="chatApiHint">
-                <summary>AI 無法回覆？點此查看常見原因與設定方式</summary>
-                <p style="margin:8px 0 4px">多數情況是 Cloudflare Worker 尚未設定 DeepSeek 金鑰，或 API 網址與你的網域不符。</p>
-                <p style="margin:0 0 4px"><strong>步驟：</strong>在專案目錄執行 <code>npx wrangler secret put DEEPSEEK_API_KEY</code>（綁定 Worker <code>peachblossom-enjoyread-quiz</code>），貼上與 Next 悅讀相同的 Key，再重新整理本頁。</p>
-                <p style="margin:0">若 Worker 網址不同，可改頁首 <code>&lt;meta name="enjoyread-quiz-api"&gt;</code>，或在主控台設定 <code>localStorage.setItem('enjoyread_quiz_api_base','https://…')</code> 後重新整理。</p>
-            </details>
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-form" id="chatForm">
                 <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>

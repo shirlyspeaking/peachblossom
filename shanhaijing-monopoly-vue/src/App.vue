@@ -299,7 +299,17 @@ onBeforeUnmount(() => {
               @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
             />
           </label>
-          <span class="player-modal-item__money">💰 {{ game.state.game.players[index]?.money ?? 0 }}</span>
+          <label class="player-modal-item__money">
+            <span>💰 金幣</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              :disabled="!game.state.game.players[index] || !game.canEditPlayerMoney(index)"
+              :value="game.state.game.players[index]?.money ?? 0"
+              @change="game.updatePlayerMoney(index, Number(($event.target as HTMLInputElement).value))"
+            />
+          </label>
         </article>
       </div>
     </BaseDialog>
