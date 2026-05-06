@@ -1074,7 +1074,7 @@
             }
             appendChatRow(
                 'assistant',
-                '你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。'
+                '你好！我是閱讀小助手。你可以直接問任何問題（學習、語文、英文、文章理解都可以）；若你有點選文章，我也會把該篇內容當作參考。'
             );
             box.dataset.seeded = '1';
             chatTurns = [];
@@ -1125,10 +1125,7 @@
             const text = (input && input.value || '').trim();
             if (!text) return;
             const ctx = buildArticleContextForChat(chatContextIdx);
-            if (!ctx.content || ctx.content === '（尚無文章）') {
-                alert('請等待文章載入後再提問。');
-                return;
-            }
+            const hasArticleContext = ctx.content && ctx.content !== '（尚無文章）';
 
             appendChatRow('user', text);
             chatTurns.push({ role: 'user', content: text });
@@ -1141,8 +1138,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        articleTitle: ctx.title,
-                        articleContent: ctx.content,
+                        articleTitle: hasArticleContext ? ctx.title : '',
+                        articleContent: hasArticleContext ? ctx.content : '',
                         messages: chatTurns,
                     }),
                 });
