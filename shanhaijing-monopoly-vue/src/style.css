@@ -1410,15 +1410,15 @@ a {
   }
 }
 
-@keyframes diceRoll {
+@keyframes cubeToss {
   0% {
-    transform: rotate(0deg) scale(1);
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
   }
   50% {
-    transform: rotate(8deg) scale(1.04);
+    transform: rotateX(180deg) rotateY(220deg) rotateZ(90deg);
   }
   100% {
-    transform: rotate(-8deg) scale(1);
+    transform: rotateX(360deg) rotateY(420deg) rotateZ(180deg);
   }
 }
 
@@ -1466,6 +1466,10 @@ a {
   }
 
   .board-center {
+    grid-template-columns: 1fr;
+  }
+
+  .player-pills {
     grid-template-columns: 1fr;
   }
 }
