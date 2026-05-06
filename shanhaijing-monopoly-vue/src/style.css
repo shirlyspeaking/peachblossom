@@ -771,7 +771,7 @@ a {
   grid-column: 2 / 7;
   grid-row: 2 / 7;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(170px, 0.78fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(150px, 0.65fr);
   gap: var(--space-md);
 }
 
@@ -967,35 +967,146 @@ a {
   color: var(--ink);
 }
 
-.dice-shell {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.player-pills {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.player-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklch, var(--line-strong) 75%, transparent);
+  background: color-mix(in oklch, var(--surface-strong) 90%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+.player-pill--active {
+  border-color: oklch(0.6 0.12 18 / 0.5);
+  box-shadow:
+    0 0 0 3px oklch(0.75 0.09 18 / 0.12),
+    var(--shadow-soft);
+}
+
+.player-pill__head {
+  flex-shrink: 0;
+}
+
+.player-pill__name {
+  flex: 1;
+}
+
+.player-pill__name input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklch, var(--line-strong) 72%, transparent);
+  background: oklch(0.995 0.006 76 / 0.92);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.player-pill__money {
+  position: absolute;
+  top: -11px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--line-strong) 68%, transparent);
+  background: oklch(0.99 0.016 76 / 0.96);
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.dice-shell {
+  --dice-face-1: rotateX(0deg) rotateY(0deg);
+  --dice-face-2: rotateX(-90deg) rotateY(0deg);
+  --dice-face-3: rotateX(0deg) rotateY(-90deg);
+  --dice-face-4: rotateX(0deg) rotateY(90deg);
+  --dice-face-5: rotateX(90deg) rotateY(0deg);
+  --dice-face-6: rotateX(0deg) rotateY(180deg);
+  --dice-rotation: var(--dice-face-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   place-items: center;
-  gap: var(--space-xs);
-  min-height: 138px;
+  gap: 10px;
+  min-height: 112px;
   border: 1px solid var(--line);
-  border-radius: 32px;
+  border-radius: 24px;
   background:
     radial-gradient(circle at 35% 22%, oklch(0.99 0.012 78), transparent 34%),
     linear-gradient(145deg, oklch(0.95 0.035 72), oklch(0.9 0.045 35));
   box-shadow:
     inset 0 0 0 1px oklch(0.99 0.008 80 / 0.48),
     var(--shadow-soft);
+  perspective: 560px;
 }
 
-.dice-shell strong {
+.dice-shell__value {
   color: var(--ink);
   font-family: var(--font-serif);
-  font-size: 3rem;
+  font-size: 1.25rem;
   line-height: 1;
 }
 
-.dice-shell__emoji {
-  font-size: 2.2rem;
-  filter: drop-shadow(0 12px 18px oklch(0.34 0.05 35 / 0.16));
+.dice-cube {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  transform-style: preserve-3d;
+  transform: var(--dice-rotation);
+  transition: transform 560ms var(--ease-out-expo);
+}
+
+.dice-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  border: 1px solid color-mix(in oklch, var(--line-strong) 74%, transparent);
+  background: linear-gradient(145deg, oklch(0.998 0.008 80), oklch(0.94 0.02 64));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.99 0.007 78 / 0.55),
+    0 7px 14px oklch(0.34 0.05 35 / 0.2);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.dice-face--front { transform: translateZ(27px); }
+.dice-face--back { transform: rotateY(180deg) translateZ(27px); }
+.dice-face--right { transform: rotateY(90deg) translateZ(27px); }
+.dice-face--left { transform: rotateY(-90deg) translateZ(27px); }
+.dice-face--top { transform: rotateX(90deg) translateZ(27px); }
+.dice-face--bottom { transform: rotateX(-90deg) translateZ(27px); }
+
+.dice-shell--rolling .dice-cube {
+  animation: cubeToss 760ms linear infinite;
 }
 
 .dice-shell--rolling {
-  animation: diceRoll 760ms var(--ease-out-expo) infinite;
+  animation: none;
 }
 
 .turn-log {
