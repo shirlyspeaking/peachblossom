@@ -791,6 +791,10 @@ a {
   justify-content: center;
   text-align: center;
   background: transparent;
+  justify-self: center;
+  align-items: center;
+  width: max-content;
+  min-width: 0;
 }
 
 .board-tile {
@@ -983,18 +987,12 @@ a {
   place-items: center;
   gap: 10px;
   min-height: 112px;
+  width: 74px;
   border: none;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   perspective: 560px;
-}
-
-.dice-shell__value {
-  color: var(--ink);
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  line-height: 1;
 }
 
 .dice-cube {
@@ -1035,6 +1033,10 @@ a {
 
 .dice-shell--rolling {
   animation: none;
+}
+
+.board-center__block--dice .draw-actions {
+  justify-content: center;
 }
 
 .turn-log {

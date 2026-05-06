@@ -150,9 +150,8 @@ onBeforeUnmount(() => {
                     <span class="dice-face dice-face--top">2</span>
                     <span class="dice-face dice-face--bottom">5</span>
                   </div>
-                  <strong class="dice-shell__value">{{ game.diceValue }}</strong>
                 </div>
-                <button type="button" class="primary-btn primary-btn--wide" :disabled="game.isRolling" @click="game.rollDice">
+                <button type="button" class="primary-btn" :disabled="game.isRolling" @click="game.rollDice">
                   擲骰
                 </button>
                 <div class="draw-actions">
