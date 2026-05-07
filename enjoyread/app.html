@@ -56,30 +56,6 @@
             font-family: "Noto Serif TC", serif;
             background: color-mix(in oklch, var(--surface) 94%, transparent);
         }
-        .chat-context-bar {
-            flex-shrink: 0;
-            padding: 8px 10px;
-            font-size: 0.75rem;
-            color: var(--text-soft);
-            background: color-mix(in oklch, var(--accent-soft) 12%, #fff 88%);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            max-height: 4.6em;
-            overflow: hidden;
-            line-height: 1.4;
-        }
-        .chat-context-bar strong { color: var(--accent-deep); }
-        .chat-api-hint {
-            flex-shrink: 0;
-            margin: 0;
-            padding: 8px 10px;
-            font-size: 0.72rem;
-            line-height: 1.45;
-            color: oklch(0.38 0.12 25);
-            background: color-mix(in oklch, oklch(0.96 0.04 25) 92%, transparent);
-            border-bottom: 1px solid color-mix(in oklch, oklch(0.88 0.06 25) 55%, transparent);
-        }
-        .chat-api-hint summary { cursor: pointer; font-weight: 700; color: var(--accent-deep); }
-        .chat-api-hint code { font-size: 0.68rem; word-break: break-all; }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -461,17 +437,8 @@
     <div class="app-layout">
         <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
             <div class="chat-dock-header">💬 閱讀小助手</div>
-            <div class="chat-context-bar" id="chatContextBar">
-                <strong>目前參考：</strong><span id="chatContextTitle">載入中…</span>
-            </div>
-            <details class="chat-api-hint" id="chatApiHint">
-                <summary>AI 無法回覆？點此查看常見原因與設定方式</summary>
-                <p style="margin:8px 0 4px">多數情況是 Cloudflare Worker 尚未設定 DeepSeek 金鑰，或 API 網址與你的網域不符。</p>
-                <p style="margin:0 0 4px"><strong>步驟：</strong>在專案目錄執行 <code>npx wrangler secret put DEEPSEEK_API_KEY</code>（綁定 Worker <code>peachblossom-enjoyread-quiz</code>），貼上與 Next 悅讀相同的 Key，再重新整理本頁。</p>
-                <p style="margin:0">若 Worker 網址不同，可改頁首 <code>&lt;meta name="enjoyread-quiz-api"&gt;</code>，或在主控台設定 <code>localStorage.setItem('enjoyread_quiz_api_base','https://…')</code> 後重新整理。</p>
-            </details>
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
-            <form class="chat-form" id="chatForm" onsubmit="submitChat(event)">
+            <form class="chat-form" id="chatForm">
                 <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
                 <div class="chat-form-actions">
                     <button type="submit" class="chat-send-btn" id="chatSendBtn">送出</button>
@@ -1074,7 +1041,7 @@
             }
             appendChatRow(
                 'assistant',
-                '你好！我是閱讀小助手。點選任一篇文章區塊後，我會以該篇摘要為參考（若你已生成「AI 精華短文」，也會一併納入）。可以問字詞意思、句子怎麼理解，或「英文怎麼說」。'
+                '你好！我是閱讀小助手。你可以直接問任何問題（學習、語文、英文、文章理解都可以）；若你有點選文章，我也會把該篇內容當作參考。'
             );
             box.dataset.seeded = '1';
             chatTurns = [];
@@ -1101,6 +1068,7 @@
                 inner.appendChild(col);
                 inner.appendChild(av);
             } else {
+                col.appendChild(bubble);
                 inner.appendChild(av);
                 inner.appendChild(col);
             }
@@ -1120,15 +1088,12 @@
         }
 
         async function submitChat(ev) {
-            ev.preventDefault();
+            if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
             const input = document.getElementById('chatInput');
             const text = (input && input.value || '').trim();
             if (!text) return;
             const ctx = buildArticleContextForChat(chatContextIdx);
-            if (!ctx.content || ctx.content === '（尚無文章）') {
-                alert('請等待文章載入後再提問。');
-                return;
-            }
+            const hasArticleContext = ctx.content && ctx.content !== '（尚無文章）';
 
             appendChatRow('user', text);
             chatTurns.push({ role: 'user', content: text });
@@ -1141,8 +1106,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        articleTitle: ctx.title,
-                        articleContent: ctx.content,
+                        articleTitle: hasArticleContext ? ctx.title : '',
+                        articleContent: hasArticleContext ? ctx.content : '',
                         messages: chatTurns,
                     }),
                 });
@@ -1345,6 +1310,13 @@
         }
 
         async function init() {
+            const chatFormEl = document.getElementById('chatForm');
+            const chatSendBtnEl = document.getElementById('chatSendBtn');
+            if (chatSendBtnEl) chatSendBtnEl.disabled = false;
+            if (chatFormEl) {
+                // 避免只靠 inline onsubmit，某些環境會造成送出事件失效
+                chatFormEl.addEventListener('submit', submitChat);
+            }
             seedChatWelcome();
             await loadAndRenderArticles('正在搜集最新文章...');
         }

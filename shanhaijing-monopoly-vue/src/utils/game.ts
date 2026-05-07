@@ -36,6 +36,7 @@ export function roomsBaseUrl() {
 export function buildDefaultPlayers(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     id: index,
+    name: `玩家 ${index + 1}`,
     money: DEFAULT_START_MONEY,
     position: 0,
   }))
@@ -107,6 +108,10 @@ export function normalizeState(raw: Partial<GameState> | null | undefined): Game
   const players = Array.isArray(game.players) && game.players.length === playerCount
     ? game.players.map((player, index) => ({
         id: index,
+        name:
+          typeof player?.name === 'string' && player.name.trim()
+            ? player.name.trim().slice(0, 20)
+            : `玩家 ${index + 1}`,
         money:
           typeof player?.money === 'number' && player.money >= 0
             ? Math.floor(player.money)

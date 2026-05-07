@@ -77,16 +77,19 @@ export function ArticleChat({
         }),
       });
       const rawText = await res.text();
-      let data: { answer?: unknown } = {};
+      let data: { answer?: unknown; error?: unknown } = {};
       try {
-        data = rawText.trim() ? (JSON.parse(rawText) as { answer?: unknown }) : {};
+        data = rawText.trim() ? (JSON.parse(rawText) as { answer?: unknown; error?: unknown }) : {};
       } catch {
         data = {};
       }
+      const errStr = typeof data.error === "string" ? data.error.trim() : "";
       const answerStr =
-        typeof data.answer === "string"
-          ? data.answer
-          : rawText.trim().slice(0, 600);
+        typeof data.answer === "string" && data.answer.trim()
+          ? data.answer.trim()
+          : errStr ||
+            (!res.ok ? `請求失敗（${res.status}）。請稍後再試。` : "") ||
+            rawText.trim().slice(0, 600);
       const assistantMessage: ArticleChatMessage = {
         role: "assistant",
         content:

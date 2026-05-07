@@ -26,6 +26,7 @@ export interface CardItem {
 
 export interface PlayerState {
   id: number
+  name: string
   money: number
   position: number
 }

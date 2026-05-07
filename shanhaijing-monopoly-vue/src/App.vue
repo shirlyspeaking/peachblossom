@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AuthBar from './components/AuthBar.vue'
 import BaseDialog from './components/BaseDialog.vue'
 import BoardTile from './components/BoardTile.vue'
@@ -12,10 +12,15 @@ import { useGameStore } from './stores/game'
 const game = useGameStore().api
 const { authState } = useAuthStore().api
 
+const turnLogOpen = ref(false)
+const playersModalOpen = ref(false)
+
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
-  if (game.rulesModalOpen) {
-    game.rulesModalOpen = false
+  if (playersModalOpen.value) {
+    playersModalOpen.value = false
+  } else if (turnLogOpen.value) {
+    turnLogOpen.value = false
   } else if (game.medalModal.open) {
     game.closeMedalPopup()
   } else if (game.buyLandModal.open) {
@@ -30,10 +35,7 @@ const pawnPositions = computed(() =>
     game.state.game.players
       .map((player, index) => ({ position: player.position, playerNumber: index + 1 }))
       .filter((item) => item.position === tile.index)
-      .map((item) => ({
-        playerNumber: item.playerNumber,
-        label: game.pawnLabelForPlayer(item.playerNumber - 1),
-      })),
+      .map((item) => item.playerNumber),
   ),
 )
 
@@ -52,9 +54,19 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-shell">
     <header class="topbar">
-      <div class="topbar__title">
-        <p class="eyebrow">桃花源 · 劇本桌遊</p>
-        <h1>桃源萬象大富翁</h1>
+      <div class="topbar__lead">
+        <div class="topbar__title">
+          <p class="eyebrow">桃花源 · 劇本桌遊</p>
+          <h1>桃源萬象大富翁</h1>
+        </div>
+
+        <div class="topbar-orbit hero-orbit" aria-hidden="true">
+          <span class="hero-orbit__ring"></span>
+          <span class="hero-orbit__beast">龍</span>
+          <span class="hero-orbit__dice">骰</span>
+          <span class="hero-orbit__spark hero-orbit__spark--one"></span>
+          <span class="hero-orbit__spark hero-orbit__spark--two"></span>
+        </div>
       </div>
 
       <div class="topbar__actions">
@@ -71,36 +83,9 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <section class="hero-panel">
-      <div class="hero-panel__intro">
-        <p class="eyebrow">Current Scenario</p>
-        <h2>山海大巡遊</h2>
-      </div>
-
-      <div class="hero-orbit" aria-hidden="true">
-        <span class="hero-orbit__ring"></span>
-        <span class="hero-orbit__beast">龍</span>
-        <span class="hero-orbit__dice">骰</span>
-        <span class="hero-orbit__spark hero-orbit__spark--one"></span>
-        <span class="hero-orbit__spark hero-orbit__spark--two"></span>
-      </div>
-
-      <div class="hero-panel__meta">
-        <div class="meta-chip">
-          <span class="meta-chip__label">目前回合</span>
-          <strong>{{ game.currentTurnLabel }}</strong>
-        </div>
-        <div class="meta-chip" v-if="game.online.mode">
-          <span class="meta-chip__label">線上房間</span>
-          <strong>{{ game.onlineStatusText }}</strong>
-        </div>
-      </div>
-    </section>
-
     <section class="online-panel">
       <div>
         <h3>線上對戰（Google 登入）</h3>
-        <p class="panel-note">登入後可以建立房間、分享連結，讓不同裝置一起加入同一局。</p>
       </div>
 
       <div class="online-panel__actions">
@@ -121,16 +106,16 @@ onBeforeUnmount(() => {
 
     <main class="workspace-shell">
       <section class="board-panel">
-        <div class="panel-header">
-          <div>
+        <div class="panel-header panel-header--board">
+          <div class="panel-header__lead">
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
-            <p class="panel-note">棋盤是主舞台；玩家、骰子與回合紀錄都放在中央，減少來回找功能。</p>
           </div>
-          <div class="panel-actions">
-            <button type="button" class="secondary-btn" @click="game.rulesModalOpen = true">規則</button>
-            <button type="button" class="secondary-btn" @click="game.restartGameSession">重新開始</button>
-            <button type="button" class="danger-btn" @click="game.resetToDefault">重設預設</button>
+          <div class="board-toolbar">
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="playersModalOpen = true">玩家設定</button>
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="turnLogOpen = true">回合記錄</button>
+            <button type="button" class="secondary-btn secondary-btn--toolbar" @click="game.restartGameSession">重新開始</button>
+            <button type="button" class="danger-btn danger-btn--toolbar" @click="game.resetToDefault">重設預設</button>
           </div>
         </div>
 
@@ -150,69 +135,28 @@ onBeforeUnmount(() => {
             />
 
             <section class="board-center">
-              <div class="board-center__block">
-                <p class="eyebrow">Players</p>
-                <div class="inline-field">
-                  <span>遊玩人數</span>
-                  <select
-                    :value="game.state.game.playerCount"
-                    :disabled="game.online.mode"
-                    @change="game.setPlayerCount(Number(($event.target as HTMLSelectElement).value))"
-                  >
-                    <option v-for="count in [2, 3, 4, 5, 6]" :key="count" :value="count">{{ count }} 人</option>
-                  </select>
-                </div>
-
-                <div class="player-list">
-                  <article
-                    v-for="(player, index) in game.state.game.players"
-                    :key="player.id"
-                    class="player-card"
-                    :class="{ 'player-card--active': index === game.state.game.currentPlayerIndex }"
-                  >
-                    <div class="player-card__identity">
-                      <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
-                        {{ game.playerAnimal(index) }}
-                      </span>
-                      <div>
-                        <strong>{{ game.titleForPlayer(index) }}</strong>
-                        <p>{{ game.statusForPlayer(index) }}</p>
-                      </div>
-                    </div>
-
-                    <label class="inline-field inline-field--stacked">
-                      <span>金幣</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        :disabled="!game.canEditPlayerMoney(index)"
-                        :value="player.money"
-                        @change="game.updatePlayerMoney(index, Number(($event.target as HTMLInputElement).value))"
-                      />
-                    </label>
-                  </article>
-                </div>
-              </div>
-
               <div class="board-center__block board-center__block--dice">
-                <div class="dice-shell" :class="{ 'dice-shell--rolling': game.isRolling }">
-                  <span class="dice-shell__emoji">🎲</span>
-                  <strong>{{ game.diceValue }}</strong>
+                <p class="eyebrow">Dice</p>
+                <div
+                  class="dice-shell"
+                  :class="{ 'dice-shell--rolling': game.isRolling }"
+                  :style="`--dice-rotation: var(--dice-face-${game.diceValue});`"
+                >
+                  <div class="dice-cube">
+                    <span class="dice-face dice-face--front">1</span>
+                    <span class="dice-face dice-face--back">6</span>
+                    <span class="dice-face dice-face--right">3</span>
+                    <span class="dice-face dice-face--left">4</span>
+                    <span class="dice-face dice-face--top">2</span>
+                    <span class="dice-face dice-face--bottom">5</span>
+                  </div>
                 </div>
-                <button type="button" class="primary-btn primary-btn--wide" :disabled="game.isRolling" @click="game.rollDice">
+                <button type="button" class="primary-btn" :disabled="game.isRolling" @click="game.rollDice">
                   擲骰
                 </button>
                 <div class="draw-actions">
                   <button type="button" class="secondary-btn" @click="game.drawCard('chance')">抽機會卡</button>
                   <button type="button" class="secondary-btn" @click="game.drawCard('fate')">抽命運卡</button>
-                </div>
-              </div>
-
-              <div class="board-center__block">
-                <p class="eyebrow">Turn Log</p>
-                <div class="turn-log">
-                  <p v-for="(line, index) in recentTurnLog" :key="`${index}-${line}`">{{ line }}</p>
                 </div>
               </div>
             </section>
@@ -258,7 +202,7 @@ onBeforeUnmount(() => {
           :aria-labelledby="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'"
         >
           <div class="drawer-panel__header panel-header">
-            <div>
+            <div class="panel-header__lead">
               <p class="eyebrow">{{ game.sideDrawer === 'presets' ? 'Presets' : 'Cards' }}</p>
               <h2 :id="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'">
                 {{ game.sideDrawer === 'presets' ? '棋盤收藏' : '卡片設置' }}
@@ -327,13 +271,46 @@ onBeforeUnmount(() => {
       </Transition>
     </main>
 
-    <BaseDialog :open="game.rulesModalOpen" title="基本規則" width="wide" @close="game.rulesModalOpen = false">
-      <textarea
-        class="rules-textarea rules-textarea--dialog"
-        :disabled="!game.canEditBoardAndCards"
-        :value="game.state.rulesText"
-        @input="game.syncRulesText(($event.target as HTMLTextAreaElement).value)"
-      />
+    <BaseDialog :open="turnLogOpen" title="回合記錄" width="medium" @close="turnLogOpen = false">
+      <div class="turn-log turn-log--dialog">
+        <p v-for="(line, index) in recentTurnLog" :key="`${index}-${line}`">{{ line }}</p>
+      </div>
+    </BaseDialog>
+
+    <BaseDialog :open="playersModalOpen" title="玩家設定" width="medium" @close="playersModalOpen = false">
+      <div class="player-modal-grid">
+        <article
+          v-for="index in [0, 1, 2, 3]"
+          :key="index"
+          class="player-modal-item"
+          :class="{ 'player-modal-item--active': index === game.state.game.currentPlayerIndex }"
+        >
+          <span class="player-token" :style="{ background: PLAYER_COLORS[index % PLAYER_COLORS.length] }">
+            {{ game.playerAnimal(index) }}
+          </span>
+          <label class="player-modal-item__name">
+            <span>玩家 {{ index + 1 }}</span>
+            <input
+              type="text"
+              maxlength="20"
+              :disabled="!game.state.game.players[index]"
+              :value="game.state.game.players[index]?.name || `玩家 ${index + 1}`"
+              @change="game.updatePlayerName(index, ($event.target as HTMLInputElement).value)"
+            />
+          </label>
+          <label class="player-modal-item__money">
+            <span>💰 金幣</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              :disabled="!game.state.game.players[index] || !game.canEditPlayerMoney(index)"
+              :value="game.state.game.players[index]?.money ?? 0"
+              @change="game.updatePlayerMoney(index, Number(($event.target as HTMLInputElement).value))"
+            />
+          </label>
+        </article>
+      </div>
     </BaseDialog>
 
     <BaseDialog :open="game.medalModal.open" :title="game.medalModal.type === 'chance' ? '機會卡' : '命運卡'" width="narrow" @close="game.closeMedalPopup">

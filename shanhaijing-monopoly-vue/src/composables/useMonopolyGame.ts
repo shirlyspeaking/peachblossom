@@ -40,7 +40,6 @@ export function useMonopolyGame() {
   const toastMessage = ref('')
   const diceValue = ref(1)
   const isRolling = ref(false)
-  const rulesModalOpen = ref(false)
   const sideDrawer = ref<SideDrawerId | null>(null)
   const selectedPresetId = ref('')
   const presetNameInput = ref('')
@@ -121,17 +120,6 @@ export function useMonopolyGame() {
     return (online.meta.members ?? []).length >= state.value.game.playerCount
   })
 
-  const currentTurnLabel = computed(() => {
-    const turnIndex = state.value.game.currentPlayerIndex
-    const member = memberAtPlayerIndex(turnIndex)
-    let label = `現在出發：${playerTitle(turnIndex, member)}`
-    label += `（共 ${state.value.game.playerCount} 人）`
-    if (online.mode && !lobbyFull.value) {
-      label += ' — 等待玩家加入中，尚不可擲骰'
-    }
-    return label
-  })
-
   function loadState() {
     try {
       return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'))
@@ -177,7 +165,11 @@ export function useMonopolyGame() {
   }
 
   function titleForPlayer(index: number) {
-    return playerTitle(index, online.mode ? memberAtPlayerIndex(index) : null)
+    const localPlayer = state.value.game.players[index]
+    if (!online.mode) {
+      return `${playerAnimal(index)} ${localPlayer?.name || `玩家 ${index + 1}`}`
+    }
+    return playerTitle(index, memberAtPlayerIndex(index))
   }
 
   /** 棋盤棋子下方極小標籤（不含動物圖示，避免與頭像重複） */
@@ -329,6 +321,13 @@ export function useMonopolyGame() {
       return
     }
     state.value.game.players[index].money = Math.max(0, Math.floor(value || 0))
+    debouncedSave()
+  }
+
+  function updatePlayerName(index: number, value: string) {
+    if (!state.value.game.players[index]) return
+    const normalized = value.trim().slice(0, 20) || `玩家 ${index + 1}`
+    state.value.game.players[index].name = normalized
     debouncedSave()
   }
 
@@ -896,7 +895,6 @@ export function useMonopolyGame() {
     toastMessage,
     diceValue,
     isRolling,
-    rulesModalOpen,
     sideDrawer,
     toggleSideDrawer,
     closeSideDrawer,
@@ -908,7 +906,6 @@ export function useMonopolyGame() {
     online,
     canEditBoardAndCards,
     currentPlayer,
-    currentTurnLabel,
     boardPresets,
     onlineRoomShareUrl,
     onlineStatusText,
@@ -924,6 +921,7 @@ export function useMonopolyGame() {
     syncRulesText,
     updateTileField,
     updatePlayerMoney,
+    updatePlayerName,
     setPlayerCount,
     restartGameSession,
     resetToDefault,
