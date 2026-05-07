@@ -1,6 +1,7 @@
 import {
   DEFAULT_CHANCE,
   DEFAULT_FATE,
+  DEFAULT_PLAYER_COUNT,
   DEFAULT_RULES_TEXT,
   DEFAULT_START_MONEY,
   DEFAULT_TOLL_FEE,
@@ -47,7 +48,7 @@ export function initialTurnLogLine() {
 }
 
 export function defaultGame(): GameSession {
-  const playerCount = 4
+  const playerCount = DEFAULT_PLAYER_COUNT
   return {
     playerCount,
     players: buildDefaultPlayers(playerCount),
@@ -63,6 +64,7 @@ export function defaultState(): GameState {
     fate: deepClone(DEFAULT_FATE),
     rulesText: DEFAULT_RULES_TEXT,
     game: defaultGame(),
+    boardGridLocked: false,
   }
 }
 
@@ -100,9 +102,9 @@ export function normalizeState(raw: Partial<GameState> | null | undefined): Game
   }
 
   const game = raw.game && typeof raw.game === 'object' ? raw.game : defaultGame()
-  let playerCount = Number.parseInt(String(game.playerCount ?? 4), 10)
+  let playerCount = Number.parseInt(String(game.playerCount ?? DEFAULT_PLAYER_COUNT), 10)
   if (Number.isNaN(playerCount) || playerCount < 2 || playerCount > 6) {
-    playerCount = 4
+    playerCount = DEFAULT_PLAYER_COUNT
   }
 
   const players = Array.isArray(game.players) && game.players.length === playerCount
@@ -133,6 +135,7 @@ export function normalizeState(raw: Partial<GameState> | null | undefined): Game
     chance: normalizeCards(raw.chance, DEFAULT_CHANCE),
     fate: normalizeCards(raw.fate, DEFAULT_FATE),
     rulesText: typeof raw.rulesText === 'string' ? raw.rulesText : DEFAULT_RULES_TEXT,
+    boardGridLocked: raw.boardGridLocked === true,
     game: {
       playerCount,
       players,

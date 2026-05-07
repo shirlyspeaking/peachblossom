@@ -12,7 +12,7 @@ describe('game store', () => {
   it('starts with a default playable board', () => {
     const store = useGameStore().api
 
-    expect(store.state.game.playerCount).toBe(4)
+    expect(store.state.game.playerCount).toBe(2)
     expect(store.state.tiles).toHaveLength(24)
     expect(store.state.chance.length).toBeGreaterThan(0)
     expect(store.state.fate.length).toBeGreaterThan(0)

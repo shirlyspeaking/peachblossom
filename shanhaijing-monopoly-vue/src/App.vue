@@ -35,8 +35,15 @@ const pawnPositions = computed(() =>
     game.state.game.players
       .map((player, index) => ({ position: player.position, playerNumber: index + 1 }))
       .filter((item) => item.position === tile.index)
-      .map((item) => item.playerNumber),
+      .map((item) => ({
+        playerNumber: item.playerNumber,
+        label: game.pawnLabelForPlayer(item.playerNumber - 1),
+      })),
   ),
+)
+
+const playerSlotIndices = computed(() =>
+  Array.from({ length: game.state.game.playerCount }, (_, i) => i),
 )
 
 const recentTurnLog = computed(() => game.state.game.turnLog.slice(-30))
@@ -110,6 +117,9 @@ onBeforeUnmount(() => {
           <div class="panel-header__lead">
             <p class="eyebrow">Board</p>
             <h2>巡遊棋盤</h2>
+            <p v-if="game.state.boardGridLocked" class="board-locked-note">
+              已套用棋盤收藏：格名與效果為唯讀。若要恢復編輯，請按「重設預設」。
+            </p>
           </div>
           <div class="board-toolbar">
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="playersModalOpen = true">玩家設定</button>
@@ -120,7 +130,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="board-scroll">
-          <div class="board-grid">
+          <div class="board-grid" :class="{ 'board-grid--locked': game.state.boardGridLocked }">
             <BoardTile
               v-for="(tile, index) in game.tiles"
               :key="index"
@@ -129,14 +139,13 @@ onBeforeUnmount(() => {
               :row="tile.row"
               :col="tile.col"
               :meta="tile.meta"
-              :disabled="!game.canEditBoardAndCards"
+              :disabled="!game.canEditBoardTiles"
               :pawns="pawnPositions[index]"
               @update-field="game.updateTileField"
             />
 
             <section class="board-center">
               <div class="board-center__block board-center__block--dice">
-                <p class="eyebrow">Dice</p>
                 <div
                   class="dice-shell"
                   :class="{ 'dice-shell--rolling': game.isRolling }"
@@ -278,9 +287,24 @@ onBeforeUnmount(() => {
     </BaseDialog>
 
     <BaseDialog :open="playersModalOpen" title="玩家設定" width="medium" @close="playersModalOpen = false">
+      <div class="player-modal-count">
+        <label class="inline-field inline-field--stacked player-modal-count__field">
+          <span>本局玩家數</span>
+          <select
+            :value="game.state.game.playerCount"
+            :disabled="game.online.mode"
+            @change="game.setPlayerCount(Number(($event.target as HTMLSelectElement).value))"
+          >
+            <option v-for="n in [2, 3, 4, 5, 6]" :key="n" :value="n">{{ n }} 人</option>
+          </select>
+        </label>
+        <p v-if="game.online.mode" class="player-modal-count__hint">
+          線上房間的人數由建立房間時決定，無法在此變更。
+        </p>
+      </div>
       <div class="player-modal-grid">
         <article
-          v-for="index in [0, 1, 2, 3]"
+          v-for="index in playerSlotIndices"
           :key="index"
           class="player-modal-item"
           :class="{ 'player-modal-item--active': index === game.state.game.currentPlayerIndex }"

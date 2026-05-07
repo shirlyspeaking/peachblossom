@@ -767,6 +767,25 @@ a {
   min-width: 920px;
 }
 
+.board-grid--locked .board-tile:hover {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.board-grid--locked .board-tile {
+  cursor: default;
+}
+
+.board-locked-note {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  font-weight: 650;
+}
+
 .board-center {
   grid-column: 2 / 7;
   grid-row: 2 / 7;
@@ -1084,6 +1103,28 @@ a {
 
 .turn-log--dialog {
   max-height: min(52vh, 420px);
+}
+
+.player-modal-count {
+  display: grid;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.player-modal-count__field {
+  align-items: stretch;
+}
+
+.player-modal-count__field select {
+  width: 100%;
+  max-width: 200px;
+}
+
+.player-modal-count__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
 }
 
 .player-modal-grid {

@@ -14,11 +14,28 @@ describe('game utils', () => {
       tiles: [{ type: 'tile-land', label: '測試地', effect: '支付過路費', owner: 'abc' as never }],
     })
 
-    expect(normalized.game.playerCount).toBe(4)
-    expect(normalized.game.players).toHaveLength(4)
+    expect(normalized.game.playerCount).toBe(2)
+    expect(normalized.game.players).toHaveLength(2)
     expect(normalized.game.players[0]?.money).toBe(DEFAULT_START_MONEY)
-    expect(normalized.game.currentPlayerIndex).toBe(3)
+    expect(normalized.game.currentPlayerIndex).toBe(1)
     expect(normalized.tiles[0]?.owner).toBeNull()
+    expect(normalized.boardGridLocked).toBe(false)
+  })
+
+  it('preserves boardGridLocked when true', () => {
+    const normalized = normalizeState({
+      boardGridLocked: true,
+      game: {
+        playerCount: 2,
+        players: [
+          { id: 0, name: '玩家 1', money: 1500, position: 0 },
+          { id: 1, name: '玩家 2', money: 1500, position: 0 },
+        ],
+        currentPlayerIndex: 0,
+        turnLog: [],
+      },
+    })
+    expect(normalized.boardGridLocked).toBe(true)
   })
 
   it('reads toll fee from tile effect text and falls back when absent', () => {

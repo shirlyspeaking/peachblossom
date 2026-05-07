@@ -28,6 +28,8 @@ export type MonopolySnapshot = {
     currentPlayerIndex: number;
     turnLog: string[];
   };
+  /** 與前端 GameState.boardGridLocked：套用收藏後主棋盤格唯讀 */
+  boardGridLocked?: boolean;
 };
 
 function json(
@@ -426,7 +428,7 @@ function buildSnapshotFromClientState(
   const gameRaw = raw.game && typeof raw.game === "object" ? (raw.game as Record<string, unknown>) : {};
   const game = buildGame(playerCount, gameRaw);
 
-  return {
+  const snapshot: MonopolySnapshot = {
     hostUserId: host.id,
     members: [
       {
@@ -443,6 +445,10 @@ function buildSnapshotFromClientState(
     rulesText,
     game,
   };
+  if (raw.boardGridLocked === true) {
+    snapshot.boardGridLocked = true;
+  }
+  return snapshot;
 }
 
 function defaultRulesText(): string {
