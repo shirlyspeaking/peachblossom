@@ -30,7 +30,10 @@ const pawnPositions = computed(() =>
     game.state.game.players
       .map((player, index) => ({ position: player.position, playerNumber: index + 1 }))
       .filter((item) => item.position === tile.index)
-      .map((item) => item.playerNumber),
+      .map((item) => ({
+        playerNumber: item.playerNumber,
+        label: game.pawnLabelForPlayer(item.playerNumber - 1),
+      })),
   ),
 )
 
@@ -193,7 +196,6 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="board-center__block board-center__block--dice">
-                <p class="eyebrow">Dice</p>
                 <div class="dice-shell" :class="{ 'dice-shell--rolling': game.isRolling }">
                   <span class="dice-shell__emoji">🎲</span>
                   <strong>{{ game.diceValue }}</strong>

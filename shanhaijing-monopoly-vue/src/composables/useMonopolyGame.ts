@@ -19,6 +19,7 @@ import {
   isChanceTile,
   isFateTile,
   isPurchasableLandTile,
+  memberLabel,
   normalizeState,
   playerAnimal,
   playerStatusText,
@@ -177,6 +178,15 @@ export function useMonopolyGame() {
 
   function titleForPlayer(index: number) {
     return playerTitle(index, online.mode ? memberAtPlayerIndex(index) : null)
+  }
+
+  /** 棋盤棋子下方極小標籤（不含動物圖示，避免與頭像重複） */
+  function pawnLabelForPlayer(index: number) {
+    if (online.mode) {
+      const member = memberAtPlayerIndex(index)
+      return memberLabel(member?.name, member?.email) || `玩家${index + 1}`
+    }
+    return `玩家${index + 1}`
   }
 
   function statusForPlayer(index: number) {
@@ -907,6 +917,7 @@ export function useMonopolyGame() {
     initialize,
     memberAtPlayerIndex,
     playerAnimal,
+    pawnLabelForPlayer,
     titleForPlayer,
     statusForPlayer,
     canEditPlayerMoney,

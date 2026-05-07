@@ -841,9 +841,34 @@ a {
 
 .board-tile__pawns {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-top: auto;
+  align-items: flex-start;
+}
+
+.board-tile__pawn-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: 56px;
+  animation: pawnArrive 480ms var(--ease-out-expo) both;
+}
+
+.board-tile__pawn-name {
+  display: block;
+  max-width: 100%;
+  padding: 0 1px;
+  font-size: 0.58rem;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .board-tile__pawn,
@@ -860,7 +885,7 @@ a {
 }
 
 .board-tile__pawn {
-  animation: pawnArrive 480ms var(--ease-out-expo) both;
+  flex-shrink: 0;
 }
 
 .inline-field {
