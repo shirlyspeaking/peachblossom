@@ -21,31 +21,35 @@ export function buildLayout(text: string, config: PageLayoutConfig): LayoutResul
   const characters = toCharacters(text);
   const charactersForLayout =
     cfg.copybookVariant === "strokeOrderPractice"
-      ? characters.flatMap((char) => [char, char, char, ""])
-      : characters;
+      ? characters.flatMap((char, sourceIndex) => ([
+          { char, practiceStep: 1 as const, sourceChar: char, sourceIndex },
+          { char, practiceStep: 2 as const, sourceChar: char, sourceIndex },
+          { char, practiceStep: 3 as const, sourceChar: char, sourceIndex },
+          { char: "", practiceStep: 4 as const, sourceChar: char, sourceIndex },
+        ]))
+      : characters.map((char) => ({ char }));
   const perPage = cfg.rows * cfg.cols;
   const pages: LayoutPage[] = [];
 
   for (let pageIndex = 0; pageIndex * perPage < charactersForLayout.length; pageIndex += 1) {
     const start = pageIndex * perPage;
     const pageChars = charactersForLayout.slice(start, start + perPage);
-    const cells: LayoutCell[] = pageChars.map((char, idx) => {
-      const absoluteIdx = start + idx;
+    const cells: LayoutCell[] = pageChars.map((entry, idx) => {
+      const baseCell = {
+        row: Math.floor(idx / cfg.cols),
+        col: idx % cfg.cols,
+      };
       if (cfg.copybookVariant === "strokeOrderPractice") {
-        const step = ((absoluteIdx % 4) + 1) as 1 | 2 | 3 | 4;
-        const sourceChar = characters[Math.floor(absoluteIdx / 4)] || "";
         return {
-          char,
-          row: Math.floor(idx / cfg.cols),
-          col: idx % cfg.cols,
-          practiceStep: step,
-          sourceChar,
+          char: entry.char,
+          ...baseCell,
+          practiceStep: entry.practiceStep,
+          sourceChar: entry.sourceChar,
         };
       }
       return {
-        char,
-        row: Math.floor(idx / cfg.cols),
-        col: idx % cfg.cols,
+        char: entry.char,
+        ...baseCell,
       };
     });
     pages.push({ index: pageIndex, cells });

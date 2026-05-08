@@ -337,7 +337,7 @@ export default function CalligraphyPage() {
                 })}
               </div>
             </div>
-            {config.copybookVariant === "strokeOrderPractice" ? <p className="mt-2 text-xs text-slate-500">每字依序展開為 4 格：1 看字形、2 描紅、3 臨寫、4 空格默寫。</p> : null}
+            {config.copybookVariant === "strokeOrderPractice" ? <p className="mt-2 text-xs text-slate-500">每個輸入字元（含重複字）都會依序展開為 4 格：1 看字形、2 描紅、3 臨寫、4 空格默寫。</p> : null}
           </CardContent>
         </Card>
       </div>
