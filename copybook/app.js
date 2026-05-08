@@ -492,12 +492,12 @@
                 var cellSize = Math.max(Math.round(fs * lh), fs + 8);
 
                 if (useStrokePaths) {
+                    var layoutCpl = strokePathLayout.cpl || 1;
                     var rowCells = pageRows[r] || [];
-                    var rowCpl = rowCells.length || 1;
-                    grid.style.gridTemplateColumns = 'repeat(' + rowCpl + ', ' + cellSize + 'px)';
+                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
                     grid.style.gridTemplateRows = cellSize + 'px';
 
-                    for (var sc = 0; sc < rowCpl; sc++) {
+                    for (var sc = 0; sc < layoutCpl; sc++) {
                         var item = rowCells[sc] || { kind: 'blank' };
                         var cell = document.createElement('div');
                         cell.className = cellClassForGrid(gtype);
@@ -505,7 +505,7 @@
                         cell.style.minWidth = cellSize + 'px';
                         cell.style.height = cellSize + 'px';
                         cell.style.minHeight = cellSize + 'px';
-                        if (sc === rowCpl - 1) cell.classList.add('col-last');
+                        if (sc === layoutCpl - 1) cell.classList.add('col-last');
                         if (r === pageRows.length - 1) cell.classList.add('row-last');
 
                         var innerSp = document.createElement('span');
