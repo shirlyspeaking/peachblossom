@@ -171,7 +171,7 @@
      */
     function buildStrokePathsSvg(pathDs, fs, hongMode, lightPinkHongMode) {
         var vb = '0 0 1024 1024';
-        var sw = Math.max(15, Math.min(54, Math.round(((fs || 36) + 4) * 0.85)));
+        var sw = Math.max(13, Math.min(46, Math.round(((fs || 36) + 4) * 0.72)));
         var ty = STROKE_PATH_TRANSLATE_Y;
         var parts = '';
         var i;
@@ -223,7 +223,7 @@
             '<g transform="translate(0,' +
             ty +
             ')">' +
-            '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
+            '<g transform="translate(512,512) scale(0.82,-0.82) translate(-512,-512)">' +
             parts +
             '</g>' +
             '</g>' +
@@ -237,7 +237,8 @@
 
     function parseHanziChars(text) {
         var out = [];
-        var chars = stringToChars(String(text || '').trim());
+        // 保留輸入順序與重複字；支援多行輸入（換行會被略過，不會中斷解析）
+        var chars = stringToChars(String(text || ''));
         for (var i = 0; i < chars.length; i++) {
             var ch = chars[i];
             if (!/[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch)) continue;
@@ -319,9 +320,15 @@
     }
 
     async function onAutoStrokeFromChars() {
-        var chars = parseHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
+        var sourceText = '';
+        if (autoStrokeChars && String(autoStrokeChars.value || '').trim()) {
+            sourceText = autoStrokeChars.value;
+        } else if (textInput) {
+            sourceText = textInput.value;
+        }
+        var chars = parseHanziChars(sourceText);
         if (!chars.length) {
-            window.alert('請先輸入至少一個漢字');
+            window.alert('請先輸入至少一個漢字（可在筆順字帖輸入或字帖內容中輸入，多行可用）');
             return;
         }
         if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
@@ -485,12 +492,12 @@
                 var cellSize = Math.max(Math.round(fs * lh), fs + 8);
 
                 if (useStrokePaths) {
-                    var layoutCpl = strokePathLayout.cpl || 1;
                     var rowCells = pageRows[r] || [];
-                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
+                    var rowCpl = rowCells.length || 1;
+                    grid.style.gridTemplateColumns = 'repeat(' + rowCpl + ', ' + cellSize + 'px)';
                     grid.style.gridTemplateRows = cellSize + 'px';
 
-                    for (var sc = 0; sc < layoutCpl; sc++) {
+                    for (var sc = 0; sc < rowCpl; sc++) {
                         var item = rowCells[sc] || { kind: 'blank' };
                         var cell = document.createElement('div');
                         cell.className = cellClassForGrid(gtype);
@@ -498,7 +505,7 @@
                         cell.style.minWidth = cellSize + 'px';
                         cell.style.height = cellSize + 'px';
                         cell.style.minHeight = cellSize + 'px';
-                        if (sc === layoutCpl - 1) cell.classList.add('col-last');
+                        if (sc === rowCpl - 1) cell.classList.add('col-last');
                         if (r === pageRows.length - 1) cell.classList.add('row-last');
 
                         var innerSp = document.createElement('span');
