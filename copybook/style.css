@@ -266,7 +266,7 @@ select {
 
 textarea {
     resize: vertical;
-    min-height: 160px;
+    min-height: 80px;
 }
 
 .btn-generate {
@@ -286,7 +286,7 @@ textarea {
 
 #autoStrokeChars {
     margin-bottom: 2px;
-    min-height: 78px;
+    min-height: 39px;
 }
 
 .row {

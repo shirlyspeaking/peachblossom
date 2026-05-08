@@ -282,9 +282,8 @@
             blocks.push(cells);
         }
 
-        var avgCells = blocks.length ? totalCells / blocks.length : 1;
-        var targetGridPerRow = 18;
-        var charsPerRow = Math.max(1, Math.min(6, Math.floor(targetGridPerRow / avgCells) || 1));
+        // 筆順字帖固定一行一字，避免不同字同列造成閱讀干擾
+        var charsPerRow = 1;
         var rows = [];
         var maxCols = 1;
 
