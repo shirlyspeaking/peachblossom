@@ -286,6 +286,7 @@ textarea {
 
 #autoStrokeChars {
     margin-bottom: 2px;
+    min-height: 78px;
 }
 
 .row {
