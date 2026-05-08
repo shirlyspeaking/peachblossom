@@ -235,15 +235,12 @@
         return fontPreset.value.trim();
     }
 
-    function uniqHanziChars(text) {
-        var seen = Object.create(null);
+    function parseHanziChars(text) {
         var out = [];
         var chars = stringToChars(String(text || '').trim());
         for (var i = 0; i < chars.length; i++) {
             var ch = chars[i];
             if (!/[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch)) continue;
-            if (seen[ch]) continue;
-            seen[ch] = true;
             out.push(ch);
         }
         return out;
@@ -323,7 +320,7 @@
     }
 
     async function onAutoStrokeFromChars() {
-        var chars = uniqHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
+        var chars = parseHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
         if (!chars.length) {
             window.alert('請先輸入至少一個漢字');
             return;
