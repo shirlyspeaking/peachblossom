@@ -314,7 +314,16 @@
         var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
         for (var i = 0; i < rows.length; i += n) {
-            pages.push(rows.slice(i, i + n));
+            var pageRows = rows.slice(i, i + n);
+            while (pageRows.length < n) {
+                pageRows.push([]);
+            }
+            pages.push(pageRows);
+        }
+        if (pages.length === 0) {
+            var emptyPage = [];
+            while (emptyPage.length < n) emptyPage.push([]);
+            pages.push(emptyPage);
         }
         return pages;
     }
