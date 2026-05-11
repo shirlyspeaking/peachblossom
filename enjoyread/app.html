@@ -739,7 +739,10 @@
             return [];
         }
 
-        async function loadArticles() {
+        /**
+         * @param {boolean} shuffleForRefresh 為 true 時（使用者按「更新」）從近期池中洗牌取樣，避免 RSS 排序固定導致永遠同一批前 30 筆
+         */
+        async function loadArticles(shuffleForRefresh = false) {
             const results = await Promise.all(RSS_SOURCES.map((src) => fetchRss(src)));
             let all = results.flat();
             const seen = new Set();
@@ -751,7 +754,16 @@
             });
             if (all.length === 0) return shuffleFallback();
             all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            return all.slice(0, 30);
+            if (!shuffleForRefresh) {
+                return all.slice(0, 30);
+            }
+            const poolSize = Math.min(80, all.length);
+            const pool = all.slice(0, poolSize);
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, Math.min(30, pool.length));
         }
 
         function esc(s) {
@@ -1298,10 +1310,11 @@
                 '<div class="loading"><div class="loading-spinner"></div><p>' + msg + '</p></div>';
         }
 
-        async function loadAndRenderArticles(loadingMsg) {
+        async function loadAndRenderArticles(loadingMsg, options) {
+            const shuffleForRefresh = Boolean(options && options.shuffleForRefresh);
             if (loadingMsg) showLoadingMessage(loadingMsg);
             try {
-                articles = await loadArticles();
+                articles = await loadArticles(shuffleForRefresh);
                 renderArticles(articles);
             } catch (e) {
                 articles = shuffleFallback();
@@ -1324,15 +1337,19 @@
         async function refreshArticles() {
             if (viewMode === 'history') return;
             const btn = document.getElementById('refreshBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ 更新中...';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ 更新中...';
+            }
             if (typeof speechSynthesis !== 'undefined') {
                 speechSynthesis.cancel();
                 currentPlayingIdx = -1;
             }
-            await loadAndRenderArticles('正在重新抓取最新文章，請稍候…');
-            btn.disabled = false;
-            btn.textContent = '🔄 更新';
+            await loadAndRenderArticles('正在重新抓取最新文章，請稍候…', { shuffleForRefresh: true });
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🔄 更新';
+            }
         }
 
         if (document.readyState === 'loading') {
