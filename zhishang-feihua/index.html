@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 部署 Next 應用後，將下方 content 改為正式網址（含 https://），存檔後首頁卡片進入會自動跳轉。 -->
-    <meta name="zhishang-feihua-app-url" content="">
+    <!-- 線上版網址（只改這一行雙引號裡即可）。若 Cloudflare 給的網址不同，整段換成你的 https://… -->
+    <meta name="zhishang-feihua-app-url" content="https://zhishang-feihua.pages.dev">
     <title>指上飛花 · 桃花源</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,6 +59,10 @@
             background: linear-gradient(135deg, oklch(0.55 0.14 350), oklch(0.45 0.12 8));
             box-shadow: 0 8px 20px oklch(0.5 0.1 350 / 0.2);
         }
+        a.btn[aria-disabled="true"] {
+            opacity: 0.45;
+            pointer-events: none;
+        }
         a.back {
             display: inline-block;
             margin-top: 22px;
@@ -72,30 +76,35 @@
             border-radius: 6px;
         }
     </style>
+</head>
+<body>
+    <div class="card">
+        <h1>指上飛花</h1>
+        <p>桃花源 · 中文輸入練習。請按下方按鈕進入線上版（網址已寫在原始碼第 7 行，之後若要改只改那一行即可）。</p>
+        <p class="muted">本機開發可先執行 <code>npm run dev</code>（埠 3210），或在瀏覽器主控台執行 <code>localStorage.setItem(&quot;zhishang_feihua_app_url&quot;,&quot;http://localhost:3210&quot;)</code> 後重新整理本頁，按鈕會改連本機。</p>
+        <p><a id="enter-app" class="btn" href="#">正在讀取網址…</a></p>
+        <a class="back" href="../index.html">← 返回桃花源首頁</a>
+    </div>
     <script>
         (function () {
-            var params = new URLSearchParams(window.location.search);
-            if (params.get("stay") === "1") return;
             var meta = document.querySelector('meta[name="zhishang-feihua-app-url"]');
             var url = (meta && meta.getAttribute("content") || "").trim();
             try {
                 var fromStorage = localStorage.getItem("zhishang_feihua_app_url");
                 if (fromStorage) url = String(fromStorage).trim();
             } catch (e) {}
+            var btn = document.getElementById("enter-app");
+            if (!btn) return;
             if (url && /^https?:\/\//i.test(url)) {
-                window.location.replace(url);
+                btn.href = url;
+                btn.textContent = "進入指上飛花（線上版）";
+                btn.setAttribute("aria-disabled", "false");
+            } else {
+                btn.href = "#";
+                btn.textContent = "尚未設定線上網址";
+                btn.setAttribute("aria-disabled", "true");
             }
         })();
     </script>
-</head>
-<body>
-    <div class="card">
-        <h1>指上飛花</h1>
-        <p>桃花源 · 中文輸入練習（詞語與段落）。本頁為靜態入口；完整功能由 Next.js 應用提供。</p>
-        <p class="muted">若已部署正式站，請編輯本目錄下 <code>index.html</code>，在 <code>meta name=&quot;zhishang-feihua-app-url&quot;</code> 的 <code>content</code> 填入網址，訪客將自動前往。除錯時可在網址後加 <code>?stay=1</code> 暫停跳轉。</p>
-        <p class="muted">本機開發：<code>cd zhishang-feihua &amp;&amp; npm run dev</code>（預設埠 3210）。瀏覽器可執行 <code>localStorage.setItem('zhishang_feihua_app_url','http://localhost:3210')</code> 後重新整理，即可從本頁跳轉到本機。</p>
-        <a class="btn" href="../index.html">返回桃花源首頁</a>
-        <div><a class="back" href="../index.html">← 桃花源</a></div>
-    </div>
 </body>
 </html>
