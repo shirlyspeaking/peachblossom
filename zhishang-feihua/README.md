@@ -2,6 +2,10 @@
 
 獨立 Next.js 應用：詞語練習與段落練習，視覺風格對齊桃花源系。
 
+## 桃花源首頁
+
+根目錄 [index.html](../index.html) 已加入「指上飛花」卡片，連結為 `zhishang-feihua/`（靜態 [index.html](./index.html)）。部署 Next 後請在該 `index.html` 的 `meta name="zhishang-feihua-app-url"` 填入正式網址，訪客會自動跳轉；除錯可加網址參數 `?stay=1` 暫停跳轉。
+
 ## 開發
 
 ```bash

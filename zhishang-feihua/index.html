@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 部署 Next 應用後，將下方 content 改為正式網址（含 https://），存檔後首頁卡片進入會自動跳轉。 -->
+    <meta name="zhishang-feihua-app-url" content="">
+    <title>指上飛花 · 桃花源</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: oklch(0.975 0.014 8);
+            --text: oklch(0.305 0.06 8);
+            --soft: oklch(0.49 0.04 10);
+            --accent: oklch(0.55 0.14 350);
+            --line: oklch(0.852 0.03 10 / 0.7);
+        }
+        body {
+            min-height: 100vh;
+            font-family: "Noto Sans TC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+        .card {
+            max-width: 440px;
+            width: 100%;
+            border-radius: 24px;
+            border: 1px solid var(--line);
+            background: oklch(0.99 0.008 8 / 0.95);
+            box-shadow: 0 20px 50px oklch(0.5 0.06 8 / 0.08);
+            padding: 36px 28px 32px;
+            text-align: center;
+        }
+        h1 {
+            font-family: "Noto Serif TC", serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: oklch(0.38 0.1 350);
+            margin-bottom: 10px;
+        }
+        p { color: var(--soft); line-height: 1.75; font-size: 0.95rem; margin-bottom: 14px; }
+        .muted { font-size: 0.85rem; opacity: 0.9; }
+        a.btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 12px 26px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            color: oklch(0.99 0.01 8);
+            background: linear-gradient(135deg, oklch(0.55 0.14 350), oklch(0.45 0.12 8));
+            box-shadow: 0 8px 20px oklch(0.5 0.1 350 / 0.2);
+        }
+        a.back {
+            display: inline-block;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+        code {
+            font-size: 0.8rem;
+            background: oklch(0.94 0.02 8);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+    </style>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get("stay") === "1") return;
+            var meta = document.querySelector('meta[name="zhishang-feihua-app-url"]');
+            var url = (meta && meta.getAttribute("content") || "").trim();
+            try {
+                var fromStorage = localStorage.getItem("zhishang_feihua_app_url");
+                if (fromStorage) url = String(fromStorage).trim();
+            } catch (e) {}
+            if (url && /^https?:\/\//i.test(url)) {
+                window.location.replace(url);
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h1>指上飛花</h1>
+        <p>桃花源 · 中文輸入練習（詞語與段落）。本頁為靜態入口；完整功能由 Next.js 應用提供。</p>
+        <p class="muted">若已部署正式站，請編輯本目錄下 <code>index.html</code>，在 <code>meta name=&quot;zhishang-feihua-app-url&quot;</code> 的 <code>content</code> 填入網址，訪客將自動前往。除錯時可在網址後加 <code>?stay=1</code> 暫停跳轉。</p>
+        <p class="muted">本機開發：<code>cd zhishang-feihua &amp;&amp; npm run dev</code>（預設埠 3210）。瀏覽器可執行 <code>localStorage.setItem('zhishang_feihua_app_url','http://localhost:3210')</code> 後重新整理，即可從本頁跳轉到本機。</p>
+        <a class="btn" href="../index.html">返回桃花源首頁</a>
+        <div><a class="back" href="../index.html">← 桃花源</a></div>
+    </div>
+</body>
+</html>
