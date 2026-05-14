@@ -462,6 +462,7 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
+            <p class="page-desc" style="margin: 0 0 12px; font-size: 0.9rem; color: var(--muted, #666);">僅顯示<strong>本週</strong>（週一 00:00 起至今日）RSS 發布的文章。按「更新」會盡量換成<strong>本週您尚未看過</strong>的另一批。</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
@@ -492,6 +493,8 @@
     <script>
         const SUMMARY_LENGTH = 150; // 約 150 字
         const READ_HISTORY_KEY = 'enjoyread-read-history';
+        /** 本週已在列表中出現過的文章 key（title|link），按「更新」時會排除，週一自動重算 */
+        const FEED_SHOWN_WEEK_KEY = 'enjoyread-feed-shown-week-v1';
         const MAX_HISTORY = 50;
         const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
         function getQuizApiBase() {
@@ -687,6 +690,69 @@
 
         const ITEMS_PER_FEED = 12;
 
+        /** 本週：以裝置本地時間，從本週一 00:00 起算 */
+        function getThisWeekWindowLocal() {
+            const now = new Date();
+            const day = now.getDay();
+            const diffToMonday = day === 0 ? -6 : 1 - day;
+            const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+            monday.setHours(0, 0, 0, 0);
+            const weekKey =
+                monday.getFullYear() +
+                '-' +
+                String(monday.getMonth() + 1).padStart(2, '0') +
+                '-' +
+                String(monday.getDate()).padStart(2, '0');
+            return { startMs: monday.getTime(), weekKey };
+        }
+
+        function parsePubDateToMs(dateStr) {
+            if (!dateStr || !String(dateStr).trim()) return NaN;
+            const t = Date.parse(String(dateStr).trim());
+            return Number.isFinite(t) ? t : NaN;
+        }
+
+        function articleStableKey(item) {
+            return String(item.link || '') + '\n' + String(item.title || '');
+        }
+
+        function loadFeedShownForWeek() {
+            try {
+                const { weekKey } = getThisWeekWindowLocal();
+                const raw = localStorage.getItem(FEED_SHOWN_WEEK_KEY);
+                const data = raw ? JSON.parse(raw) : null;
+                if (!data || data.weekKey !== weekKey) {
+                    return { weekKey, keys: [] };
+                }
+                return { weekKey, keys: Array.isArray(data.keys) ? data.keys : [] };
+            } catch (e) {
+                return { weekKey: getThisWeekWindowLocal().weekKey, keys: [] };
+            }
+        }
+
+        function appendFeedShownKeys(newKeys) {
+            const { weekKey } = getThisWeekWindowLocal();
+            const cur = loadFeedShownForWeek();
+            const set = new Set(cur.weekKey === weekKey ? cur.keys : []);
+            newKeys.forEach((k) => {
+                if (k) set.add(k);
+            });
+            const keys = [...set].slice(-400);
+            localStorage.setItem(
+                FEED_SHOWN_WEEK_KEY,
+                JSON.stringify({ weekKey, keys })
+            );
+        }
+
+        function shuffleArray(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
         function parseRssXml(xmlText) {
             const items = [];
             try {
@@ -702,13 +768,16 @@
                         || el.querySelector('content')?.textContent?.trim()
                         || el.querySelector('summary')?.textContent?.trim() || '';
                     const pubDate = el.querySelector('pubDate')?.textContent?.trim()
+                        || el.querySelector('published')?.textContent?.trim()
                         || el.querySelector('updated')?.textContent?.trim() || '';
+                    const dateMs = parsePubDateToMs(pubDate);
                     if (title && (desc || title)) {
                         items.push({
                             title,
                             link,
                             summary: createSummary(desc || title, SUMMARY_LENGTH),
-                            date: pubDate
+                            date: pubDate,
+                            dateMs
                         });
                     }
                 });
@@ -740,36 +809,99 @@
         }
 
         /**
-         * @param {boolean} shuffleForRefresh 為 true 時（使用者按「更新」）從近期池中洗牌取樣，避免 RSS 排序固定導致永遠同一批前 30 筆
+         * 從 RSS 取得文章，僅保留「本週一 00:00～現在」內發布者。
+         * @param {{ shuffleForRefresh?: boolean, excludeShown?: boolean }} options
+         *   excludeShown：按「更新」時排除本機已顯示過的連結，避免重複同一批。
          */
-        async function loadArticles(shuffleForRefresh = false) {
+        async function loadArticles(options) {
+            const shuffleForRefresh = Boolean(options && options.shuffleForRefresh);
+            const excludeShown = Boolean(options && options.excludeShown);
+            const { startMs } = getThisWeekWindowLocal();
+            const nowMs = Date.now();
+            const upperMs = nowMs + 120000;
+
             const results = await Promise.all(RSS_SOURCES.map((src) => fetchRss(src)));
             let all = results.flat();
-            const seen = new Set();
+            const seenDup = new Set();
             all = all.filter((item) => {
-                const key = (item.title || '') + '|' + (item.link || '');
-                if (seen.has(key)) return false;
-                seen.add(key);
+                const key = articleStableKey(item);
+                if (seenDup.has(key)) return false;
+                seenDup.add(key);
                 return true;
             });
-            if (all.length === 0) return shuffleFallback();
-            all.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            if (!shuffleForRefresh) {
-                return all.slice(0, 30);
+
+            all.forEach((item) => {
+                if (!Number.isFinite(item.dateMs)) {
+                    item.dateMs = parsePubDateToMs(item.date);
+                }
+            });
+
+            all = all.filter(
+                (item) =>
+                    Number.isFinite(item.dateMs) &&
+                    item.dateMs >= startMs &&
+                    item.dateMs <= upperMs
+            );
+
+            if (all.length === 0) {
+                return [];
             }
-            const poolSize = Math.min(80, all.length);
-            const pool = all.slice(0, poolSize);
-            for (let i = pool.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [pool[i], pool[j]] = [pool[j], pool[i]];
+
+            all.sort((a, b) => (b.dateMs || 0) - (a.dateMs || 0));
+
+            let pool = all;
+            if (excludeShown) {
+                const shown = new Set(loadFeedShownForWeek().keys);
+                pool = all.filter((item) => !shown.has(articleStableKey(item)));
+                if (pool.length === 0) {
+                    return [];
+                }
             }
-            return pool.slice(0, Math.min(30, pool.length));
+
+            const limit = 30;
+            if (shuffleForRefresh) {
+                pool = shuffleArray(pool).slice(0, limit);
+            } else {
+                pool = pool.slice(0, limit);
+            }
+
+            return pool;
         }
 
         function esc(s) {
             const d = document.createElement('div');
             d.textContent = s || '';
             return d.innerHTML;
+        }
+
+        function renderFeedNotice(title, detailText) {
+            document.getElementById('contentArea').innerHTML =
+                '<div class="article-card" style="max-width:640px;margin:1rem auto;text-align:left;padding:1.25rem 1.5rem;">' +
+                '<h2 class="article-title" style="margin-top:0;">' +
+                esc(title) +
+                '</h2>' +
+                '<p class="article-summary">' +
+                esc(detailText) +
+                '</p>' +
+                '</div>';
+        }
+
+        function renderEmptyFeedList(opts) {
+            const exhausted = opts && opts.excludeShown;
+            const title = exhausted
+                ? '本週沒有更多尚未顯示過的文章'
+                : '本週暫沒有可用的 RSS 新文';
+            const detail = exhausted
+                ? '本週（週一至今日）RSS 中、且尚未在列表出現過的文章可能已全部顯示過。請晚點再按「更新」，或下週一後再試。'
+                : '目前沒有符合「本週發布日期」的項目（可能來源未更新、日期無法解析，或網路／代理暫時不可用）。';
+            renderFeedNotice(title, detail);
+        }
+
+        function renderFeedLoadFailed() {
+            renderFeedNotice(
+                '載入失敗',
+                '連線或解析過程發生錯誤。請檢查網路後再按「更新」。'
+            );
         }
 
         function renderArticles(articles) {
@@ -1311,14 +1443,22 @@
         }
 
         async function loadAndRenderArticles(loadingMsg, options) {
-            const shuffleForRefresh = Boolean(options && options.shuffleForRefresh);
             if (loadingMsg) showLoadingMessage(loadingMsg);
             try {
-                articles = await loadArticles(shuffleForRefresh);
-                renderArticles(articles);
+                articles = await loadArticles(options || {});
+                if (!articles || articles.length === 0) {
+                    articles = [];
+                    renderEmptyFeedList({
+                        excludeShown: Boolean(options && options.excludeShown),
+                    });
+                } else {
+                    appendFeedShownKeys(articles.map((a) => articleStableKey(a)));
+                    renderArticles(articles);
+                }
             } catch (e) {
-                articles = shuffleFallback();
-                renderArticles(articles);
+                console.warn(e);
+                articles = [];
+                renderFeedLoadFailed();
             }
         }
 
@@ -1345,7 +1485,10 @@
                 speechSynthesis.cancel();
                 currentPlayingIdx = -1;
             }
-            await loadAndRenderArticles('正在重新抓取最新文章，請稍候…', { shuffleForRefresh: true });
+            await loadAndRenderArticles('正在重新抓取最新文章，請稍候…', {
+                shuffleForRefresh: true,
+                excludeShown: true,
+            });
             if (btn) {
                 btn.disabled = false;
                 btn.textContent = '🔄 更新';
