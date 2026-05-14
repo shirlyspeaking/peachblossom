@@ -756,34 +756,6 @@
             return String(item.link || '') + '\n' + String(item.title || '');
         }
 
-        function loadFeedShownForWeek() {
-            try {
-                const { weekKey } = getThisWeekWindowLocal();
-                const raw = localStorage.getItem(FEED_SHOWN_WEEK_KEY);
-                const data = raw ? JSON.parse(raw) : null;
-                if (!data || data.weekKey !== weekKey) {
-                    return { weekKey, keys: [] };
-                }
-                return { weekKey, keys: Array.isArray(data.keys) ? data.keys : [] };
-            } catch (e) {
-                return { weekKey: getThisWeekWindowLocal().weekKey, keys: [] };
-            }
-        }
-
-        function appendFeedShownKeys(newKeys) {
-            const { weekKey } = getThisWeekWindowLocal();
-            const cur = loadFeedShownForWeek();
-            const set = new Set(cur.weekKey === weekKey ? cur.keys : []);
-            newKeys.forEach((k) => {
-                if (k) set.add(k);
-            });
-            const keys = [...set].slice(-400);
-            localStorage.setItem(
-                FEED_SHOWN_WEEK_KEY,
-                JSON.stringify({ weekKey, keys })
-            );
-        }
-
         function shuffleArray(arr) {
             const a = arr.slice();
             for (let i = a.length - 1; i > 0; i--) {
@@ -849,15 +821,14 @@
         }
 
         /**
-         * 從 RSS 取得文章，僅保留「本週一 00:00～現在」內發布者。
+         * 從 RSS 取得文章；僅保留發布時間在「現在起往回滾動 7 天」內的項目（本地時間）。
+         * 若 7 天內沒有任何符合筆數，或按「更新」時已無未顯示過的項目，則回傳示範清單（與舊版相同 fallback）。
          * @param {{ shuffleForRefresh?: boolean, excludeShown?: boolean }} options
-         *   excludeShown：按「更新」時排除本機已顯示過的連結，避免重複同一批。
          */
         async function loadArticles(options) {
             const shuffleForRefresh = Boolean(options && options.shuffleForRefresh);
             const excludeShown = Boolean(options && options.excludeShown);
-            const { startMs } = getThisWeekWindowLocal();
-            const nowMs = Date.now();
+            const { startMs, nowMs } = getRolling7DaysWindowMs();
             const upperMs = nowMs + 120000;
 
             const results = await Promise.all(RSS_SOURCES.map((src) => fetchRss(src)));
@@ -884,17 +855,19 @@
             );
 
             if (all.length === 0) {
-                return [];
+                return wrapFallbackList(shuffleFallback());
             }
 
             all.sort((a, b) => (b.dateMs || 0) - (a.dateMs || 0));
 
+            pruneFeedShownToPool(all);
+
             let pool = all;
             if (excludeShown) {
-                const shown = new Set(loadFeedShownForWeek().keys);
+                const shown = new Set(loadFeedShown7d());
                 pool = all.filter((item) => !shown.has(articleStableKey(item)));
                 if (pool.length === 0) {
-                    return [];
+                    return wrapFallbackList(shuffleFallback());
                 }
             }
 
@@ -912,36 +885,6 @@
             const d = document.createElement('div');
             d.textContent = s || '';
             return d.innerHTML;
-        }
-
-        function renderFeedNotice(title, detailText) {
-            document.getElementById('contentArea').innerHTML =
-                '<div class="article-card" style="max-width:640px;margin:1rem auto;text-align:left;padding:1.25rem 1.5rem;">' +
-                '<h2 class="article-title" style="margin-top:0;">' +
-                esc(title) +
-                '</h2>' +
-                '<p class="article-summary">' +
-                esc(detailText) +
-                '</p>' +
-                '</div>';
-        }
-
-        function renderEmptyFeedList(opts) {
-            const exhausted = opts && opts.excludeShown;
-            const title = exhausted
-                ? '本週沒有更多尚未顯示過的文章'
-                : '本週暫沒有可用的 RSS 新文';
-            const detail = exhausted
-                ? '本週（週一至今日）RSS 中、且尚未在列表出現過的文章可能已全部顯示過。請晚點再按「更新」，或下週一後再試。'
-                : '目前沒有符合「本週發布日期」的項目（可能來源未更新、日期無法解析，或網路／代理暫時不可用）。';
-            renderFeedNotice(title, detail);
-        }
-
-        function renderFeedLoadFailed() {
-            renderFeedNotice(
-                '載入失敗',
-                '連線或解析過程發生錯誤。請檢查網路後再按「更新」。'
-            );
         }
 
         function renderArticles(articles) {
@@ -1487,18 +1430,21 @@
             try {
                 articles = await loadArticles(options || {});
                 if (!articles || articles.length === 0) {
-                    articles = [];
-                    renderEmptyFeedList({
-                        excludeShown: Boolean(options && options.excludeShown),
-                    });
-                } else {
-                    appendFeedShownKeys(articles.map((a) => articleStableKey(a)));
-                    renderArticles(articles);
+                    articles = wrapFallbackList(shuffleFallback());
                 }
+                const fromFb = articles.some((a) => a._fromFallback === true);
+                articles = articles.map((a) => {
+                    const { _fromFallback, ...rest } = a;
+                    return rest;
+                });
+                if (!fromFb) {
+                    appendFeedShownKeys(articles.map((a) => articleStableKey(a)));
+                }
+                renderArticles(articles);
             } catch (e) {
                 console.warn(e);
-                articles = [];
-                renderFeedLoadFailed();
+                articles = wrapFallbackList(shuffleFallback()).map(({ _fromFallback, ...r }) => r);
+                renderArticles(articles);
             }
         }
 
