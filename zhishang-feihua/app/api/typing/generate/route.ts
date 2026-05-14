@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 function coerceMessageText(raw: unknown): string {
   if (typeof raw === "string") return raw;
   if (raw == null) return "";

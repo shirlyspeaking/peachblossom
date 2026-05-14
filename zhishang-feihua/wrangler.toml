@@ -1,0 +1,6 @@
+# Cloudflare Pages：建置後執行 npm run pages:deploy
+# 文件：https://developers.cloudflare.com/pages/framework-guides/nextjs/ssr/get-started/
+name = "zhishang-feihua"
+compatibility_date = "2026-04-28"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"

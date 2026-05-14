@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 線上版網址（只改這一行雙引號裡即可）。若 Cloudflare 給的網址不同，整段換成你的 https://… -->
-    <meta name="zhishang-feihua-app-url" content="https://zhishang-feihua.pages.dev">
     <title>指上飛花 · 桃花源</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +28,7 @@
             padding: 24px 16px;
         }
         .card {
-            max-width: 440px;
+            max-width: 460px;
             width: 100%;
             border-radius: 24px;
             border: 1px solid var(--line);
@@ -47,10 +45,10 @@
             margin-bottom: 10px;
         }
         p { color: var(--soft); line-height: 1.75; font-size: 0.95rem; margin-bottom: 14px; }
-        .muted { font-size: 0.85rem; opacity: 0.9; }
+        .muted { font-size: 0.85rem; opacity: 0.92; }
+        .btn-row { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
         a.btn {
             display: inline-block;
-            margin-top: 8px;
             padding: 12px 26px;
             border-radius: 999px;
             text-decoration: none;
@@ -59,9 +57,11 @@
             background: linear-gradient(135deg, oklch(0.55 0.14 350), oklch(0.45 0.12 8));
             box-shadow: 0 8px 20px oklch(0.5 0.1 350 / 0.2);
         }
-        a.btn[aria-disabled="true"] {
-            opacity: 0.45;
-            pointer-events: none;
+        a.btn-secondary {
+            background: oklch(0.97 0.012 8);
+            color: oklch(0.38 0.1 350);
+            border: 1px solid var(--line);
+            box-shadow: none;
         }
         a.back {
             display: inline-block;
@@ -70,41 +70,26 @@
             color: var(--accent);
         }
         code {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             background: oklch(0.94 0.02 8);
             padding: 2px 6px;
             border-radius: 6px;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>指上飛花</h1>
-        <p>桃花源 · 中文輸入練習。請按下方按鈕進入線上版（網址已寫在原始碼第 7 行，之後若要改只改那一行即可）。</p>
-        <p class="muted">本機開發可先執行 <code>npm run dev</code>（埠 3210），或在瀏覽器主控台執行 <code>localStorage.setItem(&quot;zhishang_feihua_app_url&quot;,&quot;http://localhost:3210&quot;)</code> 後重新整理本頁，按鈕會改連本機。</p>
-        <p><a id="enter-app" class="btn" href="#">正在讀取網址…</a></p>
-        <a class="back" href="../index.html">← 返回桃花源首頁</a>
+        <p>桃花源 · 中文輸入練習。線上版架在 Cloudflare Pages，網址為 <strong>zhishang-feihua.pages.dev</strong>。</p>
+        <p class="muted">若按下後出現 <strong>404</strong> 或空白，代表<strong>尚未完成一次部署</strong>：請在本機進入 <code>zhishang-feihua</code> 資料夾，執行 <code>npm install</code> 再執行 <code>npm run pages:deploy</code>（需已安裝 Wrangler 並登入 Cloudflare）。部署成功後再開啟下方按鈕即可。</p>
+        <div class="btn-row">
+            <!-- 線上版（勿改為相對路徑；主站為純靜態，Next 須架在 Pages） -->
+            <a class="btn" href="https://zhishang-feihua.pages.dev/">進入指上飛花（線上版）</a>
+            <a class="btn btn-secondary" href="../index.html">返回桃花源首頁</a>
+        </div>
+        <p class="muted" style="margin-top: 18px;">本機開發：在 <code>zhishang-feihua</code> 執行 <code>npm run dev</code>（埠 3210），瀏覽器開 <code>http://localhost:3210</code>。</p>
+        <a class="back" href="../index.html">← 桃花源</a>
     </div>
-    <script>
-        (function () {
-            var meta = document.querySelector('meta[name="zhishang-feihua-app-url"]');
-            var url = (meta && meta.getAttribute("content") || "").trim();
-            try {
-                var fromStorage = localStorage.getItem("zhishang_feihua_app_url");
-                if (fromStorage) url = String(fromStorage).trim();
-            } catch (e) {}
-            var btn = document.getElementById("enter-app");
-            if (!btn) return;
-            if (url && /^https?:\/\//i.test(url)) {
-                btn.href = url;
-                btn.textContent = "進入指上飛花（線上版）";
-                btn.setAttribute("aria-disabled", "false");
-            } else {
-                btn.href = "#";
-                btn.textContent = "尚未設定線上網址";
-                btn.setAttribute("aria-disabled", "true");
-            }
-        })();
-    </script>
 </body>
 </html>
