@@ -462,7 +462,7 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc" style="margin: 0 0 12px; font-size: 0.9rem; color: var(--muted, #666);">僅顯示<strong>本週</strong>（週一 00:00 起至今日）RSS 發布的文章。按「更新」會盡量換成<strong>本週您尚未看過</strong>的另一批。</p>
+            <p class="page-desc" style="margin: 0 0 12px; font-size: 0.9rem; color: var(--muted, #666);">優先顯示<strong>最近 7 天內</strong>（依 RSS 發布時間）的文章；按「更新」會盡量換成<strong>這 7 天內您尚未在列表看過</strong>的另一批。若來源暫無符合條件的新文，會改為<strong>示範文章</strong>（與先前相同備援清單）。</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">普通話音色</label>
                 <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
@@ -493,8 +493,8 @@
     <script>
         const SUMMARY_LENGTH = 150; // 約 150 字
         const READ_HISTORY_KEY = 'enjoyread-read-history';
-        /** 本週已在列表中出現過的文章 key（title|link），按「更新」時會排除，週一自動重算 */
-        const FEED_SHOWN_WEEK_KEY = 'enjoyread-feed-shown-week-v1';
+        /** 滾動 7 天內已在列表出現過的文章 key；按「更新」時會排除。舊鍵 enjoyread-feed-shown-week-v1 已不再讀寫。 */
+        const FEED_SHOWN_7D_KEY = 'enjoyread-feed-shown-7d-v1';
         const MAX_HISTORY = 50;
         const EDGE_TTS_ENDPOINT = 'https://peachblossom-edge-tts.shirlyspeaking.workers.dev/v1/audio/speech';
         function getQuizApiBase() {
@@ -602,6 +602,11 @@
             }).join('') + '<p style="text-align:center"><button type="button" class="clear-history-btn" onclick="clearReadHistory()">清空歷史</button></p>';
         }
 
+        /**
+         * RSS 來源（可再自行增刪）。建議：挑「有全文摘要、更新頻繁、HTTPS」的 feed；
+         * 教育向可加：科學人、親子天下、國語日報、公共電視、各縣市教育局公告 RSS（若有）。
+         * 若某來源經 CORS 代理失敗，可註解掉該列或換成該站其他分類 feed。
+         */
         const RSS_SOURCES = [
             { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
             { name: '科技新報', url: 'https://technews.tw/feed', desc: '科技產業動態' },
@@ -610,7 +615,12 @@
             { name: '運動去', url: 'https://feeds.feedburner.com/go-sport', desc: '運動健身、體育資訊' },
             { name: '運動視界', url: 'https://www.sportsv.net/feed', desc: '運動賽事、體育評論' },
             { name: '台視娛樂', url: 'https://www.ttv.com.tw/rss/RSSHandler.ashx?d=news&t=F', desc: '娛樂新聞' },
-            { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' }
+            { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' },
+            { name: '上下游 NewsMarket', url: 'https://www.newsmarket.tw/feed', desc: '農食、環境、社會' },
+            { name: '報導者', url: 'https://www.twreporter.org/rss/category/post_rss.xml', desc: '深度專題' },
+            { name: '天下雜誌', url: 'https://www.cw.com.tw/rss', desc: '財經與趨勢' },
+            { name: '聯合報', url: 'https://udn.com/rssfeed/news/1', desc: '綜合新聞' },
+            { name: '關鍵評論網', url: 'https://www.thenewslens.com/rss/main/posts/rss', desc: '觀點與國際' }
         ];
 
         const CORS_PROXIES = [
@@ -688,22 +698,52 @@
             return '#';
         }
 
-        const ITEMS_PER_FEED = 12;
+        const ITEMS_PER_FEED = 14;
 
-        /** 本週：以裝置本地時間，從本週一 00:00 起算 */
-        function getThisWeekWindowLocal() {
-            const now = new Date();
-            const day = now.getDay();
-            const diffToMonday = day === 0 ? -6 : 1 - day;
-            const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-            monday.setHours(0, 0, 0, 0);
-            const weekKey =
-                monday.getFullYear() +
-                '-' +
-                String(monday.getMonth() + 1).padStart(2, '0') +
-                '-' +
-                String(monday.getDate()).padStart(2, '0');
-            return { startMs: monday.getTime(), weekKey };
+        /** 滾動 7 天：發布時間在「現在往前 7×24 小時」內（本地時間） */
+        function getRolling7DaysWindowMs() {
+            const nowMs = Date.now();
+            const startMs = nowMs - 7 * 24 * 60 * 60 * 1000;
+            return { startMs, nowMs };
+        }
+
+        function loadFeedShown7d() {
+            try {
+                const raw = localStorage.getItem(FEED_SHOWN_7D_KEY);
+                const data = raw ? JSON.parse(raw) : null;
+                return Array.isArray(data && data.keys) ? data.keys : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveFeedShown7d(keys) {
+            try {
+                localStorage.setItem(
+                    FEED_SHOWN_7D_KEY,
+                    JSON.stringify({ keys: keys.slice(-400) })
+                );
+            } catch (e) { /* quota */ }
+        }
+
+        /** 移除已不在目前 7 天池內的 key，避免快取無限累積 */
+        function pruneFeedShownToPool(poolAll) {
+            const valid = new Set(poolAll.map(articleStableKey));
+            const pruned = loadFeedShown7d().filter((k) => valid.has(k));
+            saveFeedShown7d(pruned);
+            return pruned;
+        }
+
+        function appendFeedShownKeys(newKeys) {
+            const set = new Set(loadFeedShown7d());
+            newKeys.forEach((k) => {
+                if (k) set.add(k);
+            });
+            saveFeedShown7d([...set]);
+        }
+
+        function wrapFallbackList(list) {
+            return list.map((item) => ({ ...item, _fromFallback: true }));
         }
 
         function parsePubDateToMs(dateStr) {
