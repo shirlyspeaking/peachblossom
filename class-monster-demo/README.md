@@ -1,15 +1,8 @@
-# 班級小怪獸點名
+# 芯芽
 
-桃花源課堂工具：原始碼在本資料夾，正式站靜態檔輸出至倉庫根目錄 **`class-monster/`**。
+桃花源課堂工具（班級點名／積分）：原始碼在本資料夾，正式站靜態檔輸出至倉庫根目錄 **`class-monster/`**。
 
-## 本機開發
-
-```bash
-npm install
-npm run dev
-```
-
-預設：`http://localhost:5174/`（開發模式 `base` 為 `/`，無需加路徑）。
+## 功能
 
 - **加分／扣分規則**：左側可編輯說明文字（僅供課堂參考，不自動計分），並會存進 `localStorage`；班級看板頂部可摺疊查看同一份規則摘要。
 - **學生姓名管理**
@@ -22,13 +15,22 @@ npm run dev
 - 設定抽取人數、隨機點名動畫、「停！」後顯示中選者、瀏覽器語音朗讀。
 - 班級名單暫存在 `localStorage`。
 
+## 本機開發
+
+```bash
+npm install
+npm run dev
+```
+
+預設：`http://localhost:5174/`（開發模式 `base` 為 `/`，無需加路徑）。
+
 ## 部署到 peachspring.cc（倉庫靜態網站）
 
 此 app 建置輸出至倉庫根目錄的 **`class-monster/`**。將本倉庫部署到 Cloudflare Pages（或既有桃花源靜態流程）後，正式網址為：
 
 **https://peachspring.cc/class-monster/**
 
-首頁「探索應用」已連到 `class-monster/`。
+桃花源首頁「探索應用」中的「芯芽」連結為 `class-monster/`。
 
 更新前端時在本資料夾執行：
 
