@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>指上飛花 · 桃花源</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: oklch(0.975 0.014 8);
+            --text: oklch(0.305 0.06 8);
+            --soft: oklch(0.49 0.04 10);
+            --accent: oklch(0.55 0.14 350);
+            --line: oklch(0.852 0.03 10 / 0.7);
+        }
+        body {
+            min-height: 100vh;
+            font-family: "Noto Sans TC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+        .card {
+            max-width: 460px;
+            width: 100%;
+            border-radius: 24px;
+            border: 1px solid var(--line);
+            background: oklch(0.99 0.008 8 / 0.95);
+            box-shadow: 0 20px 50px oklch(0.5 0.06 8 / 0.08);
+            padding: 36px 28px 32px;
+            text-align: center;
+        }
+        h1 {
+            font-family: "Noto Serif TC", serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: oklch(0.38 0.1 350);
+            margin-bottom: 10px;
+        }
+        p { color: var(--soft); line-height: 1.75; font-size: 0.95rem; margin-bottom: 14px; }
+        .muted { font-size: 0.85rem; opacity: 0.92; }
+        .btn-row { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+        a.btn {
+            display: inline-block;
+            padding: 12px 26px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            color: oklch(0.99 0.01 8);
+            background: linear-gradient(135deg, oklch(0.55 0.14 350), oklch(0.45 0.12 8));
+            box-shadow: 0 8px 20px oklch(0.5 0.1 350 / 0.2);
+        }
+        a.btn-secondary {
+            background: oklch(0.97 0.012 8);
+            color: oklch(0.38 0.1 350);
+            border: 1px solid var(--line);
+            box-shadow: none;
+        }
+        a.back {
+            display: inline-block;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+        code {
+            font-size: 0.78rem;
+            background: oklch(0.94 0.02 8);
+            padding: 2px 6px;
+            border-radius: 6px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>指上飛花</h1>
+        <p>桃花源 · 中文輸入練習。線上版架在 Cloudflare Pages，網址為 <strong>zhishang-feihua.pages.dev</strong>。</p>
+        <p class="muted">若按下後出現 <strong>404</strong> 或空白，代表<strong>尚未完成一次部署</strong>：請在本機進入 <code>zhishang-feihua</code> 資料夾，執行 <code>npm install</code> 再執行 <code>npm run pages:deploy</code>（需已安裝 Wrangler 並登入 Cloudflare）。部署成功後再開啟下方按鈕即可。</p>
+        <div class="btn-row">
+            <!-- 線上版（勿改為相對路徑；主站為純靜態，Next 須架在 Pages） -->
+            <a class="btn" href="https://zhishang-feihua.pages.dev/">進入指上飛花（線上版）</a>
+            <a class="btn btn-secondary" href="../index.html">返回桃花源首頁</a>
+        </div>
+        <p class="muted" style="margin-top: 18px;">本機開發：在 <code>zhishang-feihua</code> 執行 <code>npm run dev</code>（埠 3210），瀏覽器開 <code>http://localhost:3210</code>。</p>
+        <a class="back" href="../index.html">← 桃花源</a>
+    </div>
+</body>
+</html>

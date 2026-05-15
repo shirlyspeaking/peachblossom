@@ -33,13 +33,13 @@
     <main class="layout">
         <aside class="panel">
             <label for="textInput">字帖內容</label>
-            <textarea id="textInput" rows="10" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
+            <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
             <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
 
             <div class="field">
                 <label for="autoStrokeChars">筆順字帖輸入</label>
-                <input id="autoStrokeChars" type="text" placeholder="輸入漢字；累進式描紅（例：永）" autocomplete="off">
+                <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
                 <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">筆順字帖</button>
             </div>
 
@@ -146,6 +146,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=41"></script>
+    <script src="app.js?v=43"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import {
   BOARD_PRESETS_KEY,
+  DEFAULT_PLAYER_COUNT,
   DEFAULT_START_MONEY,
   LAND_PRICE,
   MAX_BOARD_PRESETS_PER_USER,
@@ -19,6 +20,7 @@ import {
   isChanceTile,
   isFateTile,
   isPurchasableLandTile,
+  memberLabel,
   normalizeState,
   playerAnimal,
   playerStatusText,
@@ -84,6 +86,10 @@ export function useMonopolyGame() {
   )
 
   const canEditBoardAndCards = computed(() => !online.mode || isOnlineHost.value)
+  /** 主棋盤格（格名／效果）是否可編輯；套用收藏後鎖定 */
+  const canEditBoardTiles = computed(
+    () => canEditBoardAndCards.value && !state.value.boardGridLocked,
+  )
   const currentPlayer = computed(() => state.value.game.players[state.value.game.currentPlayerIndex] ?? null)
   const boardPresets = computed(() => {
     presetsRevision.value
@@ -171,6 +177,17 @@ export function useMonopolyGame() {
     return playerTitle(index, memberAtPlayerIndex(index))
   }
 
+  /** 棋盤棋子下方極小標籤（不含動物圖示，避免與頭像重複） */
+  function pawnLabelForPlayer(index: number) {
+    if (online.mode) {
+      const member = memberAtPlayerIndex(index)
+      return memberLabel(member?.name, member?.email) || `玩家${index + 1}`
+    }
+    const localPlayer = state.value.game.players[index]
+    const name = localPlayer?.name?.trim()
+    return name || `玩家${index + 1}`
+  }
+
   function statusForPlayer(index: number) {
     const member = online.mode ? memberAtPlayerIndex(index) : null
     if (online.mode && !member) {
@@ -194,6 +211,7 @@ export function useMonopolyGame() {
       fate: deepClone(state.value.fate),
       rulesText: state.value.rulesText,
       game: deepClone(state.value.game),
+      ...(state.value.boardGridLocked ? { boardGridLocked: true } : {}),
     }
   }
 
@@ -210,6 +228,7 @@ export function useMonopolyGame() {
       fate: data.snapshot.fate,
       rulesText: data.snapshot.rulesText,
       game: data.snapshot.game,
+      boardGridLocked: data.snapshot.boardGridLocked,
     })
     if (online.mode && !silentToast) {
       showToast('已同步房間狀態')
@@ -300,6 +319,7 @@ export function useMonopolyGame() {
   }
 
   function updateTileField(index: number, field: 'label' | 'effect', value: string) {
+    if (state.value.boardGridLocked) return
     state.value.tiles[index][field] = value
     debouncedSave()
   }
@@ -401,7 +421,7 @@ export function useMonopolyGame() {
       return
     }
 
-    const count = Math.min(6, Math.max(2, Number(state.value.game.playerCount) || 4))
+    const count = Math.min(6, Math.max(2, Number(state.value.game.playerCount) || DEFAULT_PLAYER_COUNT))
     state.value.game = {
       playerCount: count,
       players: buildDefaultPlayers(count),
@@ -427,10 +447,11 @@ export function useMonopolyGame() {
   }
 
   function applyBoardPresetPayload(preset: BoardPreset) {
-    const playerCount = Math.min(6, Math.max(2, Number(state.value.game.playerCount) || 4))
+    const playerCount = Math.min(6, Math.max(2, Number(state.value.game.playerCount) || DEFAULT_PLAYER_COUNT))
     state.value = normalizeState({
       ...snapshotBoardSettingsOnly(),
       ...preset,
+      boardGridLocked: true,
       game: {
         playerCount,
         players: buildDefaultPlayers(playerCount),
@@ -895,6 +916,7 @@ export function useMonopolyGame() {
     buyLandModal,
     online,
     canEditBoardAndCards,
+    canEditBoardTiles,
     currentPlayer,
     boardPresets,
     onlineRoomShareUrl,
@@ -904,6 +926,7 @@ export function useMonopolyGame() {
     initialize,
     memberAtPlayerIndex,
     playerAnimal,
+    pawnLabelForPlayer,
     titleForPlayer,
     statusForPlayer,
     canEditPlayerMoney,

@@ -4,6 +4,8 @@ export const STORAGE_KEY = 'shanhaijing-monopoly-v1'
 export const BOARD_PRESETS_KEY = 'shanhaijing-monopoly-board-presets-v1'
 export const MAX_BOARD_PRESETS_PER_USER = 20
 export const DEFAULT_START_MONEY = 1500
+/** 新開局預設玩家數（可在「玩家設定」中改為 2～6 人） */
+export const DEFAULT_PLAYER_COUNT = 2
 export const PASS_GO_BONUS = 200
 export const LAND_PRICE = 300
 export const DEFAULT_TOLL_FEE = 120

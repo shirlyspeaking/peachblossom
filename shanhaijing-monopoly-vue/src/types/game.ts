@@ -44,6 +44,8 @@ export interface GameState {
   fate: CardItem[]
   rulesText: string
   game: GameSession
+  /** 套用棋盤收藏後為 true，主棋盤格不可編輯（重設預設會清除） */
+  boardGridLocked?: boolean
 }
 
 export interface AuthUser {
@@ -79,6 +81,7 @@ export interface ServerSnapshot {
   fate: CardItem[]
   rulesText: string
   game: GameSession
+  boardGridLocked?: boolean
 }
 
 export interface RoomPayload {

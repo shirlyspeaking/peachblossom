@@ -11,7 +11,7 @@ const props = defineProps<{
   col: number
   meta: TileMeta
   disabled: boolean
-  pawns: number[]
+  pawns: { playerNumber: number; label: string }[]
 }>()
 
 const emit = defineEmits<{
@@ -54,14 +54,19 @@ const tileStyle = computed(() => ({
     </div>
 
     <div class="board-tile__pawns">
-      <span
+      <div
         v-for="pawn in pawns"
-        :key="pawn"
-        class="board-tile__pawn"
-        :style="{ background: PLAYER_COLORS[(pawn - 1) % PLAYER_COLORS.length] }"
+        :key="pawn.playerNumber"
+        class="board-tile__pawn-unit"
       >
-        {{ playerAnimal(pawn - 1) }}
-      </span>
+        <span
+          class="board-tile__pawn"
+          :style="{ background: PLAYER_COLORS[(pawn.playerNumber - 1) % PLAYER_COLORS.length] }"
+        >
+          {{ playerAnimal(pawn.playerNumber - 1) }}
+        </span>
+        <span class="board-tile__pawn-name">{{ pawn.label }}</span>
+      </div>
     </div>
   </article>
 </template>

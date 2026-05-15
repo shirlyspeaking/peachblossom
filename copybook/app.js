@@ -171,7 +171,7 @@
      */
     function buildStrokePathsSvg(pathDs, fs, hongMode, lightPinkHongMode) {
         var vb = '0 0 1024 1024';
-        var sw = Math.max(15, Math.min(54, Math.round(((fs || 36) + 4) * 0.85)));
+        var sw = Math.max(13, Math.min(46, Math.round(((fs || 36) + 4) * 0.72)));
         var ty = STROKE_PATH_TRANSLATE_Y;
         var parts = '';
         var i;
@@ -223,7 +223,7 @@
             '<g transform="translate(0,' +
             ty +
             ')">' +
-            '<g transform="translate(512,512) scale(0.86,-0.86) translate(-512,-512)">' +
+            '<g transform="translate(512,512) scale(0.82,-0.82) translate(-512,-512)">' +
             parts +
             '</g>' +
             '</g>' +
@@ -235,15 +235,13 @@
         return fontPreset.value.trim();
     }
 
-    function uniqHanziChars(text) {
-        var seen = Object.create(null);
+    function parseHanziChars(text) {
         var out = [];
-        var chars = stringToChars(String(text || '').trim());
+        // 保留輸入順序與重複字；支援多行輸入（換行會被略過，不會中斷解析）
+        var chars = stringToChars(String(text || ''));
         for (var i = 0; i < chars.length; i++) {
             var ch = chars[i];
             if (!/[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch)) continue;
-            if (seen[ch]) continue;
-            seen[ch] = true;
             out.push(ch);
         }
         return out;
@@ -285,9 +283,8 @@
             blocks.push(cells);
         }
 
-        var avgCells = blocks.length ? totalCells / blocks.length : 1;
-        var targetGridPerRow = 18;
-        var charsPerRow = Math.max(1, Math.min(6, Math.floor(targetGridPerRow / avgCells) || 1));
+        // 筆順字帖固定一行一字，避免不同字同列造成閱讀干擾
+        var charsPerRow = 1;
         var rows = [];
         var maxCols = 1;
 
@@ -317,15 +314,30 @@
         var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
         for (var i = 0; i < rows.length; i += n) {
-            pages.push(rows.slice(i, i + n));
+            var pageRows = rows.slice(i, i + n);
+            while (pageRows.length < n) {
+                pageRows.push([]);
+            }
+            pages.push(pageRows);
+        }
+        if (pages.length === 0) {
+            var emptyPage = [];
+            while (emptyPage.length < n) emptyPage.push([]);
+            pages.push(emptyPage);
         }
         return pages;
     }
 
     async function onAutoStrokeFromChars() {
-        var chars = uniqHanziChars(autoStrokeChars ? autoStrokeChars.value : '');
+        var sourceText = '';
+        if (autoStrokeChars && String(autoStrokeChars.value || '').trim()) {
+            sourceText = autoStrokeChars.value;
+        } else if (textInput) {
+            sourceText = textInput.value;
+        }
+        var chars = parseHanziChars(sourceText);
         if (!chars.length) {
-            window.alert('請先輸入至少一個漢字');
+            window.alert('請先輸入至少一個漢字（可在筆順字帖輸入或字帖內容中輸入，多行可用）');
             return;
         }
         if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
