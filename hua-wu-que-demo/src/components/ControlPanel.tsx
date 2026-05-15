@@ -72,6 +72,14 @@ export function ControlPanel(props: ControlPanelProps) {
 
   return (
     <aside className="flex h-full min-h-0 w-full max-w-[320px] flex-col gap-5 overflow-y-auto border-r border-stone-200/90 bg-[#fbfaf7] p-5 shadow-[inset_-1px_0_0_rgba(44,40,36,0.04)]">
+      <a
+        href="../index.html"
+        className="inline-flex w-fit items-center gap-2 rounded-xl border border-stone-300/80 bg-white/90 px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:border-stone-400 hover:bg-white hover:text-stone-900"
+      >
+        <span aria-hidden>←</span>
+        返回主頁
+      </a>
+
       <header className="space-y-1 border-b border-stone-200/80 pb-4">
         <p className="text-xs tracking-[0.28em] text-stone-400">中式插花</p>
         <h1 className="text-2xl font-semibold tracking-wide text-stone-800">
