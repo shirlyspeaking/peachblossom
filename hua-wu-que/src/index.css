@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-serif-sc: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --color-zen-paper: #f7f4ee;
+  --color-zen-ink: #2c2824;
+  --color-zen-mist: #e8e4dc;
+  --color-zen-accent: #8b6914;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-serif-sc);
+  background: var(--color-zen-paper);
+  color: var(--color-zen-ink);
+  -webkit-font-smoothing: antialiased;
+}

@@ -327,10 +327,10 @@ function App() {
     <main className="app-shell">
       <section className="hero-panel">
         <div>
-          <p className="eyebrow">Demo only · 不會部署到桃花源</p>
+          <p className="eyebrow">桃花源 · 課堂工具</p>
           <h1>班級小怪獸點名</h1>
           <p className="hero-copy">
-            建立名單、設定加分／扣分規則參考，並為每位同學記分。支援單人加入、批量加入，以及從清單覆蓋重建。
+            建立名單、設定加分／扣分規則參考，並為每位同學記分。支援單人加入、批量加入、批次刪除與以清單覆蓋重建。
           </p>
         </div>
         <div className="hero-monster" aria-hidden="true">
