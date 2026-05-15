@@ -20,7 +20,23 @@ npm run dev
 
 預設埠：`3210`。
 
-## 部署到 Cloudflare Pages（讓線上版可開）
+## 部署到 Cloudflare（路線 A：Git 連線，英文介面）
+
+在 **Workers & Pages** → 你的專案 → **Settings** → **Build**（或 **Build configuration**）請設：
+
+| English field | Value |
+|---------------|--------|
+| **Root directory** | `zhishang-feihua`（勿用 `/`） |
+| **Build command** | `npm install && npm run pages:build` |
+| **Deploy command** | `npx wrangler pages deploy .vercel/output/static --project-name=zhishang-feihua` |
+
+勿使用單獨的 `npx wrangler deploy`（且 **Root** 為 `/` 會找不到 `package.json`，約 8 秒就失敗）。
+
+**Environment variables**（Settings → Environment variables）：`NODE_VERSION` = `20`；選用 `TAVILY_API_KEY`、`DEEPSEEK_API_KEY`。
+
+改完後 **Deployments** → **Retry deployment**。
+
+## 部署到 Cloudflare Pages（本機 Wrangler，路線 B）
 
 ```bash
 cd zhishang-feihua
@@ -39,3 +55,12 @@ npm run pages:deploy
 - `DEEPSEEK_API_KEY`（可選 `DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL`）：AI 生成短文。
 
 未設定時，搜尋／生成會顯示友善提示，仍可用手動貼上或 .txt 上傳練習。
+
+## 建置失敗（Last build failed）時
+
+1. **Deployments** → 失敗那筆 → **Build log**，往下滑找到 **Error** / **npm ERR** 那段。
+2. 確認 **Root directory** 為 **`zhishang-feihua`**（不可為 `/`）。
+3. **Build command**：`npm install && npm run pages:build`  
+   **Deploy command**：`npx wrangler pages deploy .vercel/output/static --project-name=zhishang-feihua`  
+   （或使用不含 Deploy command 的傳統 Pages：**Output directory** = `.vercel/output/static`。）
+4. 本專案使用 **Next 14.2** 以利 `@cloudflare/next-on-pages` 建置穩定；若錯誤仍提到 Next 15／相容性，請 **Retry deployment** 讓 Cloudflare 拉最新程式後再試。
