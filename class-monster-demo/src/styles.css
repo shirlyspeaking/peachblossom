@@ -111,8 +111,13 @@ h2 {
   border-radius: 40px;
   background: #f7fff7;
   box-shadow: 0 10px 0 #172033;
-  font-size: 5rem;
   transform: rotate(5deg);
+}
+
+.hero-sprout-glyph {
+  width: 5.25rem;
+  height: auto;
+  color: #1f6f54;
 }
 
 .workspace {
