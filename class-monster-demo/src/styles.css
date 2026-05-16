@@ -114,10 +114,10 @@ h2 {
   transform: rotate(5deg);
 }
 
-.hero-sprout-glyph {
-  width: 5.25rem;
-  height: auto;
-  color: #1f6f54;
+.hero-seedling-icon {
+  font-size: 5rem;
+  line-height: 1;
+  color: #22ad6e;
 }
 
 .workspace {
