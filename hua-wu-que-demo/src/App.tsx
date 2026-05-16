@@ -91,7 +91,7 @@ export default function App() {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
         <header className="shrink-0 space-y-1">
           <p className="text-xs tracking-[0.35em] text-stone-400">
-            DIGITAL IKEBANA · ZEN INTERFACE
+            DIGITAL FLOWER ART · ZEN INTERFACE
           </p>
           <h2 className="text-xl font-medium text-stone-800">
             插花·無聲之詩
