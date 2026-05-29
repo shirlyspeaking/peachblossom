@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>落英溪 · 桃花源</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-root">
+    <header class="top-bar">
+      <div class="brand">
+        <h1>落英溪</h1>
+        <span>創意順流生根 · 中學生創意寫作小站</span>
+      </div>
+      <div class="top-actions">
+        <span id="saveStatus" class="status-pill" hidden aria-live="polite"></span>
+        <button type="button" class="rail-toggle" id="railToggle" aria-expanded="false" aria-controls="inspirationRail">
+          靈感欄
+        </button>
+        <a class="link-back" href="../index.html">返回桃花源</a>
+      </div>
+    </header>
+
+    <div class="rail-overlay" id="railOverlay" aria-hidden="true"></div>
+
+    <div class="layout">
+      <main class="canvas-col">
+        <div class="seed-panel">
+          <label class="visually-hidden" for="seedTopic">今天想寫的主題或題目</label>
+          <input
+            type="text"
+            id="seedTopic"
+            class="seed-input"
+            placeholder="今天想寫什麼？一句主題或課堂題目就好"
+            maxlength="200"
+            autocomplete="off"
+          />
+          <fieldset class="tag-chips" aria-label="可選氛圍標籤">
+            <legend>氛圍</legend>
+            <label><input type="radio" name="vibe" value="" checked /><span>隨意</span></label>
+            <label><input type="radio" name="vibe" value="日常" /><span>日常</span></label>
+            <label><input type="radio" name="vibe" value="奇幻" /><span>奇幻</span></label>
+            <label><input type="radio" name="vibe" value="懸念" /><span>懸念</span></label>
+            <label><input type="radio" name="vibe" value="抒情" /><span>抒情</span></label>
+          </fieldset>
+        </div>
+
+        <div class="canvas-card watermark-wrap" id="canvasCard">
+          <div class="opening-slot">
+            <div id="openingCard" class="opening-card" hidden>
+              <p id="openingText"></p>
+              <div class="opening-actions">
+                <button type="button" class="btn btn-secondary" id="btnInsertOpening">插入到游標後</button>
+                <button type="button" class="btn-ghost" id="btnAltOpening">換個味道</button>
+              </div>
+            </div>
+          </div>
+          <div class="manuscript-wrap">
+            <label class="visually-hidden" for="manuscript">正文</label>
+            <textarea
+              id="manuscript"
+              placeholder="從這裡開始寫——沒有格式要求，先讓念頭流過紙面也可以。"
+              spellcheck="true"
+            ></textarea>
+          </div>
+          <div class="watermark-preview" id="imgWatermark" hidden aria-hidden="true">
+            <img src="" alt="" />
+          </div>
+        </div>
+      </main>
+
+      <aside class="rail" id="inspirationRail" aria-label="靈感欄">
+        <div class="rail-header">
+          <div class="rail-tabs" role="tablist" aria-label="靈感分類">
+            <button type="button" role="tab" id="tabText" aria-selected="true" aria-controls="paneText">開頭靈感</button>
+            <button type="button" role="tab" id="tabImg" aria-selected="false" aria-controls="paneImg">畫中有話</button>
+            <button type="button" role="tab" id="tabEnd" aria-selected="false" aria-controls="paneEnd">故事岔路</button>
+          </div>
+        </div>
+        <div class="rail-panel">
+          <div class="rail-pane is-active" id="paneText" role="tabpanel" aria-labelledby="tabText">
+            <h2>第一句從哪裡長出來？</h2>
+            <p class="hint">先用上面主題欄寫一句，再按按鈕；若留空，也會給你一段開放式開頭。</p>
+            <div class="secondary-row">
+              <button type="button" class="btn" id="btnGenOpening">來點開頭靈感</button>
+            </div>
+          </div>
+
+          <div class="rail-pane" id="paneImg" role="tabpanel" aria-labelledby="tabImg" hidden>
+            <h2>用畫面換一個角度</h2>
+            <p class="hint">點一張小圖，右下角會出現淡淡的水印當靈感；問題沒有標準答案。</p>
+            <div class="img-grid" id="imgGrid"></div>
+            <div class="img-preview" id="imgPreviewBlock" hidden>
+              <img id="imgPreviewLarge" src="" alt="" />
+              <p class="img-question" id="imgQuestion"></p>
+              <div class="row-actions">
+                <button type="button" class="btn btn-secondary" id="btnInsertImgNote">把靈感句插入正文</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-pane" id="paneEnd" role="tabpanel" aria-labelledby="tabEnd" hidden>
+            <h2>接下來可以往哪流？</h2>
+            <p class="hint">寫了一小段再來看最剛好；若想提前偷看，也可以按下面按鈕。</p>
+            <div class="stuck-gate" id="endGate">
+              先寫一段，或按「我卡住了」解鎖三條岔路。
+              <button type="button" class="btn btn-secondary" id="btnUnlockEndings">我卡住了，給我岔路</button>
+            </div>
+            <div class="branch-grid" id="branchGrid" hidden></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="puzzle-strip" aria-label="寫作拼圖進度（僅自我鼓勵，無順序要求）">
+      <div class="inner" role="group" aria-label="四段拼圖">
+        <button type="button" class="piece-btn" data-piece="opening" aria-pressed="false">開頭</button>
+        <button type="button" class="piece-btn" data-piece="turn" aria-pressed="false">轉折</button>
+        <button type="button" class="piece-btn" data-piece="climax" aria-pressed="false">高潮</button>
+        <button type="button" class="piece-btn" data-piece="ending" aria-pressed="false">結尾</button>
+      </div>
+      <p class="piece-tip">點亮拼圖只是記錄心情，先寫結尾再補開頭也完全沒問題。</p>
+    </footer>
+  </div>
+
+  <style>
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+  <script src="app.js" defer></script>
+</body>
+</html>

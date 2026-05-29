@@ -327,14 +327,14 @@ function App() {
     <main className="app-shell">
       <section className="hero-panel">
         <div>
-          <p className="eyebrow">Demo only · 不會部署到桃花源</p>
-          <h1>班級小怪獸點名</h1>
+          <p className="eyebrow">桃花源 · 課堂工具</p>
+          <h1>芯芽</h1>
           <p className="hero-copy">
-            建立名單、設定加分／扣分規則參考，並為每位同學記分。支援單人加入、批量加入，以及從清單覆蓋重建。
+            建立名單、設定加分／扣分規則參考，並為每位同學記分。支援單人加入、批量加入、批次刪除與以清單覆蓋重建。
           </p>
         </div>
         <div className="hero-monster" aria-hidden="true">
-          👾
+          <i className="fa-solid fa-seedling hero-seedling-icon" />
         </div>
       </section>
 
@@ -419,7 +419,7 @@ function App() {
           <button className="primary-button" type="button" onClick={replaceClassFromBatch}>
             以清單覆蓋重建班級
           </button>
-          <p className="hint-text">覆蓋重建會重置所有同學的怪獸頭像與分數為 0。</p>
+          <p className="hint-text">覆蓋重建會重置所有同學的頭像與分數為 0。</p>
 
           {hasClass && (
             <button className="ghost-button" type="button" onClick={resetClass}>
@@ -446,7 +446,7 @@ function App() {
           <div className="board-header">
             <div>
               <p className="eyebrow">Class Board</p>
-              <h2>{hasClass ? `${students.length} 位小怪獸同學` : '尚未建立班級'}</h2>
+              <h2>{hasClass ? `${students.length} 位同學` : '尚未建立班級'}</h2>
             </div>
             <label className="count-control">
               抽取
@@ -515,7 +515,7 @@ function App() {
           ) : (
             <div className="empty-state">
               <span>🎒</span>
-              <p>左側加入學生後，這裡會出現每位同學的小怪獸卡片。</p>
+              <p>左側加入學生後，這裡會出現每位同學的頭像卡片。</p>
             </div>
           )}
         </section>
@@ -539,7 +539,7 @@ function App() {
       {phase === 'finished' && (
         <div className="modal-backdrop" role="button" tabIndex={0} onClick={closeResult} onKeyDown={closeResult}>
           <div className="result-modal" onClick={(event) => event.stopPropagation()}>
-            <p className="eyebrow">Lucky Monsters</p>
+            <p className="eyebrow">芯芽 · 點名結果</p>
             <h2>恭喜中選同學</h2>
             <div className="winner-grid">
               {winners.map((winner) => (
@@ -618,7 +618,7 @@ function StudentCard({
         </button>
       )}
       <div className="avatar-ring">
-        <img src={student.avatarUrl} alt={`${student.name} 的小怪獸頭像`} />
+        <img src={student.avatarUrl} alt={`${student.name} 的頭像`} />
       </div>
       <h3>{student.name}</h3>
       <div className={`score-badge ${student.score > 0 ? 'positive' : student.score < 0 ? 'negative' : ''}`}>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>山海密室 · 桃花源</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/base.css" />
+</head>
+<body>
+  <div id="app" class="app-root">
+    <header class="top-bar">
+      <button type="button" class="btn-ghost top-home" id="btn-brand" aria-label="返回序章">山海密室</button>
+      <div class="top-meta">
+        <span class="badge-role">山川使者</span>
+        <button type="button" class="btn-ghost" id="btn-map" hidden>輿圖</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <!-- 序章 -->
+      <section id="screen-intro" class="screen screen-active" aria-labelledby="intro-title">
+        <div class="scroll-panel">
+          <h1 id="intro-title" class="title-xl">山海密室</h1>
+          <p class="lead">
+            帝之下都傳來異動：五方山川各有靈獸試煉。通過試煉者將取得<strong>符印</strong>，最終於崑崙門前復歸秩序。
+          </p>
+          <p class="muted small">
+            適合小五以上親子共玩；無驚嚇橋段。詳見本資料夾 <code>docs/PLAN.md</code>。
+          </p>
+          <button type="button" class="btn-primary" id="btn-begin">進入輿圖</button>
+        </div>
+      </section>
+
+      <!-- Hub -->
+      <section id="screen-hub" class="screen" aria-labelledby="hub-title" hidden>
+        <div class="hub-wrap">
+          <h2 id="hub-title" class="title-lg">山川輿圖</h2>
+          <p class="hub-lead muted">點選一方試煉。方位對應神話角色特質——詳見各關說明。</p>
+
+          <div class="seals-row" id="seals-row" aria-live="polite">
+            <span class="seal" data-seal="east" title="東方符印"><span class="seal-inner">—</span><small>東·九尾</small></span>
+            <span class="seal" data-seal="south" title="南方符印"><span class="seal-inner">—</span><small>南·燭龍</small></span>
+            <span class="seal" data-seal="west" title="西方符印"><span class="seal-inner">—</span><small>西·刑天</small></span>
+            <span class="seal" data-seal="north" title="北方符印"><span class="seal-inner">—</span><small>北·精衛</small></span>
+            <span class="seal" data-seal="center" title="中央符印"><span class="seal-inner">—</span><small>中·夸父</small></span>
+          </div>
+
+          <div class="compass-grid" role="group" aria-label="五方試煉">
+            <button type="button" class="compass-node compass-east" data-go="east">
+              <span class="compass-dir">東</span>
+              <span class="compass-beast">九尾狐</span>
+              <span class="compass-tag">幻化 · 九尾</span>
+            </button>
+            <button type="button" class="compass-node compass-south" data-go="south">
+              <span class="compass-dir">南</span>
+              <span class="compass-beast">燭龍</span>
+              <span class="compass-tag">晝夜 · 鐘山</span>
+            </button>
+            <button type="button" class="compass-node compass-west" data-go="west">
+              <span class="compass-dir">西</span>
+              <span class="compass-beast">刑天</span>
+              <span class="compass-tag">不屈 · 倒景</span>
+            </button>
+            <button type="button" class="compass-node compass-north" data-go="north">
+              <span class="compass-dir">北</span>
+              <span class="compass-beast">精衛</span>
+              <span class="compass-tag">填海 · 累石</span>
+            </button>
+            <button type="button" class="compass-node compass-center" data-go="center">
+              <span class="compass-dir">中</span>
+              <span class="compass-beast">夸父</span>
+              <span class="compass-tag">逐日 · 乾渴</span>
+            </button>
+          </div>
+
+          <button type="button" class="btn-finale" id="btn-finale" disabled>
+            終幕 · 山海合一
+          </button>
+          <p class="finale-hint muted small" id="finale-hint">集齊五道符印後解鎖。</p>
+        </div>
+      </section>
+
+      <!-- 東 · 九尾 -->
+      <section id="screen-east" class="screen room-screen" hidden data-room="east">
+        <div class="room-panel">
+          <h2 class="title-md">東方試煉 · 九尾狐</h2>
+          <p class="room-flavor">
+            狐善幻化，尾影重重。传说九尾，须按<strong>由一至九</strong>次序點破幻象（數字位置會變動）。
+          </p>
+          <div class="fox-grid" id="fox-grid" role="group" aria-label="九尾順序"></div>
+          <p class="feedback" id="fox-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 南 · 燭龍 -->
+      <section id="screen-south" class="screen room-screen" hidden data-room="south">
+        <div class="room-panel">
+          <h2 class="title-md">南方試煉 · 燭龍</h2>
+          <p class="room-flavor">
+            「開目為晝，瞑為夜」。唯有在<strong>白晝相位</strong>瞬間按下封印，才能鎮住鐘山的時間紊亂。
+          </p>
+          <div class="zhulong-stage">
+            <div class="sky-disk" id="sky-disk" aria-hidden="true">
+              <span class="sun-face">☀</span>
+              <span class="moon-face">🌙</span>
+            </div>
+            <p class="phase-label" id="phase-label">相位：夜</p>
+            <button type="button" class="btn-primary" id="btn-seal-day">在白晝時封印</button>
+          </div>
+          <p class="feedback" id="south-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 西 · 刑天 -->
+      <section id="screen-west" class="screen room-screen" hidden data-room="west">
+        <div class="room-panel">
+          <h2 class="title-md">西方試煉 · 刑天</h2>
+          <p class="room-flavor">
+            刑天舞干戚，常以異視觀世。石碑上的提示被<strong>上下倒轉</strong>——請读出三位數密碼後輸入。
+          </p>
+          <div class="xingtian-stele-wrap">
+            <div class="xingtian-stele" id="xingtian-stele" aria-hidden="true">684</div>
+          </div>
+          <label class="field-label">
+            <span>三位數密碼</span>
+            <input type="text" inputmode="numeric" maxlength="3" id="west-input" autocomplete="off" />
+          </label>
+          <button type="button" class="btn-primary" id="btn-west-submit">確認</button>
+          <p class="feedback" id="west-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 北 · 精衛 -->
+      <section id="screen-north" class="screen room-screen" hidden data-room="north">
+        <div class="room-panel">
+          <h2 class="title-md">北方試煉 · 精衛</h2>
+          <p class="room-flavor">
+            精衛銜微木，将以填沧海。在此累積<strong>八枚</strong>石志願，象徵堅持不改。
+          </p>
+          <div class="jingwei-counter">
+            <div class="stones" id="stones-visual" aria-hidden="true"></div>
+            <p>已銜石：<strong id="stone-count">0</strong> / 8</p>
+            <button type="button" class="btn-primary" id="btn-add-stone">銜一枚石子</button>
+          </div>
+          <p class="feedback" id="north-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 中 · 夸父 -->
+      <section id="screen-center" class="screen room-screen" hidden data-room="center">
+        <div class="room-panel">
+          <h2 class="title-md">中央試煉 · 夸父</h2>
+          <p class="room-flavor">
+            夸父逐日，渴極須向<strong>河渭</strong>覓水——選錯方向只會更乾渴。
+          </p>
+          <div class="kuafu-choices" role="group" aria-label="夸父去向">
+            <button type="button" class="btn-choice" data-choice="wrong-a">往太行深谷</button>
+            <button type="button" class="btn-choice btn-choice-correct" data-choice="correct">往河、渭之濱</button>
+            <button type="button" class="btn-choice" data-choice="wrong-b">往空曠大澤</button>
+          </div>
+          <p class="feedback" id="center-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 終幕 -->
+      <section id="screen-finale" class="screen" hidden aria-labelledby="finale-title">
+        <div class="scroll-panel">
+          <h2 id="finale-title" class="title-lg">終幕 · 山海合一</h2>
+          <p class="muted">
+            依輿圖上符印順序（東 → 南 → 西 → 北 → 中）輸入五位數，復歸帝之下都秩序。
+          </p>
+          <label class="field-label">
+            <span>五位數封印</span>
+            <input type="text" inputmode="numeric" maxlength="5" id="finale-input" autocomplete="off" />
+          </label>
+          <button type="button" class="btn-primary" id="btn-finale-submit">獻封印</button>
+          <p class="feedback" id="finale-feedback" aria-live="polite"></p>
+          <button type="button" class="btn-ghost btn-back" data-back>返回輿圖</button>
+        </div>
+      </section>
+
+      <!-- 結局 -->
+      <section id="screen-win" class="screen" hidden aria-labelledby="win-title">
+        <div class="scroll-panel win-panel">
+          <h2 id="win-title" class="title-xl">山海復序</h2>
+          <p class="lead">
+            五方試煉已平，符印歸位。你已完成本期數位試玩版本——線下完整流程與美術可見 <code>docs/PLAN.md</code>。
+          </p>
+          <button type="button" class="btn-primary" id="btn-replay">再巡山川</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer muted small">
+      桃花源 · Shanhai Escape · 與 EnjoyRead 無程式耦合
+    </footer>
+  </div>
+
+  <script src="scripts/game.js" defer></script>
+</body>
+</html>

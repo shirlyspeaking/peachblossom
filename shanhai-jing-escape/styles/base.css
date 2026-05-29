@@ -1,0 +1,511 @@
+/* 山海密室 · 主題：赭石、玄青、鳥篆金 */
+:root {
+  color-scheme: dark;
+  --bg-deep: #12161c;
+  --bg-panel: #1a222d;
+  --line: rgba(232, 214, 178, 0.22);
+  --text: #f3ebe0;
+  --muted: rgba(243, 235, 224, 0.62);
+  --gold: #c9a227;
+  --gold-soft: rgba(201, 162, 39, 0.35);
+  --teal: #2d6b6b;
+  --coral: #c75c5c;
+  --east: #5a9e7a;
+  --south: #e07a4f;
+  --west: #9b8cc4;
+  --north: #6eb3d9;
+  --center: #c9a227;
+  --radius: 14px;
+  --font-serif: "Noto Serif TC", "Songti SC", serif;
+  --font-sans: "Noto Sans TC", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(45, 107, 107, 0.35), transparent 55%),
+    radial-gradient(circle at 90% 70%, rgba(201, 162, 39, 0.08), transparent 40%),
+    var(--bg-deep);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1rem 1.5rem;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.top-home {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+}
+
+.top-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-role {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+}
+
+.stage {
+  flex: 1;
+  padding: 1.25rem 0 2rem;
+}
+
+.screen {
+  display: none;
+  animation: fadeIn 0.35s ease;
+}
+
+.screen-active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.scroll-panel,
+.room-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.35rem 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+.title-xl {
+  font-family: var(--font-serif);
+  font-size: clamp(1.65rem, 4vw, 2rem);
+  margin: 0 0 0.75rem;
+  color: var(--gold);
+}
+
+.title-lg {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  margin: 0 0 0.5rem;
+}
+
+.title-md {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  margin: 0 0 0.65rem;
+}
+
+.lead {
+  margin: 0 0 1rem;
+  font-size: 1.02rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+code {
+  font-size: 0.88em;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.12em 0.35em;
+  border-radius: 6px;
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-choice,
+.btn-finale {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(165deg, var(--gold), #9a7619);
+  color: #1a1206;
+  font-weight: 700;
+  padding: 0.65rem 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  padding: 0.45rem 0.65rem;
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  border-color: var(--line);
+}
+
+.btn-back {
+  margin-top: 1.25rem;
+  width: 100%;
+  border: 1px solid var(--line);
+}
+
+.btn-finale {
+  width: 100%;
+  margin-top: 1.35rem;
+  padding: 0.85rem;
+  font-weight: 700;
+  background: rgba(201, 162, 39, 0.18);
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+}
+
+.btn-finale:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hub-wrap {
+  text-align: center;
+}
+
+.hub-lead {
+  margin: 0 auto 1rem;
+  max-width: 34rem;
+}
+
+.seals-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+
+.seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.2rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.seal-inner {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.seal.done {
+  border-style: solid;
+  border-color: var(--gold-soft);
+  color: var(--gold);
+}
+
+.compass-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.65rem;
+  grid-template-areas:
+    ". east ."
+    "west . north"
+    ". south ."
+    "center center center";
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+.compass-node {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.compass-node:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-soft);
+}
+
+.compass-east {
+  grid-area: east;
+  border-left: 4px solid var(--east);
+}
+.compass-south {
+  grid-area: south;
+  border-left: 4px solid var(--south);
+}
+.compass-west {
+  grid-area: west;
+  border-left: 4px solid var(--west);
+}
+.compass-north {
+  grid-area: north;
+  border-left: 4px solid var(--north);
+}
+.compass-center {
+  grid-area: center;
+  border-left: 4px solid var(--center);
+}
+
+.compass-dir {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.compass-beast {
+  font-weight: 700;
+}
+
+.compass-tag {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.room-flavor {
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.feedback {
+  min-height: 1.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.feedback.ok {
+  color: var(--east);
+}
+.feedback.err {
+  color: var(--coral);
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.field-label input {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+/* 九尾網格 */
+.fox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.fox-grid button {
+  aspect-ratio: 1;
+  font-size: 1.35rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(90, 158, 122, 0.15);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fox-grid button.done {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.fox-grid button.err-flash {
+  animation: errFlash 0.4s ease;
+}
+
+@keyframes errFlash {
+  50% {
+    background: rgba(199, 92, 92, 0.5);
+  }
+}
+
+/* 燭龍 */
+.zhulong-stage {
+  text-align: center;
+}
+
+.sky-disk {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 55%);
+  position: relative;
+  overflow: hidden;
+}
+
+.sky-disk.is-day {
+  background: radial-gradient(circle at 40% 35%, rgba(255, 214, 120, 0.45), rgba(45, 107, 107, 0.25));
+}
+
+.sky-disk.is-night {
+  background: radial-gradient(circle at 60% 40%, rgba(80, 110, 180, 0.45), rgba(18, 22, 28, 0.9));
+}
+
+.sun-face,
+.moon-face {
+  font-size: 3rem;
+  position: absolute;
+  transition: opacity 0.35s ease;
+}
+
+.sky-disk.is-day .moon-face {
+  opacity: 0;
+}
+.sky-disk.is-night .sun-face {
+  opacity: 0;
+}
+
+.phase-label {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+}
+
+/* 刑天石碑 */
+.xingtian-stele-wrap {
+  perspective: 400px;
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.xingtian-stele {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  padding: 1rem 1.5rem;
+  border: 3px double var(--gold-soft);
+  border-radius: 8px;
+  background: rgba(155, 140, 196, 0.12);
+  transform: rotate(180deg);
+}
+
+/* 精衛 */
+.jingwei-counter {
+  text-align: center;
+}
+
+.stones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  min-height: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stones span {
+  width: 12px;
+  height: 12px;
+  border-radius: 40% 60% 55% 45%;
+  background: var(--north);
+  opacity: 0.9;
+}
+
+/* 夸父 */
+.kuafu-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-choice {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.btn-choice:hover {
+  border-color: var(--gold-soft);
+}
+
+.win-panel {
+  text-align: center;
+}
+
+.app-footer {
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
