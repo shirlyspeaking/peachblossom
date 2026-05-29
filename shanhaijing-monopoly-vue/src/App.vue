@@ -14,6 +14,20 @@ const { authState } = useAuthStore().api
 
 const turnLogOpen = ref(false)
 const playersModalOpen = ref(false)
+const isEditMode = ref(false)
+
+const enterEditMode = () => {
+  isEditMode.value = true
+}
+
+const exitEditMode = () => {
+  isEditMode.value = false
+  game.closeSideDrawer()
+}
+
+const boardTilesEditable = computed(
+  () => isEditMode.value && game.canEditBoardTiles,
+)
 
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
@@ -77,6 +91,22 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="topbar__actions">
+        <button
+          v-if="!isEditMode"
+          type="button"
+          class="secondary-btn topbar__mode-btn"
+          @click="enterEditMode"
+        >
+          編輯棋盤
+        </button>
+        <button
+          v-else
+          type="button"
+          class="primary-btn topbar__mode-btn"
+          @click="exitEditMode"
+        >
+          返回遊戲
+        </button>
         <AuthBar
           :status="authState.status"
           :user="authState.user ?? null"
@@ -111,13 +141,13 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <main class="workspace-shell">
+    <main class="workspace-shell" :class="{ 'workspace-shell--play': !isEditMode }">
       <section class="board-panel">
         <div class="panel-header panel-header--board">
           <div class="panel-header__lead">
-            <p class="eyebrow">Board</p>
+            <p class="eyebrow">{{ isEditMode ? 'Edit' : 'Play' }}</p>
             <h2>巡遊棋盤</h2>
-            <p v-if="game.state.boardGridLocked" class="board-locked-note">
+            <p v-if="isEditMode && game.state.boardGridLocked" class="board-locked-note">
               已套用棋盤收藏：格名與效果為唯讀。若要恢復編輯，請按「重設預設」。
             </p>
           </div>
@@ -125,12 +155,22 @@ onBeforeUnmount(() => {
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="playersModalOpen = true">玩家設定</button>
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="turnLogOpen = true">回合記錄</button>
             <button type="button" class="secondary-btn secondary-btn--toolbar" @click="game.restartGameSession">重新開始</button>
-            <button type="button" class="danger-btn danger-btn--toolbar" @click="game.resetToDefault">重設預設</button>
+            <button
+              v-if="isEditMode"
+              type="button"
+              class="danger-btn danger-btn--toolbar"
+              @click="game.resetToDefault"
+            >
+              重設預設
+            </button>
           </div>
         </div>
 
         <div class="board-scroll">
-          <div class="board-grid" :class="{ 'board-grid--locked': game.state.boardGridLocked }">
+          <div
+            class="board-grid"
+            :class="{ 'board-grid--locked': !isEditMode || game.state.boardGridLocked }"
+          >
             <BoardTile
               v-for="(tile, index) in game.tiles"
               :key="index"
@@ -139,7 +179,8 @@ onBeforeUnmount(() => {
               :row="tile.row"
               :col="tile.col"
               :meta="tile.meta"
-              :disabled="!game.canEditBoardTiles"
+              :play-mode="!isEditMode"
+              :disabled="!boardTilesEditable"
               :pawns="pawnPositions[index]"
               @update-field="game.updateTileField"
             />
@@ -173,7 +214,7 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <div class="drawer-rail" role="toolbar" aria-label="側邊工具">
+      <div v-if="isEditMode" class="drawer-rail" role="toolbar" aria-label="側邊工具">
         <button
           type="button"
           class="drawer-rail__btn"
@@ -196,7 +237,7 @@ onBeforeUnmount(() => {
 
       <Transition name="drawer-backdrop">
         <div
-          v-if="game.sideDrawer"
+          v-if="isEditMode && game.sideDrawer"
           class="drawer-backdrop"
           aria-hidden="true"
           @click="game.closeSideDrawer"
@@ -205,7 +246,7 @@ onBeforeUnmount(() => {
 
       <Transition name="drawer-panel">
         <aside
-          v-if="game.sideDrawer"
+          v-if="isEditMode && game.sideDrawer"
           class="drawer-panel"
           role="dialog"
           :aria-labelledby="game.sideDrawer === 'presets' ? 'drawer-title-presets' : 'drawer-title-cards'"
