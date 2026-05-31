@@ -1,0 +1,9 @@
+# 子應用入口不長快取，部署後才能立刻載入帶新 hash 的 JS/CSS
+/taoyuan-wanxiang-monopoly/
+  Cache-Control: no-cache, must-revalidate
+
+/taoyuan-wanxiang-monopoly/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/taoyuan-wanxiang-monopoly/assets/*
+  Cache-Control: public, max-age=31536000, immutable
