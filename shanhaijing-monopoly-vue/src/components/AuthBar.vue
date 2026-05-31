@@ -31,7 +31,7 @@ const emit = defineEmits<{
     </template>
 
     <template v-else>
-      <button type="button" class="pill-btn" @click="emit('login')">Google 登入桃花源</button>
+      <button type="button" class="pill-btn" @click="emit('login')">登入</button>
     </template>
   </div>
 </template>

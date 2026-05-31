@@ -116,8 +116,6 @@ onBeforeUnmount(() => {
       <div class="topbar__divider" aria-hidden="true"></div>
 
       <div class="topbar__row topbar__row--online">
-        <h3 class="topbar__online-title">線上對戰（Google 登入）</h3>
-
         <div class="topbar__online-actions">
           <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
           <label class="inline-field">
@@ -199,8 +197,34 @@ onBeforeUnmount(() => {
                   擲骰
                 </button>
                 <div class="draw-actions">
-                  <button type="button" class="secondary-btn" @click="game.drawCard('chance')">抽機會卡</button>
-                  <button type="button" class="secondary-btn" @click="game.drawCard('fate')">抽命運卡</button>
+                  <button
+                    type="button"
+                    class="draw-card draw-card--chance"
+                    aria-label="抽機會卡"
+                    @click="game.drawCard('chance')"
+                  >
+                    <span class="draw-card__corner" aria-hidden="true">機</span>
+                    <span class="draw-card__body">
+                      <span class="draw-card__sigil" aria-hidden="true">☀</span>
+                      <span class="draw-card__title">機會</span>
+                      <span class="draw-card__action">抽卡</span>
+                    </span>
+                    <span class="draw-card__corner draw-card__corner--flip" aria-hidden="true">機</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="draw-card draw-card--fate"
+                    aria-label="抽命運卡"
+                    @click="game.drawCard('fate')"
+                  >
+                    <span class="draw-card__corner" aria-hidden="true">命</span>
+                    <span class="draw-card__body">
+                      <span class="draw-card__sigil" aria-hidden="true">☾</span>
+                      <span class="draw-card__title">命運</span>
+                      <span class="draw-card__action">抽卡</span>
+                    </span>
+                    <span class="draw-card__corner draw-card__corner--flip" aria-hidden="true">命</span>
+                  </button>
                 </div>
               </div>
             </section>
