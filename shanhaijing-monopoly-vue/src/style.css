@@ -144,7 +144,6 @@ a {
 }
 
 .topbar,
-.online-panel,
 .panel-card,
 .board-panel {
   border: 1px solid var(--line);
@@ -157,18 +156,41 @@ a {
 }
 
 .topbar,
-.online-panel,
 .panel-card {
   border-radius: var(--radius-xl);
   padding: clamp(18px, 2.2vw, 30px);
 }
 
 .topbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  animation: riseIn 680ms var(--ease-out-quint) both;
+}
+
+.topbar__row--head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-xl);
   align-items: center;
-  animation: riseIn 680ms var(--ease-out-quint) both;
+}
+
+.topbar__row--online {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(280px, 1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.topbar__divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--line-strong) 55%, transparent) 18%,
+    color-mix(in oklch, var(--line-strong) 55%, transparent) 82%,
+    transparent
+  );
 }
 
 .topbar__lead {
@@ -192,8 +214,7 @@ a {
   z-index: 0;
 }
 
-.topbar__lead > .topbar__title,
-.topbar__lead > .topbar-orbit {
+.topbar__lead > .topbar__title {
   position: relative;
   z-index: 1;
 }
@@ -205,7 +226,7 @@ a {
 
 .topbar__title h1,
 .panel-header h2,
-.online-panel h3,
+.topbar__online-title,
 .dialog-header h2 {
   margin: 0;
   color: var(--ink);
@@ -229,7 +250,7 @@ a {
 
 .topbar__actions,
 .board-toolbar,
-.online-panel__actions,
+.topbar__online-actions,
 .buy-panel__actions,
 .preset-actions,
 .draw-actions {
@@ -259,8 +280,7 @@ a {
 .card-editor,
 .preset-panel,
 .board-center__block,
-.inline-field,
-.board-tile {
+.inline-field {
   border: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
   background: color-mix(in oklch, var(--surface-strong) 92%, transparent);
   box-shadow: var(--shadow-soft);
@@ -379,7 +399,7 @@ a {
 }
 
 .panel-note,
-.online-panel__status,
+.topbar__online-status,
 .player-card p {
   color: var(--ink-soft);
   line-height: 1.78;
@@ -523,23 +543,15 @@ a {
   font-size: 1.08rem;
 }
 
-.online-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 0.7fr) minmax(280px, 1fr);
-  gap: var(--space-lg);
-  align-items: center;
-  animation: riseIn 720ms var(--ease-out-quint) 240ms both;
-}
-
-.online-panel h3 {
+.topbar__online-title {
   font-size: 1.6rem;
 }
 
-.online-panel__actions {
+.topbar__online-actions {
   justify-content: flex-end;
 }
 
-.online-panel__status {
+.topbar__online-status {
   grid-column: 1 / -1;
   display: grid;
   gap: var(--space-xs);
@@ -705,8 +717,8 @@ a {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, oklch(0.5 0.05 42 / 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, oklch(0.5 0.05 42 / 0.045) 1px, transparent 1px);
+    linear-gradient(90deg, oklch(0.72 0.1 350 / 0.04) 1px, transparent 1px),
+    linear-gradient(0deg, oklch(0.72 0.1 155 / 0.04) 1px, transparent 1px);
   background-size: 34px 34px;
   mask-image: radial-gradient(circle at 50% 38%, black 0%, transparent 76%);
 }
@@ -755,8 +767,12 @@ a {
   padding: var(--space-sm);
   border-radius: 34px;
   background:
-    radial-gradient(circle at 50% 50%, oklch(0.98 0.018 80 / 0.9), transparent 62%),
-    oklch(0.89 0.035 60 / 0.48);
+    radial-gradient(circle at 12% 18%, oklch(0.9 0.11 350 / 0.42), transparent 38%),
+    radial-gradient(circle at 88% 78%, oklch(0.88 0.1 155 / 0.38), transparent 36%),
+    radial-gradient(circle at 72% 12%, oklch(0.92 0.1 85 / 0.32), transparent 32%),
+    radial-gradient(circle at 50% 50%, oklch(0.98 0.035 72 / 0.88), transparent 62%),
+    linear-gradient(145deg, oklch(0.93 0.048 55 / 0.55), oklch(0.9 0.055 145 / 0.42));
+  box-shadow: inset 0 1px 0 oklch(0.99 0.02 80 / 0.65);
 }
 
 .board-grid {
@@ -824,16 +840,48 @@ a {
   border-radius: 22px;
   padding: 12px;
   overflow: hidden;
+  border: 1px solid oklch(0.88 0.06 70 / 0.35);
+  box-shadow: var(--shadow-soft);
   transition:
     transform 180ms var(--ease-out-quart),
     box-shadow 180ms var(--ease-out-quart),
     filter 180ms var(--ease-out-quart);
 }
 
+.board-tile.tile-land {
+  background: linear-gradient(145deg, oklch(0.95 0.08 72), oklch(0.8 0.14 68), oklch(0.92 0.1 70));
+}
+
+.board-tile.tile-start {
+  background: linear-gradient(145deg, oklch(0.95 0.1 330), oklch(0.76 0.18 320), oklch(0.9 0.13 325));
+}
+
+.board-tile.tile-event {
+  background: linear-gradient(145deg, oklch(0.95 0.1 350), oklch(0.74 0.2 345), oklch(0.9 0.14 348));
+}
+
+.board-tile.tile-tax {
+  background: linear-gradient(145deg, oklch(0.97 0.1 90), oklch(0.82 0.18 82), oklch(0.93 0.13 86));
+}
+
+.board-tile.tile-jail {
+  background: linear-gradient(145deg, oklch(0.91 0.07 290), oklch(0.66 0.16 285), oklch(0.82 0.1 292));
+}
+
+.board-tile.tile-free {
+  background: linear-gradient(145deg, oklch(0.94 0.1 155), oklch(0.78 0.17 160), oklch(0.88 0.12 158));
+}
+
+.board-tile.tile-go-jail {
+  background: linear-gradient(145deg, oklch(0.93 0.1 25), oklch(0.72 0.16 20), oklch(0.86 0.12 22));
+}
+
 .board-tile:hover {
   transform: translateY(-3px) scale(1.01);
-  box-shadow: var(--shadow-panel);
-  filter: saturate(1.04);
+  box-shadow:
+    0 18px 40px oklch(0.42 0.08 35 / 0.14),
+    var(--shadow-panel);
+  filter: saturate(1.08) brightness(1.02);
 }
 
 .board-tile__header {
@@ -849,7 +897,8 @@ a {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: oklch(0.98 0.012 80 / 0.72);
+  background: oklch(0.99 0.015 80 / 0.78);
+  box-shadow: 0 2px 8px oklch(0.4 0.06 35 / 0.1);
 }
 
 .board-tile__label {
@@ -887,6 +936,8 @@ a {
   min-height: 34px;
   padding: 7px 9px;
   font-size: 0.88rem;
+  background: oklch(0.995 0.008 76 / 0.72);
+  border-color: oklch(0.82 0.05 70 / 0.32);
 }
 
 .board-tile__input:focus,
@@ -1517,13 +1568,13 @@ a {
     width: min(100vw, calc(100vw - 16px));
   }
 
-  .topbar,
-  .online-panel {
+  .topbar__row--head,
+  .topbar__row--online {
     grid-template-columns: 1fr;
   }
 
   .topbar__actions,
-  .online-panel__actions {
+  .topbar__online-actions {
     justify-content: flex-start;
   }
 
@@ -1543,7 +1594,6 @@ a {
   }
 
   .topbar,
-  .online-panel,
   .panel-card,
   .board-panel {
     border-radius: 26px;

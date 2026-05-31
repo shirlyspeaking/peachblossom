@@ -61,55 +61,49 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-shell">
     <header class="topbar">
-      <div class="topbar__lead">
-        <div class="topbar__title">
-          <p class="eyebrow">桃花源 · 劇本桌遊</p>
-          <h1>桃源萬象大富翁</h1>
+      <div class="topbar__row topbar__row--head">
+        <div class="topbar__lead">
+          <div class="topbar__title">
+            <p class="eyebrow">桃花源 · 劇本桌遊</p>
+            <h1>桃源萬象大富翁</h1>
+          </div>
         </div>
 
-        <div class="topbar-orbit hero-orbit" aria-hidden="true">
-          <span class="hero-orbit__ring"></span>
-          <span class="hero-orbit__beast">龍</span>
-          <span class="hero-orbit__dice">骰</span>
-          <span class="hero-orbit__spark hero-orbit__spark--one"></span>
-          <span class="hero-orbit__spark hero-orbit__spark--two"></span>
+        <div class="topbar__actions">
+          <AuthBar
+            :status="authState.status"
+            :user="authState.user ?? null"
+            :error="authState.error"
+            @login="login"
+            @logout="logout"
+            @retry="refreshSession"
+          />
+          <a class="back-link" href="../index.html">← 回桃花源</a>
+          <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
         </div>
       </div>
 
-      <div class="topbar__actions">
-        <AuthBar
-          :status="authState.status"
-          :user="authState.user ?? null"
-          :error="authState.error"
-          @login="login"
-          @logout="logout"
-          @retry="refreshSession"
-        />
-        <a class="back-link" href="../index.html">← 回桃花源</a>
-        <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
+      <div class="topbar__divider" aria-hidden="true"></div>
+
+      <div class="topbar__row topbar__row--online">
+        <h3 class="topbar__online-title">線上對戰（Google 登入）</h3>
+
+        <div class="topbar__online-actions">
+          <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
+          <label class="inline-field">
+            <span>房間代碼</span>
+            <input v-model="game.roomCodeInput" type="text" maxlength="8" placeholder="ABCDEF" />
+          </label>
+          <button type="button" class="secondary-btn" @click="game.joinOnlineRoom">加入房間</button>
+          <button type="button" class="danger-btn" :disabled="!game.online.mode" @click="game.leaveOnlineMode">離開線上模式</button>
+        </div>
+
+        <div v-if="game.online.mode" class="topbar__online-status">
+          <p>{{ game.onlineStatusText }}</p>
+          <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
+        </div>
       </div>
     </header>
-
-    <section class="online-panel">
-      <div>
-        <h3>線上對戰（Google 登入）</h3>
-      </div>
-
-      <div class="online-panel__actions">
-        <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
-        <label class="inline-field">
-          <span>房間代碼</span>
-          <input v-model="game.roomCodeInput" type="text" maxlength="8" placeholder="ABCDEF" />
-        </label>
-        <button type="button" class="secondary-btn" @click="game.joinOnlineRoom">加入房間</button>
-        <button type="button" class="danger-btn" :disabled="!game.online.mode" @click="game.leaveOnlineMode">離開線上模式</button>
-      </div>
-
-      <div v-if="game.online.mode" class="online-panel__status">
-        <p>{{ game.onlineStatusText }}</p>
-        <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
-      </div>
-    </section>
 
     <main class="workspace-shell">
       <section class="board-panel">
