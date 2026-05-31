@@ -990,6 +990,7 @@ a {
   transform-style: preserve-3d;
   transform: var(--dice-rotation);
   transition: transform 560ms var(--ease-out-expo);
+  filter: drop-shadow(0 5px 10px oklch(0.38 0.04 35 / 0.1));
 }
 
 .dice-face {
@@ -997,13 +998,14 @@ a {
   inset: 0;
   display: grid;
   place-items: center;
-  border-radius: 11px;
-  border: none;
-  background: var(--paper);
-  box-shadow: none;
+  border-radius: 10px;
+  border: 1.5px solid oklch(0.68 0.045 42 / 0.62);
+  background: linear-gradient(145deg, oklch(0.995 0.008 80), oklch(0.955 0.022 68));
+  box-shadow: inset 0 1px 0 oklch(0.99 0.01 78 / 0.85);
   color: var(--ink);
   font-weight: 800;
   font-size: 1.1rem;
+  backface-visibility: hidden;
 }
 
 .dice-face--front { transform: translateZ(27px); }
