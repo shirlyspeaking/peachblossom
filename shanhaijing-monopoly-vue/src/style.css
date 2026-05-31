@@ -569,6 +569,14 @@ a {
   box-sizing: border-box;
 }
 
+.workspace-shell--play {
+  padding-right: 0;
+}
+
+.topbar__mode-btn {
+  flex-shrink: 0;
+}
+
 .drawer-rail {
   position: fixed;
   top: 50%;
@@ -930,6 +938,13 @@ a {
     border-color 180ms var(--ease-out-quart),
     box-shadow 180ms var(--ease-out-quart),
     background-color 180ms var(--ease-out-quart);
+}
+
+.board-tile__effect {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .board-tile__input {

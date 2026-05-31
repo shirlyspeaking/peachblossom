@@ -11,6 +11,7 @@ const props = defineProps<{
   col: number
   meta: TileMeta
   disabled: boolean
+  playMode?: boolean
   pawns: { playerNumber: number; label: string }[]
 }>()
 
@@ -33,21 +34,26 @@ const tileStyle = computed(() => ({
       <span class="board-tile__num">{{ index + 1 }}</span>
     </header>
 
-    <input
-      class="board-tile__input"
-      :disabled="disabled"
-      :value="tile.label"
-      placeholder="格名"
-      @input="emit('updateField', index, 'label', ($event.target as HTMLInputElement).value)"
-    />
+    <template v-if="playMode">
+      <p v-if="tile.effect" class="board-tile__effect">{{ tile.effect }}</p>
+    </template>
+    <template v-else>
+      <input
+        class="board-tile__input"
+        :disabled="disabled"
+        :value="tile.label"
+        placeholder="格名"
+        @input="emit('updateField', index, 'label', ($event.target as HTMLInputElement).value)"
+      />
 
-    <input
-      class="board-tile__input"
-      :disabled="disabled"
-      :value="tile.effect"
-      placeholder="效果說明"
-      @input="emit('updateField', index, 'effect', ($event.target as HTMLInputElement).value)"
-    />
+      <input
+        class="board-tile__input"
+        :disabled="disabled"
+        :value="tile.effect"
+        placeholder="效果說明"
+        @input="emit('updateField', index, 'effect', ($event.target as HTMLInputElement).value)"
+      />
+    </template>
 
     <div v-if="tile.owner !== null" class="board-tile__owner" :style="{ color: PLAYER_COLORS[tile.owner % PLAYER_COLORS.length] }">
       已由玩家 {{ tile.owner + 1 }} 持有
