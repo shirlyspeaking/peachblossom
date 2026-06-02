@@ -108,9 +108,8 @@ onBeforeUnmount(() => {
             @logout="logout"
             @retry="refreshSession"
           />
-          <a class="back-link" href="../index.html">← 回桃花源</a>
-          <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
-        </div>
+        <a class="back-link" href="../index.html">← 回桃花源</a>
+      </div>
       </div>
 
       <div class="topbar__divider" aria-hidden="true"></div>
