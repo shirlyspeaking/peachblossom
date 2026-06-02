@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       content: message.content.slice(0, 1200),
     }));
 
-  const systemPrompt = `你是 EnjoyRead 的中學生閱讀助教。請只根據提供的文章內容回答學生問題。
+  const systemPrompt = `你是摸鱼俱乐部 Cyberloafing Club 的中學生閱讀助教。請只根據提供的文章內容回答學生問題。
 
 回答規則：
 1. 使用繁體中文，語氣溫和、清楚，適合中學生。
