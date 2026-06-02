@@ -222,24 +222,17 @@
             box-shadow: 0 10px 30px oklch(0.48 0.08 8 / 0.06);
         }
         .logo {
-            font-size: 1.15rem;
+            flex-shrink: 0;
+            font-size: clamp(0.82rem, 2.2vw, 1.12rem);
             font-weight: 600;
             font-family: "Noto Serif TC", serif;
             color: var(--accent-deep);
             text-decoration: none;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            line-height: 1.2;
         }
         .logo:hover { color: var(--accent); }
-        .logo-en {
-            display: inline;
-            font-family: inherit;
-            font-size: 0.9em;
-            font-weight: inherit;
-            letter-spacing: 0.03em;
-            color: var(--accent-deep);
-            margin-left: 0.32em;
-            white-space: nowrap;
-        }
         .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .nav-history-btn {
             padding: 9px 16px;
@@ -458,7 +451,7 @@
         </aside>
         <div class="app-main">
     <nav class="navbar">
-        <a href="../index.html" class="logo">📖 「摸魚」俱樂部 <span class="logo-en">Loafing Club</span></a>
+        <a href="../index.html" class="logo">📖 「摸魚」俱樂部&nbsp;Loafing Club</a>
         <button type="button" class="nav-history-btn nav-chat-toggle" id="btnChatToggle" onclick="toggleChatDock()">💬 小助手</button>
         <div class="nav-actions">
             <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 閱讀歷史</button>
