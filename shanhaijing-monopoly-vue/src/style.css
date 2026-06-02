@@ -968,10 +968,6 @@ a {
   --dice-face-5: rotateX(90deg) rotateY(0deg);
   --dice-face-6: rotateX(0deg) rotateY(180deg);
   --dice-rotation: var(--dice-face-1);
-  --dice-fill-top: #b8bcc4;
-  --dice-fill-bottom: #8b919a;
-  --dice-edge: #6b7280;
-  --dice-ink: #374151;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -994,7 +990,7 @@ a {
   transform-style: preserve-3d;
   transform: var(--dice-rotation);
   transition: transform 560ms var(--ease-out-expo);
-  filter: drop-shadow(0 6px 12px rgb(55 65 81 / 0.28));
+  filter: drop-shadow(0 5px 10px oklch(0.38 0.04 35 / 0.1));
 }
 
 .dice-face {
@@ -1003,10 +999,10 @@ a {
   display: grid;
   place-items: center;
   border-radius: 10px;
-  border: 1.5px solid var(--dice-edge);
-  background: linear-gradient(145deg, var(--dice-fill-top), var(--dice-fill-bottom));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
-  color: var(--dice-ink);
+  border: 1.5px solid oklch(0.68 0.045 42 / 0.62);
+  background: linear-gradient(145deg, oklch(0.995 0.008 80), oklch(0.955 0.022 68));
+  box-shadow: inset 0 1px 0 oklch(0.99 0.01 78 / 0.85);
+  color: var(--ink);
   font-weight: 800;
   font-size: 1.1rem;
   backface-visibility: hidden;
