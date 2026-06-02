@@ -465,10 +465,9 @@
                 <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
                 <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
             </div>
-            <p class="page-desc" style="margin: 0 0 12px; font-size: 0.9rem; color: var(--muted, #666);">優先顯示<strong>最近 7 天內</strong>（依 RSS 發布時間）的文章；按「更新」會盡量換成<strong>這 7 天內您尚未在列表看過</strong>的另一批。若來源暫無符合條件的新文，會改為<strong>示範文章</strong>（與先前相同備援清單）。</p>
             <div class="voice-controls">
-                <label for="mandarinVoice">普通話音色</label>
-                <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
+                <label for="mandarinVoice">聲音選擇</label>
+                <select id="mandarinVoice" aria-label="聲音選擇">
                     <option value="shimmer">女聲（溫柔普通話）</option>
                     <option value="onyx">女聲（活潑普通話）</option>
                     <option value="alloy">男聲（穩定普通話）</option>
@@ -901,12 +900,12 @@
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
-                        🔊 普通話朗讀摘要
+                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="聽一聽" data-stop-text="⏸ 停止朗讀">
+                        聽一聽
                     </button>
                     <div class="quiz-section">
                         <div class="quiz-toolbar">
-                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 AI 閱讀題（3 題）</button>
+                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 閱讀題（3題）</button>
                             <button type="button" class="quiz-btn hidden" onclick="loadReadingQuiz(${idx}, true)" id="quizRegenBtn${idx}">🔄 重新出題</button>
                         </div>
                         <p class="quiz-status" id="quizStatus${idx}" aria-live="polite"></p>
@@ -1311,7 +1310,7 @@
 
             document.querySelectorAll('.tts-btn').forEach(b => {
                 b.classList.remove('playing');
-                b.textContent = b.dataset.defaultText || '🔊 普通話朗讀摘要';
+                b.textContent = b.dataset.defaultText || '聽一聽';
             });
             btn.classList.add('playing');
             btn.textContent = '⏳ 生成普通話...';
@@ -1372,7 +1371,7 @@
         function resetTtsButton(btn) {
             currentPlayingIdx = -1;
             btn.classList.remove('playing');
-            btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
+            btn.textContent = btn.dataset.defaultText || '聽一聽';
         }
 
         function readWithBrowserMandarin(summary, btn) {
