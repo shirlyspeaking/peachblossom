@@ -115,31 +115,24 @@ onBeforeUnmount(() => {
           @logout="logout"
           @retry="refreshSession"
         />
-        <a class="back-link" href="../index.html">← 回桃花源</a>
-        <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
-      </div>
-    </header>
-
-    <section class="online-panel">
-      <div>
-        <h3>線上對戰（Google 登入）</h3>
-      </div>
-
-      <div class="online-panel__actions">
+        <span class="topbar__divider" aria-hidden="true"></span>
         <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
-        <label class="inline-field">
+        <label class="inline-field inline-field--compact">
           <span>房間代碼</span>
           <input v-model="game.roomCodeInput" type="text" maxlength="8" placeholder="ABCDEF" />
         </label>
         <button type="button" class="secondary-btn" @click="game.joinOnlineRoom">加入房間</button>
         <button type="button" class="danger-btn" :disabled="!game.online.mode" @click="game.leaveOnlineMode">離開線上模式</button>
+        <span class="topbar__divider" aria-hidden="true"></span>
+        <a class="back-link" href="../index.html">← 回桃花源</a>
+        <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
       </div>
 
-      <div v-if="game.online.mode" class="online-panel__status">
+      <div v-if="game.online.mode" class="topbar__status">
         <p>{{ game.onlineStatusText }}</p>
         <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
       </div>
-    </section>
+    </header>
 
     <main class="workspace-shell" :class="{ 'workspace-shell--play': !isEditMode }">
       <section class="board-panel">
