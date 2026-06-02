@@ -19,8 +19,11 @@ export function Navbar({ searchQuery = "", onSearchChange, onSearch }: NavbarPro
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-card/85 backdrop-blur-md supports-[backdrop-filter]:bg-card/70">
       <div className="container flex h-16 items-center gap-4 px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 font-serif text-lg font-semibold tracking-wide text-primary-800 dark:text-primary-200">
-          <BookOpen className="h-6 w-6 text-primary-600" />
-          <span className="hidden sm:inline-block">摸鱼俱乐部 Cyberloafing Club</span>
+          <BookOpen className="h-6 w-6 text-primary-600 shrink-0" />
+          <span className="hidden sm:inline-flex sm:flex-col sm:leading-tight">
+            <span>「摸魚」俱樂部</span>
+            <span className="font-sans text-xs font-medium tracking-widest text-muted-foreground">Loafing Club</span>
+          </span>
         </Link>
 
         <nav className="flex flex-1 items-center gap-4">

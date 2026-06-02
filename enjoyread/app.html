@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 若你自建 Worker，可改此網址；或在瀏覽器主控台執行：localStorage.setItem('enjoyread_quiz_api_base','https://你的網域') 後重新整理 -->
     <meta name="enjoyread-quiz-api" content="https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev" />
-    <title>摸鱼俱乐部 Cyberloafing Club - 最新有趣文章</title>
+    <title>「摸魚」俱樂部 Loafing Club - 最新有趣文章</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
@@ -230,6 +230,15 @@
             letter-spacing: 0.04em;
         }
         .logo:hover { color: var(--accent); }
+        .logo-en {
+            display: block;
+            font-family: "Noto Sans TC", system-ui, sans-serif;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
+            margin-top: 2px;
+        }
         .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .nav-history-btn {
             padding: 9px 16px;
@@ -448,7 +457,7 @@
         </aside>
         <div class="app-main">
     <nav class="navbar">
-        <a href="../index.html" class="logo">📖 摸鱼俱乐部 Cyberloafing Club</a>
+        <a href="../index.html" class="logo">📖 「摸魚」俱樂部<span class="logo-en">Loafing Club</span></a>
         <button type="button" class="nav-history-btn nav-chat-toggle" id="btnChatToggle" onclick="toggleChatDock()">💬 小助手</button>
         <div class="nav-actions">
             <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 閱讀歷史</button>

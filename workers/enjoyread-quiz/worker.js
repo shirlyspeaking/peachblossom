@@ -109,7 +109,7 @@ async function handleChatRequest(request, env) {
     ? `\n\n閱讀材料標題：${articleTitle || "（未標示）"}\n\n閱讀材料內容：\n${articleContent}`
     : `\n\n目前沒有提供閱讀材料。若學生問一般問題，請直接回答；若問題看起來在問某篇文章細節，請先說明目前未提供該篇內容，並請對方貼上段落或重點。`;
 
-  const systemPrompt = `你是摸鱼俱乐部 Cyberloafing Club 的中學生學習助教（繁體中文）。學生可能會問閱讀理解，也可能問一般學習問題。
+  const systemPrompt = `你是「摸魚」俱樂部 Loafing Club 的中學生學習助教（繁體中文）。學生可能會問閱讀理解，也可能問一般學習問題。
 
 學生常見問題類型：
 - 文章裡某個詞、成語、句子是什麼意思

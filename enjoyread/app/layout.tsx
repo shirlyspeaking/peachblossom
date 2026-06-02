@@ -19,7 +19,7 @@ const notoSerif = Noto_Serif_TC({
 
 
 export const metadata: Metadata = {
-  title: "摸鱼俱乐部 Cyberloafing Club - 中學生閱讀平台",
+  title: "「摸魚」俱樂部 Loafing Club - 中學生閱讀平台",
   description: "整合 AI 搜尋、文章摘要、自動出題與 TTS 語音朗讀的現代化教育平台",
 };
 
