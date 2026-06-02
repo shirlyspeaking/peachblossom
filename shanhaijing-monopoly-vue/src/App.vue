@@ -75,62 +75,61 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-shell">
     <header class="topbar">
-      <div class="topbar__lead">
-        <div class="topbar__title">
-          <p class="eyebrow">桃花源 · 劇本桌遊</p>
-          <h1>桃源萬象大富翁</h1>
+      <div class="topbar__row topbar__row--head">
+        <div class="topbar__lead">
+          <div class="topbar__title">
+            <p class="eyebrow">桃花源 · 劇本桌遊</p>
+            <h1>桃源萬象大富翁</h1>
+          </div>
         </div>
 
-        <div class="topbar-orbit hero-orbit" aria-hidden="true">
-          <span class="hero-orbit__ring"></span>
-          <span class="hero-orbit__beast">龍</span>
-          <span class="hero-orbit__dice">骰</span>
-          <span class="hero-orbit__spark hero-orbit__spark--one"></span>
-          <span class="hero-orbit__spark hero-orbit__spark--two"></span>
+        <div class="topbar__actions">
+          <button
+            v-if="!isEditMode"
+            type="button"
+            class="secondary-btn topbar__mode-btn"
+            @click="enterEditMode"
+          >
+            編輯棋盤
+          </button>
+          <button
+            v-else
+            type="button"
+            class="primary-btn topbar__mode-btn"
+            @click="exitEditMode"
+          >
+            返回遊戲
+          </button>
+          <AuthBar
+            :status="authState.status"
+            :user="authState.user ?? null"
+            :error="authState.error"
+            @login="login"
+            @logout="logout"
+            @retry="refreshSession"
+          />
+          <a class="back-link" href="../index.html">← 回桃花源</a>
+          <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
         </div>
       </div>
 
-      <div class="topbar__actions">
-        <button
-          v-if="!isEditMode"
-          type="button"
-          class="secondary-btn topbar__mode-btn"
-          @click="enterEditMode"
-        >
-          編輯棋盤
-        </button>
-        <button
-          v-else
-          type="button"
-          class="primary-btn topbar__mode-btn"
-          @click="exitEditMode"
-        >
-          返回遊戲
-        </button>
-        <AuthBar
-          :status="authState.status"
-          :user="authState.user ?? null"
-          :error="authState.error"
-          @login="login"
-          @logout="logout"
-          @retry="refreshSession"
-        />
-        <span class="topbar__divider" aria-hidden="true"></span>
-        <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
-        <label class="inline-field inline-field--compact">
-          <span>房間代碼</span>
-          <input v-model="game.roomCodeInput" type="text" maxlength="8" placeholder="ABCDEF" />
-        </label>
-        <button type="button" class="secondary-btn" @click="game.joinOnlineRoom">加入房間</button>
-        <button type="button" class="danger-btn" :disabled="!game.online.mode" @click="game.leaveOnlineMode">離開線上模式</button>
-        <span class="topbar__divider" aria-hidden="true"></span>
-        <a class="back-link" href="../index.html">← 回桃花源</a>
-        <a class="back-link back-link--secondary" href="../shanhaijing-monopoly/index.html">查看舊版</a>
-      </div>
+      <div class="topbar__divider" aria-hidden="true"></div>
 
-      <div v-if="game.online.mode" class="topbar__status">
-        <p>{{ game.onlineStatusText }}</p>
-        <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
+      <div class="topbar__row topbar__row--online">
+        <div class="topbar__online-actions">
+          <button type="button" class="primary-btn" @click="game.createOnlineRoom">建立線上房間</button>
+          <label class="inline-field">
+            <span>房間代碼</span>
+            <input v-model="game.roomCodeInput" type="text" maxlength="8" placeholder="ABCDEF" />
+          </label>
+          <button type="button" class="secondary-btn" @click="game.joinOnlineRoom">加入房間</button>
+          <button type="button" class="danger-btn" :disabled="!game.online.mode" @click="game.leaveOnlineMode">離開線上模式</button>
+        </div>
+
+        <div v-if="game.online.mode" class="topbar__online-status">
+          <p>{{ game.onlineStatusText }}</p>
+          <a :href="game.onlineRoomShareUrl">{{ game.onlineRoomShareUrl }}</a>
+        </div>
       </div>
     </header>
 
@@ -198,8 +197,34 @@ onBeforeUnmount(() => {
                   擲骰
                 </button>
                 <div class="draw-actions">
-                  <button type="button" class="secondary-btn" @click="game.drawCard('chance')">抽機會卡</button>
-                  <button type="button" class="secondary-btn" @click="game.drawCard('fate')">抽命運卡</button>
+                  <button
+                    type="button"
+                    class="draw-card draw-card--chance"
+                    aria-label="抽機會卡"
+                    @click="game.drawCard('chance')"
+                  >
+                    <span class="draw-card__corner" aria-hidden="true">機</span>
+                    <span class="draw-card__body">
+                      <span class="draw-card__sigil" aria-hidden="true">☀</span>
+                      <span class="draw-card__title">機會</span>
+                      <span class="draw-card__action">抽卡</span>
+                    </span>
+                    <span class="draw-card__corner draw-card__corner--flip" aria-hidden="true">機</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="draw-card draw-card--fate"
+                    aria-label="抽命運卡"
+                    @click="game.drawCard('fate')"
+                  >
+                    <span class="draw-card__corner" aria-hidden="true">命</span>
+                    <span class="draw-card__body">
+                      <span class="draw-card__sigil" aria-hidden="true">☾</span>
+                      <span class="draw-card__title">命運</span>
+                      <span class="draw-card__action">抽卡</span>
+                    </span>
+                    <span class="draw-card__corner draw-card__corner--flip" aria-hidden="true">命</span>
+                  </button>
                 </div>
               </div>
             </section>
