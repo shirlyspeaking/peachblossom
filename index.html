@@ -505,15 +505,20 @@
             color: var(--accent-deep);
         }
 
+        .app-name--bilingual {
+            max-width: min(100%, 22rem);
+            line-height: 1.35;
+        }
+
         .app-name-en {
-            display: block;
-            margin-top: 0.2em;
-            font-family: "Noto Sans TC", system-ui, sans-serif;
-            font-size: 0.78rem;
-            font-weight: 500;
-            letter-spacing: 0.06em;
-            text-transform: none;
-            color: var(--text-soft);
+            display: inline;
+            font-family: inherit;
+            font-size: 0.92em;
+            font-weight: inherit;
+            letter-spacing: 0.02em;
+            color: var(--accent-deep);
+            margin-left: 0.28em;
+            white-space: nowrap;
         }
 
         .app-card-copy {
@@ -863,7 +868,7 @@
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-book-open app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name">「摸魚」俱樂部<span class="app-name-en">Loafing Club</span></h3>
+                        <h3 class="app-name app-name--bilingual">「摸魚」俱樂部 <span class="app-name-en">Loafing Club</span></h3>
                     </a>
 
                     <a href="luoying-xi/" class="app-card" style="--app-accent: oklch(0.58 0.12 175);" aria-label="落英溪 創意寫作小站">

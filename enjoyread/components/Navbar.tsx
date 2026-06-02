@@ -20,9 +20,9 @@ export function Navbar({ searchQuery = "", onSearchChange, onSearch }: NavbarPro
       <div className="container flex h-16 items-center gap-4 px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 font-serif text-lg font-semibold tracking-wide text-primary-800 dark:text-primary-200">
           <BookOpen className="h-6 w-6 text-primary-600 shrink-0" />
-          <span className="hidden sm:inline-flex sm:flex-col sm:leading-tight">
-            <span>「摸魚」俱樂部</span>
-            <span className="font-sans text-xs font-medium tracking-widest text-muted-foreground">Loafing Club</span>
+          <span className="hidden sm:inline whitespace-nowrap font-serif text-lg font-semibold tracking-wide text-primary-800 dark:text-primary-200">
+            「摸魚」俱樂部{" "}
+            <span className="text-[0.92em] font-medium tracking-wide">Loafing Club</span>
           </span>
         </Link>
 
