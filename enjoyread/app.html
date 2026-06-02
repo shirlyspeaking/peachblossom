@@ -46,16 +46,6 @@
             z-index: 50;
             box-shadow: 4px 0 24px oklch(0.48 0.06 8 / 0.06);
         }
-        .chat-dock-header {
-            flex-shrink: 0;
-            padding: 14px 12px 10px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--accent-deep);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            font-family: "Noto Serif TC", serif;
-            background: color-mix(in oklch, var(--surface) 94%, transparent);
-        }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -438,14 +428,13 @@
 <body>
     <div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDock()" aria-hidden="true"></div>
     <div class="app-layout">
-        <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
-            <div class="chat-dock-header">💬 閱讀小助手</div>
+        <aside class="chat-dock" id="chatDock" aria-label="Chat assistant">
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-form" id="chatForm">
-                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
+                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？ / e.g. What does &quot;streaming&quot; mean? How do you say it in English?" maxlength="1200" autocomplete="off"></textarea>
                 <div class="chat-form-actions">
-                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出</button>
-                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話</button>
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出 Send</button>
+                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話 Clear chat</button>
                 </div>
             </form>
         </aside>
@@ -1170,7 +1159,7 @@
             }
             appendChatRow(
                 'assistant',
-                '你好！我是閱讀小助手。你可以直接問任何問題（學習、語文、英文、文章理解都可以）；若你有點選文章，我也會把該篇內容當作參考。'
+                'Hi! Ask me anything—reading, English, or study help. Open an article and I\'ll use it as context.'
             );
             box.dataset.seeded = '1';
             chatTurns = [];
