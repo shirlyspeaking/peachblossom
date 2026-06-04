@@ -505,14 +505,29 @@
             color: var(--accent-deep);
         }
 
-        /* 與 Legendary Card Creator 相同：整段標題共用 .app-name，不另設副標色 */
+        /* 雙語應用：中文第一行、英文譯名第二行 */
         .app-card .app-name--bilingual {
             max-width: 100%;
             width: 100%;
-            font-size: clamp(0.62rem, 2.65vw, 0.96rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.22em;
+            line-height: 1.35;
+        }
+
+        .app-card .app-name--bilingual .app-name-zh {
+            display: block;
+        }
+
+        .app-card .app-name--bilingual .app-name-en {
+            display: block;
+            font-family: "Noto Sans TC", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
             line-height: 1.25;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
+            color: var(--text-soft);
         }
 
         .app-card-copy {
@@ -801,8 +816,8 @@
                 font-size: 1rem;
             }
 
-            .app-card .app-name--bilingual {
-                font-size: clamp(0.58rem, 2.4vw, 0.9rem);
+            .app-card .app-name--bilingual .app-name-en {
+                font-size: 0.72rem;
             }
 
             .app-tooltip {
@@ -866,7 +881,10 @@
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-book-open app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name app-name--bilingual">「摸魚」俱樂部&nbsp;Loafing Club</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">「摸魚」俱樂部</span>
+                            <span class="app-name-en">Loafing Club</span>
+                        </h3>
                     </a>
 
                     <a href="luoying-xi/" class="app-card" style="--app-accent: oklch(0.58 0.12 175);" aria-label="落英溪 創意寫作小站">
@@ -911,7 +929,10 @@
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-pen-nib app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name app-name--bilingual">字帖生成平台&nbsp;Calligraphy copybook</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">字帖生成平台</span>
+                            <span class="app-name-en">Calligraphy copybook</span>
+                        </h3>
                     </a>
 
                     <a href="legendary-card-creator/index.html" class="app-card" style="--app-accent: oklch(0.65 0.08 330);" aria-label="Legendary Card Creator">
@@ -939,7 +960,10 @@
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-map app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name app-name--bilingual">山海經大富翁&nbsp;Monopoly of the Legends</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">山海經大富翁</span>
+                            <span class="app-name-en">Monopoly of the Legends</span>
+                        </h3>
                         <div class="app-card-links">
                             <a href="taoyuan-wanxiang-monopoly/" class="app-card-link">新版</a>
                             <a href="shanhaijing-monopoly/" class="app-card-link app-card-link--secondary">經典版</a>
