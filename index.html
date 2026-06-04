@@ -505,7 +505,7 @@
             color: var(--accent-deep);
         }
 
-        /* 雙語應用：中文第一行、英文譯名第二行 */
+        /* 雙語應用：中文第一行、英文譯名第二行（英文用 em，隨 .app-name 字級縮放） */
         .app-card .app-name--bilingual {
             max-width: 100%;
             width: 100%;
@@ -518,15 +518,18 @@
 
         .app-card .app-name--bilingual .app-name-zh {
             display: block;
+            font-size: 1em;
+            font-weight: 500;
+            color: inherit;
         }
 
         .app-card .app-name--bilingual .app-name-en {
             display: block;
             font-family: "Noto Sans TC", sans-serif;
-            font-size: 0.86rem;
-            font-weight: 400;
+            font-size: 0.94em;
+            font-weight: 500;
             letter-spacing: 0.02em;
-            line-height: 1.25;
+            line-height: 1.3;
             color: var(--text-soft);
         }
 
@@ -814,10 +817,6 @@
 
             .app-name {
                 font-size: 1rem;
-            }
-
-            .app-card .app-name--bilingual .app-name-en {
-                font-size: 0.8rem;
             }
 
             .app-tooltip {
