@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(url, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; EnjoyRead/1.0; +https://enjoyread.edu)",
+          "Mozilla/5.0 (compatible; LoafingClub/1.0; +https://peachblossom.edu)",
       },
     });
     const html = await res.text();

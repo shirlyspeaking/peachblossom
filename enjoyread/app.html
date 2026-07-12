@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 若你自建 Worker，可改此網址；或在瀏覽器主控台執行：localStorage.setItem('enjoyread_quiz_api_base','https://你的網域') 後重新整理 -->
     <meta name="enjoyread-quiz-api" content="https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev" />
-    <title>悅讀 EnjoyRead - 最新有趣文章</title>
+    <title>「摸魚」俱樂部 Loafing Club - 最新有趣文章</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
@@ -32,10 +32,12 @@
             min-height: 100vh;
         }
         .chat-dock {
+            --chat-bg: oklch(0.94 0.048 235);
+            --chat-bg-soft: oklch(0.935 0.052 238);
             width: min(340px, 100vw);
             flex: 0 0 min(340px, 100vw);
-            background: #efeae2;
-            border-right: 1px solid color-mix(in oklch, var(--line-strong) 45%, transparent);
+            background: var(--chat-bg);
+            border-right: 1px solid color-mix(in oklch, oklch(0.82 0.06 235) 55%, var(--line-strong) 45%);
             display: flex;
             flex-direction: column;
             position: sticky;
@@ -45,16 +47,6 @@
             max-height: 100vh;
             z-index: 50;
             box-shadow: 4px 0 24px oklch(0.48 0.06 8 / 0.06);
-        }
-        .chat-dock-header {
-            flex-shrink: 0;
-            padding: 14px 12px 10px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--accent-deep);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            font-family: "Noto Serif TC", serif;
-            background: color-mix(in oklch, var(--surface) 94%, transparent);
         }
         .chat-messages {
             flex: 1;
@@ -66,8 +58,8 @@
             gap: 0;
             min-height: 120px;
             background:
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.04) 2px, rgba(255, 255, 255, 0.04) 4px),
-                #e6ded4;
+                repeating-linear-gradient(0deg, transparent, transparent 2px, oklch(0.99 0.02 235 / 0.45) 2px, oklch(0.99 0.02 235 / 0.45) 4px),
+                var(--chat-bg-soft);
         }
         .wa-row {
             display: flex;
@@ -135,8 +127,8 @@
         }
         .chat-form {
             padding: 12px;
-            border-top: 1px solid color-mix(in oklch, var(--line) 88%, transparent);
-            background: color-mix(in oklch, var(--surface) 88%, transparent);
+            border-top: 1px solid color-mix(in oklch, oklch(0.82 0.05 235) 50%, var(--line) 50%);
+            background: color-mix(in oklch, var(--chat-bg) 88%, oklch(0.99 0.02 235) 12%);
         }
         .chat-form textarea {
             width: 100%;
@@ -222,12 +214,15 @@
             box-shadow: 0 10px 30px oklch(0.48 0.08 8 / 0.06);
         }
         .logo {
-            font-size: 1.15rem;
+            flex-shrink: 0;
+            font-size: clamp(0.82rem, 2.2vw, 1.12rem);
             font-weight: 600;
             font-family: "Noto Serif TC", serif;
             color: var(--accent-deep);
             text-decoration: none;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            line-height: 1.2;
         }
         .logo:hover { color: var(--accent); }
         .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -250,6 +245,11 @@
         .nav-history-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 12px 26px oklch(0.48 0.09 8 / 0.12);
+        }
+        .nav-history-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
         }
         .history-empty { text-align: center; padding: 48px 20px; color: var(--text-soft); line-height: 1.7; }
         .history-item { border-left: 3px solid color-mix(in oklch, var(--accent) 70%, var(--line) 30%); padding-left: 16px; margin-bottom: 20px; }
@@ -435,37 +435,33 @@
 <body>
     <div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDock()" aria-hidden="true"></div>
     <div class="app-layout">
-        <aside class="chat-dock" id="chatDock" aria-label="DeepSeek 閱讀小助手">
-            <div class="chat-dock-header">💬 閱讀小助手</div>
+        <aside class="chat-dock" id="chatDock" aria-label="Chat assistant">
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-form" id="chatForm">
-                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？" maxlength="1200" autocomplete="off"></textarea>
+                <textarea id="chatInput" placeholder="例：「串流」是什麼意思？英文怎麼說？ / e.g. What does &quot;streaming&quot; mean? How do you say it in English?" maxlength="1200" autocomplete="off"></textarea>
                 <div class="chat-form-actions">
-                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出</button>
-                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話</button>
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn">送出 Send</button>
+                    <button type="button" class="chat-clear-btn" onclick="clearChat()">清除對話 Clear chat</button>
                 </div>
             </form>
         </aside>
         <div class="app-main">
     <nav class="navbar">
-        <a href="../index.html" class="logo">📖 悅讀 EnjoyRead</a>
+        <a href="../index.html" class="logo">📖 「摸魚」俱樂部&nbsp;Loafing Club</a>
         <button type="button" class="nav-history-btn nav-chat-toggle" id="btnChatToggle" onclick="toggleChatDock()">💬 小助手</button>
         <div class="nav-actions">
-            <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 悅讀歷史</button>
+            <button type="button" class="nav-history-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
+            <button type="button" class="nav-history-btn" id="btnHistory" onclick="openHistoryView()">📚 閱讀歷史</button>
             <button type="button" class="nav-history-btn hidden" id="btnBackFeed" onclick="closeHistoryView()">← 返回文章列表</button>
         </div>
     </nav>
 
     <div class="container">
         <div id="feedHeader">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
-                <h1 class="page-title" style="margin-bottom: 0;">最新 · 最有趣的文章</h1>
-                <button class="btn refresh-articles-btn" id="refreshBtn" onclick="refreshArticles()">🔄 更新</button>
-            </div>
-            <p class="page-desc" style="margin: 0 0 12px; font-size: 0.9rem; color: var(--muted, #666);">優先顯示<strong>最近 7 天內</strong>（依 RSS 發布時間）的文章；按「更新」會盡量換成<strong>這 7 天內您尚未在列表看過</strong>的另一批。若來源暫無符合條件的新文，會改為<strong>示範文章</strong>（與先前相同備援清單）。</p>
+            <h1 class="page-title" style="margin-bottom: 8px;">最新 · 最有趣的文章</h1>
             <div class="voice-controls">
-                <label for="mandarinVoice">普通話音色</label>
-                <select id="mandarinVoice" aria-label="選擇普通話朗讀音色">
+                <label for="mandarinVoice">聲音選擇</label>
+                <select id="mandarinVoice" aria-label="聲音選擇">
                     <option value="shimmer">女聲（溫柔普通話）</option>
                     <option value="onyx">女聲（活潑普通話）</option>
                     <option value="alloy">男聲（穩定普通話）</option>
@@ -476,7 +472,7 @@
         </div>
 
         <div id="historyHeader" class="hidden">
-            <h1 class="page-title" style="margin-bottom: 0;">悅讀歷史</h1>
+            <h1 class="page-title" style="margin-bottom: 0;">閱讀歷史</h1>
             <p class="page-desc">您曾開啟連結或聆聽語音摘要的文章會記錄在此（僅儲存在本機瀏覽器）。</p>
         </div>
 
@@ -566,6 +562,7 @@
             document.getElementById('feedHeader').classList.add('hidden');
             document.getElementById('historyHeader').classList.remove('hidden');
             document.getElementById('btnHistory').classList.add('hidden');
+            document.getElementById('refreshBtn').classList.add('hidden');
             document.getElementById('btnBackFeed').classList.remove('hidden');
             renderHistoryList();
         }
@@ -575,6 +572,7 @@
             document.getElementById('feedHeader').classList.remove('hidden');
             document.getElementById('historyHeader').classList.add('hidden');
             document.getElementById('btnHistory').classList.remove('hidden');
+            document.getElementById('refreshBtn').classList.remove('hidden');
             document.getElementById('btnBackFeed').classList.add('hidden');
             renderArticles(articles);
         }
@@ -898,12 +896,12 @@
                     <h2 class="article-title">${titleHtml}</h2>
                     <p class="article-summary">${esc(a.summary)}</p>
                     <div class="article-meta">${a.date ? new Date(a.date).toLocaleDateString('zh-TW') : ''}</div>
-                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="🔊 普通話朗讀摘要" data-stop-text="⏸ 停止朗讀">
-                        🔊 普通話朗讀摘要
+                    <button type="button" class="tts-btn" onclick="readSummary(${idx})" id="ttsBtn${idx}" data-default-text="聽一聽" data-stop-text="⏸ 停止朗讀">
+                        聽一聽
                     </button>
                     <div class="quiz-section">
                         <div class="quiz-toolbar">
-                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 AI 閱讀題（3 題）</button>
+                            <button type="button" class="quiz-btn quiz-btn-primary" onclick="loadReadingQuiz(${idx}, false)" id="quizLoadBtn${idx}">📝 閱讀題（3題）</button>
                             <button type="button" class="quiz-btn hidden" onclick="loadReadingQuiz(${idx}, true)" id="quizRegenBtn${idx}">🔄 重新出題</button>
                         </div>
                         <p class="quiz-status" id="quizStatus${idx}" aria-live="polite"></p>
@@ -1168,7 +1166,7 @@
             }
             appendChatRow(
                 'assistant',
-                '你好！我是閱讀小助手。你可以直接問任何問題（學習、語文、英文、文章理解都可以）；若你有點選文章，我也會把該篇內容當作參考。'
+                'Hi! Ask me anything—reading, English, or study help. Open an article and I\'ll use it as context.'
             );
             box.dataset.seeded = '1';
             chatTurns = [];
@@ -1308,7 +1306,7 @@
 
             document.querySelectorAll('.tts-btn').forEach(b => {
                 b.classList.remove('playing');
-                b.textContent = b.dataset.defaultText || '🔊 普通話朗讀摘要';
+                b.textContent = b.dataset.defaultText || '聽一聽';
             });
             btn.classList.add('playing');
             btn.textContent = '⏳ 生成普通話...';
@@ -1369,7 +1367,7 @@
         function resetTtsButton(btn) {
             currentPlayingIdx = -1;
             btn.classList.remove('playing');
-            btn.textContent = btn.dataset.defaultText || '🔊 普通話朗讀摘要';
+            btn.textContent = btn.dataset.defaultText || '聽一聽';
         }
 
         function readWithBrowserMandarin(summary, btn) {

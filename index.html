@@ -505,6 +505,34 @@
             color: var(--accent-deep);
         }
 
+        /* 雙語應用：中文第一行、英文譯名第二行（英文用 em，隨 .app-name 字級縮放） */
+        .app-card .app-name--bilingual {
+            max-width: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.22em;
+            line-height: 1.35;
+        }
+
+        .app-card .app-name--bilingual .app-name-zh {
+            display: block;
+            font-size: 1em;
+            font-weight: 500;
+            color: inherit;
+        }
+
+        .app-card .app-name--bilingual .app-name-en {
+            display: block;
+            font-family: "Noto Sans TC", sans-serif;
+            font-size: 0.94em;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            line-height: 1.3;
+            color: var(--text-soft);
+        }
+
         .app-card-copy {
             max-width: 22ch;
             font-size: 0.9rem;
@@ -848,11 +876,14 @@
                 </div>
 
                 <div class="apps-grid">
-                    <a href="enjoyread/app.html" class="app-card" style="--app-accent: oklch(0.7 0.12 48);" aria-label="悅讀 EnjoyRead 中學生閱讀平台">
+                    <a href="enjoyread/app.html" class="app-card" style="--app-accent: oklch(0.7 0.12 48);" aria-label="「摸魚」俱樂部 Loafing Club 中學生閱讀平台">
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-book-open app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name">悅讀 EnjoyRead</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">「摸魚」俱樂部</span>
+                            <span class="app-name-en">Loafing Club</span>
+                        </h3>
                     </a>
 
                     <a href="luoying-xi/" class="app-card" style="--app-accent: oklch(0.58 0.12 175);" aria-label="落英溪 創意寫作小站">
@@ -893,11 +924,14 @@
                         <h3 class="app-name">花無缺</h3>
                     </a>
 
-                    <a href="copybook/" class="app-card" style="--app-accent: oklch(0.63 0.1 24);" aria-label="書法字帖生成平台">
+                    <a href="copybook/" class="app-card" style="--app-accent: oklch(0.63 0.1 24);" aria-label="字帖生成平台 Calligraphy copybook">
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-pen-nib app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name">書法字帖生成平台</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">字帖生成平台</span>
+                            <span class="app-name-en">Calligraphy copybook</span>
+                        </h3>
                     </a>
 
                     <a href="legendary-card-creator/index.html" class="app-card" style="--app-accent: oklch(0.65 0.08 330);" aria-label="Legendary Card Creator">
@@ -928,11 +962,14 @@
                         <h3 class="app-name">山海密室</h3>
                     </a>
 
-                    <article class="app-card" style="--app-accent: oklch(0.62 0.08 170);" aria-label="山海經大富翁新版與舊版入口">
+                    <article class="app-card" style="--app-accent: oklch(0.62 0.08 170);" aria-label="山海經大富翁 Monopoly of the Legends，新版與舊版入口">
                         <div class="app-icon-shell">
                             <i class="fa-solid fa-map app-icon" aria-hidden="true"></i>
                         </div>
-                        <h3 class="app-name">山海經大富翁</h3>
+                        <h3 class="app-name app-name--bilingual">
+                            <span class="app-name-zh">山海經大富翁</span>
+                            <span class="app-name-en">Monopoly of the Legends</span>
+                        </h3>
                         <div class="app-card-links">
                             <a href="taoyuan-wanxiang-monopoly/" class="app-card-link">新版</a>
                             <a href="shanhaijing-monopoly/" class="app-card-link app-card-link--secondary">經典版</a>
