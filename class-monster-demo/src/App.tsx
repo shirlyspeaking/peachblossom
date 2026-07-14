@@ -325,6 +325,10 @@ function App() {
 
   return (
     <main className="app-shell">
+      <a className="back-link" href="../index.html">
+        <i className="fa-solid fa-arrow-left" aria-hidden="true" />
+        返回桃花源
+      </a>
       <section className="hero-panel">
         <div>
           <p className="eyebrow">桃花源 · 課堂工具</p>

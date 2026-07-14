@@ -43,6 +43,43 @@ button:disabled {
   padding: 32px 0 120px;
 }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  border: 3px solid #172033;
+  border-radius: 999px;
+  background: #fffdf8;
+  box-shadow: 0 4px 0 #172033;
+  color: #172033;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  background: #ffe08a;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 #172033;
+}
+
+.back-link:focus-visible {
+  outline: 3px solid #7dd3ff;
+  outline-offset: 2px;
+}
+
+.back-link:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #172033;
+}
+
 .hero-panel,
 .setup-card,
 .class-board,
