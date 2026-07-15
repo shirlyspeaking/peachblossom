@@ -25,6 +25,45 @@
         });
     });
 
+    /* ---- Options drawer ---- */
+    var btnPanelToggle = document.getElementById('btnPanelToggle');
+    var btnPanelClose = document.getElementById('btnPanelClose');
+    var panelBackdrop = document.getElementById('panelBackdrop');
+    var PANEL_OPEN_KEY = 'copybook-panel-open';
+
+    function setPanelOpen(open) {
+        document.body.classList.toggle('panel-open', !!open);
+        if (btnPanelToggle) {
+            btnPanelToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btnPanelToggle.title = open ? '收合選項' : '展開選項';
+        }
+        if (panelBackdrop) {
+            if (open) panelBackdrop.removeAttribute('hidden');
+            else panelBackdrop.setAttribute('hidden', '');
+        }
+        try {
+            localStorage.setItem(PANEL_OPEN_KEY, open ? '1' : '0');
+        } catch (_) {}
+    }
+
+    function togglePanel() {
+        setPanelOpen(!document.body.classList.contains('panel-open'));
+    }
+
+    if (btnPanelToggle) btnPanelToggle.addEventListener('click', togglePanel);
+    if (btnPanelClose) btnPanelClose.addEventListener('click', function () { setPanelOpen(false); });
+    if (panelBackdrop) panelBackdrop.addEventListener('click', function () { setPanelOpen(false); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.body.classList.contains('panel-open')) {
+            setPanelOpen(false);
+        }
+    });
+    (function initPanel() {
+        var saved = null;
+        try { saved = localStorage.getItem(PANEL_OPEN_KEY); } catch (_) {}
+        setPanelOpen(saved === '1');
+    })();
+
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
     var btnGenerate = document.getElementById('btnGenerate');
@@ -646,15 +685,30 @@
     async function capturePageElements(pageEls, scale) {
         var s = scale || 2;
         var blobs = [];
-        for (var i = 0; i < pageEls.length; i++) {
-            setStatus('繪製第 ' + (i + 1) + ' 頁…');
-            var canvas = await window.html2canvas(pageEls[i], {
-                scale: s,
-                useCORS: true,
-                backgroundColor: null,
-                logging: false
-            });
-            blobs.push(await canvasToBlob(canvas));
+        var prevZoom = '';
+        var prevTransform = '';
+        if (preview) {
+            prevZoom = preview.style.zoom;
+            prevTransform = preview.style.transform;
+            preview.style.zoom = '1';
+            preview.style.transform = 'none';
+        }
+        try {
+            for (var i = 0; i < pageEls.length; i++) {
+                setStatus('繪製第 ' + (i + 1) + ' 頁…');
+                var canvas = await window.html2canvas(pageEls[i], {
+                    scale: s,
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+                blobs.push(await canvasToBlob(canvas));
+            }
+        } finally {
+            if (preview) {
+                preview.style.zoom = prevZoom;
+                preview.style.transform = prevTransform;
+            }
         }
         return blobs;
     }

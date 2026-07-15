@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=34">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -30,8 +30,18 @@
         </div>
     </header>
 
+    <button type="button" id="btnPanelToggle" class="panel-toggle" aria-expanded="false" aria-controls="optionsPanel" title="展開選項">
+        <span class="panel-toggle__icon" aria-hidden="true">☰</span>
+        <span class="panel-toggle__label">選項</span>
+    </button>
+    <div id="panelBackdrop" class="panel-backdrop" hidden></div>
+
     <main class="layout">
-        <aside class="panel">
+        <aside id="optionsPanel" class="panel" aria-label="字帖選項">
+            <div class="panel-header">
+                <h2 class="panel-title">字帖選項</h2>
+                <button type="button" id="btnPanelClose" class="panel-close" title="收合選項" aria-label="收合選項">×</button>
+            </div>
             <label for="textInput">字帖內容</label>
             <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
@@ -146,6 +156,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=43"></script>
+    <script src="app.js?v=44"></script>
 </body>
 </html>
