@@ -427,140 +427,438 @@ textarea {
   color: var(--accent-deep);
 }
 
-/* Claw */
-.claw-machine {
-  position: relative;
-  width: min(420px, 88%);
-  height: min(360px, 50vh);
-  border-radius: 22px;
-  background: linear-gradient(180deg, oklch(0.9 0.03 220), oklch(0.82 0.04 210));
-  border: 4px solid oklch(0.55 0.08 30);
-  overflow: hidden;
-  box-shadow: inset 0 0 0 10px oklch(0.95 0.02 220 / 0.35), 0 18px 36px oklch(0.45 0.05 30 / 0.2);
+/* Claw — Cupiclaw-inspired cute arcade cabinet */
+.theme-claw {
+  background:
+    radial-gradient(circle at 50% 0%, oklch(0.94 0.06 320 / 0.35), transparent 42%),
+    radial-gradient(circle at 20% 80%, oklch(0.92 0.08 350 / 0.25), transparent 30%);
 }
 
-.claw-rail {
+.cupi-cabinet {
+  position: relative;
+  width: min(400px, 90%);
+  filter: drop-shadow(0 20px 0 #5a3d7a) drop-shadow(0 28px 40px oklch(0.45 0.08 300 / 0.28));
+}
+
+.cupi-marquee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px 12px;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(180deg, #ff9ec8 0%, #e878a8 55%, #c85a90 100%);
+  border: 4px solid #5a3d7a;
+  border-bottom: none;
+  box-shadow: inset 0 2px 0 oklch(1 0 0 / 0.35);
+}
+
+.cupi-marquee-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+  font-weight: 700;
+  color: #fff8fc;
+  letter-spacing: 0.12em;
+  text-shadow:
+    2px 2px 0 #5a3d7a,
+    -1px -1px 0 oklch(1 0 0 / 0.2);
+}
+
+.cupi-star {
+  color: #ffe566;
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 0 #c9a020;
+  animation: cupi-star-twinkle 1.4s ease-in-out infinite;
+}
+
+.cupi-star--r {
+  animation-delay: 0.7s;
+}
+
+.cupi-body {
+  padding: 0 10px;
+  background: linear-gradient(180deg, #c85a90, #9b4d80);
+  border-left: 4px solid #5a3d7a;
+  border-right: 4px solid #5a3d7a;
+}
+
+.cupi-glass {
+  position: relative;
+  min-height: min(300px, 44vh);
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(180deg, oklch(0.88 0.04 260 / 0.55) 0%, oklch(0.82 0.06 300 / 0.35) 100%);
+  border: 3px solid #7eb8e8;
+  box-shadow:
+    inset 0 0 0 2px oklch(1 0 0 / 0.45),
+    inset 0 -30px 40px oklch(0.75 0.08 320 / 0.2);
+  overflow: hidden;
+}
+
+.cupi-rail {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 18px;
-  background: oklch(0.45 0.04 40);
-}
-
-.claw-arm {
-  position: absolute;
-  top: 10px;
-  width: 28px;
-  transform: translateX(-50%);
-  transition: left 0.85s var(--ease);
-  z-index: 3;
-}
-
-.claw-cable {
-  width: 4px;
   height: 36px;
-  margin: 0 auto;
-  background: oklch(0.55 0.02 40);
-  transition: height 0.55s var(--ease);
+  z-index: 4;
 }
 
-.claw-arm.is-dropping .claw-cable {
-  height: 150px;
-}
-
-.claw-arm.is-caught .claw-cable {
-  height: 72px;
-}
-
-.claw-hand {
-  position: relative;
-  width: 36px;
-  height: 28px;
-  margin: 0 auto;
-}
-
-.claw-finger {
+.cupi-rail-track {
   position: absolute;
-  top: 0;
-  width: 12px;
+  top: 14px;
+  left: 8%;
+  right: 8%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #6b7280, #4b5563);
+  box-shadow: 0 2px 0 oklch(0.3 0.02 260 / 0.4);
+}
+
+.cupi-trolley {
+  position: absolute;
+  top: 6px;
+  width: 44px;
+  transform: translateX(-50%);
+  transition: left 0.9s cubic-bezier(0.34, 1.2, 0.64, 1);
+  z-index: 5;
+}
+
+.cupi-trolley-body {
+  width: 28px;
+  height: 14px;
+  margin: 0 auto;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #9ca3af, #6b7280);
+  border: 2px solid #4b5563;
+}
+
+.cupi-cable {
+  width: 3px;
   height: 28px;
-  border-radius: 8px;
-  background: oklch(0.72 0.08 70);
-  transition: transform 0.35s var(--ease);
+  margin: 0 auto;
+  background: repeating-linear-gradient(
+    180deg,
+    #78716c 0 4px,
+    #a8a29e 4px 8px
+  );
+  transition: height 0.6s cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
-.claw-finger--l {
-  left: 2px;
-  transform: rotate(18deg);
+.cupi-trolley.is-dropping .cupi-cable {
+  height: 148px;
 }
 
-.claw-finger--r {
-  right: 2px;
-  transform: rotate(-18deg);
+.cupi-trolley.is-caught .cupi-cable {
+  height: 68px;
 }
 
-.claw-arm.is-caught .claw-finger--l {
-  transform: rotate(-8deg);
+.cupi-claw {
+  position: relative;
+  width: 40px;
+  height: 32px;
+  margin: 0 auto;
 }
 
-.claw-arm.is-caught .claw-finger--r {
+.cupi-claw-prong {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 22px;
+  border-radius: 4px 4px 6px 6px;
+  background: linear-gradient(180deg, #ffe066, #f5a623);
+  border: 2px solid #c47f17;
+  transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.cupi-claw-prong--l {
+  left: 4px;
+  transform: rotate(22deg);
+  transform-origin: top center;
+}
+
+.cupi-claw-prong--c {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cupi-claw-prong--r {
+  right: 4px;
+  transform: rotate(-22deg);
+  transform-origin: top center;
+}
+
+.cupi-trolley.is-dropping .cupi-claw-prong--l {
   transform: rotate(8deg);
 }
 
-.claw-prize {
-  margin-top: 4px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: oklch(0.93 0.05 12);
-  color: var(--accent-deep);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-align: center;
-  white-space: nowrap;
-  box-shadow: 0 6px 14px oklch(0.5 0.08 10 / 0.2);
+.cupi-trolley.is-dropping .cupi-claw-prong--r {
+  transform: rotate(-8deg);
 }
 
-.claw-pit {
-  position: absolute;
-  inset: auto 8% 8% 8%;
-  height: 42%;
+.cupi-trolley.is-caught .cupi-claw-prong--l {
+  transform: rotate(-6deg);
 }
 
-.claw-ball {
+.cupi-trolley.is-caught .cupi-claw-prong--r {
+  transform: rotate(6deg);
+}
+
+.cupi-claw-face {
   position: absolute;
-  width: 58px;
-  height: 58px;
+  top: -2px;
+  left: 50%;
   transform: translateX(-50%);
-  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #5a3d7a;
+  line-height: 1;
+}
+
+.cupi-caught-plush {
+  position: relative;
+  width: 52px;
+  height: 44px;
+  margin: 2px auto 0;
+  border-radius: 50% 50% 44% 44%;
+  background: var(--plush-body);
+  border: 2px solid oklch(0.45 0.06 350 / 0.35);
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 30% 28%, oklch(0.95 0.04 20), oklch(0.72 0.14 15));
-  color: oklch(0.28 0.06 8);
-  font-size: 0.72rem;
-  font-weight: 700;
-  box-shadow: 0 8px 16px oklch(0.45 0.06 15 / 0.25);
+  animation: cupi-plush-bob 0.5s ease-in-out infinite alternate;
+}
+
+.cupi-caught-ear {
+  position: absolute;
+  top: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.cupi-caught-ear--l {
+  left: 4px;
+}
+
+.cupi-caught-ear--r {
+  right: 4px;
+}
+
+.cupi-caught-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: oklch(0.32 0.06 350);
+  max-width: 3.4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupi-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28%;
+  background:
+    linear-gradient(180deg, transparent, oklch(0.78 0.1 320 / 0.45)),
+    repeating-linear-gradient(
+      90deg,
+      oklch(0.82 0.08 320 / 0.15) 0 12px,
+      oklch(0.78 0.1 310 / 0.2) 12px 24px
+    );
+  border-top: 2px dashed oklch(0.65 0.1 320 / 0.35);
+}
+
+.cupi-pile {
+  position: absolute;
+  inset: 36px 6% 8% 6%;
+}
+
+.cupi-plush {
+  position: absolute;
+  width: 54px;
+  height: 48px;
+  transform: translateX(-50%) rotate(var(--plush-rot)) scale(var(--plush-scale));
+  border-radius: 50% 50% 42% 42%;
+  background: var(--plush-body);
+  border: 2px solid oklch(0.5 0.06 350 / 0.25);
+  box-shadow:
+    0 6px 0 oklch(0.55 0.06 350 / 0.2),
+    0 8px 16px oklch(0.45 0.06 350 / 0.15);
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-.claw-ball span {
+.cupi-plush-ear {
+  position: absolute;
+  top: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--plush-ear);
+}
+
+.cupi-plush-ear--l {
+  left: 6px;
+}
+
+.cupi-plush-ear--r {
+  right: 6px;
+}
+
+.cupi-plush-face {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.cupi-plush-eye {
+  width: 5px;
+  height: 7px;
+  border-radius: 50%;
+  background: oklch(0.28 0.05 350);
+}
+
+.cupi-plush-name {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: oklch(0.32 0.06 350);
   max-width: 3.6em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.claw-ball.is-taken {
+.cupi-plush.is-taken {
   opacity: 0;
-  transform: translateX(-50%) scale(0.4);
+  transform: translateX(-50%) rotate(var(--plush-rot)) scale(0.2);
 }
 
-.claw-glass {
+.cupi-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.cupi-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffe566;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: cupi-sparkle-pop 0.8s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.06s);
+  left: calc(20% + var(--i) * 8%);
+  top: calc(25% + (var(--i) % 3) * 18%);
+}
+
+.cupi-glass-shine {
   pointer-events: none;
   position: absolute;
-  inset: 18px 10px 10px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, oklch(1 0 0 / 0.18), transparent 42%);
+  inset: 0;
+  background:
+    linear-gradient(125deg, oklch(1 0 0 / 0.28) 0%, transparent 28%),
+    linear-gradient(315deg, oklch(1 0 0 / 0.08) 0%, transparent 18%);
+}
+
+.cupi-panel {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  background: linear-gradient(180deg, #9b4d80, #7a3d68);
+  border: 4px solid #5a3d7a;
+  border-top: 3px solid #c85a90;
+  border-radius: 0 0 16px 16px;
+}
+
+.cupi-joystick {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  justify-self: start;
+}
+
+.cupi-stick {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 6px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: #6b7280;
+}
+
+.cupi-knob {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff6b8a, #e8456a);
+  border: 2px solid #5a3d7a;
+  box-shadow: 0 3px 0 #9b3050;
+}
+
+.cupi-coin-slot {
+  justify-self: center;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #4b5563;
+  border: 2px solid #374151;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: oklch(0.85 0.02 260);
+  letter-spacing: 0.08em;
+}
+
+.cupi-btn {
+  justify-self: end;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #7ee787, #4ade80);
+  border: 3px solid #5a3d7a;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #1a472a;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 0 #2d6a3e;
+}
+
+@keyframes cupi-star-twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(12deg); opacity: 0.75; }
+}
+
+@keyframes cupi-plush-bob {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
+}
+
+@keyframes cupi-sparkle-pop {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  40% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+  100% { transform: scale(0.6) rotate(90deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cupi-star,
+  .cupi-caught-plush,
+  .cupi-sparkle {
+    animation: none !important;
+  }
 }
 
 .bottom-bar {
