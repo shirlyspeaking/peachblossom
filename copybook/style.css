@@ -221,122 +221,70 @@ body {
 .theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
 .theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
 
-/* ===== Layout ===== */
-
-.layout {
-    display: block;
-    padding: 20px 24px 32px;
-    max-width: none;
-}
-
-/* 左側拉出型選項面板 */
-.panel-toggle {
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 60;
+.bg-upload {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
-    width: 40px;
-    padding: 14px 6px;
-    border: none;
-    border-radius: 0 12px 12px 0;
-    background: linear-gradient(180deg, var(--accent-mid), var(--accent-dark));
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 2px 0 16px var(--page-shadow);
-    transition: filter 0.2s, left 0.28s ease;
+    gap: 6px;
+    margin-left: 6px;
+    padding-left: 10px;
+    border-left: 1px solid var(--ui-border);
 }
 
-.panel-toggle__icon {
-    font-size: 1.05rem;
-    line-height: 1;
-}
-
-.panel-toggle__label {
-    writing-mode: vertical-rl;
-    letter-spacing: 0.12em;
+.bg-upload-btn,
+.bg-upload-clear {
+    width: auto;
+    padding: 6px 10px;
     font-size: 0.78rem;
-}
-
-body.panel-open .panel-toggle {
-    left: min(320px, 92vw);
-}
-
-.panel-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 55;
-    background: rgba(40, 28, 32, 0.28);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.panel-backdrop[hidden] {
-    display: none;
-}
-
-.panel {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 70;
-    width: min(320px, 92vw);
-    max-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: color-mix(in oklch, oklch(0.988 0.01 8) 94%, transparent);
-    border: none;
-    border-right: 1px solid var(--ui-border);
-    border-radius: 0;
-    padding: 14px 14px 24px;
-    box-shadow: 8px 0 40px oklch(0.53 0.09 8 / 0.14);
-    transform: translateX(-105%);
-    transition: transform 0.28s ease, border-color 0.3s;
-    height: auto;
-}
-
-body.panel-open .panel {
-    transform: translateX(0);
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 4px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.panel-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--page-title-color);
-    letter-spacing: 0.04em;
-}
-
-.panel-close {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    padding: 0;
     border-radius: 8px;
-    font-size: 1.35rem;
-    line-height: 1;
-    background: color-mix(in oklch, var(--accent-mid) 28%, transparent);
+    white-space: nowrap;
+}
+
+.bg-upload-clear {
+    background: color-mix(in oklch, var(--accent-dark) 18%, transparent);
     color: var(--accent-dark);
 }
 
-.panel-close:hover {
-    filter: brightness(1.08);
+/* ===== Layout ===== */
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 290px) 1fr;
+    gap: 16px;
+    padding: 20px;
+}
+
+.panel {
+    background: color-mix(in oklch, oklch(0.988 0.01 8) 90%, transparent);
+    border: 1px solid var(--ui-border);
+    border-radius: 22px;
+    padding: 12px 12px 14px;
+    position: sticky;
+    top: 12px;
+    height: fit-content;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    box-shadow: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
+    transition: border-color 0.3s;
+}
+
+.panel-section {
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.panel-section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.panel-section-title {
+    margin: 4px 0 2px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--page-title-color);
 }
 
 /* ===== Form Elements ===== */
@@ -502,6 +450,7 @@ button:hover {
 /* ===== Page Card ===== */
 
 .page {
+    position: relative;
     background: var(--paper);
     border-radius: 10px;
     box-shadow: 0 8px 30px var(--page-shadow);
@@ -511,6 +460,25 @@ button:hover {
     transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+}
+
+/* 上傳圖：70% 透明度（opacity 0.3），疊在紙底之上、格線與字之下 */
+.preview--bg-upload .page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--upload-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
+
+.preview--bg-upload .page > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* 古風紙底須寫在 .page 之後，否則 background 簡寫會蓋掉 background-image */
@@ -673,7 +641,18 @@ button:hover {
 
 @media (max-width: 980px) {
     .layout {
+        grid-template-columns: 1fr;
         padding: 12px 12px 28px;
+    }
+
+    .panel {
+        position: static;
+        max-height: none;
+    }
+
+    .theme-picker {
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .preview {
@@ -697,9 +676,7 @@ button:hover {
     }
 
     .site-header,
-    .panel,
-    .panel-toggle,
-    .panel-backdrop {
+    .panel {
         display: none !important;
     }
 

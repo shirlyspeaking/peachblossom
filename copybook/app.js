@@ -25,45 +25,6 @@
         });
     });
 
-    /* ---- Options drawer ---- */
-    var btnPanelToggle = document.getElementById('btnPanelToggle');
-    var btnPanelClose = document.getElementById('btnPanelClose');
-    var panelBackdrop = document.getElementById('panelBackdrop');
-    var PANEL_OPEN_KEY = 'copybook-panel-open';
-
-    function setPanelOpen(open) {
-        document.body.classList.toggle('panel-open', !!open);
-        if (btnPanelToggle) {
-            btnPanelToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            btnPanelToggle.title = open ? '收合選項' : '展開選項';
-        }
-        if (panelBackdrop) {
-            if (open) panelBackdrop.removeAttribute('hidden');
-            else panelBackdrop.setAttribute('hidden', '');
-        }
-        try {
-            localStorage.setItem(PANEL_OPEN_KEY, open ? '1' : '0');
-        } catch (_) {}
-    }
-
-    function togglePanel() {
-        setPanelOpen(!document.body.classList.contains('panel-open'));
-    }
-
-    if (btnPanelToggle) btnPanelToggle.addEventListener('click', togglePanel);
-    if (btnPanelClose) btnPanelClose.addEventListener('click', function () { setPanelOpen(false); });
-    if (panelBackdrop) panelBackdrop.addEventListener('click', function () { setPanelOpen(false); });
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && document.body.classList.contains('panel-open')) {
-            setPanelOpen(false);
-        }
-    });
-    (function initPanel() {
-        var saved = null;
-        try { saved = localStorage.getItem(PANEL_OPEN_KEY); } catch (_) {}
-        setPanelOpen(saved === '1');
-    })();
-
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
     var btnGenerate = document.getElementById('btnGenerate');
@@ -84,6 +45,10 @@
     var btnChenyuFont = document.getElementById('btnChenyuFont');
     var pageBackground = document.getElementById('pageBackground');
     var cellBackground = document.getElementById('cellBackground');
+    var bgImageInput = document.getElementById('bgImageInput');
+    var btnBgImageUpload = document.getElementById('btnBgImageUpload');
+    var btnBgImageClear = document.getElementById('btnBgImageClear');
+    var uploadedBgUrl = '';
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
@@ -514,14 +479,21 @@
                 : 'none';
         var cellBgVal =
             rawCellBg === 'translucent' || rawCellBg === 'transparent' ? rawCellBg : 'white';
+        if (uploadedBgUrl && cellBgVal === 'white') cellBgVal = 'translucent';
         preview.className =
             'preview preview--' +
             psize +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
+            (uploadedBgUrl ? ' preview--bg-upload' : '') +
             (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
             ' preview--cellbg-' +
             cellBgVal;
+        if (uploadedBgUrl) {
+            preview.style.setProperty('--upload-bg', 'url("' + uploadedBgUrl + '")');
+        } else {
+            preview.style.removeProperty('--upload-bg');
+        }
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
@@ -827,6 +799,41 @@
     if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
+
+    function clearUploadedBg() {
+        if (uploadedBgUrl) {
+            URL.revokeObjectURL(uploadedBgUrl);
+            uploadedBgUrl = '';
+        }
+        if (bgImageInput) bgImageInput.value = '';
+        if (btnBgImageClear) btnBgImageClear.hidden = true;
+        renderNow();
+    }
+
+    if (btnBgImageUpload && bgImageInput) {
+        btnBgImageUpload.addEventListener('click', function () {
+            bgImageInput.click();
+        });
+        bgImageInput.addEventListener('change', function () {
+            var file = bgImageInput.files && bgImageInput.files[0];
+            if (!file) return;
+            if (!/^image\//.test(file.type)) {
+                window.alert('請選擇圖片檔');
+                bgImageInput.value = '';
+                return;
+            }
+            if (file.size > 8 * 1024 * 1024) {
+                window.alert('圖片請小於 8MB');
+                bgImageInput.value = '';
+                return;
+            }
+            if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
+            uploadedBgUrl = URL.createObjectURL(file);
+            if (btnBgImageClear) btnBgImageClear.hidden = false;
+            renderNow();
+        });
+    }
+    if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
     renderNow();
 })();
