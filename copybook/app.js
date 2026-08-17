@@ -34,17 +34,22 @@
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
-    var lineHeight = document.getElementById('lineHeight');
     var pageSize = document.getElementById('pageSize');
-    var charsPerLine = document.getElementById('charsPerLine');
-    var linesPerPage = document.getElementById('linesPerPage');
+    var pageBackground = document.getElementById('pageBackground');
+    var fontPresetStroke = document.getElementById('fontPresetStroke');
+    var gridTypeStroke = document.getElementById('gridTypeStroke');
+    var copyStyleStroke = document.getElementById('copyStyleStroke');
+    var fontSizeStroke = document.getElementById('fontSizeStroke');
+    var pageSizeStroke = document.getElementById('pageSizeStroke');
+    var pageBackgroundStroke = document.getElementById('pageBackgroundStroke');
+    var DEFAULT_LINE_HEIGHT = 1.15;
+    var DEFAULT_CHARS_PER_LINE = 12;
+    var DEFAULT_LINES_PER_PAGE = 12;
+    var DEFAULT_STROKE_LINES_PER_PAGE = 10;
     var preview = document.getElementById('preview');
-    var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
-    var pageBackground = document.getElementById('pageBackground');
-    var cellBackground = document.getElementById('cellBackground');
     var bgImageInput = document.getElementById('bgImageInput');
     var btnBgImageUpload = document.getElementById('btnBgImageUpload');
     var btnBgImageClear = document.getElementById('btnBgImageClear');
@@ -302,8 +307,34 @@
         );
     }
 
+    function isStrokeMode() {
+        return !!(strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0);
+    }
+
+    function getActiveControls() {
+        if (isStrokeMode()) {
+            return {
+                fontPreset: fontPresetStroke || fontPreset,
+                gridType: gridTypeStroke || gridType,
+                copyStyle: copyStyleStroke || copyStyle,
+                fontSize: fontSizeStroke || fontSize,
+                pageSize: pageSizeStroke || pageSize,
+                pageBackground: pageBackgroundStroke || pageBackground
+            };
+        }
+        return {
+            fontPreset: fontPreset,
+            gridType: gridType,
+            copyStyle: copyStyle,
+            fontSize: fontSize,
+            pageSize: pageSize,
+            pageBackground: pageBackground
+        };
+    }
+
     function getFontFamily() {
-        return fontPreset.value.trim();
+        var c = getActiveControls();
+        return c.fontPreset && c.fontPreset.value ? c.fontPreset.value.trim() : '';
     }
 
     function parseHanziChars(text) {
@@ -374,11 +405,8 @@
     }
 
     function applyStrokePathDefaults() {
-        if (gridType) gridType.value = 'tian';
-        if (fontSize) fontSize.value = '40';
-        if (lineHeight) lineHeight.value = '1.15';
-        if (charsPerLine) charsPerLine.value = '1';
-        if (linesPerPage) linesPerPage.value = '10';
+        if (gridTypeStroke) gridTypeStroke.value = 'tian';
+        if (fontSizeStroke) fontSizeStroke.value = '40';
     }
 
     function chunkLayoutRows(rows, lpp) {
@@ -417,7 +445,6 @@
             strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
             if (textInput) textInput.value = '';
             applyStrokePathDefaults();
-            if (charsPerLine) charsPerLine.value = String(layout.charsPerRow);
             renderNow();
         } catch (e) {
             window.alert('筆畫拆解失敗：' + (e.message || String(e)));
@@ -496,30 +523,25 @@
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         var raw = textInput.value;
         var text = normalizeText(raw);
-        var cpl = Math.max(1, Math.min(20, parseInt(charsPerLine.value, 10) || 12));
-        var lpp = Math.max(1, Math.min(20, parseInt(linesPerPage.value, 10) || 12));
-        var fsMin = parseInt(fontSize.getAttribute('min'), 10);
-        var fsMax = parseInt(fontSize.getAttribute('max'), 10);
+        var ctrls = getActiveControls();
+        var cpl = DEFAULT_CHARS_PER_LINE;
+        var lpp = isStrokeMode() ? DEFAULT_STROKE_LINES_PER_PAGE : DEFAULT_LINES_PER_PAGE;
+        var fsEl = ctrls.fontSize;
+        var fsMin = fsEl ? parseInt(fsEl.getAttribute('min'), 10) : 18;
+        var fsMax = fsEl ? parseInt(fsEl.getAttribute('max'), 10) : 72;
         if (!Number.isFinite(fsMin)) fsMin = 18;
         if (!Number.isFinite(fsMax)) fsMax = 72;
-        var fs = parseInt(String(fontSize.value).trim(), 10);
+        var fs = fsEl ? parseInt(String(fsEl.value).trim(), 10) : 36;
         if (!Number.isFinite(fs)) fs = 36;
         fs = Math.max(fsMin, Math.min(fsMax, fs));
 
-        var lhMin = parseFloat(lineHeight.getAttribute('min'));
-        var lhMax = parseFloat(lineHeight.getAttribute('max'));
-        if (!Number.isFinite(lhMin)) lhMin = 1;
-        if (!Number.isFinite(lhMax)) lhMax = 2.5;
-        var lh = parseFloat(String(lineHeight.value).trim().replace(',', '.'));
-        if (!Number.isFinite(lh)) lh = 1.15;
-        lh = Math.max(lhMin, Math.min(lhMax, lh));
-        var gtype = gridType.value;
-        var psize = pageSize.value;
+        var lh = DEFAULT_LINE_HEIGHT;
+        var gtype = ctrls.gridType && ctrls.gridType.value ? ctrls.gridType.value : 'tian';
+        var psize = ctrls.pageSize && ctrls.pageSize.value ? ctrls.pageSize.value : 'a4';
         var font = getFontFamily();
-        var hongMode =
-            copyStyle &&
-            (copyStyle.value === 'hong' || copyStyle.value === 'trace');
-        var lightPinkHongMode = copyStyle && copyStyle.value === 'lightPinkHong';
+        var styleVal = ctrls.copyStyle && ctrls.copyStyle.value ? ctrls.copyStyle.value : 'standard';
+        var hongMode = styleVal === 'hong' || styleVal === 'trace';
+        var lightPinkHongMode = styleVal === 'lightPinkHong';
 
         var useStrokePaths =
             strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
@@ -534,8 +556,7 @@
         }
 
         preview.innerHTML = '';
-        var rawBg = pageBackground && pageBackground.value ? pageBackground.value : 'none';
-        var rawCellBg = cellBackground && cellBackground.value ? cellBackground.value : 'white';
+        var rawBg = ctrls.pageBackground && ctrls.pageBackground.value ? ctrls.pageBackground.value : 'none';
         var bgVal =
             rawBg === 'xuan' ||
             rawBg === 'letter' ||
@@ -544,9 +565,7 @@
             rawBg === 'cloud'
                 ? rawBg
                 : 'none';
-        var cellBgVal =
-            rawCellBg === 'translucent' || rawCellBg === 'transparent' ? rawCellBg : 'white';
-        if (uploadedBgUrl && cellBgVal === 'white') cellBgVal = 'translucent';
+        var cellBgVal = uploadedBgUrl ? 'translucent' : 'white';
         preview.className =
             'preview preview--' +
             psize +
@@ -842,14 +861,16 @@
 
     function applyChenyuFont() {
         var opt = document.getElementById('fontOptChenyu');
+        var optStroke = document.getElementById('fontOptChenyuStroke');
         if (opt && fontPreset) fontPreset.value = opt.value;
+        if (optStroke && fontPresetStroke) fontPresetStroke.value = optStroke.value;
         setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
         renderNow();
     }
 
     var inputs = [
-        fontPreset, gridType, copyStyle, pageBackground, cellBackground, fontSize, lineHeight,
-        pageSize, charsPerLine, linesPerPage
+        fontPreset, gridType, copyStyle, pageBackground, fontSize, pageSize,
+        fontPresetStroke, gridTypeStroke, copyStyleStroke, pageBackgroundStroke, fontSizeStroke, pageSizeStroke
     ];
     inputs.forEach(function (el) {
         if (!el) return;
@@ -867,9 +888,7 @@
         clearStrokePathLayout();
         renderNow();
     });
-    if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
-    if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
