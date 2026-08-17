@@ -384,12 +384,20 @@ button:hover {
     min-width: 0;
     width: 100%;
     overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .preview {
     display: grid;
+    justify-items: center;
     gap: 28px;
     --cell-bg: #fff;
+    width: max-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     /* 螢幕預覽約 2 倍面積觀感；列印／匯出不受影響 */
     zoom: 2;
 }
@@ -399,7 +407,7 @@ button:hover {
         zoom: unset;
         transform: scale(2);
         transform-origin: top center;
-        width: 50%;
+        width: max-content;
         margin-left: auto;
         margin-right: auto;
     }
@@ -428,21 +436,21 @@ button:hover {
 
 .preview--a4 .page {
     max-width: 210mm;
-    width: 100%;
+    width: 210mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--a4l .page {
     max-width: 297mm;
-    width: 100%;
+    width: 297mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--letter .page {
     max-width: 8.5in;
-    width: 100%;
+    width: 8.5in;
     margin-left: auto;
     margin-right: auto;
 }
@@ -535,8 +543,8 @@ button:hover {
     border-right: none;
     width: max-content;
     max-width: none;
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: auto;
+    margin-right: auto;
     transition: border-color 0.3s;
 }
 
