@@ -14,6 +14,8 @@
   const sheetBackdrop = document.getElementById("sheetBackdrop");
 
   if (!form || !playfield || !scatter || !sheet) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const SLOTS = [
     { s: 1.45, r: -14, dx: "-10px", dy: "18px" },
     { s: 0.82, r: 16, dx: "22px", dy: "-12px" },
