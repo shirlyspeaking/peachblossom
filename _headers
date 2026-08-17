@@ -1,4 +1,10 @@
 # 子應用入口不長快取，部署後才能立刻載入帶新 hash 的 JS/CSS
+/copybook/
+  Cache-Control: no-cache, must-revalidate
+
+/copybook/index.html
+  Cache-Control: no-cache, must-revalidate
+
 /taoyuan-wanxiang-monopoly/
   Cache-Control: no-cache, must-revalidate
 
