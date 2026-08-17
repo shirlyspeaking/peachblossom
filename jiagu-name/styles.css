@@ -316,77 +316,236 @@ body::after {
 .ritual.is-on .stroke-d { animation-delay: 1420ms; animation-duration: 180ms; }
 .ritual.is-on .stroke-e { animation-delay: 1580ms; animation-duration: 180ms; }
 
-.ritual.is-on .chip-1 { animation: chip-fall 700ms 500ms var(--ease) both; }
-.ritual.is-on .chip-2 { animation: chip-fall 700ms 900ms var(--ease) both; }
-.ritual.is-on .chip-3 { animation: chip-fall 700ms 1300ms var(--ease) both; }
-
-.shell-stage {
+.page.is-playing .mascot,
+.page.is-playing .hero p {
   display: none;
-  margin: 36px auto 0;
-  width: min(100%, 560px);
 }
 
-.shell-stage.is-on {
-  display: block;
+.page.is-playing .hero {
+  padding: 0;
+  gap: 8px;
 }
 
-.shell-card {
+.page.is-playing .hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.playfield {
+  margin-top: 18px;
+}
+
+.play-hint {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 0.98rem;
+  color: var(--ink-soft);
+}
+
+.scatter {
   position: relative;
-  padding: 28px 24px 22px;
-  border-radius: 36px 36px 42px 42px;
+  min-height: min(58vh, 520px);
+  border-radius: 32px;
   background:
-    radial-gradient(circle at 50% 18%, #fffdfb 0%, transparent 36%),
-    linear-gradient(180deg, #fff3ec 0%, #f3ddd2 100%);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, #c9a8a4 42%, transparent),
-    var(--shadow-float);
+    radial-gradient(circle at 18% 20%, oklch(0.98 0.02 20 / 0.9) 0%, transparent 36%),
+    radial-gradient(circle at 86% 76%, oklch(0.95 0.03 155 / 0.55) 0%, transparent 32%),
+    color-mix(in srgb, var(--shell) 72%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
   overflow: hidden;
 }
 
-.shell-card::before {
-  content: "";
+.bone-piece {
   position: absolute;
-  inset: 18px;
-  border: 1px solid color-mix(in srgb, #c9a8a4 36%, transparent);
-  border-radius: 28px;
-  pointer-events: none;
+  left: 50%;
+  top: 42%;
+  width: 118px;
+  height: 118px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%) scale(0.38);
+  transition:
+    left 760ms var(--ease),
+    top 760ms var(--ease),
+    transform 760ms var(--ease);
+  z-index: 1;
 }
 
-.shell-label {
-  position: relative;
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: center;
+.bone-piece.is-landed {
+  left: var(--x);
+  top: var(--y);
+  transform: scale(var(--s)) rotate(var(--r));
 }
 
-.shell-name {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: clamp(10px, 3vw, 28px);
-  padding: 8px 8px 4px;
+.bone-piece:focus-visible {
+  outline: 2px solid var(--cinnabar);
+  outline-offset: 6px;
+  z-index: 3;
 }
 
-.shell-glyph {
+.bone-float {
   display: grid;
-  justify-items: center;
-  gap: 8px;
+  width: 100%;
+  height: 100%;
+  perspective: 800px;
+  animation: piece-idle 5.2s ease-in-out infinite;
+}
+
+.bone-flip {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms var(--ease);
+}
+
+.bone-piece.is-flipped .bone-flip {
+  transform: rotateY(180deg);
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 28px;
+  backface-visibility: hidden;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #c9a8a4 40%, transparent),
+    var(--shadow);
+}
+
+.face-oracle {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 30% 24%, #fffdfb 0%, transparent 42%),
+    linear-gradient(180deg, #fff4ee 0%, #f0d8ce 100%);
+}
+
+.face-oracle svg,
+.face-oracle .fallback-glyph {
+  width: 78px;
+  height: 78px;
+}
+
+.face-modern {
+  font-family: "Noto Serif TC", serif;
+  font-size: 2.6rem;
+  color: var(--cinnabar-deep);
+  background: linear-gradient(180deg, #fff 0%, #ffe8ea 100%);
+  transform: rotateY(180deg);
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.sheet[hidden] {
+  display: none;
+}
+
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: color-mix(in srgb, #3d2c33 28%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sheet-card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: min(86vh, 640px);
+  overflow: auto;
+  padding: 28px 24px 24px;
+  border: 1px solid color-mix(in srgb, white 55%, var(--line));
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--shell) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  box-shadow: var(--shadow-float);
+  transform: translateY(16px);
+  opacity: 0;
+  transition: transform 220ms var(--ease), opacity 220ms var(--ease);
+}
+
+.sheet.is-on .sheet-card {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.sheet-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, white 70%, transparent);
+}
+
+.sheet-pair {
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sheet-glyph {
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 128px;
+  border-radius: 28px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 30% 24%, #fffdfb 0%, transparent 42%),
+    linear-gradient(180deg, #fff4ee 0%, #f0d8ce 100%);
+}
+
+.sheet-glyph svg,
+.sheet-glyph .fallback-glyph {
+  width: 92px;
+  height: 92px;
+}
+
+.sheet-kicker {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+.sheet-modern {
+  font-family: "Noto Serif TC", serif;
+  font-size: 3rem;
+  line-height: 1.1;
   color: var(--ink);
 }
 
-.shell-glyph svg {
-  width: clamp(72px, 18vw, 108px);
-  height: clamp(72px, 18vw, 108px);
+.sheet-pinyin {
+  margin-top: 4px;
+  color: var(--muted);
 }
 
-.shell-glyph .modern {
-  font-family: "Noto Serif TC", serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.2em;
+.sheet-badge {
+  margin-top: 10px;
+}
+
+@keyframes piece-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 .fallback-glyph {
@@ -543,8 +702,34 @@ body::after {
     width: 100%;
   }
 
-  .shard-head {
-    align-items: center;
+  .bone-piece {
+    width: 92px;
+    height: 92px;
+  }
+
+  .face-oracle svg,
+  .face-oracle .fallback-glyph {
+    width: 62px;
+    height: 62px;
+  }
+
+  .face-modern {
+    font-size: 2.1rem;
+  }
+
+  .scatter {
+    min-height: 380px;
+  }
+
+  .sheet-pair {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .sheet-modern-wrap {
+    display: grid;
+    justify-items: center;
   }
 }
 

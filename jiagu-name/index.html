@@ -94,15 +94,30 @@
         <p>正在龜甲上刻字……</p>
       </section>
 
-      <section class="shell-stage" id="shellStage" aria-live="polite">
-        <div class="shell-card">
-          <span class="shell-label">龜甲上的名字</span>
-          <div class="shell-name" id="shellName"></div>
-        </div>
+      <section class="playfield" id="playfield" hidden>
+        <p class="play-hint" id="playHint">甲骨散落了。點一點，把它翻成現在的字。</p>
+        <div class="scatter" id="scatter"></div>
       </section>
-
-      <section class="results" id="results"></section>
     </main>
+
+    <div class="sheet" id="sheet" hidden>
+      <button type="button" class="sheet-backdrop" id="sheetBackdrop" aria-label="關閉說明"></button>
+      <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" id="sheetCard">
+        <button type="button" class="sheet-close" id="sheetClose" aria-label="關閉">關閉</button>
+        <div class="sheet-pair">
+          <div class="sheet-glyph" id="sheetOracle"></div>
+          <div class="sheet-modern-wrap">
+            <p class="sheet-kicker">現在這樣寫</p>
+            <p class="sheet-modern" id="sheetTitle"></p>
+            <p class="sheet-pinyin" id="sheetPinyin"></p>
+            <p class="sheet-badge" id="sheetBadge"></p>
+          </div>
+        </div>
+        <p class="meaning" id="sheetMeaning"></p>
+        <p class="era-note" id="sheetEra"></p>
+        <p class="story" id="sheetStory"></p>
+      </div>
+    </div>
 
     <footer class="page-foot">
       字形是為小朋友辨認而畫的教學象形，重點在「像什麼」，不是出土拓片的逐筆複製。字源說明也用五年級讀得懂的話來寫。
