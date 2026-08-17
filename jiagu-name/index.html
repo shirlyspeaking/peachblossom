@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>甲骨尋名 · 桃花源</title>
+  <title>桃源契文 · 桃花源</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>龜</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,7 +15,7 @@
   <div class="page">
     <header class="top-bar">
       <a class="back-link" href="../index.html">返回桃花源</a>
-      <span class="brand-kicker">漢字小探險</span>
+      <span class="brand-kicker">契文小站</span>
     </header>
 
     <main id="main">
@@ -29,7 +29,7 @@
           <circle cx="81" cy="43" r="1.8" fill="currentColor"/>
           <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
         </svg>
-        <h1>甲骨尋名</h1>
+        <h1>桃源契文</h1>
         <p>把你的名字寫下來，看它在三千年前的龜甲上，會變成什麼模樣。</p>
       </section>
 
@@ -44,7 +44,7 @@
             autocomplete="off"
             placeholder="寫下你的名字，例如：小雨"
           />
-          <button type="submit">尋找甲骨名</button>
+          <button type="submit">刻上名字</button>
         </div>
         <div class="chips" aria-label="試試這些名字">
           <button type="button" data-name="小雨">小雨</button>
@@ -61,12 +61,36 @@
       </aside>
 
       <section class="ritual" id="ritual" aria-hidden="true">
-        <svg class="ritual-bone" viewBox="0 0 180 120">
-          <ellipse class="glow" cx="90" cy="88" rx="46" ry="14" fill="#c4452d" opacity="0.25"/>
-          <path fill="#f4e4c6" stroke="#8b6a45" stroke-width="2" d="M28 38c8-22 48-30 86-18 22 8 46 22 40 46-8 28-52 42-92 28C26 84 18 62 28 38z"/>
-          <path class="crack" fill="none" stroke="#c4452d" stroke-width="2.4" stroke-linecap="round" d="M84 22c-4 18 8 28 2 46-8 14 10 20 6 34"/>
-        </svg>
-        <p>龜甲正被火輕輕問着……</p>
+        <div class="ritual-stage" id="ritualStage">
+          <svg class="ritual-bone" viewBox="0 0 220 150" aria-hidden="true">
+            <defs>
+              <linearGradient id="boneFill" x1="40" y1="10" x2="180" y2="140">
+                <stop offset="0%" stop-color="#fffaf4"/>
+                <stop offset="55%" stop-color="#f4e4d2"/>
+                <stop offset="100%" stop-color="#e8d2b8"/>
+              </linearGradient>
+            </defs>
+            <path class="plastron" fill="url(#boneFill)" stroke="#8a6a52" stroke-width="2.2" d="M36 34c6-16 38-24 78-18 42 6 78 4 92 22 12 16 8 42-8 62-18 24-58 38-98 32C48 126 18 98 22 68c2-16 6-26 14-34z"/>
+            <path fill="none" stroke="#cbb59a" stroke-width="1" opacity="0.7" d="M58 42c28-8 86-6 118 12M50 70c36-6 92 2 116 18M62 98c30 6 70 8 98-4"/>
+            <g class="carved" fill="none" stroke="#3a2a28" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle class="stroke-a" cx="78" cy="72" r="18"/>
+              <line class="stroke-b" x1="66" y1="72" x2="90" y2="72"/>
+              <path class="stroke-c" d="M128 48c-18 10-18 30 0 40 8-10 8-30 0-40"/>
+              <line class="stroke-d" x1="118" y1="62" x2="118" y2="68"/>
+              <line class="stroke-e" x1="118" y1="76" x2="118" y2="82"/>
+            </g>
+            <g class="burin">
+              <path d="M0 0 L7 18 L0 14 L-4 18 Z" fill="#6b5344" stroke="#3a2a28" stroke-width="1"/>
+              <path d="M0 0 L1.4 -10" stroke="#c4a574" stroke-width="2" stroke-linecap="round"/>
+            </g>
+            <g class="chips" fill="#d9c4a8">
+              <rect class="chip chip-1" x="96" y="58" width="3" height="2" rx="0.5"/>
+              <rect class="chip chip-2" x="108" y="80" width="2.5" height="2" rx="0.5"/>
+              <rect class="chip chip-3" x="132" y="64" width="3" height="2" rx="0.5"/>
+            </g>
+          </svg>
+        </div>
+        <p>正在龜甲上刻字……</p>
       </section>
 
       <section class="shell-stage" id="shellStage" aria-live="polite">

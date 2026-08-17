@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=38">
+    <link rel="stylesheet" href="style.css?v=39">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -38,13 +38,16 @@
     <main class="layout">
         <aside class="panel" aria-label="字帖選項">
             <section class="panel-section">
-                <h2 class="panel-section-title">字帖生成</h2>
+                <h2 class="panel-section-title">自由字帖生成</h2>
                 <label for="textInput">字帖內容</label>
                 <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
                 <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
                 <details class="tune-details">
-                    <summary>版面調整</summary>
+                    <summary>
+                        <span>字體與樣式</span>
+                        <span class="tune-chevron" aria-hidden="true"></span>
+                    </summary>
                     <div class="tune-details-body">
                         <p class="tune-group-label">基礎設置</p>
                         <div class="field">
@@ -111,7 +114,10 @@
                 <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
                 <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">生成筆順字帖</button>
                 <details class="tune-details">
-                    <summary>版面調整</summary>
+                    <summary>
+                        <span>字體與樣式</span>
+                        <span class="tune-chevron" aria-hidden="true"></span>
+                    </summary>
                     <div class="tune-details-body">
                         <p class="tune-group-label">基礎設置</p>
                         <div class="field">

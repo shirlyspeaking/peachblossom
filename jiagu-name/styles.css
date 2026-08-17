@@ -1,19 +1,19 @@
 :root {
   color-scheme: light;
-  --bone: #f6efe2;
-  --bone-deep: #ead9c0;
-  --shell: #fbf6ed;
-  --ink: #2c2118;
-  --ink-soft: #5c4a3a;
-  --muted: #7a6856;
-  --cinnabar: #c4452d;
-  --cinnabar-deep: #9d2f1c;
-  --moss: #5f7a58;
-  --moss-soft: #7e9a72;
-  --bronze: #b0894d;
-  --line: color-mix(in srgb, #8b6a45 34%, transparent);
-  --shadow: 0 18px 40px color-mix(in srgb, #6a4a2a 12%, transparent);
-  --shadow-float: 0 22px 48px color-mix(in srgb, #6a4a2a 16%, transparent);
+  --bone: #fff4ee;
+  --bone-deep: #f3ddd6;
+  --shell: #fffaf7;
+  --ink: #3d2c33;
+  --ink-soft: #6a5560;
+  --muted: #8d7380;
+  --cinnabar: #d56b7c;
+  --cinnabar-deep: #b24a60;
+  --moss: #5f8a76;
+  --moss-soft: #86b09a;
+  --bronze: #c4a07a;
+  --line: color-mix(in srgb, #c9a8a4 46%, transparent);
+  --shadow: 0 18px 40px color-mix(in srgb, #8a4a58 10%, transparent);
+  --shadow-float: 0 22px 48px color-mix(in srgb, #8a4a58 14%, transparent);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -32,22 +32,37 @@ body {
   color: var(--ink);
   font-family: "Noto Sans TC", sans-serif;
   background:
-    radial-gradient(circle at 12% 10%, #fff8ee 0%, transparent 28%),
-    radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--cinnabar) 10%, white) 0%, transparent 22%),
-    radial-gradient(circle at 80% 78%, color-mix(in srgb, var(--moss) 12%, white) 0%, transparent 24%),
-    linear-gradient(180deg, #f7f0e4 0%, #f3e6d0 48%, #efe0c8 100%);
+    radial-gradient(circle at 16% 0%, oklch(0.97 0.035 12) 0%, transparent 34%),
+    radial-gradient(circle at 92% 8%, oklch(0.96 0.04 350) 0%, transparent 30%),
+    radial-gradient(circle at 78% 100%, oklch(0.96 0.03 155) 0%, transparent 34%),
+    linear-gradient(180deg, oklch(0.99 0.012 20) 0%, oklch(0.975 0.02 12) 46%, oklch(0.97 0.018 145) 100%);
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(28px);
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.22;
-  background-image:
-    linear-gradient(115deg, transparent 0 46%, color-mix(in srgb, #8b6a45 18%, transparent) 47%, transparent 48%),
-    linear-gradient(18deg, transparent 0 62%, color-mix(in srgb, #8b6a45 12%, transparent) 63%, transparent 64%);
-  mask-image: radial-gradient(circle at 30% 20%, black 0%, transparent 72%);
+  top: 8vh;
+  left: -40px;
+  width: 220px;
+  height: 120px;
+  background: oklch(0.9 0.06 12 / 0.45);
+  transform: rotate(-18deg);
+}
+
+body::after {
+  right: -50px;
+  bottom: 12vh;
+  width: 240px;
+  height: 140px;
+  background: oklch(0.92 0.04 155 / 0.38);
+  transform: rotate(16deg);
 }
 
 .skip {
@@ -114,8 +129,8 @@ body::before {
 .mascot {
   width: 92px;
   height: 92px;
-  color: color-mix(in srgb, var(--moss) 70%, var(--ink) 30%);
-  filter: drop-shadow(0 12px 18px color-mix(in srgb, var(--moss) 18%, transparent));
+  color: color-mix(in srgb, var(--cinnabar-deep) 42%, var(--moss) 58%);
+  filter: drop-shadow(0 12px 18px color-mix(in srgb, var(--cinnabar) 16%, transparent));
   animation: floaty 5.5s var(--ease) infinite;
 }
 
@@ -124,7 +139,7 @@ body::before {
   font-size: clamp(2.6rem, 8vw, 4.4rem);
   font-weight: 400;
   letter-spacing: 0.12em;
-  color: color-mix(in srgb, var(--cinnabar-deep) 55%, var(--ink) 45%);
+  color: color-mix(in srgb, var(--cinnabar-deep) 62%, var(--ink) 38%);
 }
 
 .hero p {
@@ -257,7 +272,7 @@ body::before {
 
 .ritual {
   display: none;
-  width: min(100%, 280px);
+  width: min(100%, 360px);
   margin: 28px auto 0;
   text-align: center;
 }
@@ -268,22 +283,41 @@ body::before {
   justify-items: center;
 }
 
+.ritual p {
+  color: var(--ink-soft);
+}
+
 .ritual-bone {
-  width: 180px;
-  height: 120px;
-  color: var(--ink);
+  width: min(100%, 280px);
+  height: auto;
+  overflow: visible;
 }
 
-.ritual-bone .glow {
-  transform-origin: 90px 88px;
-  animation: ember 900ms ease-in-out infinite alternate;
+.ritual.is-on .stroke-a,
+.ritual.is-on .stroke-b,
+.ritual.is-on .stroke-c,
+.ritual.is-on .stroke-d,
+.ritual.is-on .stroke-e {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: carve-stroke 520ms var(--ease) forwards;
 }
 
-.ritual-bone .crack {
-  stroke-dasharray: 120;
-  stroke-dashoffset: 120;
-  animation: crack 1100ms var(--ease) forwards;
+.ritual.is-on .stroke-a { animation-duration: 700ms; }
+.ritual.is-on .stroke-b { animation-delay: 620ms; animation-duration: 280ms; }
+.ritual.is-on .stroke-c { animation-delay: 980ms; animation-duration: 560ms; }
+.ritual.is-on .stroke-d { animation-delay: 1420ms; animation-duration: 180ms; }
+.ritual.is-on .stroke-e { animation-delay: 1580ms; animation-duration: 180ms; }
+
+.ritual.is-on .burin {
+  offset-path: path("M96 54 C78 54 60 62 60 72 C60 86 74 90 78 72 C82 58 96 54 96 54 C118 42 146 52 146 68 C146 88 128 92 128 68 C128 54 118 48 118 62");
+  offset-rotate: auto;
+  animation: burin-run 1.8s var(--ease) forwards;
 }
+
+.ritual.is-on .chip-1 { animation: chip-fall 700ms 500ms var(--ease) both; }
+.ritual.is-on .chip-2 { animation: chip-fall 700ms 900ms var(--ease) both; }
+.ritual.is-on .chip-3 { animation: chip-fall 700ms 1300ms var(--ease) both; }
 
 .shell-stage {
   display: none;
@@ -300,10 +334,10 @@ body::before {
   padding: 28px 24px 22px;
   border-radius: 36px 36px 42px 42px;
   background:
-    radial-gradient(circle at 50% 18%, #fffaf1 0%, transparent 36%),
-    linear-gradient(180deg, #f3e2c4 0%, #e6cd9f 100%);
+    radial-gradient(circle at 50% 18%, #fffdfb 0%, transparent 36%),
+    linear-gradient(180deg, #fff3ec 0%, #f3ddd2 100%);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, #8b6a45 28%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #c9a8a4 42%, transparent),
     var(--shadow-float);
   overflow: hidden;
 }
@@ -312,7 +346,7 @@ body::before {
   content: "";
   position: absolute;
   inset: 18px;
-  border: 1px solid color-mix(in srgb, #8b6a45 22%, transparent);
+  border: 1px solid color-mix(in srgb, #c9a8a4 36%, transparent);
   border-radius: 28px;
   pointer-events: none;
 }
