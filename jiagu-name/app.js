@@ -84,10 +84,13 @@
 
     const entries = chars.map((ch) => JiaguChars.lookup(ch));
     intro.classList.add("is-away");
+    const stage = document.getElementById("ritualStage");
+    const bone = stage && stage.querySelector("svg");
+    if (bone) stage.replaceChild(bone.cloneNode(true), bone);
     ritual.classList.add("is-on");
     ritual.setAttribute("aria-hidden", "false");
 
-    const wait = reduceMotion ? 0 : 1100;
+    const wait = reduceMotion ? 0 : 1900;
     window.setTimeout(() => {
       ritual.classList.remove("is-on");
       ritual.setAttribute("aria-hidden", "true");

@@ -267,30 +267,31 @@ body {
 }
 
 .panel-section {
-    padding: 14px 14px 16px;
+    padding: 16px 16px 18px;
     margin-bottom: 0;
     border: 1px solid var(--ui-border);
     border-radius: 18px;
-    background: color-mix(in oklch, oklch(0.988 0.01 8) 92%, transparent);
-    box-shadow: 0 16px 40px oklch(0.53 0.09 8 / 0.07);
+    background: var(--paper);
+    box-shadow: 0 10px 28px var(--page-shadow);
 }
 
 .panel-section--stroke {
-    margin-top: 22px;
-    padding-top: 14px;
-    border-top: 1px solid var(--ui-border);
+    margin-top: 40px;
+    padding-top: 16px;
+    border: 1px solid var(--ui-border);
+    background: var(--paper);
 }
 
 .panel-section-title {
-    margin: 2px 0 8px;
-    font-size: 0.95rem;
+    margin: 0 0 10px;
+    font-size: 1.02rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     color: var(--page-title-color);
 }
 
 .tune-details {
-    margin-top: 12px;
+    margin-top: 14px;
     background: transparent;
     border: none;
 }
@@ -302,25 +303,36 @@ body {
     gap: 8px;
     cursor: pointer;
     list-style: none;
-    padding: 7px 2px 7px 0;
-    font-size: 0.84rem;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 0.88rem;
     color: var(--accent-dark);
     user-select: none;
-    background: transparent;
+    background: color-mix(in oklch, white 55%, transparent);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
 }
 
 .tune-details summary::-webkit-details-marker {
     display: none;
 }
 
+.tune-details[open] > summary {
+    border-radius: 10px 10px 0 0;
+    border-bottom-color: transparent;
+}
+
 .tune-chevron {
     display: inline-block;
     width: 0;
     height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--accent-dark);
-    opacity: 0.7;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--accent-dark);
+    opacity: 0.75;
     transition: transform 0.2s ease;
     flex-shrink: 0;
 }
@@ -330,9 +342,11 @@ body {
 }
 
 .tune-details-body {
-    padding: 4px 0 2px;
-    border-top: 1px solid color-mix(in oklch, var(--ui-border) 70%, transparent);
-    background: transparent;
+    padding: 6px 12px 12px;
+    border: 1px solid var(--input-border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: rgb(255 255 255 / 0.28);
 }
 
 .tune-group-label {
@@ -344,7 +358,7 @@ body {
 }
 
 .panel-footer {
-    margin-top: 18px;
+    margin-top: 22px;
     padding-top: 0;
     border-top: none;
 }
