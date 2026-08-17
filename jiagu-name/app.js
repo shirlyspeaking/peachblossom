@@ -13,14 +13,14 @@
   const sheetClose = document.getElementById("sheetClose");
   const sheetBackdrop = document.getElementById("sheetBackdrop");
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!form || !playfield || !scatter || !sheet) return;
   const SLOTS = [
-    { x: 6, y: 8, s: 1.28, r: -14 },
-    { x: 58, y: 4, s: 0.82, r: 16 },
-    { x: 32, y: 38, s: 1.12, r: -5 },
-    { x: 64, y: 46, s: 1.38, r: 9 },
-    { x: 8, y: 56, s: 0.9, r: 18 },
-    { x: 42, y: 14, s: 0.74, r: -20 },
+    { s: 1.45, r: -14, dx: "-10px", dy: "18px" },
+    { s: 0.82, r: 16, dx: "22px", dy: "-12px" },
+    { s: 1.18, r: -6, dx: "8px", dy: "28px" },
+    { s: 1.36, r: 11, dx: "-18px", dy: "-6px" },
+    { s: 0.9, r: 20, dx: "16px", dy: "22px" },
+    { s: 0.74, r: -18, dx: "-4px", dy: "8px" },
   ];
 
   let entries = [];
@@ -76,7 +76,7 @@
 
   function clearView() {
     lastFocus = null;
-    playfield.hidden = true;
+    playfield.classList.remove("is-on");
     page.classList.remove("is-playing");
     scatter.innerHTML = "";
     foundCount = 0;
@@ -106,7 +106,7 @@
             type="button"
             class="bone-piece"
             data-index="${index}"
-            style="--x:${slot.x}%; --y:${slot.y}%; --s:${slot.s}; --r:${slot.r}deg;"
+            style="--s:${slot.s}; --r:${slot.r}deg; --dx:${slot.dx}; --dy:${slot.dy};"
             aria-label="一塊甲骨，點擊翻成現在的字"
           >
             <span class="bone-float">
@@ -119,17 +119,9 @@
       })
       .join("");
 
-    playfield.hidden = false;
+    playfield.classList.add("is-on");
     page.classList.add("is-playing");
     updateHint();
-
-    const pieces = Array.from(scatter.querySelectorAll(".bone-piece"));
-    pieces.forEach((piece, index) => {
-      const land = () => piece.classList.add("is-landed");
-      if (reduceMotion) land();
-      else window.setTimeout(land, 40 + index * 90);
-    });
-
     playfield.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   }
 
@@ -174,7 +166,7 @@
     ritual.classList.add("is-on");
     ritual.setAttribute("aria-hidden", "false");
 
-    const wait = reduceMotion ? 0 : 1900;
+    const wait = reduceMotion ? 0 : 900;
     window.setTimeout(() => {
       ritual.classList.remove("is-on");
       ritual.setAttribute("aria-hidden", "true");

@@ -316,8 +316,7 @@ body::after {
 .ritual.is-on .stroke-d { animation-delay: 1420ms; animation-duration: 180ms; }
 .ritual.is-on .stroke-e { animation-delay: 1580ms; animation-duration: 180ms; }
 
-.page.is-playing .mascot,
-.page.is-playing .hero p {
+.page.is-playing .mascot {
   display: none;
 }
 
@@ -331,7 +330,12 @@ body::after {
 }
 
 .playfield {
+  display: none;
   margin-top: 18px;
+}
+
+.playfield.is-on {
+  display: block;
 }
 
 .play-hint {
@@ -342,40 +346,40 @@ body::after {
 }
 
 .scatter {
-  position: relative;
-  min-height: min(58vh, 520px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 18px 28px;
+  min-height: 380px;
+  padding: 28px 16px 36px;
   border-radius: 32px;
   background:
     radial-gradient(circle at 18% 20%, oklch(0.98 0.02 20 / 0.9) 0%, transparent 36%),
     radial-gradient(circle at 86% 76%, oklch(0.95 0.03 155 / 0.55) 0%, transparent 32%),
     color-mix(in srgb, var(--shell) 72%, transparent);
   box-shadow: inset 0 0 0 1px var(--line);
-  overflow: hidden;
 }
 
 .bone-piece {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 118px;
-  height: 118px;
+  flex: 0 0 auto;
+  width: calc(96px * var(--s, 1));
+  height: calc(96px * var(--s, 1));
+  margin: var(--dy, 0) var(--dx, 0);
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  transform: translate(-50%, -50%) scale(0.38);
-  transition:
-    left 760ms var(--ease),
-    top 760ms var(--ease),
-    transform 760ms var(--ease);
+  transform: rotate(var(--r, 0deg));
+  animation: piece-pop 560ms var(--ease) both;
   z-index: 1;
 }
 
-.bone-piece.is-landed {
-  left: var(--x);
-  top: var(--y);
-  transform: scale(var(--s)) rotate(var(--r));
-}
+.bone-piece:nth-child(2) { animation-delay: 70ms; }
+.bone-piece:nth-child(3) { animation-delay: 140ms; }
+.bone-piece:nth-child(4) { animation-delay: 210ms; }
+.bone-piece:nth-child(5) { animation-delay: 280ms; }
+.bone-piece:nth-child(6) { animation-delay: 350ms; }
 
 .bone-piece:focus-visible {
   outline: 2px solid var(--cinnabar);
@@ -411,6 +415,7 @@ body::after {
   height: 100%;
   border-radius: 28px;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, #c9a8a4 40%, transparent),
     var(--shadow);
@@ -421,17 +426,18 @@ body::after {
   background:
     radial-gradient(circle at 30% 24%, #fffdfb 0%, transparent 42%),
     linear-gradient(180deg, #fff4ee 0%, #f0d8ce 100%);
+  transform: rotateY(0deg);
 }
 
 .face-oracle svg,
 .face-oracle .fallback-glyph {
-  width: 78px;
-  height: 78px;
+  width: 68%;
+  height: 68%;
 }
 
 .face-modern {
   font-family: "Noto Serif TC", serif;
-  font-size: 2.6rem;
+  font-size: calc(1.8rem * var(--s, 1));
   color: var(--cinnabar-deep);
   background: linear-gradient(180deg, #fff 0%, #ffe8ea 100%);
   transform: rotateY(180deg);
@@ -541,6 +547,17 @@ body::after {
 
 .sheet-badge {
   margin-top: 10px;
+}
+
+@keyframes piece-pop {
+  from {
+    opacity: 0;
+    transform: rotate(var(--r, 0deg)) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--r, 0deg)) scale(1);
+  }
 }
 
 @keyframes piece-idle {
@@ -703,22 +720,8 @@ body::after {
   }
 
   .bone-piece {
-    width: 92px;
-    height: 92px;
-  }
-
-  .face-oracle svg,
-  .face-oracle .fallback-glyph {
-    width: 62px;
-    height: 62px;
-  }
-
-  .face-modern {
-    font-size: 2.1rem;
-  }
-
-  .scatter {
-    min-height: 380px;
+    width: calc(84px * var(--s, 1));
+    height: calc(84px * var(--s, 1));
   }
 
   .sheet-pair {

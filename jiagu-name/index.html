@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=scatter-2" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -30,7 +30,7 @@
           <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
         </svg>
         <h1>桃源契文</h1>
-        <p>把你的名字寫下來，看它在三千年前的龜甲上，會變成什麼模樣。</p>
+        <p>把名字刻上去之後，甲骨會散落開來。點一點，就能翻成現在的字，並看看它的小故事。</p>
       </section>
 
       <form class="search-panel" id="nameForm">
@@ -94,7 +94,7 @@
         <p>正在龜甲上刻字……</p>
       </section>
 
-      <section class="playfield" id="playfield" hidden>
+      <section class="playfield" id="playfield" aria-live="polite">
         <p class="play-hint" id="playHint">甲骨散落了。點一點，把它翻成現在的字。</p>
         <div class="scatter" id="scatter"></div>
       </section>
@@ -124,8 +124,8 @@
     </footer>
   </div>
 
-  <script src="glyphs.js"></script>
-  <script src="characters.js"></script>
-  <script src="app.js"></script>
+  <script src="glyphs.js?v=scatter-2"></script>
+  <script src="characters.js?v=scatter-2"></script>
+  <script src="app.js?v=scatter-2"></script>
 </body>
 </html>
