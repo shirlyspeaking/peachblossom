@@ -6,6 +6,7 @@
   const shellStage = document.getElementById("shellStage");
   const shellName = document.getElementById("shellName");
   const results = document.getElementById("results");
+  const intro = document.getElementById("intro");
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -53,6 +54,8 @@
 
     shellStage.classList.add("is-on");
     results.classList.add("is-on");
+    intro.classList.add("is-away");
+    shellStage.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   }
 
   function clearView() {
@@ -68,16 +71,19 @@
     clearView();
 
     if (!name.trim()) {
+      intro.classList.remove("is-away");
       status.textContent = "先寫下一個名字吧。";
       input.focus();
       return;
     }
     if (!chars.length) {
+      intro.classList.remove("is-away");
       status.textContent = "請輸入中文名字，例如「小雨」。";
       return;
     }
 
     const entries = chars.map((ch) => JiaguChars.lookup(ch));
+    intro.classList.add("is-away");
     ritual.classList.add("is-on");
     ritual.setAttribute("aria-hidden", "false");
 
@@ -92,7 +98,7 @@
           ? "這些字還沒收進小字典，但你仍可以看它們現在的樣子。"
           : "有些字已找到古老圖畫，有些是後來才造的，正好一起比較。";
       } else {
-        status.textContent = "找到了。點下面每一塊「甲骨」，讀讀它的小故事。";
+        status.textContent = "找到了。下面每一塊甲骨，都有這個字的小故事。";
       }
     }, wait);
   }

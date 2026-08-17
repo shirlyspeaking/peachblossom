@@ -243,6 +243,10 @@ body::before {
   color: var(--ink-soft);
 }
 
+.intro.is-away {
+  display: none;
+}
+
 .status {
   min-height: 1.4em;
   margin-top: 14px;
