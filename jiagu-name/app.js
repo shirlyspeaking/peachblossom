@@ -9,7 +9,6 @@
   const intro = document.getElementById("intro");
   const page = document.querySelector(".page");
   const sheet = document.getElementById("sheet");
-  const sheetCard = document.getElementById("sheetCard");
   const sheetClose = document.getElementById("sheetClose");
   const sheetBackdrop = document.getElementById("sheetBackdrop");
 
@@ -31,12 +30,12 @@
 
   function parseName(raw) {
     const chars = Array.from((raw || "").trim());
-    const cjk = chars.filter((ch) => JiaguChars.isCjk(ch));
+    const cjk = chars.filter((ch) => window.JiaguChars && JiaguChars.isCjk(ch));
     return cjk.slice(0, 6);
   }
 
   function glyphMarkup(entry) {
-    const svg = JiaguGlyphs.getGlyph(entry.char, entry.glyph);
+    const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char, entry.glyph);
     if (svg) return svg;
     return `<span class="fallback-glyph">${entry.char}</span>`;
   }
@@ -64,7 +63,7 @@
     document.getElementById("sheetStory").textContent = entry.story;
     sheet.hidden = false;
     requestAnimationFrame(() => sheet.classList.add("is-on"));
-    sheetClose.focus();
+    if (sheetClose) sheetClose.focus();
   }
 
   function closeSheet() {
@@ -76,23 +75,13 @@
     }, reduceMotion ? 0 : 180);
   }
 
-  function clearView() {
-    lastFocus = null;
-    playfield.classList.remove("is-on");
-    page.classList.remove("is-playing");
-    scatter.innerHTML = "";
-    foundCount = 0;
-    sheet.classList.remove("is-on");
-    sheet.hidden = true;
-  }
-
   function updateHint() {
     if (!entries.length) return;
     if (foundCount >= entries.length) {
       playHint.textContent = "名字裡的字都認出來了。再點一次，還可以看故事。";
       status.textContent = "你把散落的甲骨都翻開了。";
     } else {
-      playHint.textContent = "甲骨散落了。點一點，把它翻成現在的字。";
+      playHint.textContent = "點一點散落的甲骨，把它翻成現在的字。";
     }
   }
 
@@ -108,7 +97,7 @@
             type="button"
             class="bone-piece"
             data-index="${index}"
-            style="--s:${slot.s}; --r:${slot.r}deg; --dx:${slot.dx}; --dy:${slot.dy};"
+            style="--s:${slot.s}; --r:${slot.r}deg;"
             aria-label="一塊甲骨，點擊翻成現在的字"
           >
             <span class="bone-float">
@@ -122,9 +111,17 @@
       .join("");
 
     playfield.classList.add("is-on");
-    page.classList.add("is-playing");
+    playfield.style.display = "block";
+    if (page) page.classList.add("is-playing");
+    if (intro) intro.classList.add("is-away");
+    if (ritual) {
+      ritual.classList.remove("is-on");
+      ritual.setAttribute("aria-hidden", "true");
+    }
     updateHint();
-    playfield.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    scatter.querySelectorAll(".bone-piece").forEach((piece) => {
+      piece.addEventListener("click", () => onPieceClick(piece));
+    });
   }
 
   function onPieceClick(piece) {
@@ -139,42 +136,35 @@
       foundCount += 1;
       updateHint();
     }
-    const wait = firstFlip && !reduceMotion ? 520 : 0;
-    window.setTimeout(() => openSheet(entry), wait);
+    openSheet(entry);
   }
 
   function search(name) {
     const chars = parseName(name);
     status.textContent = "";
-    clearView();
+    foundCount = 0;
+    sheet.classList.remove("is-on");
+    sheet.hidden = true;
 
     if (!name.trim()) {
-      intro.classList.remove("is-away");
+      if (intro) intro.classList.remove("is-away");
       status.textContent = "先寫下一個名字吧。";
       input.focus();
       return;
     }
     if (!chars.length) {
-      intro.classList.remove("is-away");
+      if (intro) intro.classList.remove("is-away");
       status.textContent = "請輸入中文名字，例如「小雨」。";
+      return;
+    }
+    if (!window.JiaguChars) {
+      status.textContent = "字庫還沒載入完成，請再按一次。";
       return;
     }
 
     const nextEntries = chars.map((ch) => JiaguChars.lookup(ch));
-    intro.classList.add("is-away");
-    const stage = document.getElementById("ritualStage");
-    const bone = stage && stage.querySelector("svg");
-    if (bone) stage.replaceChild(bone.cloneNode(true), bone);
-    ritual.classList.add("is-on");
-    ritual.setAttribute("aria-hidden", "false");
-
-    const wait = reduceMotion ? 0 : 900;
-    window.setTimeout(() => {
-      ritual.classList.remove("is-on");
-      ritual.setAttribute("aria-hidden", "true");
-      renderGame(nextEntries);
-      status.textContent = "刻好了。去點散落的甲骨吧。";
-    }, wait);
+    renderGame(nextEntries);
+    status.textContent = "甲骨散落了。點一點看看。";
   }
 
   form.addEventListener("submit", (event) => {
@@ -189,14 +179,12 @@
     });
   });
 
-  scatter.addEventListener("click", (event) => {
-    const piece = event.target.closest(".bone-piece");
-    if (piece) onPieceClick(piece);
-  });
-
-  sheetClose.addEventListener("click", closeSheet);
-  sheetBackdrop.addEventListener("click", closeSheet);
+  if (sheetClose) sheetClose.addEventListener("click", closeSheet);
+  if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !sheet.hidden) closeSheet();
   });
+
+  input.value = "小雨";
+  search("小雨");
 })();

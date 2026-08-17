@@ -8,7 +8,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=scatter-2" />
+  <link rel="stylesheet" href="styles.css?v=fix6" />
+  <style>
+    .playfield.is-on { display: block !important; }
+    .scatter { min-height: 220px !important; }
+    .bone-piece {
+      width: 128px !important;
+      height: 128px !important;
+      margin: 0 !important;
+    }
+    .face-oracle {
+      background: #f6e4d4 !important;
+      color: #3d2c33 !important;
+    }
+  </style>
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -94,8 +107,8 @@
         <p>正在龜甲上刻字……</p>
       </section>
 
-      <section class="playfield" id="playfield" aria-live="polite">
-        <p class="play-hint" id="playHint">甲骨散落了。點一點，把它翻成現在的字。</p>
+      <section class="playfield is-on" id="playfield" aria-live="polite">
+        <p class="play-hint" id="playHint">點一點散落的甲骨，把它翻成現在的字。</p>
         <div class="scatter" id="scatter"></div>
       </section>
     </main>
@@ -124,8 +137,8 @@
     </footer>
   </div>
 
-  <script src="glyphs.js?v=scatter-2"></script>
-  <script src="characters.js?v=scatter-2"></script>
-  <script src="app.js?v=scatter-3"></script>
+  <script src="glyphs.js?v=fix4"></script>
+  <script src="characters.js?v=fix4"></script>
+  <script src="app.js?v=fix6"></script>
 </body>
 </html>
