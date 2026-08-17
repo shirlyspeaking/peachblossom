@@ -50,6 +50,73 @@
     var btnBgImageClear = document.getElementById('btnBgImageClear');
     var uploadedBgUrl = '';
 
+    function mmToCssPx(mm) {
+        return (mm * 96) / 25.4;
+    }
+
+    function drawImageCover(ctx, img, dw, dh) {
+        var sw = img.width;
+        var sh = img.height;
+        if (!sw || !sh) return;
+        var scale = Math.max(dw / sw, dh / sh);
+        var w = sw * scale;
+        var h = sh * scale;
+        ctx.drawImage(img, (dw - w) / 2, (dh - h) / 2, w, h);
+    }
+
+    function loadImageFromFile(file) {
+        if (typeof createImageBitmap === 'function') {
+            return createImageBitmap(file);
+        }
+        return new Promise(function (resolve, reject) {
+            var url = URL.createObjectURL(file);
+            var img = new Image();
+            img.onload = function () {
+                URL.revokeObjectURL(url);
+                resolve(img);
+            };
+            img.onerror = function () {
+                URL.revokeObjectURL(url);
+                reject(new Error('無法讀取圖片'));
+            };
+            img.src = url;
+        });
+    }
+
+    /** 依預覽 zoom×dpr 把原圖 cover 重繪成高解析 blob，避免 zoom:2 先降採樣再放大 */
+    function rasterizeUploadBg(file) {
+        return loadImageFromFile(file).then(function (img) {
+            var cssSide = mmToCssPx(297);
+            var zoom = 2;
+            var dpr = Math.max(1, window.devicePixelRatio || 1);
+            var px = Math.round(cssSide * zoom * dpr);
+            px = Math.max(1200, Math.min(4096, px));
+            var canvas = document.createElement('canvas');
+            canvas.width = px;
+            canvas.height = px;
+            var ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('無法處理圖片');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            drawImageCover(ctx, img, px, px);
+            if (img.close) {
+                try {
+                    img.close();
+                } catch (_) {}
+            }
+            return new Promise(function (resolve, reject) {
+                canvas.toBlob(
+                    function (blob) {
+                        if (!blob) reject(new Error('無法產生背景圖'));
+                        else resolve(URL.createObjectURL(blob));
+                    },
+                    'image/jpeg',
+                    0.92
+                );
+            });
+        });
+    }
+
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
 
@@ -489,17 +556,23 @@
             (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
             ' preview--cellbg-' +
             cellBgVal;
-        if (uploadedBgUrl) {
-            preview.style.setProperty('--upload-bg', 'url("' + uploadedBgUrl + '")');
-        } else {
-            preview.style.removeProperty('--upload-bg');
-        }
+        preview.style.removeProperty('--upload-bg');
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
             var pageEl = document.createElement('div');
             pageEl.className = 'page';
             pageEl.setAttribute('data-page-index', String(p + 1));
+
+            if (uploadedBgUrl) {
+                var bgImg = document.createElement('img');
+                bgImg.className = 'page-upload-bg';
+                bgImg.src = uploadedBgUrl;
+                bgImg.alt = '';
+                bgImg.setAttribute('aria-hidden', 'true');
+                bgImg.draggable = false;
+                pageEl.appendChild(bgImg);
+            }
 
             var title = document.createElement('div');
             title.className = 'page-title';
@@ -827,10 +900,21 @@
                 bgImageInput.value = '';
                 return;
             }
-            if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
-            uploadedBgUrl = URL.createObjectURL(file);
-            if (btnBgImageClear) btnBgImageClear.hidden = false;
-            renderNow();
+            btnBgImageUpload.disabled = true;
+            rasterizeUploadBg(file)
+                .then(function (url) {
+                    if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
+                    uploadedBgUrl = url;
+                    if (btnBgImageClear) btnBgImageClear.hidden = false;
+                    renderNow();
+                })
+                .catch(function (e) {
+                    window.alert('背景圖處理失敗：' + (e.message || String(e)));
+                    bgImageInput.value = '';
+                })
+                .then(function () {
+                    btnBgImageUpload.disabled = false;
+                });
         });
     }
     if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);

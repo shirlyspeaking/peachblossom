@@ -470,23 +470,26 @@ button:hover {
     -webkit-print-color-adjust: exact;
 }
 
-/* 上傳圖：70% 透明度（opacity 0.3），疊在紙底之上、格線與字之下 */
-.preview--bg-upload .page::before {
-    content: "";
+.page-upload-bg {
     position: absolute;
     inset: 0;
     z-index: 0;
-    pointer-events: none;
-    background-image: var(--upload-bg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     opacity: 0.3;
+    pointer-events: none;
 }
 
 .preview--bg-upload .page > * {
     position: relative;
     z-index: 1;
+}
+
+.preview--bg-upload .page > .page-upload-bg {
+    position: absolute;
+    z-index: 0;
 }
 
 /* 古風紙底須寫在 .page 之後，否則 background 簡寫會蓋掉 background-image */
