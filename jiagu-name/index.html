@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>桃源契文 · 桃花源</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>龜</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=fix6" />
+  <style>
+    .playfield.is-on { display: block !important; }
+    .scatter { min-height: 220px !important; }
+    .bone-piece {
+      width: 128px !important;
+      height: 128px !important;
+      margin: 0 !important;
+    }
+    .face-oracle {
+      background: #f6e4d4 !important;
+      color: #3d2c33 !important;
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到內容</a>
+  <div class="page">
+    <header class="top-bar">
+      <a class="back-link" href="../index.html">返回桃花源</a>
+      <span class="brand-kicker">契文小站</span>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <svg class="mascot" viewBox="0 0 100 100" aria-hidden="true">
+          <ellipse cx="46" cy="78" rx="22" ry="6" fill="currentColor" opacity="0.12"/>
+          <path fill="currentColor" opacity="0.18" d="M28 54c2-18 18-30 36-26 14 4 24 18 20 32-6 18-28 26-42 18-12-6-16-14-14-24z"/>
+          <path fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M30 52c3-16 18-26 34-22 13 3 22 16 19 30-4 16-24 24-37 17-11-6-18-14-16-25z"/>
+          <path fill="none" stroke="currentColor" stroke-width="2.6" d="M42 40 54 48 44 60M54 48 66 42M54 48 62 62"/>
+          <circle cx="78" cy="46" r="9.5" fill="none" stroke="currentColor" stroke-width="4"/>
+          <circle cx="81" cy="43" r="1.8" fill="currentColor"/>
+          <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
+        </svg>
+        <h1>桃源契文</h1>
+        <p>把名字刻上去之後，甲骨會散落開來。點一點，就能翻成現在的字，並看看它的小故事。</p>
+      </section>
+
+      <form class="search-panel" id="nameForm">
+        <div class="search-row">
+          <label class="skip" for="nameInput">名字</label>
+          <input
+            id="nameInput"
+            name="name"
+            type="text"
+            maxlength="8"
+            autocomplete="off"
+            placeholder="寫下你的名字，例如：小雨"
+          />
+          <button type="submit">刻上名字</button>
+        </div>
+        <div class="chips" aria-label="試試這些名字">
+          <button type="button" data-name="小雨">小雨</button>
+          <button type="button" data-name="明心">明心</button>
+          <button type="button" data-name="林安">林安</button>
+          <button type="button" data-name="日升">日升</button>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </form>
+
+      <aside class="intro" id="intro">
+        <h2>什麼是甲骨文？</h2>
+        <p>三千多年前，商朝的人把字刻在龜甲或牛骨上。那些字常常像一幅小畫：太陽是圓的，山是三座峰，雨是雲底下的水滴。我們現在寫的漢字，就是從這些小畫慢慢長出來的。</p>
+      </aside>
+
+      <section class="ritual" id="ritual" aria-hidden="true">
+        <div class="ritual-stage" id="ritualStage">
+          <svg class="ritual-bone" viewBox="0 0 220 150" aria-hidden="true">
+            <defs>
+              <linearGradient id="boneFill" x1="40" y1="10" x2="180" y2="140">
+                <stop offset="0%" stop-color="#fffaf4"/>
+                <stop offset="55%" stop-color="#f4e4d2"/>
+                <stop offset="100%" stop-color="#e8d2b8"/>
+              </linearGradient>
+            </defs>
+            <path class="plastron" fill="url(#boneFill)" stroke="#8a6a52" stroke-width="2.2" d="M34 36 L78 18 148 16 198 40 204 86 176 126 62 132 22 92 20 58 Z"/>
+            <path fill="none" stroke="#cbb59a" stroke-width="1" opacity="0.75" d="M48 52 L176 44M42 78 L184 72M54 104 L168 100M92 22 L84 128"/>
+            <g class="carved" fill="none" stroke="#3a2a28" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle class="stroke-a" cx="78" cy="72" r="18"/>
+              <line class="stroke-b" x1="66" y1="72" x2="90" y2="72"/>
+              <path class="stroke-c" d="M128 48c-18 10-18 30 0 40 8-10 8-30 0-40"/>
+              <line class="stroke-d" x1="118" y1="62" x2="118" y2="68"/>
+              <line class="stroke-e" x1="118" y1="76" x2="118" y2="82"/>
+            </g>
+            <g class="burin">
+              <animateMotion dur="1.8s" rotate="auto" fill="freeze" keyPoints="0;0.42;0.55;0.82;1" keyTimes="0;0.38;0.5;0.82;1" calcMode="linear" path="M78 54 A18 18 0 1 1 77.9 54 L90 72 66 72 M128 48 C110 58 110 78 128 88 C136 78 136 58 128 48"/>
+              <path d="M0 0 L7 18 L0 14 L-4 18 Z" fill="#6b5344" stroke="#3a2a28" stroke-width="1"/>
+              <path d="M0 0 L1.4 -10" stroke="#c4a574" stroke-width="2" stroke-linecap="round"/>
+            </g>
+            <g class="chips" fill="#d9c4a8">
+              <rect class="chip chip-1" x="96" y="58" width="3" height="2" rx="0.5"/>
+              <rect class="chip chip-2" x="108" y="80" width="2.5" height="2" rx="0.5"/>
+              <rect class="chip chip-3" x="132" y="64" width="3" height="2" rx="0.5"/>
+            </g>
+          </svg>
+        </div>
+        <p>正在龜甲上刻字……</p>
+      </section>
+
+      <section class="playfield is-on" id="playfield" aria-live="polite">
+        <p class="play-hint" id="playHint">點一點散落的甲骨，把它翻成現在的字。</p>
+        <div class="scatter" id="scatter"></div>
+      </section>
+    </main>
+
+    <div class="sheet" id="sheet" hidden>
+      <button type="button" class="sheet-backdrop" id="sheetBackdrop" aria-label="關閉說明"></button>
+      <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" id="sheetCard">
+        <button type="button" class="sheet-close" id="sheetClose" aria-label="關閉">關閉</button>
+        <div class="sheet-pair">
+          <div class="sheet-glyph" id="sheetOracle"></div>
+          <div class="sheet-modern-wrap">
+            <p class="sheet-kicker">現在這樣寫</p>
+            <p class="sheet-modern" id="sheetTitle"></p>
+            <p class="sheet-pinyin" id="sheetPinyin"></p>
+            <p class="sheet-badge" id="sheetBadge"></p>
+          </div>
+        </div>
+        <p class="meaning" id="sheetMeaning"></p>
+        <p class="era-note" id="sheetEra"></p>
+        <p class="story" id="sheetStory"></p>
+      </div>
+    </div>
+
+    <footer class="page-foot">
+      字形是為小朋友辨認而畫的教學象形，重點在「像什麼」，不是出土拓片的逐筆複製。字源說明也用五年級讀得懂的話來寫。
+    </footer>
+  </div>
+
+  <script src="glyphs.js?v=fix4"></script>
+  <script src="characters.js?v=fix4"></script>
+  <script src="app.js?v=fix6"></script>
+</body>
+</html>

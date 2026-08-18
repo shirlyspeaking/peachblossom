@@ -34,17 +34,93 @@
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
-    var lineHeight = document.getElementById('lineHeight');
     var pageSize = document.getElementById('pageSize');
-    var charsPerLine = document.getElementById('charsPerLine');
-    var linesPerPage = document.getElementById('linesPerPage');
+    var pageBackground = document.getElementById('pageBackground');
+    var fontPresetStroke = document.getElementById('fontPresetStroke');
+    var gridTypeStroke = document.getElementById('gridTypeStroke');
+    var copyStyleStroke = document.getElementById('copyStyleStroke');
+    var fontSizeStroke = document.getElementById('fontSizeStroke');
+    var pageSizeStroke = document.getElementById('pageSizeStroke');
+    var pageBackgroundStroke = document.getElementById('pageBackgroundStroke');
+    var DEFAULT_LINE_HEIGHT = 1.15;
+    var DEFAULT_CHARS_PER_LINE = 12;
+    var DEFAULT_LINES_PER_PAGE = 12;
+    var DEFAULT_STROKE_LINES_PER_PAGE = 10;
     var preview = document.getElementById('preview');
-    var btnPrint = document.getElementById('btnPrint');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
-    var pageBackground = document.getElementById('pageBackground');
-    var cellBackground = document.getElementById('cellBackground');
+    var bgImageInput = document.getElementById('bgImageInput');
+    var btnBgImageUpload = document.getElementById('btnBgImageUpload');
+    var btnBgImageClear = document.getElementById('btnBgImageClear');
+    var uploadedBgUrl = '';
+
+    function mmToCssPx(mm) {
+        return (mm * 96) / 25.4;
+    }
+
+    function drawImageCover(ctx, img, dw, dh) {
+        var sw = img.width;
+        var sh = img.height;
+        if (!sw || !sh) return;
+        var scale = Math.max(dw / sw, dh / sh);
+        var w = sw * scale;
+        var h = sh * scale;
+        ctx.drawImage(img, (dw - w) / 2, (dh - h) / 2, w, h);
+    }
+
+    function loadImageFromFile(file) {
+        if (typeof createImageBitmap === 'function') {
+            return createImageBitmap(file);
+        }
+        return new Promise(function (resolve, reject) {
+            var url = URL.createObjectURL(file);
+            var img = new Image();
+            img.onload = function () {
+                URL.revokeObjectURL(url);
+                resolve(img);
+            };
+            img.onerror = function () {
+                URL.revokeObjectURL(url);
+                reject(new Error('無法讀取圖片'));
+            };
+            img.src = url;
+        });
+    }
+
+    /** 依預覽 zoom×dpr 把原圖 cover 重繪成高解析 blob，避免 zoom:2 先降採樣再放大 */
+    function rasterizeUploadBg(file) {
+        return loadImageFromFile(file).then(function (img) {
+            var cssSide = mmToCssPx(297);
+            var zoom = 2;
+            var dpr = Math.max(1, window.devicePixelRatio || 1);
+            var px = Math.round(cssSide * zoom * dpr);
+            px = Math.max(1200, Math.min(4096, px));
+            var canvas = document.createElement('canvas');
+            canvas.width = px;
+            canvas.height = px;
+            var ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('無法處理圖片');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            drawImageCover(ctx, img, px, px);
+            if (img.close) {
+                try {
+                    img.close();
+                } catch (_) {}
+            }
+            return new Promise(function (resolve, reject) {
+                canvas.toBlob(
+                    function (blob) {
+                        if (!blob) reject(new Error('無法產生背景圖'));
+                        else resolve(URL.createObjectURL(blob));
+                    },
+                    'image/jpeg',
+                    0.92
+                );
+            });
+        });
+    }
 
     var debounceTimer = null;
     var DEBOUNCE_MS = 320;
@@ -231,8 +307,34 @@
         );
     }
 
+    function isStrokeMode() {
+        return !!(strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0);
+    }
+
+    function getActiveControls() {
+        if (isStrokeMode()) {
+            return {
+                fontPreset: fontPresetStroke || fontPreset,
+                gridType: gridTypeStroke || gridType,
+                copyStyle: copyStyleStroke || copyStyle,
+                fontSize: fontSizeStroke || fontSize,
+                pageSize: pageSizeStroke || pageSize,
+                pageBackground: pageBackgroundStroke || pageBackground
+            };
+        }
+        return {
+            fontPreset: fontPreset,
+            gridType: gridType,
+            copyStyle: copyStyle,
+            fontSize: fontSize,
+            pageSize: pageSize,
+            pageBackground: pageBackground
+        };
+    }
+
     function getFontFamily() {
-        return fontPreset.value.trim();
+        var c = getActiveControls();
+        return c.fontPreset && c.fontPreset.value ? c.fontPreset.value.trim() : '';
     }
 
     function parseHanziChars(text) {
@@ -303,11 +405,8 @@
     }
 
     function applyStrokePathDefaults() {
-        if (gridType) gridType.value = 'tian';
-        if (fontSize) fontSize.value = '40';
-        if (lineHeight) lineHeight.value = '1.15';
-        if (charsPerLine) charsPerLine.value = '1';
-        if (linesPerPage) linesPerPage.value = '10';
+        if (gridTypeStroke) gridTypeStroke.value = 'tian';
+        if (fontSizeStroke) fontSizeStroke.value = '40';
     }
 
     function chunkLayoutRows(rows, lpp) {
@@ -346,7 +445,6 @@
             strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
             if (textInput) textInput.value = '';
             applyStrokePathDefaults();
-            if (charsPerLine) charsPerLine.value = String(layout.charsPerRow);
             renderNow();
         } catch (e) {
             window.alert('筆畫拆解失敗：' + (e.message || String(e)));
@@ -425,30 +523,25 @@
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         var raw = textInput.value;
         var text = normalizeText(raw);
-        var cpl = Math.max(1, Math.min(20, parseInt(charsPerLine.value, 10) || 12));
-        var lpp = Math.max(1, Math.min(20, parseInt(linesPerPage.value, 10) || 12));
-        var fsMin = parseInt(fontSize.getAttribute('min'), 10);
-        var fsMax = parseInt(fontSize.getAttribute('max'), 10);
+        var ctrls = getActiveControls();
+        var cpl = DEFAULT_CHARS_PER_LINE;
+        var lpp = isStrokeMode() ? DEFAULT_STROKE_LINES_PER_PAGE : DEFAULT_LINES_PER_PAGE;
+        var fsEl = ctrls.fontSize;
+        var fsMin = fsEl ? parseInt(fsEl.getAttribute('min'), 10) : 18;
+        var fsMax = fsEl ? parseInt(fsEl.getAttribute('max'), 10) : 72;
         if (!Number.isFinite(fsMin)) fsMin = 18;
         if (!Number.isFinite(fsMax)) fsMax = 72;
-        var fs = parseInt(String(fontSize.value).trim(), 10);
+        var fs = fsEl ? parseInt(String(fsEl.value).trim(), 10) : 36;
         if (!Number.isFinite(fs)) fs = 36;
         fs = Math.max(fsMin, Math.min(fsMax, fs));
 
-        var lhMin = parseFloat(lineHeight.getAttribute('min'));
-        var lhMax = parseFloat(lineHeight.getAttribute('max'));
-        if (!Number.isFinite(lhMin)) lhMin = 1;
-        if (!Number.isFinite(lhMax)) lhMax = 2.5;
-        var lh = parseFloat(String(lineHeight.value).trim().replace(',', '.'));
-        if (!Number.isFinite(lh)) lh = 1.15;
-        lh = Math.max(lhMin, Math.min(lhMax, lh));
-        var gtype = gridType.value;
-        var psize = pageSize.value;
+        var lh = DEFAULT_LINE_HEIGHT;
+        var gtype = ctrls.gridType && ctrls.gridType.value ? ctrls.gridType.value : 'tian';
+        var psize = ctrls.pageSize && ctrls.pageSize.value ? ctrls.pageSize.value : 'a4';
         var font = getFontFamily();
-        var hongMode =
-            copyStyle &&
-            (copyStyle.value === 'hong' || copyStyle.value === 'trace');
-        var lightPinkHongMode = copyStyle && copyStyle.value === 'lightPinkHong';
+        var styleVal = ctrls.copyStyle && ctrls.copyStyle.value ? ctrls.copyStyle.value : 'standard';
+        var hongMode = styleVal === 'hong' || styleVal === 'trace';
+        var lightPinkHongMode = styleVal === 'lightPinkHong';
 
         var useStrokePaths =
             strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
@@ -463,8 +556,7 @@
         }
 
         preview.innerHTML = '';
-        var rawBg = pageBackground && pageBackground.value ? pageBackground.value : 'none';
-        var rawCellBg = cellBackground && cellBackground.value ? cellBackground.value : 'white';
+        var rawBg = ctrls.pageBackground && ctrls.pageBackground.value ? ctrls.pageBackground.value : 'none';
         var bgVal =
             rawBg === 'xuan' ||
             rawBg === 'letter' ||
@@ -473,22 +565,33 @@
             rawBg === 'cloud'
                 ? rawBg
                 : 'none';
-        var cellBgVal =
-            rawCellBg === 'translucent' || rawCellBg === 'transparent' ? rawCellBg : 'white';
+        var cellBgVal = uploadedBgUrl ? 'translucent' : 'white';
         preview.className =
             'preview preview--' +
             psize +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
+            (uploadedBgUrl ? ' preview--bg-upload' : '') +
             (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
             ' preview--cellbg-' +
             cellBgVal;
+        preview.style.removeProperty('--upload-bg');
 
         for (var p = 0; p < pages.length; p++) {
             var pageRows = pages[p];
             var pageEl = document.createElement('div');
             pageEl.className = 'page';
             pageEl.setAttribute('data-page-index', String(p + 1));
+
+            if (uploadedBgUrl) {
+                var bgImg = document.createElement('img');
+                bgImg.className = 'page-upload-bg';
+                bgImg.src = uploadedBgUrl;
+                bgImg.alt = '';
+                bgImg.setAttribute('aria-hidden', 'true');
+                bgImg.draggable = false;
+                pageEl.appendChild(bgImg);
+            }
 
             var title = document.createElement('div');
             title.className = 'page-title';
@@ -646,15 +749,30 @@
     async function capturePageElements(pageEls, scale) {
         var s = scale || 2;
         var blobs = [];
-        for (var i = 0; i < pageEls.length; i++) {
-            setStatus('繪製第 ' + (i + 1) + ' 頁…');
-            var canvas = await window.html2canvas(pageEls[i], {
-                scale: s,
-                useCORS: true,
-                backgroundColor: null,
-                logging: false
-            });
-            blobs.push(await canvasToBlob(canvas));
+        var prevZoom = '';
+        var prevTransform = '';
+        if (preview) {
+            prevZoom = preview.style.zoom;
+            prevTransform = preview.style.transform;
+            preview.style.zoom = '1';
+            preview.style.transform = 'none';
+        }
+        try {
+            for (var i = 0; i < pageEls.length; i++) {
+                setStatus('繪製第 ' + (i + 1) + ' 頁…');
+                var canvas = await window.html2canvas(pageEls[i], {
+                    scale: s,
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+                blobs.push(await canvasToBlob(canvas));
+            }
+        } finally {
+            if (preview) {
+                preview.style.zoom = prevZoom;
+                preview.style.transform = prevTransform;
+            }
         }
         return blobs;
     }
@@ -743,14 +861,16 @@
 
     function applyChenyuFont() {
         var opt = document.getElementById('fontOptChenyu');
+        var optStroke = document.getElementById('fontOptChenyuStroke');
         if (opt && fontPreset) fontPreset.value = opt.value;
+        if (optStroke && fontPresetStroke) fontPresetStroke.value = optStroke.value;
         setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
         renderNow();
     }
 
     var inputs = [
-        fontPreset, gridType, copyStyle, pageBackground, cellBackground, fontSize, lineHeight,
-        pageSize, charsPerLine, linesPerPage
+        fontPreset, gridType, copyStyle, pageBackground, fontSize, pageSize,
+        fontPresetStroke, gridTypeStroke, copyStyleStroke, pageBackgroundStroke, fontSizeStroke, pageSizeStroke
     ];
     inputs.forEach(function (el) {
         if (!el) return;
@@ -768,11 +888,55 @@
         clearStrokePathLayout();
         renderNow();
     });
-    if (btnPrint) btnPrint.addEventListener('click', onPrint);
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
-    if (btnPng) btnPng.addEventListener('click', function () { onPng(); });
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
+
+    function clearUploadedBg() {
+        if (uploadedBgUrl) {
+            URL.revokeObjectURL(uploadedBgUrl);
+            uploadedBgUrl = '';
+        }
+        if (bgImageInput) bgImageInput.value = '';
+        if (btnBgImageClear) btnBgImageClear.hidden = true;
+        renderNow();
+    }
+
+    if (btnBgImageUpload && bgImageInput) {
+        btnBgImageUpload.addEventListener('click', function () {
+            bgImageInput.click();
+        });
+        bgImageInput.addEventListener('change', function () {
+            var file = bgImageInput.files && bgImageInput.files[0];
+            if (!file) return;
+            if (!/^image\//.test(file.type)) {
+                window.alert('請選擇圖片檔');
+                bgImageInput.value = '';
+                return;
+            }
+            if (file.size > 8 * 1024 * 1024) {
+                window.alert('圖片請小於 8MB');
+                bgImageInput.value = '';
+                return;
+            }
+            btnBgImageUpload.disabled = true;
+            rasterizeUploadBg(file)
+                .then(function (url) {
+                    if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
+                    uploadedBgUrl = url;
+                    if (btnBgImageClear) btnBgImageClear.hidden = false;
+                    renderNow();
+                })
+                .catch(function (e) {
+                    window.alert('背景圖處理失敗：' + (e.message || String(e)));
+                    bgImageInput.value = '';
+                })
+                .then(function () {
+                    btnBgImageUpload.disabled = false;
+                });
+        });
+    }
+    if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
     renderNow();
 })();

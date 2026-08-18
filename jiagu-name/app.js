@@ -1,0 +1,190 @@
+(function () {
+  const form = document.getElementById("nameForm");
+  const input = document.getElementById("nameInput");
+  const status = document.getElementById("status");
+  const ritual = document.getElementById("ritual");
+  const playfield = document.getElementById("playfield");
+  const scatter = document.getElementById("scatter");
+  const playHint = document.getElementById("playHint");
+  const intro = document.getElementById("intro");
+  const page = document.querySelector(".page");
+  const sheet = document.getElementById("sheet");
+  const sheetClose = document.getElementById("sheetClose");
+  const sheetBackdrop = document.getElementById("sheetBackdrop");
+
+  if (!form || !playfield || !scatter || !sheet) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SLOTS = [
+    { s: 1.45, r: -14, dx: "-10px", dy: "18px" },
+    { s: 0.82, r: 16, dx: "22px", dy: "-12px" },
+    { s: 1.18, r: -6, dx: "8px", dy: "28px" },
+    { s: 1.36, r: 11, dx: "-18px", dy: "-6px" },
+    { s: 0.9, r: 20, dx: "16px", dy: "22px" },
+    { s: 0.74, r: -18, dx: "-4px", dy: "8px" },
+  ];
+
+  let entries = [];
+  let foundCount = 0;
+  let lastFocus = null;
+
+  function parseName(raw) {
+    const chars = Array.from((raw || "").trim());
+    const cjk = chars.filter((ch) => window.JiaguChars && JiaguChars.isCjk(ch));
+    return cjk.slice(0, 6);
+  }
+
+  function glyphMarkup(entry) {
+    const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char, entry.glyph);
+    if (svg) return svg;
+    return `<span class="fallback-glyph">${entry.char}</span>`;
+  }
+
+  function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = copy[i];
+      copy[i] = copy[j];
+      copy[j] = tmp;
+    }
+    return copy;
+  }
+
+  function openSheet(entry) {
+    document.getElementById("sheetOracle").innerHTML = glyphMarkup(entry);
+    document.getElementById("sheetTitle").textContent = entry.char;
+    document.getElementById("sheetPinyin").textContent = entry.pinyin || "";
+    const badge = document.getElementById("sheetBadge");
+    badge.textContent = entry.eraMeta.label;
+    badge.className = "sheet-badge badge " + entry.era;
+    document.getElementById("sheetMeaning").textContent = entry.meaning;
+    document.getElementById("sheetEra").textContent = entry.eraMeta.note;
+    document.getElementById("sheetStory").textContent = entry.story;
+    sheet.hidden = false;
+    requestAnimationFrame(() => sheet.classList.add("is-on"));
+    if (sheetClose) sheetClose.focus();
+  }
+
+  function closeSheet() {
+    if (sheet.hidden) return;
+    sheet.classList.remove("is-on");
+    window.setTimeout(() => {
+      sheet.hidden = true;
+      if (lastFocus) lastFocus.focus();
+    }, reduceMotion ? 0 : 180);
+  }
+
+  function updateHint() {
+    if (!entries.length) return;
+    if (foundCount >= entries.length) {
+      playHint.textContent = "名字裡的字都認出來了。再點一次，還可以看故事。";
+      status.textContent = "你把散落的甲骨都翻開了。";
+    } else {
+      playHint.textContent = "點一點散落的甲骨，把它翻成現在的字。";
+    }
+  }
+
+  function renderGame(nextEntries) {
+    entries = nextEntries;
+    foundCount = 0;
+    const slots = shuffle(SLOTS).slice(0, entries.length);
+    scatter.innerHTML = entries
+      .map((entry, index) => {
+        const slot = slots[index];
+        return `
+          <button
+            type="button"
+            class="bone-piece"
+            data-index="${index}"
+            style="--s:${slot.s}; --r:${slot.r}deg;"
+            aria-label="一塊甲骨，點擊翻成現在的字"
+          >
+            <span class="bone-float">
+              <span class="bone-flip">
+                <span class="face face-oracle">${glyphMarkup(entry)}</span>
+                <span class="face face-modern">${entry.char}</span>
+              </span>
+            </span>
+          </button>`;
+      })
+      .join("");
+
+    playfield.classList.add("is-on");
+    playfield.style.display = "block";
+    if (page) page.classList.add("is-playing");
+    if (intro) intro.classList.add("is-away");
+    if (ritual) {
+      ritual.classList.remove("is-on");
+      ritual.setAttribute("aria-hidden", "true");
+    }
+    updateHint();
+    scatter.querySelectorAll(".bone-piece").forEach((piece) => {
+      piece.addEventListener("click", () => onPieceClick(piece));
+    });
+  }
+
+  function onPieceClick(piece) {
+    const index = Number(piece.dataset.index);
+    const entry = entries[index];
+    if (!entry) return;
+    lastFocus = piece;
+    const firstFlip = !piece.classList.contains("is-flipped");
+    piece.classList.add("is-flipped");
+    piece.setAttribute("aria-label", "現在的字：" + entry.char);
+    if (firstFlip) {
+      foundCount += 1;
+      updateHint();
+    }
+    openSheet(entry);
+  }
+
+  function search(name) {
+    const chars = parseName(name);
+    status.textContent = "";
+    foundCount = 0;
+    sheet.classList.remove("is-on");
+    sheet.hidden = true;
+
+    if (!name.trim()) {
+      if (intro) intro.classList.remove("is-away");
+      status.textContent = "先寫下一個名字吧。";
+      input.focus();
+      return;
+    }
+    if (!chars.length) {
+      if (intro) intro.classList.remove("is-away");
+      status.textContent = "請輸入中文名字，例如「小雨」。";
+      return;
+    }
+    if (!window.JiaguChars) {
+      status.textContent = "字庫還沒載入完成，請再按一次。";
+      return;
+    }
+
+    const nextEntries = chars.map((ch) => JiaguChars.lookup(ch));
+    renderGame(nextEntries);
+    status.textContent = "甲骨散落了。點一點看看。";
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    search(input.value);
+  });
+
+  document.querySelectorAll(".chips [data-name]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      input.value = btn.dataset.name;
+      search(btn.dataset.name);
+    });
+  });
+
+  if (sheetClose) sheetClose.addEventListener("click", closeSheet);
+  if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !sheet.hidden) closeSheet();
+  });
+
+  input.value = "小雨";
+  search("小雨");
+})();

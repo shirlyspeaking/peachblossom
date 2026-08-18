@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=41">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -27,118 +27,160 @@
             <button type="button" class="theme-dot theme-dot--green" data-theme="green" title="藕綠"></button>
             <button type="button" class="theme-dot theme-dot--blue" data-theme="blue" title="汝窯"></button>
             <button type="button" class="theme-dot theme-dot--silver" data-theme="silver" title="月白"></button>
+            <div class="bg-upload">
+                <input id="bgImageInput" type="file" accept="image/*" hidden>
+                <button type="button" id="btnBgImageUpload" class="bg-upload-btn" title="上傳圖片作為字帖背景">上傳背景</button>
+                <button type="button" id="btnBgImageClear" class="bg-upload-clear" hidden title="清除上傳背景">清除</button>
+            </div>
         </div>
     </header>
 
     <main class="layout">
-        <aside class="panel">
-            <label for="textInput">字帖內容</label>
-            <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
+        <aside class="panel" aria-label="字帖選項">
+            <section class="panel-section">
+                <h2 class="panel-section-title">自由字帖生成</h2>
+                <label for="textInput">字帖內容</label>
+                <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
-            <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
+                <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
+                <details class="tune-details">
+                    <summary>
+                        <span>字體與樣式</span>
+                        <span class="tune-chevron" aria-hidden="true"></span>
+                    </summary>
+                    <div class="tune-details-body">
+                        <p class="tune-group-label">基礎設置</p>
+                        <div class="field">
+                            <label for="fontPreset">字體選擇</label>
+                            <select id="fontPreset">
+                                <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
+                                <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
+                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
+                                <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
+                                <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
+                                <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
+                                <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
+                                <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
+                                <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
+                                <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="copyStyle">字帖版本</label>
+                            <select id="copyStyle" name="copyStyle">
+                                <option value="standard">標準墨色</option>
+                                <option value="hong">描紅（紅框鏤空）</option>
+                                <option value="lightPinkHong">淺粉色描紅</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="pageBackground">字帖背景</label>
+                            <select id="pageBackground" name="pageBackground">
+                                <option value="none">無（紙色）</option>
+                                <option value="xuan">宣紙／藏經紙</option>
+                                <option value="letter">古代信箋</option>
+                                <option value="scroll">仿古捲軸</option>
+                                <option value="redLines">朱絲欄紋</option>
+                                <option value="cloud">祥雲紋</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="fontSize">字體大小</label>
+                            <input id="fontSize" type="number" min="18" max="72" step="1" value="36">
+                        </div>
+                        <div class="field">
+                            <label for="gridType">格線樣式</label>
+                            <select id="gridType">
+                                <option value="tian">田字格</option>
+                                <option value="mi">米字格</option>
+                                <option value="blank">空白格</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="pageSize">預覽紙張</label>
+                            <select id="pageSize">
+                                <option value="a4">A4（直式）</option>
+                                <option value="a4l">A4（橫式）</option>
+                                <option value="letter">Letter</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+            </section>
 
-            <div class="field">
+            <section class="panel-section panel-section--stroke">
+                <h2 class="panel-section-title">筆順字帖生成</h2>
                 <label for="autoStrokeChars">筆順字帖輸入</label>
                 <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
-                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">筆順字帖</button>
-            </div>
+                <button id="btnAutoStrokeFromChars" type="button" class="btn-secondary">生成筆順字帖</button>
+                <details class="tune-details">
+                    <summary>
+                        <span>字體與樣式</span>
+                        <span class="tune-chevron" aria-hidden="true"></span>
+                    </summary>
+                    <div class="tune-details-body">
+                        <p class="tune-group-label">基礎設置</p>
+                        <div class="field">
+                            <label for="fontPresetStroke">字體選擇</label>
+                            <select id="fontPresetStroke">
+                                <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
+                                <option id="fontOptChenyuStroke" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
+                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
+                                <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
+                                <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
+                                <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
+                                <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
+                                <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
+                                <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
+                                <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="copyStyleStroke">字帖版本</label>
+                            <select id="copyStyleStroke" name="copyStyleStroke">
+                                <option value="standard">標準墨色</option>
+                                <option value="hong">描紅（紅框鏤空）</option>
+                                <option value="lightPinkHong">淺粉色描紅</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="pageBackgroundStroke">字帖背景</label>
+                            <select id="pageBackgroundStroke" name="pageBackgroundStroke">
+                                <option value="none">無（紙色）</option>
+                                <option value="xuan">宣紙／藏經紙</option>
+                                <option value="letter">古代信箋</option>
+                                <option value="scroll">仿古捲軸</option>
+                                <option value="redLines">朱絲欄紋</option>
+                                <option value="cloud">祥雲紋</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="fontSizeStroke">字體大小</label>
+                            <input id="fontSizeStroke" type="number" min="18" max="72" step="1" value="40">
+                        </div>
+                        <div class="field">
+                            <label for="gridTypeStroke">格線樣式</label>
+                            <select id="gridTypeStroke">
+                                <option value="tian">田字格</option>
+                                <option value="mi">米字格</option>
+                                <option value="blank">空白格</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="pageSizeStroke">預覽紙張</label>
+                            <select id="pageSizeStroke">
+                                <option value="a4">A4（直式）</option>
+                                <option value="a4l">A4（橫式）</option>
+                                <option value="letter">Letter</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+            </section>
 
-            <div class="field">
-                <label for="fontPreset">字體選擇</label>
-                <select id="fontPreset">
-                    <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
-                    <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                    <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
-                    <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
-                    <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
-                    <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
-                    <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
-                    <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
-                    <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
-                    <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
-                </select>
-            </div>
-
-            <div class="row row-single">
-                <div class="field">
-                    <label for="copyStyle">字帖版本</label>
-                    <select id="copyStyle" name="copyStyle">
-                        <option value="standard">標準墨色</option>
-                        <option value="hong">描紅（紅框鏤空）</option>
-                        <option value="lightPinkHong">淺粉色描紅</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="field">
-                    <label for="pageBackground">字帖背景</label>
-                    <select id="pageBackground" name="pageBackground">
-                        <option value="none">無（紙色）</option>
-                        <option value="xuan">宣紙／藏經紙</option>
-                        <option value="letter">古代信箋</option>
-                        <option value="scroll">仿古捲軸</option>
-                        <option value="redLines">朱絲欄紋</option>
-                        <option value="cloud">祥雲紋</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="cellBackground">格子底色</label>
-                    <select id="cellBackground" name="cellBackground">
-                        <option value="white">白底（最清晰）</option>
-                        <option value="translucent">半透明白</option>
-                        <option value="transparent">透明</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="field">
-                    <label for="gridType">格線樣式</label>
-                    <select id="gridType">
-                        <option value="tian">田字格</option>
-                        <option value="mi">米字格</option>
-                        <option value="blank">空白格</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="fontSize">字體大小</label>
-                    <input id="fontSize" type="number" min="18" max="72" step="1" value="36">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="field">
-                    <label for="lineHeight">行高倍率</label>
-                    <input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.15">
-                </div>
-                <div class="field">
-                    <label for="pageSize">預覽紙張</label>
-                    <select id="pageSize">
-                        <option value="a4">A4（直式）</option>
-                        <option value="a4l">A4（橫式）</option>
-                        <option value="letter">Letter</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="field">
-                    <label for="charsPerLine">每行字數</label>
-                    <input id="charsPerLine" type="number" min="1" max="20" value="12">
-                </div>
-                <div class="field">
-                    <label for="linesPerPage">每頁行數</label>
-                    <input id="linesPerPage" type="number" min="1" max="20" value="12">
-                </div>
-            </div>
-
-            <div class="actions actions-3">
-                <button id="btnPrint" type="button">列印字帖</button>
+            <div class="panel-footer">
                 <button id="btnPdf" type="button">下載 PDF</button>
-                <button id="btnPng" type="button">下載 PNG</button>
             </div>
-
         </aside>
 
         <section class="preview-wrap">
@@ -146,6 +188,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=43"></script>
+    <script src="app.js?v=48"></script>
 </body>
 </html>

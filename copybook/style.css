@@ -221,25 +221,150 @@ body {
 .theme-dot--blue   { background: linear-gradient(135deg, #c4d6ec, #5a80b0); }
 .theme-dot--silver { background: linear-gradient(135deg, #d4d4da, #7a7a88); }
 
+.bg-upload {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 6px;
+    padding-left: 10px;
+    border-left: 1px solid var(--ui-border);
+}
+
+.bg-upload-btn,
+.bg-upload-clear {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.bg-upload-clear {
+    background: color-mix(in oklch, var(--accent-dark) 18%, transparent);
+    color: var(--accent-dark);
+}
+
 /* ===== Layout ===== */
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(220px, 270px) 1fr;
+    grid-template-columns: minmax(240px, 290px) 1fr;
     gap: 16px;
     padding: 20px;
 }
 
 .panel {
-    background: color-mix(in oklch, oklch(0.988 0.01 8) 90%, transparent);
-    border: 1px solid var(--ui-border);
-    border-radius: 22px;
-    padding: 12px 12px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
     position: sticky;
     top: 12px;
     height: fit-content;
-    box-shadow: 0 24px 60px oklch(0.53 0.09 8 / 0.08);
-    transition: border-color 0.3s;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    box-shadow: none;
+}
+
+.panel-section {
+    padding: 16px 16px 18px;
+    margin-bottom: 0;
+    border: 1px solid var(--ui-border);
+    border-radius: 18px;
+    background: var(--paper);
+    box-shadow: 0 10px 28px var(--page-shadow);
+}
+
+.panel-section--stroke {
+    margin-top: 40px;
+    padding-top: 16px;
+    border: 1px solid var(--ui-border);
+    background: var(--paper);
+}
+
+.panel-section-title {
+    margin: 0 0 10px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--page-title-color);
+}
+
+.tune-details {
+    margin-top: 14px;
+    background: transparent;
+    border: none;
+}
+
+.tune-details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    list-style: none;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    color: var(--accent-dark);
+    user-select: none;
+    background: color-mix(in oklch, white 55%, transparent);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+}
+
+.tune-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.tune-details[open] > summary {
+    border-radius: 10px 10px 0 0;
+    border-bottom-color: transparent;
+}
+
+.tune-chevron {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--accent-dark);
+    opacity: 0.75;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.tune-details[open] > summary .tune-chevron {
+    transform: rotate(180deg);
+}
+
+.tune-details-body {
+    padding: 6px 12px 12px;
+    border: 1px solid var(--input-border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: rgb(255 255 255 / 0.28);
+}
+
+.tune-group-label {
+    margin: 10px 0 4px;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--label-color);
+    opacity: 0.85;
+}
+
+.panel-footer {
+    margin-top: 22px;
+    padding-top: 0;
+    border-top: none;
+}
+
+.panel-footer button {
+    width: 100%;
 }
 
 /* ===== Form Elements ===== */
@@ -337,12 +462,35 @@ button:hover {
 
 .preview-wrap {
     min-width: 0;
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .preview {
     display: grid;
-    gap: 16px;
+    justify-items: center;
+    gap: 28px;
     --cell-bg: #fff;
+    width: max-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    /* 螢幕預覽約 2 倍面積觀感；列印／匯出不受影響 */
+    zoom: 2;
+}
+
+@supports not (zoom: 1) {
+    .preview {
+        zoom: unset;
+        transform: scale(2);
+        transform-origin: top center;
+        width: max-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 
 .preview--cellbg-white {
@@ -368,18 +516,21 @@ button:hover {
 
 .preview--a4 .page {
     max-width: 210mm;
+    width: 210mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--a4l .page {
     max-width: 297mm;
+    width: 297mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--letter .page {
     max-width: 8.5in;
+    width: 8.5in;
     margin-left: auto;
     margin-right: auto;
 }
@@ -387,6 +538,7 @@ button:hover {
 /* ===== Page Card ===== */
 
 .page {
+    position: relative;
     background: var(--paper);
     border-radius: 10px;
     box-shadow: 0 8px 30px var(--page-shadow);
@@ -396,6 +548,28 @@ button:hover {
     transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+}
+
+.page-upload-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.preview--bg-upload .page > * {
+    position: relative;
+    z-index: 1;
+}
+
+.preview--bg-upload .page > .page-upload-bg {
+    position: absolute;
+    z-index: 0;
 }
 
 /* 古風紙底須寫在 .page 之後，否則 background 簡寫會蓋掉 background-image */
@@ -452,8 +626,8 @@ button:hover {
     border-right: none;
     width: max-content;
     max-width: none;
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: auto;
+    margin-right: auto;
     transition: border-color 0.3s;
 }
 
@@ -559,10 +733,29 @@ button:hover {
 @media (max-width: 980px) {
     .layout {
         grid-template-columns: 1fr;
+        padding: 12px 12px 28px;
     }
 
     .panel {
         position: static;
+        max-height: none;
+    }
+
+    .theme-picker {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .preview {
+        zoom: 1.35;
+    }
+
+    @supports not (zoom: 1) {
+        .preview {
+            zoom: unset;
+            transform: scale(1.35);
+            width: 74%;
+        }
     }
 }
 
@@ -575,12 +768,19 @@ button:hover {
 
     .site-header,
     .panel {
-        display: none;
+        display: none !important;
     }
 
     .layout {
         display: block;
         padding: 0;
+    }
+
+    .preview {
+        zoom: 1;
+        transform: none;
+        width: auto;
+        gap: 0;
     }
 
     .page {
