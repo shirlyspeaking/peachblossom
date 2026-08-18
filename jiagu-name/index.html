@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=wall2" />
+  <link rel="stylesheet" href="styles.css?v=riddle1" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -35,7 +35,7 @@
 
       <nav class="mode-switch" role="tablist" aria-label="使用方式">
         <button type="button" role="tab" id="modeWall" aria-selected="true" class="is-on">本班名牆</button>
-        <button type="button" role="tab" id="modeClass" aria-selected="false">課堂破冰</button>
+        <button type="button" role="tab" id="modeClass" aria-selected="false">猜字謎</button>
         <button type="button" role="tab" id="modeSolo" aria-selected="false">自己查名字</button>
       </nav>
 
@@ -58,19 +58,28 @@
       </section>
 
       <section class="class-panel" id="classPanel" hidden>
-        <details class="roster-box" id="rosterBox">
-          <summary>貼上課堂名單</summary>
-          <p class="roster-help">一人一行。每人會藏一個最好看、最像圖畫的字——不一定是甲骨文，金文、小篆的零件也可以。</p>
-          <label class="skip" for="rosterInput">課堂名單</label>
-          <textarea id="rosterInput" rows="8" placeholder="陳小雨&#10;林安&#10;張樂&#10;王山"></textarea>
-          <button type="button" class="btn-primary" id="carveClass">把名字刻進甲骨</button>
+        <details class="how-play">
+          <summary>這節課怎麼玩</summary>
+          <ol class="play-steps">
+            <li>每人的名字只藏一個最好看、最像圖畫的古字。</li>
+            <li>抽出一塊，全班先猜：這幅小畫是什麼字？</li>
+            <li>揭曉以後，再猜：這是哪位同學名字裡的字？</li>
+            <li>最後請那位同學站起來，用一句話介紹自己。</li>
+          </ol>
         </details>
-        <div class="class-toolbar" id="classToolbar" hidden>
+        <div class="class-toolbar" id="classToolbar">
           <button type="button" class="btn-primary" id="drawOne">抽出一塊</button>
           <button type="button" class="btn-ghost" id="resetClass">重新散落</button>
           <button type="button" class="btn-ghost" id="editRoster">改名單</button>
           <p class="class-progress" id="classProgress" role="status"></p>
         </div>
+        <details class="roster-box" id="rosterBox">
+          <summary>改用其他名單</summary>
+          <p class="roster-help">一人一行。每人會藏一個最好看、最像圖畫的字。</p>
+          <label class="skip" for="rosterInput">課堂名單</label>
+          <textarea id="rosterInput" rows="8" placeholder="陳小雨&#10;林安&#10;張樂&#10;王山"></textarea>
+          <button type="button" class="btn-primary" id="carveClass">把名字刻進甲骨</button>
+        </details>
       </section>
 
       <form class="search-panel" id="nameForm" hidden>
@@ -108,10 +117,10 @@
         <div id="introClass" hidden>
           <h2>這節課怎麼玩</h2>
           <ol class="play-steps">
-            <li>老師先把全班名字刻成甲骨，投影在前面。</li>
-            <li>抽出一塊，全班一起猜：這幅小畫是什麼字？</li>
-            <li>再猜：這是哪位同學名字裡的字？</li>
-            <li>揭曉以後，請那位同學站起來，用一句話介紹自己。</li>
+            <li>每人的名字只藏一個最好看、最像圖畫的古字。</li>
+            <li>抽出一塊，全班先猜：這幅小畫是什麼字？</li>
+            <li>揭曉以後，再猜：這是哪位同學名字裡的字？</li>
+            <li>最後請那位同學站起來，用一句話介紹自己。</li>
           </ol>
         </div>
         <div id="introSolo" hidden>
@@ -139,11 +148,14 @@
             <p class="sheet-badge" id="sheetBadge"></p>
           </div>
         </div>
-        <p class="meaning" id="sheetMeaning"></p>
-        <p class="era-note" id="sheetEra"></p>
-        <p class="story" id="sheetStory"></p>
+        <div id="sheetLore">
+          <p class="meaning" id="sheetMeaning"></p>
+          <p class="era-note" id="sheetEra"></p>
+          <p class="story" id="sheetStory"></p>
+        </div>
         <div class="who-box" id="whoBox" hidden>
           <p class="who-prompt" id="whoPrompt">這是誰的名字裡的字？</p>
+          <button type="button" class="btn-primary" id="revealChar">揭曉這個字</button>
           <button type="button" class="btn-primary" id="revealWho">揭曉是誰</button>
           <div class="who-result" id="whoResult" hidden>
             <p class="who-name" id="sheetOwner"></p>
@@ -158,8 +170,8 @@
     </footer>
   </div>
 
-  <script src="glyphs.js?v=wall2"></script>
-  <script src="characters.js?v=wall2"></script>
-  <script src="app.js?v=wall2"></script>
+  <script src="glyphs.js?v=riddle1"></script>
+  <script src="characters.js?v=riddle1"></script>
+  <script src="app.js?v=riddle1"></script>
 </body>
 </html>

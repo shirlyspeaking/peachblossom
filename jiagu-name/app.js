@@ -12,6 +12,17 @@
     "王溦",
     "謝宗翰",
   ];
+  const CLASS_SIGNATURES = {
+    郭昌慧: "昌",
+    胡可: "可",
+    葉肇鏘: "葉",
+    蔣芳菲: "芳",
+    金諾兒: "兒",
+    李鈴浠: "李",
+    劉晟陚: "晟",
+    王溦: "王",
+    謝宗翰: "宗",
+  };
 
   const page = document.getElementById("page");
   const main = document.getElementById("main");
@@ -33,7 +44,9 @@
   const heroCopy = document.getElementById("heroCopy");
   const whoBox = document.getElementById("whoBox");
   const whoResult = document.getElementById("whoResult");
+  const revealChar = document.getElementById("revealChar");
   const revealWho = document.getElementById("revealWho");
+  const sheetLore = document.getElementById("sheetLore");
   const modeWall = document.getElementById("modeWall");
   const modeClass = document.getElementById("modeClass");
   const modeSolo = document.getElementById("modeSolo");
@@ -83,6 +96,17 @@
         seen.add(name);
         return true;
       });
+  }
+
+  function buildRiddlePieces() {
+    return CLASS_NAMES.map((name) => {
+      const ch = CLASS_SIGNATURES[name];
+      return Object.assign({}, JiaguChars.lookup(ch), {
+        owner: name,
+        flipped: false,
+        named: false,
+      });
+    });
   }
 
   function buildClassPieces(names) {
@@ -143,9 +167,10 @@
       renderWall(true);
     } else if (isClass) {
       heroCopy.textContent =
-        "全班的名字藏在甲骨裡。先猜這是什麼字，再猜是哪位同學，然後請那個人介紹自己。";
+        "每人名字裡只藏一個古字。先猜這幅小畫是什麼字，再猜是哪位同學。";
       setIntro("introClass");
       hidePlay();
+      startRiddle();
     } else {
       heroCopy.textContent =
         "把名字刻上去之後，甲骨會散落開來。點一點，就能翻成現在的字，並看看它的小故事。";
@@ -192,7 +217,7 @@
     const total = pieces.length;
     const shown = pieces.filter((p) => p.named).length;
     classProgress.textContent = total
-      ? "已現身 " + shown + " / " + total + " 位同學"
+      ? "已揭曉 " + shown + "／" + total + " 位同學"
       : "";
     if (shown >= total && total) {
       playHint.textContent = "全班的字都認出來了。點任何一塊，還可以再看故事。";
@@ -275,9 +300,11 @@
 
   function fillSheet(entry, classGuess) {
     document.getElementById("sheetOracle").innerHTML = glyphMarkup(entry);
-    document.getElementById("sheetTitle").textContent = entry.char;
-    document.getElementById("sheetPinyin").textContent = entry.pinyin || "";
+    const kicker = document.getElementById("sheetKicker");
+    const title = document.getElementById("sheetTitle");
+    const pinyin = document.getElementById("sheetPinyin");
     const badge = document.getElementById("sheetBadge");
+    const ownerEl = document.getElementById("sheetOwner");
     badge.textContent = entry.eraMeta.label;
     badge.className = "sheet-badge badge " + entry.era;
     document.getElementById("sheetMeaning").textContent = entry.meaning;
@@ -287,13 +314,19 @@
     if (mode === "wall") {
       const slab = wallSlabs[entry.slabIndex];
       const decoded = slab && slab.decoded;
+      kicker.textContent = "現在這樣寫";
+      title.textContent = entry.char;
+      title.classList.remove("is-mystery");
+      pinyin.textContent = entry.pinyin || "";
+      badge.hidden = false;
+      if (sheetLore) sheetLore.hidden = false;
       whoBox.hidden = false;
       whoResult.hidden = false;
+      if (revealChar) revealChar.hidden = true;
       revealWho.hidden = true;
       document.getElementById("whoPrompt").textContent = decoded
         ? "這是誰的名字裡的字？"
         : "這是同一排名字裡的一個字";
-      const ownerEl = document.getElementById("sheetOwner");
       ownerEl.textContent = decoded ? slab.name : "";
       ownerEl.hidden = !decoded;
       document.getElementById("sheetCue").textContent = decoded
@@ -307,15 +340,43 @@
       return;
     }
 
+    if (classGuess && !entry.flipped) {
+      kicker.textContent = "先看這幅小畫";
+      title.textContent = "？";
+      title.classList.add("is-mystery");
+      pinyin.textContent = "";
+      badge.hidden = true;
+      if (sheetLore) sheetLore.hidden = true;
+      whoBox.hidden = false;
+      whoResult.hidden = true;
+      if (revealChar) revealChar.hidden = false;
+      revealWho.hidden = true;
+      document.getElementById("whoPrompt").textContent = "猜猜：這是名字裡的哪一個字？";
+      ownerEl.textContent = "";
+      ownerEl.hidden = true;
+      document.getElementById("sheetCue").textContent = "";
+      whoRevealed = false;
+      return;
+    }
+
+    kicker.textContent = "現在這樣寫";
+    title.textContent = entry.char;
+    title.classList.remove("is-mystery");
+    pinyin.textContent = entry.pinyin || "";
+    badge.hidden = false;
+    if (sheetLore) sheetLore.hidden = false;
+
     whoRevealed = !classGuess || entry.named;
     whoBox.hidden = !classGuess;
     whoResult.hidden = !whoRevealed;
-    revealWho.hidden = whoRevealed;
+    if (revealChar) revealChar.hidden = true;
+    revealWho.hidden = !classGuess || whoRevealed;
     document.getElementById("whoPrompt").textContent = whoRevealed
       ? "這位同學可以介紹自己了"
       : "這是誰的名字裡的字？先讓大家猜一猜。";
     if (whoRevealed && entry.owner) {
-      document.getElementById("sheetOwner").textContent = entry.owner;
+      ownerEl.hidden = false;
+      ownerEl.textContent = entry.owner;
       document.getElementById("sheetCue").textContent =
         "請「" +
         entry.owner +
@@ -325,7 +386,8 @@
         entry.char +
         "」，讓我想到……";
     } else {
-      document.getElementById("sheetOwner").textContent = "";
+      ownerEl.textContent = "";
+      ownerEl.hidden = true;
       document.getElementById("sheetCue").textContent = "";
     }
   }
@@ -341,9 +403,13 @@
   function closeSheet() {
     if (sheet.hidden) return;
     sheet.classList.remove("is-on");
-    scatter.classList.remove("is-drawing");
-    scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
-    nameWall && nameWall.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+    const keepSpot =
+      mode === "class" && pieces[activeIndex] && !pieces[activeIndex].named;
+    if (!keepSpot) {
+      scatter.classList.remove("is-drawing");
+      scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+      nameWall && nameWall.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+    }
     if (main) main.inert = false;
     window.setTimeout(() => {
       sheet.hidden = true;
@@ -357,14 +423,19 @@
     if (!entry) return;
     lastFocus = piece;
     activeIndex = index;
-    const firstFlip = !entry.flipped;
-    entry.flipped = true;
-    piece.classList.add("is-flipped");
-    piece.setAttribute("aria-label", "現在的字：" + entry.char);
     scatter.classList.add("is-drawing");
     scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
     piece.classList.add("is-spotlight");
     const classGuess = mode === "class" && Boolean(entry.owner);
+    if (classGuess && !entry.flipped) {
+      playHint.textContent = "看着這幅小畫。它像什麼？猜猜是什麼字。";
+      openSheet(entry, true);
+      return;
+    }
+    const firstFlip = !entry.flipped;
+    entry.flipped = true;
+    piece.classList.add("is-flipped");
+    piece.setAttribute("aria-label", "現在的字：" + entry.char);
     if (mode !== "class") {
       if (firstFlip) playHint.textContent = "再點別的甲骨，或再看一次故事。";
     } else if (!entry.named) {
@@ -409,6 +480,19 @@
     window.setTimeout(() => openSheet(entry, false), delay);
   }
 
+  function revealCharNow() {
+    const entry = pieces[activeIndex];
+    const piece = scatter.querySelector('[data-index="' + activeIndex + '"]');
+    if (!entry || entry.flipped) return;
+    entry.flipped = true;
+    if (piece) {
+      piece.classList.add("is-flipped");
+      piece.setAttribute("aria-label", "現在的字：" + entry.char);
+    }
+    playHint.textContent = "字已經翻開了。猜猜這是哪位同學？";
+    fillSheet(entry, true);
+  }
+
   function revealOwner() {
     const entry = pieces[activeIndex];
     if (!entry) return;
@@ -416,8 +500,11 @@
     whoRevealed = true;
     whoResult.hidden = false;
     revealWho.hidden = true;
+    if (revealChar) revealChar.hidden = true;
     document.getElementById("whoPrompt").textContent = "這位同學可以介紹自己了";
-    document.getElementById("sheetOwner").textContent = entry.owner || "";
+    const ownerEl = document.getElementById("sheetOwner");
+    ownerEl.hidden = false;
+    ownerEl.textContent = entry.owner || "";
     document.getElementById("sheetCue").textContent = entry.owner
       ? "請「" +
         entry.owner +
@@ -429,6 +516,15 @@
       : "";
     const piece = scatter.querySelector('[data-index="' + activeIndex + '"]');
     if (piece) piece.classList.add("is-named");
+    updateProgress();
+  }
+
+  function startRiddle() {
+    if (!window.JiaguChars) return;
+    rosterInput.value = CLASS_NAMES.join("\n");
+    rosterBox.open = false;
+    renderPieces(shuffle(buildRiddlePieces()));
+    playHint.textContent = "九塊甲骨散落了。抽出一塊，先猜字，再猜人。";
     updateProgress();
   }
 
@@ -502,7 +598,7 @@
 
   document.getElementById("carveClass").addEventListener("click", startClass);
   document.getElementById("drawOne").addEventListener("click", drawOne);
-  document.getElementById("resetClass").addEventListener("click", startClass);
+  document.getElementById("resetClass").addEventListener("click", startRiddle);
   document.getElementById("editRoster").addEventListener("click", () => {
     rosterBox.open = true;
     rosterInput.focus();
@@ -519,6 +615,7 @@
     });
   });
 
+  if (revealChar) revealChar.addEventListener("click", revealCharNow);
   revealWho.addEventListener("click", revealOwner);
   if (sheetClose) sheetClose.addEventListener("click", closeSheet);
   if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
@@ -526,11 +623,7 @@
     if (event.key === "Escape" && !sheet.hidden) closeSheet();
   });
 
-  try {
-    rosterInput.value = localStorage.getItem(STORAGE_KEY) || SAMPLE;
-  } catch (err) {
-    rosterInput.value = SAMPLE;
-  }
-  rosterBox.open = true;
+  rosterInput.value = CLASS_NAMES.join("\n");
+  rosterBox.open = false;
   setMode("wall");
 })();
