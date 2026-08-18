@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=ice1" />
+  <link rel="stylesheet" href="styles.css?v=wall2" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -30,15 +30,34 @@
           <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
         </svg>
         <h1>桃源契文</h1>
-        <p id="heroCopy">全班的名字藏在甲骨裡。先猜這是什麼字，再猜是哪位同學，然後請那個人介紹自己。</p>
+        <p id="heroCopy">九個名字藏進古文字裡。先看圖畫畫的是什麼，點下去會翻成現在的字，再跳出一塊磨砂小百科。</p>
       </section>
 
       <nav class="mode-switch" role="tablist" aria-label="使用方式">
-        <button type="button" role="tab" id="modeClass" aria-selected="true" class="is-on">課堂破冰</button>
+        <button type="button" role="tab" id="modeWall" aria-selected="true" class="is-on">本班名牆</button>
+        <button type="button" role="tab" id="modeClass" aria-selected="false">課堂破冰</button>
         <button type="button" role="tab" id="modeSolo" aria-selected="false">自己查名字</button>
       </nav>
 
-      <section class="class-panel" id="classPanel">
+      <section class="wall-panel" id="wallPanel">
+        <details class="how-play">
+          <summary>這節課怎麼玩</summary>
+          <ol class="play-steps">
+            <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
+            <li>點一塊甲骨，看它翻成現在的字，再讀磨砂框裡的小故事。</li>
+            <li>同一排都認完，這位同學的名字就會現身。</li>
+            <li>沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件。</li>
+          </ol>
+        </details>
+        <div class="wall-toolbar">
+          <p class="play-hint" id="wallHint">同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。</p>
+          <p class="class-progress" id="wallProgress" role="status"></p>
+          <button type="button" class="btn-ghost" id="resetWall">重新蓋上</button>
+        </div>
+        <div class="name-wall" id="nameWall"></div>
+      </section>
+
+      <section class="class-panel" id="classPanel" hidden>
         <details class="roster-box" id="rosterBox">
           <summary>貼上課堂名單</summary>
           <p class="roster-help">一人一行。每人會藏一個最好看、最像圖畫的字——不一定是甲骨文，金文、小篆的零件也可以。</p>
@@ -77,7 +96,16 @@
       </form>
 
       <aside class="intro" id="intro">
-        <div id="introClass">
+        <div id="introWall">
+          <h2>這節課怎麼玩</h2>
+          <ol class="play-steps">
+            <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
+            <li>點一塊甲骨，看它翻成現在的字，再讀磨砂框裡的小故事。</li>
+            <li>同一排都認完，這位同學的名字就會現身。</li>
+            <li>沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件。</li>
+          </ol>
+        </div>
+        <div id="introClass" hidden>
           <h2>這節課怎麼玩</h2>
           <ol class="play-steps">
             <li>老師先把全班名字刻成甲骨，投影在前面。</li>
@@ -130,8 +158,8 @@
     </footer>
   </div>
 
-  <script src="glyphs.js?v=ice1"></script>
-  <script src="characters.js?v=ice1"></script>
-  <script src="app.js?v=ice1"></script>
+  <script src="glyphs.js?v=wall2"></script>
+  <script src="characters.js?v=wall2"></script>
+  <script src="app.js?v=wall2"></script>
 </body>
 </html>

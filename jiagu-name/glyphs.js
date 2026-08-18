@@ -1454,6 +1454,147 @@
       path("M58 18 H86 V42 H58 Z") +
       path("M58 54 H86 V86 H58 Z") +
       line(58, 70, 86, 70, true),
+    ke:
+      path("M36 8 Q50 0 50 22") +
+      path("M50 8 H70") +
+      path("M28 38 H72 V86 H28 Z"),
+    er_child:
+      path("M32 38 C28 12 72 12 68 38 C72 58 28 58 32 38") +
+      path("M40 10 Q50 0 60 10") +
+      dot(42, 34, 2.6) +
+      dot(58, 34, 2.6) +
+      line(50, 58, 50, 78) +
+      path("M32 68 H68") +
+      path("M34 92 Q50 78 66 92"),
+    ling_cmd:
+      path("M16 34 L50 8 L84 34") +
+      path("M50 34 V46") +
+      path("M38 52 C34 78 66 78 62 52") +
+      path("M50 46 V68") +
+      path("M32 90 Q50 74 68 90"),
+    ruo:
+      path("M50 16 C24 4 16 36 34 46") +
+      path("M50 16 C76 4 84 36 66 46") +
+      line(50, 16, 50, 58) +
+      path("M30 58 H70") +
+      path("M34 88 Q50 70 66 88"),
+    zhi_foot:
+      path("M50 12 V62") +
+      path("M50 28 L24 16") +
+      path("M50 36 L76 20") +
+      path("M28 78 Q50 62 72 78") +
+      path("M22 88 H78"),
+    fu_hill:
+      path("M38 10 C18 22 18 38 38 46") +
+      path("M38 46 C16 58 16 74 38 82") +
+      path("M38 82 C20 90 28 98 48 94") +
+      path("M38 10 V94"),
+    hu_door:
+      path("M28 12 H78 V88 H28 Z") +
+      path("M28 12 V88") +
+      line(28, 42, 78, 42, true) +
+      circle(40, 58, 4, true),
+    yu_brush:
+      path("M50 8 V88") +
+      path("M34 28 H66") +
+      path("M28 48 C50 40 50 40 72 48") +
+      path("M32 68 H68"),
+    xi_cloth:
+      path("M22 18 H78") +
+      path("M50 18 V86") +
+      path("M28 18 L72 78") +
+      path("M72 18 L28 78") +
+      path("M30 86 H70"),
+    wei_tiny:
+      path("M18 18 C12 48 22 78 16 88") +
+      path("M28 28 H46") +
+      path("M28 48 H46") +
+      path("M28 68 H46") +
+      path("M62 16 C84 28 86 54 68 66") +
+      path("M58 78 Q70 92 84 74"),
+    gan_dawn:
+      circle(50, 20, 10) +
+      line(50, 30, 50, 86) +
+      path("M22 48 H78") +
+      path("M30 66 H70") +
+      path("M36 86 H64"),
+    zhao_begin:
+      path("M14 12 H46 V86 H14 Z") +
+      line(14, 42, 46, 42, true) +
+      path("M62 10 V86") +
+      path("M52 30 H78") +
+      path("M48 52 C62 44 62 44 86 52") +
+      path("M70 52 L88 22"),
+    qiang_clang:
+      path("M12 62 H44") +
+      path("M28 28 V62") +
+      path("M16 46 H40") +
+      circle(18, 74, 4) +
+      circle(28, 80, 4) +
+      circle(38, 74, 4) +
+      path("M54 16 V86") +
+      path("M54 16 C78 8 90 36 70 48") +
+      path("M58 48 H90") +
+      path("M70 48 V78") +
+      path("M60 78 H84"),
+    nuo:
+      path("M18 12 C12 26 12 36 18 44") +
+      path("M8 44 H32 V86 H8 Z") +
+      line(8, 58, 32, 58, true) +
+      line(8, 72, 32, 72, true) +
+      path("M66 14 C44 4 38 34 54 44") +
+      path("M66 14 C88 4 94 34 78 44") +
+      line(66, 14, 66, 56) +
+      path("M50 56 H82") +
+      path("M52 86 Q66 70 80 86"),
+    ling_bell:
+      path("M12 62 H44") +
+      path("M28 28 V62") +
+      path("M16 46 H40") +
+      circle(18, 74, 4) +
+      circle(28, 80, 4) +
+      circle(38, 74, 4) +
+      path("M52 34 L72 10 L90 34") +
+      path("M72 34 V46") +
+      path("M62 52 C58 78 86 78 82 52") +
+      path("M72 46 V66") +
+      path("M58 88 Q72 74 86 88"),
+    xi_river:
+      path("M14 16 C6 40 24 54 14 86") +
+      path("M28 18 C18 42 38 56 28 86") +
+      path("M54 18 H90") +
+      path("M72 18 V86") +
+      path("M58 18 L86 78") +
+      path("M86 18 L58 78") +
+      path("M58 86 H86"),
+    wu_mound:
+      path("M28 12 C10 24 10 40 28 48") +
+      path("M28 48 C8 60 8 76 28 84") +
+      path("M28 12 V90") +
+      path("M48 52 H90") +
+      path("M74 16 L74 84") +
+      path("M74 28 L90 16") +
+      path("M58 78 Q72 62 86 78") +
+      path("M52 88 H90"),
+    wei_drizzle:
+      path("M14 16 C6 40 24 54 14 86") +
+      path("M28 18 C18 42 38 56 28 86") +
+      path("M50 16 C44 44 54 74 48 88") +
+      path("M58 26 H74") +
+      path("M58 44 H74") +
+      path("M58 62 H74") +
+      path("M80 18 C96 32 96 56 82 68") +
+      path("M76 78 Q86 92 96 76"),
+    han_quill:
+      path("M22 14 V86") +
+      path("M22 28 L38 20") +
+      path("M22 50 L40 40") +
+      path("M22 72 L38 62") +
+      circle(70, 20, 10) +
+      line(70, 30, 70, 86) +
+      path("M50 48 H90") +
+      path("M56 66 H84") +
+      path("M60 86 H80"),
   };
 
   function inner(key) {
@@ -1549,6 +1690,12 @@
     錢: "qian_money", 钱: "qian_money",
     佳: "jia_fine", 慧: "hui_wis", 曉: "xiao_dawn", 晓: "xiao_dawn",
     悅: "yue_joy", 悦: "yue_joy", 皓: "hao_bright", 菲: "fei", 雯: "wen_cloud",
+    可: "ke", 兒: "er_child", 儿: "er_child",
+    宗: ["roof", "shi_altar"],
+    晟: ["side", "ri", "cheng"],
+    肇: "zhao_begin", 鏘: "qiang_clang", 锵: "qiang_clang",
+    諾: "nuo", 诺: "nuo", 鈴: "ling_bell", 铃: "ling_bell",
+    浠: "xi_river", 陚: "wu_mound", 溦: "wei_drizzle", 翰: "han_quill",
   };
 
   function renderSpec(spec) {
