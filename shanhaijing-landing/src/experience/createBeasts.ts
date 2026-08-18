@@ -90,8 +90,8 @@ export function createKunBeast(): THREE.Group {
   light.position.set(3, 1.2, 0)
   group.add(light)
 
-  group.position.set(8, 2.6, -66)
-  group.scale.setScalar(1.45)
+  group.position.set(-14, -42, 2)
+  group.scale.setScalar(0.92)
   return group
 }
 
@@ -127,7 +127,7 @@ export function createPengBeast(): THREE.Group {
   wingR.position.set(7.2, 0.3, 0.2)
   group.add(wingR)
 
-  group.position.set(0, 18, -108)
+  group.position.set(0, 34, -16)
   return group
 }
 
@@ -172,7 +172,7 @@ export function createDragonBeast(): THREE.Group {
   group.add(eye)
 
   group.add(spine)
-  group.position.set(-2, 3.2, -148)
+  group.position.set(-1, 16, -34)
   group.rotation.y = 0.5
   return group
 }
@@ -212,7 +212,7 @@ export function createFoxBeast(): THREE.Group {
   }
   group.add(tails)
 
-  group.position.set(3.2, 2.1, -186)
+  group.position.set(2.4, 5.2, -48)
   return group
 }
 
@@ -233,7 +233,7 @@ export function createBrokenPeak(): THREE.Group {
     mesh.rotation.set(shard.r[0], shard.r[1], shard.r[2])
     group.add(mesh)
   })
-  group.position.set(1, -0.4, -150)
+  group.position.set(1, 14, -34)
   return group
 }
 
@@ -246,36 +246,37 @@ export function tickBeasts(
   t: number,
   time: number,
 ): void {
-  const kunGate = gate(t, 0.2, 0.28, 0.42, 0.5)
+  const kunGate = gate(t, 0.3, 0.38, 0.52, 0.6)
   setOpacity(kun, kunGate)
-  kun.position.x = lerp(-8, 22, clamp((t - 0.2) / 0.26, 0, 1))
-  kun.position.y = 2.6 + Math.sin(time * 0.7) * 0.8
-  kun.position.z = -66
-  kun.rotation.y = 0.55
-  kun.rotation.z = Math.sin(time * 0.55) * 0.05
-  kun.scale.setScalar(1.05 + kunGate * 0.12)
+  kun.position.x = lerp(-14, 16, clamp((t - 0.3) / 0.24, 0, 1))
+  kun.position.y = -42 + Math.sin(time * 0.7) * 1.4
+  kun.position.z = 2
+  kun.rotation.y = 0.9
+  kun.rotation.z = Math.sin(time * 0.55) * 0.08
+  kun.scale.setScalar(1.08 + kunGate * 0.1)
 
-  const pengGate = gate(t, 0.44, 0.54, 0.66, 0.76)
+  const pengGate = gate(t, 0.52, 0.6, 0.74, 0.84)
   setOpacity(peng, pengGate)
   peng.position.set(
-    Math.sin(time * 0.25) * 3.5,
-    lerp(8, 22, clamp((t - 0.44) / 0.22, 0, 1)),
-    -108,
+    Math.sin(time * 0.25) * 2.4,
+    lerp(18, 40, clamp((t - 0.52) / 0.2, 0, 1)),
+    -16,
   )
-  peng.rotation.x = -0.18
+  peng.rotation.x = -0.35
   const flap = Math.sin(time * 3.4) * 0.32 * pengGate
   const wingL = peng.getObjectByName('wingL')
   const wingR = peng.getObjectByName('wingR')
   if (wingL) wingL.rotation.z = 0.28 + flap
   if (wingR) wingR.rotation.z = -0.28 - flap
 
-  const peakGate = gate(t, 0.58, 0.68, 0.84, 0.92)
+  const peakGate = gate(t, 0.7, 0.78, 0.9, 0.96)
   setOpacity(peak, peakGate)
-  peak.rotation.y = time * 0.03
+  peak.position.set(1, 14, -34)
+  peak.rotation.y = time * 0.04
 
-  const dragonGate = gate(t, 0.6, 0.7, 0.82, 0.9)
+  const dragonGate = gate(t, 0.72, 0.8, 0.9, 0.97)
   setOpacity(dragon, dragonGate)
-  dragon.position.set(-2 + Math.sin(time * 0.4) * 0.8, 3.2, -148)
+  dragon.position.set(-1 + Math.sin(time * 0.4) * 0.8, 16, -34)
   dragon.rotation.y = 0.45 + Math.sin(time * 0.5) * 0.12
   const spine = dragon.getObjectByName('spine')
   spine?.children.forEach((seg, index) => {
@@ -283,9 +284,9 @@ export function tickBeasts(
     seg.position.x = Math.sin(time * 1.4 + index * 0.45) * 2.4
   })
 
-  const foxGate = gate(t, 0.76, 0.84, 0.96, 1)
+  const foxGate = gate(t, 0.84, 0.9, 0.98, 1)
   setOpacity(fox, foxGate)
-  fox.position.set(3.2, 2.1 + Math.sin(time * 1.1) * 0.12, -186)
+  fox.position.set(2.4, 5.2 + Math.sin(time * 1.1) * 0.2, -48)
   fox.rotation.y = -0.35 + Math.sin(time * 0.6) * 0.08
   const tails = fox.getObjectByName('tails')
   tails?.children.forEach((tail, index) => {

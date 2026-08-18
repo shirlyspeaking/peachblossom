@@ -238,7 +238,7 @@ a {
 .scroll-spacer {
   position: relative;
   z-index: 0;
-  height: 720vh;
+  height: 820vh;
   pointer-events: none;
 }
 

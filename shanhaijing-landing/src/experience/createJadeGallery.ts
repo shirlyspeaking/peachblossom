@@ -58,9 +58,9 @@ export function createRelics(): { group: THREE.Group; meshes: THREE.Mesh[] } {
   group.name = 'Relics'
   const meshes: THREE.Mesh[] = []
   const spots = [
-    { x: -7, y: 2.2, z: -208 },
-    { x: 6.5, y: 2.6, z: -224 },
-    { x: 0, y: 3.1, z: -240 },
+    { x: -5.5, y: 7, z: -52 },
+    { x: 4.8, y: -1.5, z: -56 },
+    { x: 0.4, y: 3.2, z: -62 },
   ]
 
   JADES.forEach((jade, index) => {

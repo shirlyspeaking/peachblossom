@@ -62,8 +62,8 @@ export function createIsland(): THREE.Group {
     }
   })
 
-  const mound = new THREE.Mesh(
-    new THREE.CylinderGeometry(5.8, 7.4, 0.7, 12),
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(4.7, 0.62, 8, 20),
     new THREE.MeshStandardMaterial({
       color: 0xb7bec8,
       roughness: 0.92,
@@ -71,15 +71,16 @@ export function createIsland(): THREE.Group {
       flatShading: true,
     }),
   )
-  mound.position.y = -0.28
-  group.add(mound)
+  rim.rotation.x = Math.PI / 2
+  rim.position.y = -0.22
+  group.add(rim)
 
   const innerCore = new THREE.Mesh(
     new THREE.SphereGeometry(1.55, 20, 14),
     new THREE.MeshBasicMaterial({ color: 0xffffff }),
   )
-  innerCore.position.y = 1.7
-  innerCore.scale.set(0.62, 0.78, 0.62)
+  innerCore.position.set(0, 2.85, 0)
+  innerCore.scale.set(0.5, 0.42, 0.5)
   group.add(innerCore)
 
   const glow = createRadialSprite('rgba(255, 255, 255, 1)', 'rgba(210, 228, 248, 0.42)')

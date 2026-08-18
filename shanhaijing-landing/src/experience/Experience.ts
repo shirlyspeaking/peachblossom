@@ -13,6 +13,7 @@ import {
 } from './createBeasts'
 import { createCloudField, tickClouds } from './createClouds'
 import { createIsland } from './createIsland'
+import { createIceShaft } from './createIceShaft'
 import { createRelics, JADES, tickRelics, type JadeInfo } from './createJadeGallery'
 import { createMountains } from './createMountains'
 import { clamp, damp, lerp, smoothstep } from './math'
@@ -51,33 +52,41 @@ const STORY = [
     hint: 'Scroll down to discover',
   },
   {
-    until: 0.26,
-    name: '裂冰',
-    verse: '下捲入海。冰面裂開，北冥在腳下。',
+    until: 0.22,
+    name: '入縫',
+    verse: '鑽進冰塊縫裡。上下左右都是冰，沒有地面。',
     beastName: '',
     beastLine: '',
-    hint: 'Through the ice',
+    hint: 'Into the crack',
   },
   {
-    until: 0.46,
+    until: 0.34,
+    name: '下墜',
+    verse: '縫的另一頭是深淵。鏡頭往下掉，冰塊從身側掠過。',
+    beastName: '',
+    beastLine: '',
+    hint: 'Falling',
+  },
+  {
+    until: 0.52,
     name: '鯤',
-    verse: '北冥有魚，其名為鯤。鯤之大，不知其幾千里也。',
+    verse: '墜入北冥。魚不在前方的地平線上，而從你身側游過。',
     beastName: '鯤',
     beastLine: '從冰海深處游來',
     hint: 'A fish named Kun',
   },
   {
-    until: 0.64,
+    until: 0.7,
     name: '鵬',
-    verse: '化而為鳥，其名為鵬。翼若垂天之雲。',
+    verse: '仰頭。化而為鳥，整座冰層被翅膀掀開。',
     beastName: '鵬',
     beastLine: '破冰升空',
     hint: 'Then it becomes a bird',
   },
   {
-    until: 0.8,
+    until: 0.86,
     name: '應龍',
-    verse: '不周既折，應龍盤於缺處。天柱折，地維絕。',
+    verse: '浮冰裡沒有山腳。不周是懸在空中的斷口。',
     beastName: '應龍',
     beastLine: '盤據不周之折',
     hint: 'The broken mountain',
@@ -103,7 +112,7 @@ const STORY = [
 export class Experience {
   readonly renderer: THREE.WebGLRenderer
   readonly scene = new THREE.Scene()
-  readonly camera = new THREE.PerspectiveCamera(38, 1, 0.1, 360)
+  readonly camera = new THREE.PerspectiveCamera(36, 1, 0.1, 360)
   readonly reduced: boolean
 
   private readonly hooks: Hooks
@@ -154,48 +163,47 @@ export class Experience {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
     this.renderer.toneMappingExposure = 1.08
 
-    this.scene.fog = new THREE.Fog(this.fogColor, 12, 58)
+    this.scene.fog = new THREE.Fog(this.fogColor, 10, 42)
     this.scene.background = this.fogColor
-    this.camera.position.set(8.2, 5.6, 13.5)
+    this.camera.position.set(7.6, 5.5, 13)
 
     this.posCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(8.2, 5.6, 13.5),
-      new THREE.Vector3(4.2, 4.2, 8),
-      new THREE.Vector3(0.6, 2.8, -10),
-      new THREE.Vector3(-4, 4.6, -38),
-      new THREE.Vector3(-8, 6.5, -46),
-      new THREE.Vector3(-7, 6.8, -50),
-      new THREE.Vector3(-4, 7, -54),
-      new THREE.Vector3(3, 12, -88),
-      new THREE.Vector3(1, 16, -98),
-      new THREE.Vector3(8, 8.5, -132),
-      new THREE.Vector3(7, 7, -142),
-      new THREE.Vector3(-3, 5, -170),
-      new THREE.Vector3(1, 4.6, -178),
-      new THREE.Vector3(0, 5.6, -220),
+      new THREE.Vector3(7.6, 5.5, 13),
+      new THREE.Vector3(2.5, 3.6, 5.4),
+      new THREE.Vector3(0.45, 2.5, 1.3),
+      new THREE.Vector3(0.15, 1.5, -0.2),
+      new THREE.Vector3(1.1, -18, 1.4),
+      new THREE.Vector3(-8.5, -40, 7.5),
+      new THREE.Vector3(-3.5, -43, 4.5),
+      new THREE.Vector3(0.4, -24, 2.5),
+      new THREE.Vector3(2.2, 10, -8),
+      new THREE.Vector3(3.2, 31, -14),
+      new THREE.Vector3(9, 18, -26),
+      new THREE.Vector3(-3, 7.2, -40),
+      new THREE.Vector3(0.2, 1.4, -54),
     ])
     this.lookCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 2.6, 0.4),
-      new THREE.Vector3(0, 2.5, 0),
-      new THREE.Vector3(0, 1.4, -28),
-      new THREE.Vector3(4, 2.6, -60),
-      new THREE.Vector3(8, 2.5, -66),
-      new THREE.Vector3(10, 2.5, -68),
-      new THREE.Vector3(14, 2.6, -70),
-      new THREE.Vector3(0, 18, -108),
-      new THREE.Vector3(0, 20, -110),
-      new THREE.Vector3(0, 6.5, -150),
-      new THREE.Vector3(0, 6, -150),
-      new THREE.Vector3(3.2, 2.5, -186),
-      new THREE.Vector3(3.2, 2.3, -186),
-      new THREE.Vector3(0, 3.2, -240),
+      new THREE.Vector3(0, 2.8, 0.2),
+      new THREE.Vector3(0, 2.5, 0.1),
+      new THREE.Vector3(0, 1.9, -1.6),
+      new THREE.Vector3(0, -14, -1),
+      new THREE.Vector3(0.2, -36, 0.4),
+      new THREE.Vector3(5, -43, 0),
+      new THREE.Vector3(10, -42, -2),
+      new THREE.Vector3(0, 22, -8),
+      new THREE.Vector3(0, 34, -14),
+      new THREE.Vector3(0, 38, -18),
+      new THREE.Vector3(0, 14, -34),
+      new THREE.Vector3(2.4, 5.2, -48),
+      new THREE.Vector3(0, -5, -62),
     ])
 
     this.addLights()
     this.scene.add(createMountains())
     this.island = createIsland()
-    this.island.scale.setScalar(1.35)
+    this.island.scale.setScalar(1.45)
     this.scene.add(this.island)
+    this.scene.add(createIceShaft())
     this.clouds = createCloudField(isMobile)
     this.scene.add(this.clouds)
 
@@ -213,9 +221,9 @@ export class Experience {
     const dustCount = isMobile ? 420 : 1100
     const dustPositions = new Float32Array(dustCount * 3)
     for (let i = 0; i < dustCount; i++) {
-      dustPositions[i * 3] = (Math.random() - 0.5) * 80
-      dustPositions[i * 3 + 1] = Math.random() * 28
-      dustPositions[i * 3 + 2] = -250 + Math.random() * 280
+      dustPositions[i * 3] = (Math.random() - 0.5) * 28
+      dustPositions[i * 3 + 1] = -58 + Math.random() * 110
+      dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 36
     }
     this.dustBase = dustPositions.slice()
     const dustGeo = new THREE.BufferGeometry()
@@ -285,6 +293,12 @@ export class Experience {
     const fill = new THREE.DirectionalLight(0xb7c6d6, 0.5)
     fill.position.set(-11, 8, -40)
     this.scene.add(fill)
+    const abyss = new THREE.PointLight(0xd7e6f4, 18, 70, 1.6)
+    abyss.position.set(0, -46, 4)
+    this.scene.add(abyss)
+    const skyFill = new THREE.PointLight(0xf4f8fc, 10, 48, 1.8)
+    skyFill.position.set(2, 38, -12)
+    this.scene.add(skyFill)
   }
 
   private tick = (): void => {
@@ -306,23 +320,34 @@ export class Experience {
     this.posCurve.getPointAt(t, this.targetPos)
     this.lookCurve.getPointAt(t, this.targetLook)
 
-    const parallax = reducedMotion ? 0 : 0.9 * (1 - t * 0.4)
-    this.targetPos.x += this.pointer.x * parallax
-    this.targetPos.y += this.pointer.y * parallax * 0.4
+    const squeeze = smoothstep(0.1, 0.18, t) * (1 - smoothstep(0.26, 0.34, t))
+    const falling = smoothstep(0.28, 0.4, t) * (1 - smoothstep(0.52, 0.62, t))
+    const soar = smoothstep(0.55, 0.68, t)
+    const parallax = reducedMotion ? 0 : 0.9 * (1 - t * 0.35)
+    this.targetPos.x += this.pointer.x * (parallax + falling * 1.6)
+    this.targetPos.y += this.pointer.y * (parallax * 0.55 + falling * 0.9)
 
     this.camera.position.lerp(this.targetPos, reducedMotion ? 1 : 1 - Math.exp(-2.8 * dt))
     this.lookAt.lerp(this.targetLook, reducedMotion ? 1 : 1 - Math.exp(-2.6 * dt))
     this.camera.lookAt(this.lookAt)
 
-    this.fogColor.copy(this.mistNear).lerp(this.mistFar, smoothstep(0.2, 0.85, t))
+    this.camera.fov = lerp(36, 24, squeeze)
+    this.camera.fov = lerp(this.camera.fov, 58, falling)
+    this.camera.fov = lerp(this.camera.fov, 46, soar)
+    this.camera.updateProjectionMatrix()
+    if (!reducedMotion) {
+      this.camera.rotateZ(squeeze * 0.07 + falling * Math.sin(t * 20 + time * 0.45) * 0.18 + soar * -0.09)
+    }
+
+    this.fogColor.copy(this.mistNear).lerp(this.mistFar, lerp(squeeze * 0.15, 0.72, falling + soar * 0.4))
     const fog = this.scene.fog as THREE.Fog
     fog.color.copy(this.fogColor)
-    fog.near = lerp(12, 8, t)
-    fog.far = lerp(48, 78, Math.sin(t * Math.PI) * 0.85 + 0.15)
+    fog.near = lerp(lerp(10, 1.15, squeeze), 7, falling + soar * 0.5)
+    fog.far = lerp(lerp(40, 8.5, squeeze), 72, Math.max(falling, soar))
+    this.renderer.setClearColor(this.fogColor, 1)
 
-    const houseFade = 1 - smoothstep(0.16, 0.3, t)
-    this.island.visible = houseFade > 0.04
-    this.island.scale.setScalar(1.35 * (0.7 + houseFade * 0.3))
+    this.island.visible = true
+    this.island.scale.setScalar(1.45)
 
     if (!reducedMotion) {
       tickClouds(this.clouds, time, dt)
@@ -357,7 +382,7 @@ export class Experience {
       const by = this.dustBase[i * 3 + 1] ?? 0
       const bz = this.dustBase[i * 3 + 2] ?? 0
       pos.setX(i, bx + Math.sin(time * 0.18 + i) * 0.28)
-      pos.setY(i, ((by - time * 0.62) % 28 + 28) % 28)
+      pos.setY(i, ((((by - time * 1.8 + 58) % 110) + 110) % 110) - 58)
       pos.setZ(i, bz)
     }
     pos.needsUpdate = true
