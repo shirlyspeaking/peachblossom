@@ -334,8 +334,14 @@ body::after {
   margin-top: 18px;
 }
 
-.playfield.is-on {
-  display: block !important;
+.playfield[hidden],
+.search-panel[hidden],
+.class-panel[hidden],
+.class-toolbar[hidden],
+.who-box[hidden],
+.who-result[hidden],
+.intro [hidden] {
+  display: none !important;
 }
 
 .play-hint {
@@ -350,41 +356,72 @@ body::after {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 20px 28px;
-  min-height: 240px;
-  padding: 28px 12px 36px;
+  gap: 18px 22px;
+  min-height: 280px;
+  padding: 28px 16px 40px;
   border-radius: 32px;
   background:
     radial-gradient(circle at 18% 20%, oklch(0.98 0.02 20 / 0.9) 0%, transparent 36%),
     radial-gradient(circle at 86% 76%, oklch(0.95 0.03 155 / 0.55) 0%, transparent 32%),
-    color-mix(in srgb, var(--shell) 72%, transparent);
+    color-mix(in srgb, var(--bone) 55%, transparent);
   box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.scatter.is-mid {
+  gap: 12px 14px;
+}
+
+.scatter.is-dense {
+  gap: 8px 10px;
 }
 
 .bone-piece {
   flex: 0 0 auto;
-  width: 128px;
-  height: 128px;
+  width: 132px;
+  height: 148px;
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  transform: rotate(var(--r, 0deg)) scale(var(--s, 1));
-  animation: piece-pop 560ms var(--ease) both;
+  transform: rotate(var(--r, 0deg));
+  animation: piece-pop 640ms var(--ease) both;
+  animation-delay: var(--pop-delay, 0ms);
   z-index: 1;
+  transition: transform 280ms var(--ease), opacity 280ms var(--ease), filter 280ms var(--ease);
 }
 
-.bone-piece:nth-child(2) { animation-delay: 70ms; }
-.bone-piece:nth-child(3) { animation-delay: 140ms; }
-.bone-piece:nth-child(4) { animation-delay: 210ms; }
-.bone-piece:nth-child(5) { animation-delay: 280ms; }
-.bone-piece:nth-child(6) { animation-delay: 350ms; }
+.scatter.is-mid .bone-piece {
+  width: 108px;
+  height: 122px;
+}
+
+.scatter.is-dense .bone-piece {
+  width: 88px;
+  height: 100px;
+}
+
+.scatter.is-drawing .bone-piece {
+  opacity: 0.34;
+  filter: saturate(0.7);
+}
+
+.scatter.is-drawing .bone-piece.is-spotlight {
+  opacity: 1;
+  filter: none;
+  z-index: 6;
+  transform: rotate(0deg) scale(1.18);
+}
 
 .bone-piece:focus-visible {
   outline: 2px solid var(--cinnabar);
-  outline-offset: 6px;
+  outline-offset: 8px;
   z-index: 3;
+}
+
+.bone-piece.is-named {
+  outline: 2px solid color-mix(in srgb, var(--cinnabar) 55%, white);
+  outline-offset: 4px;
 }
 
 .bone-float,
@@ -394,22 +431,42 @@ body::after {
   height: 100%;
 }
 
+.bone-float {
+  animation: piece-idle 5.4s var(--ease) infinite;
+}
+
 .face {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
-  border-radius: 28px;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, #c9a8a4 40%, transparent),
-    var(--shadow);
+    inset 0 1px 0 color-mix(in srgb, white 55%, transparent),
+    0 16px 28px color-mix(in srgb, #8a4a58 16%, transparent);
+}
+
+.bone-piece[data-shape="1"] .face {
+  clip-path: polygon(14% 26%, 40% 6%, 82% 12%, 97% 44%, 88% 80%, 50% 98%, 12% 86%, 3% 52%);
+}
+.bone-piece[data-shape="2"] .face {
+  clip-path: polygon(8% 38%, 28% 10%, 70% 4%, 96% 32%, 92% 72%, 62% 98%, 18% 90%, 2% 62%);
+}
+.bone-piece[data-shape="3"] .face {
+  clip-path: polygon(18% 8%, 72% 2%, 98% 36%, 90% 78%, 58% 100%, 10% 88%, 4% 48%, 12% 22%);
+}
+.bone-piece[data-shape="4"] .face {
+  clip-path: polygon(6% 30%, 36% 4%, 86% 14%, 100% 52%, 80% 92%, 34% 100%, 4% 74%, 10% 46%);
+}
+.bone-piece[data-shape="5"] .face {
+  clip-path: polygon(20% 4%, 78% 10%, 98% 48%, 84% 88%, 42% 100%, 6% 78%, 2% 42%, 12% 16%);
 }
 
 .face-oracle {
   color: var(--ink);
   background:
-    radial-gradient(circle at 30% 24%, #fffdfb 0%, transparent 42%),
-    linear-gradient(180deg, #fff4ee 0%, #f0d8ce 100%);
+    radial-gradient(circle at 30% 22%, #fffdf8 0%, transparent 40%),
+    radial-gradient(circle at 78% 82%, #e7c9b4 0%, transparent 46%),
+    linear-gradient(160deg, #fff3e8 0%, #edd2c0 52%, #e2c0a8 100%);
 }
 
 .bone-piece.is-flipped .face-oracle {
@@ -418,16 +475,22 @@ body::after {
 
 .face-oracle svg,
 .face-oracle .fallback-glyph {
-  width: 68%;
-  height: 68%;
+  width: 62%;
+  height: 62%;
 }
 
 .face-modern {
   display: none;
-  font-family: "Noto Serif TC", serif;
-  font-size: calc(2.2rem * var(--s, 1));
+  font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+  font-size: 2.6rem;
   color: var(--cinnabar-deep);
-  background: linear-gradient(180deg, #fff 0%, #ffe8ea 100%);
+  background:
+    radial-gradient(circle at 30% 24%, #fff 0%, transparent 42%),
+    linear-gradient(180deg, #fff8f4 0%, #f7d5d4 100%);
+}
+
+.scatter.is-dense .face-modern {
+  font-size: 1.8rem;
 }
 
 .bone-piece.is-flipped .face-modern {
@@ -543,7 +606,7 @@ body::after {
 @keyframes piece-pop {
   from {
     opacity: 0;
-    transform: rotate(var(--r, 0deg)) scale(0.4);
+    transform: rotate(var(--r, 0deg)) scale(0.42);
   }
   to {
     opacity: 1;
@@ -681,6 +744,147 @@ body::after {
   color: var(--muted);
 }
 
+.mode-switch {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 22px auto 0;
+}
+
+.mode-switch button {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font: inherit;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--bone) 70%, white);
+}
+
+.mode-switch button.is-on {
+  color: #fff8f2;
+  border-color: transparent;
+  background: var(--cinnabar-deep);
+}
+
+.class-panel {
+  width: min(100%, 640px);
+  margin: 22px auto 0;
+  display: grid;
+  gap: 14px;
+}
+
+.roster-box {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--shell) 88%, white);
+  padding: 4px 16px 16px;
+}
+
+.roster-box summary {
+  cursor: pointer;
+  padding: 14px 4px;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 600;
+}
+
+.roster-help {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+
+.roster-box textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font: inherit;
+  line-height: 1.7;
+  color: var(--ink);
+  background: color-mix(in srgb, white 80%, var(--bone));
+}
+
+.class-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-primary,
+.btn-ghost {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.btn-primary {
+  border: 0;
+  color: #fff8f2;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cinnabar) 92%, white) 0%, var(--cinnabar-deep) 100%);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--cinnabar) 28%, transparent);
+}
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--shell) 80%, white);
+}
+
+.class-progress {
+  width: 100%;
+  text-align: center;
+  color: var(--cinnabar-deep);
+  font-size: 0.95rem;
+}
+
+.play-steps {
+  margin: 8px 0 0 1.1em;
+  display: grid;
+  gap: 8px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.who-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+  display: grid;
+  gap: 12px;
+}
+
+.who-prompt {
+  font-family: "Noto Serif TC", serif;
+  color: var(--ink);
+}
+
+.who-name {
+  font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  color: var(--cinnabar-deep);
+}
+
+.who-cue {
+  font-size: 0.98rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+
+.page.is-playing .mode-switch,
+.page.is-playing .class-panel details:not([open]) {
+  opacity: 0.92;
+}
+
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
@@ -711,8 +915,8 @@ body::after {
   }
 
   .bone-piece {
-    width: calc(84px * var(--s, 1));
-    height: calc(84px * var(--s, 1));
+    width: 96px;
+    height: 108px;
   }
 
   .sheet-pair {

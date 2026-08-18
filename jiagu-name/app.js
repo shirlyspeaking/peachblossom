@@ -1,43 +1,45 @@
 (function () {
+  const STORAGE_KEY = "peachblossom-jiagu-roster";
+  const SAMPLE = "陳小雨\n林安\n張樂\n王山\n李木\n黃日\n吳泉\n趙鹿";
+
+  const page = document.getElementById("page");
   const form = document.getElementById("nameForm");
   const input = document.getElementById("nameInput");
   const status = document.getElementById("status");
-  const ritual = document.getElementById("ritual");
   const playfield = document.getElementById("playfield");
   const scatter = document.getElementById("scatter");
   const playHint = document.getElementById("playHint");
   const intro = document.getElementById("intro");
-  const page = document.querySelector(".page");
   const sheet = document.getElementById("sheet");
   const sheetClose = document.getElementById("sheetClose");
   const sheetBackdrop = document.getElementById("sheetBackdrop");
+  const classPanel = document.getElementById("classPanel");
+  const rosterBox = document.getElementById("rosterBox");
+  const rosterInput = document.getElementById("rosterInput");
+  const classToolbar = document.getElementById("classToolbar");
+  const classProgress = document.getElementById("classProgress");
+  const heroCopy = document.getElementById("heroCopy");
+  const whoBox = document.getElementById("whoBox");
+  const whoResult = document.getElementById("whoResult");
+  const revealWho = document.getElementById("revealWho");
+  const modeClass = document.getElementById("modeClass");
+  const modeSolo = document.getElementById("modeSolo");
 
-  if (!form || !playfield || !scatter || !sheet) return;
+  if (!playfield || !scatter || !sheet) return;
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SLOTS = [
-    { s: 1.45, r: -14, dx: "-10px", dy: "18px" },
-    { s: 0.82, r: 16, dx: "22px", dy: "-12px" },
-    { s: 1.18, r: -6, dx: "8px", dy: "28px" },
-    { s: 1.36, r: 11, dx: "-18px", dy: "-6px" },
-    { s: 0.9, r: 20, dx: "16px", dy: "22px" },
-    { s: 0.74, r: -18, dx: "-4px", dy: "8px" },
-  ];
+  const BONE_SHAPES = 5;
 
-  let entries = [];
-  let foundCount = 0;
+  let mode = "class";
+  let pieces = [];
+  let activeIndex = -1;
   let lastFocus = null;
-
-  function parseName(raw) {
-    const chars = Array.from((raw || "").trim());
-    const cjk = chars.filter((ch) => window.JiaguChars && JiaguChars.isCjk(ch));
-    return cjk.slice(0, 6);
-  }
+  let whoRevealed = false;
 
   function glyphMarkup(entry) {
-    const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char, entry.glyph);
+    const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char);
     if (svg) return svg;
-    return `<span class="fallback-glyph">${entry.char}</span>`;
+    return `<span class="fallback-glyph" aria-hidden="true">兆</span>`;
   }
 
   function shuffle(list) {
@@ -51,53 +53,94 @@
     return copy;
   }
 
-  function openSheet(entry) {
-    document.getElementById("sheetOracle").innerHTML = glyphMarkup(entry);
-    document.getElementById("sheetTitle").textContent = entry.char;
-    document.getElementById("sheetPinyin").textContent = entry.pinyin || "";
-    const badge = document.getElementById("sheetBadge");
-    badge.textContent = entry.eraMeta.label;
-    badge.className = "sheet-badge badge " + entry.era;
-    document.getElementById("sheetMeaning").textContent = entry.meaning;
-    document.getElementById("sheetEra").textContent = entry.eraMeta.note;
-    document.getElementById("sheetStory").textContent = entry.story;
-    sheet.hidden = false;
-    requestAnimationFrame(() => sheet.classList.add("is-on"));
-    if (sheetClose) sheetClose.focus();
+  function parseRoster(raw) {
+    const seen = new Set();
+    return (raw || "")
+      .split(/[\n,，、;；]+/)
+      .map((line) => line.trim())
+      .filter((line) => line && window.JiaguChars && JiaguChars.parseName(line).length)
+      .filter((name) => {
+        if (seen.has(name)) return false;
+        seen.add(name);
+        return true;
+      });
   }
 
-  function closeSheet() {
-    if (sheet.hidden) return;
-    sheet.classList.remove("is-on");
-    window.setTimeout(() => {
-      sheet.hidden = true;
-      if (lastFocus) lastFocus.focus();
-    }, reduceMotion ? 0 : 180);
+  function buildClassPieces(names) {
+    const used = new Set();
+    return names.map((name) => {
+      const entry = JiaguChars.pickSignature(name, used);
+      if (entry && entry.char) used.add(entry.char);
+      return Object.assign({}, entry, { owner: name, flipped: false, named: false });
+    });
   }
 
-  function updateHint() {
-    if (!entries.length) return;
-    if (foundCount >= entries.length) {
-      playHint.textContent = "名字裡的字都認出來了。再點一次，還可以看故事。";
-      status.textContent = "你把散落的甲骨都翻開了。";
-    } else {
-      playHint.textContent = "點一點散落的甲骨，把它翻成現在的字。";
+  function buildSoloPieces(name) {
+    const chars = JiaguChars.parseName(name);
+    return chars.map((ch) =>
+      Object.assign({}, JiaguChars.lookup(ch), { owner: name, flipped: false, named: true })
+    );
+  }
+
+  function setMode(next) {
+    mode = next;
+    const isClass = mode === "class";
+    modeClass.classList.toggle("is-on", isClass);
+    modeSolo.classList.toggle("is-on", !isClass);
+    modeClass.setAttribute("aria-selected", String(isClass));
+    modeSolo.setAttribute("aria-selected", String(!isClass));
+    classPanel.hidden = !isClass;
+    form.hidden = isClass;
+    heroCopy.textContent = isClass
+      ? "全班的名字藏在甲骨裡。先猜這是什麼字，再猜是哪位同學，然後請那個人介紹自己。"
+      : "把名字刻上去之後，甲骨會散落開來。點一點，就能翻成現在的字，並看看它的小故事。";
+    if (intro) intro.hidden = false;
+    const introClass = document.getElementById("introClass");
+    const introSolo = document.getElementById("introSolo");
+    if (introClass) introClass.hidden = !isClass;
+    if (introSolo) introSolo.hidden = isClass;
+    hidePlay();
+  }
+
+  function hidePlay() {
+    playfield.hidden = true;
+    playfield.classList.remove("is-on");
+    if (page) page.classList.remove("is-playing");
+    if (intro) intro.hidden = false;
+    scatter.innerHTML = "";
+    scatter.classList.remove("is-drawing");
+    pieces = [];
+    activeIndex = -1;
+  }
+
+  function updateProgress() {
+    if (mode !== "class") return;
+    const total = pieces.length;
+    const shown = pieces.filter((p) => p.named).length;
+    classProgress.textContent = total
+      ? "已現身 " + shown + " / " + total + " 位同學"
+      : "";
+    if (shown >= total && total) {
+      playHint.textContent = "全班的字都認出來了。點任何一塊，還可以再看故事。";
     }
   }
 
-  function renderGame(nextEntries) {
-    entries = nextEntries;
-    foundCount = 0;
-    const slots = shuffle(SLOTS).slice(0, entries.length);
-    scatter.innerHTML = entries
+  function renderPieces(nextPieces) {
+    pieces = nextPieces;
+    activeIndex = -1;
+    const n = pieces.length;
+    scatter.className = "scatter" + (n > 16 ? " is-dense" : n > 10 ? " is-mid" : "");
+    scatter.innerHTML = pieces
       .map((entry, index) => {
-        const slot = slots[index];
+        const rot = ((index * 47) % 21) - 10;
+        const delay = Math.min(index * 45, 600);
         return `
           <button
             type="button"
             class="bone-piece"
             data-index="${index}"
-            style="--s:${slot.s}; --r:${slot.r}deg;"
+            data-shape="${(index % BONE_SHAPES) + 1}"
+            style="--r:${rot}deg; --pop-delay:${delay}ms;"
             aria-label="一塊甲骨，點擊翻成現在的字"
           >
             <span class="bone-float">
@@ -110,81 +153,201 @@
       })
       .join("");
 
+    playfield.hidden = false;
     playfield.classList.add("is-on");
-    playfield.style.display = "block";
     if (page) page.classList.add("is-playing");
-    if (intro) intro.classList.add("is-away");
-    if (ritual) {
-      ritual.classList.remove("is-on");
-      ritual.setAttribute("aria-hidden", "true");
-    }
-    updateHint();
+    if (intro) intro.hidden = true;
     scatter.querySelectorAll(".bone-piece").forEach((piece) => {
       piece.addEventListener("click", () => onPieceClick(piece));
     });
+    updateProgress();
+  }
+
+  function fillSheet(entry, classGuess) {
+    document.getElementById("sheetOracle").innerHTML = glyphMarkup(entry);
+    document.getElementById("sheetTitle").textContent = entry.char;
+    document.getElementById("sheetPinyin").textContent = entry.pinyin || "";
+    const badge = document.getElementById("sheetBadge");
+    badge.textContent = entry.eraMeta.label;
+    badge.className = "sheet-badge badge " + entry.era;
+    document.getElementById("sheetMeaning").textContent = entry.meaning;
+    document.getElementById("sheetEra").textContent = entry.eraMeta.note;
+    document.getElementById("sheetStory").textContent = entry.story;
+    whoRevealed = !classGuess || entry.named;
+    whoBox.hidden = !classGuess;
+    whoResult.hidden = !whoRevealed;
+    revealWho.hidden = whoRevealed;
+    document.getElementById("whoPrompt").textContent = whoRevealed
+      ? "這位同學可以介紹自己了"
+      : "這是誰的名字裡的字？先讓大家猜一猜。";
+    if (whoRevealed && entry.owner) {
+      document.getElementById("sheetOwner").textContent = entry.owner;
+      document.getElementById("sheetCue").textContent =
+        "請「" + entry.owner + "」站起來。跟大家說：我叫" +
+        entry.owner +
+        "。我名字裡的「" +
+        entry.char +
+        "」，讓我想到……";
+    } else {
+      document.getElementById("sheetOwner").textContent = "";
+      document.getElementById("sheetCue").textContent = "";
+    }
+  }
+
+  function openSheet(entry, classGuess) {
+    fillSheet(entry, classGuess);
+    sheet.hidden = false;
+    requestAnimationFrame(() => sheet.classList.add("is-on"));
+    if (sheetClose) sheetClose.focus();
+  }
+
+  function closeSheet() {
+    if (sheet.hidden) return;
+    sheet.classList.remove("is-on");
+    scatter.classList.remove("is-drawing");
+    scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+    window.setTimeout(() => {
+      sheet.hidden = true;
+      if (lastFocus) lastFocus.focus();
+    }, reduceMotion ? 0 : 180);
   }
 
   function onPieceClick(piece) {
     const index = Number(piece.dataset.index);
-    const entry = entries[index];
+    const entry = pieces[index];
     if (!entry) return;
     lastFocus = piece;
-    const firstFlip = !piece.classList.contains("is-flipped");
+    activeIndex = index;
+    const firstFlip = !entry.flipped;
+    entry.flipped = true;
     piece.classList.add("is-flipped");
     piece.setAttribute("aria-label", "現在的字：" + entry.char);
-    if (firstFlip) {
-      foundCount += 1;
-      updateHint();
+    scatter.classList.add("is-drawing");
+    scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+    piece.classList.add("is-spotlight");
+    const classGuess = mode === "class" && Boolean(entry.owner);
+    if (mode !== "class") {
+      if (firstFlip) playHint.textContent = "再點別的甲骨，或再看一次故事。";
+    } else if (!entry.named) {
+      playHint.textContent = "字已經翻開了。猜猜這是哪位同學？";
     }
-    openSheet(entry);
+    openSheet(entry, classGuess);
   }
 
-  function search(name) {
-    const chars = parseName(name);
-    status.textContent = "";
-    foundCount = 0;
-    sheet.classList.remove("is-on");
-    sheet.hidden = true;
+  function revealOwner() {
+    const entry = pieces[activeIndex];
+    if (!entry) return;
+    entry.named = true;
+    whoRevealed = true;
+    whoResult.hidden = false;
+    revealWho.hidden = true;
+    document.getElementById("whoPrompt").textContent = "這位同學可以介紹自己了";
+    document.getElementById("sheetOwner").textContent = entry.owner || "";
+    document.getElementById("sheetCue").textContent = entry.owner
+      ? "請「" + entry.owner + "」站起來。跟大家說：我叫" +
+        entry.owner +
+        "。我名字裡的「" +
+        entry.char +
+        "」，讓我想到……"
+      : "";
+    const piece = scatter.querySelector('[data-index="' + activeIndex + '"]');
+    if (piece) piece.classList.add("is-named");
+    updateProgress();
+  }
 
-    if (!name.trim()) {
-      if (intro) intro.classList.remove("is-away");
-      status.textContent = "先寫下一個名字吧。";
-      input.focus();
+  function startClass() {
+    if (!window.JiaguChars) return;
+    const names = parseRoster(rosterInput.value);
+    if (!names.length) {
+      classProgress.textContent = "請先貼上中文名字，一人一行。";
+      rosterBox.open = true;
+      rosterInput.focus();
       return;
     }
-    if (!chars.length) {
-      if (intro) intro.classList.remove("is-away");
-      status.textContent = "請輸入中文名字，例如「小雨」。";
+    try {
+      localStorage.setItem(STORAGE_KEY, rosterInput.value);
+    } catch (err) {}
+    renderPieces(shuffle(buildClassPieces(names)));
+    rosterBox.open = false;
+    classToolbar.hidden = false;
+    playHint.textContent = "甲骨散落了。抽出一塊，先猜字，再猜人。";
+    updateProgress();
+  }
+
+  function drawOne() {
+    const hidden = pieces
+      .map((p, i) => ({ p, i }))
+      .filter((item) => !item.p.named);
+    if (!hidden.length) {
+      playHint.textContent = "全班都現身了。";
+      return;
+    }
+    const pick = hidden[Math.floor(Math.random() * hidden.length)];
+    const piece = scatter.querySelector('[data-index="' + pick.i + '"]');
+    if (!piece) return;
+    scatter.classList.add("is-drawing");
+    scatter.querySelectorAll(".is-spotlight").forEach((el) => el.classList.remove("is-spotlight"));
+    piece.classList.add("is-spotlight");
+    piece.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    playHint.textContent = "看着這幅小畫。它像什麼？猜猜是什麼字。";
+    lastFocus = piece;
+  }
+
+  function searchSolo(name) {
+    status.textContent = "";
+    if (!name.trim()) {
+      status.textContent = "先寫下一個名字吧。";
+      input.focus();
       return;
     }
     if (!window.JiaguChars) {
       status.textContent = "字庫還沒載入完成，請再按一次。";
       return;
     }
-
-    const nextEntries = chars.map((ch) => JiaguChars.lookup(ch));
-    renderGame(nextEntries);
+    const next = buildSoloPieces(name);
+    if (!next.length) {
+      status.textContent = "請輸入中文名字，例如「小雨」。";
+      return;
+    }
+    renderPieces(next);
     status.textContent = "甲骨散落了。點一點看看。";
+    playHint.textContent = "點一點散落的甲骨，把它翻成現在的字。";
   }
+
+  modeClass.addEventListener("click", () => setMode("class"));
+  modeSolo.addEventListener("click", () => setMode("solo"));
+
+  document.getElementById("carveClass").addEventListener("click", startClass);
+  document.getElementById("drawOne").addEventListener("click", drawOne);
+  document.getElementById("resetClass").addEventListener("click", startClass);
+  document.getElementById("editRoster").addEventListener("click", () => {
+    rosterBox.open = true;
+    rosterInput.focus();
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    search(input.value);
+    searchSolo(input.value);
   });
-
   document.querySelectorAll(".chips [data-name]").forEach((btn) => {
     btn.addEventListener("click", () => {
       input.value = btn.dataset.name;
-      search(btn.dataset.name);
+      searchSolo(btn.dataset.name);
     });
   });
 
+  revealWho.addEventListener("click", revealOwner);
   if (sheetClose) sheetClose.addEventListener("click", closeSheet);
   if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !sheet.hidden) closeSheet();
   });
 
-  input.value = "小雨";
-  search("小雨");
+  try {
+    rosterInput.value = localStorage.getItem(STORAGE_KEY) || SAMPLE;
+  } catch (err) {
+    rosterInput.value = SAMPLE;
+  }
+  rosterBox.open = true;
+  setMode("class");
 })();
