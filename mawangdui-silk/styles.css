@@ -56,6 +56,10 @@ a {
   font-family: inherit;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .skip-link {
   position: absolute;
   left: 12px;
@@ -286,11 +290,12 @@ h2,
 }
 
 .rail-label {
-  margin: 0;
+  margin: 0 0 4px;
   text-align: center;
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  color: oklch(0.96 0.02 80);
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  color: oklch(0.96 0.02 80 / 0.8);
+  writing-mode: horizontal-tb;
 }
 
 .stamp-list {
@@ -445,6 +450,10 @@ h2,
   overflow: auto;
 }
 
+.dock.is-reading {
+  max-height: none;
+}
+
 .realm-chip {
   margin: 0;
   width: fit-content;
@@ -579,9 +588,15 @@ h2,
   .dock {
     border-left: 0;
     border-top: 1px solid var(--line);
-    max-height: 42dvh;
+    max-height: 38dvh;
   }
 
+  .dock.is-reading {
+    max-height: 52dvh;
+  }
+}
+
+@media (max-width: 560px) {
   .intro-realms {
     grid-template-columns: 1fr;
   }

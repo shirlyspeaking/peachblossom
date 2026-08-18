@@ -312,8 +312,11 @@ function renderHotspots() {
 
 function setMission() {
   const lore = $("lore");
+  const dock = $("dock");
   lore.hidden = true;
   lore.innerHTML = "";
+  dock.classList.remove("is-reading");
+  dock.scrollTop = 0;
   if (state.mode === "teacher") {
     $("realm-chip").textContent = "導覽";
     $("mission-title").textContent = "老師導覽";
@@ -351,11 +354,9 @@ function loreHtml(spot, withQuiz) {
     .join("");
   return `
     <div class="kind-row">
-      <b>${spot.name}</b>
       <span>${spot.realm}</span>
       <span>${spot.kind}</span>
     </div>
-    <p>${spot.story}</p>
     <p class="lore-meaning"><strong>它代表：</strong>${spot.meaning}</p>
     ${withQuiz ? `<div class="quiz"><h3>${spot.quiz.q}</h3>${options}<p class="feedback" id="quiz-feedback"></p></div>` : ""}
   `;
@@ -363,15 +364,18 @@ function loreHtml(spot, withQuiz) {
 
 function openSpot(spot, fromRiddle) {
   state.selected = spot.id;
+  const needQuiz = state.mode !== "teacher" && !state.found.has(spot.id);
   $("realm-chip").textContent = spot.realm;
   $("mission-title").textContent = spot.name;
-  $("mission-text").textContent = fromRiddle && !state.found.has(spot.id) ? "答對下面的題目，就能蓋上這個印記。" : spot.kind;
-  const needQuiz = state.mode !== "teacher" && !state.found.has(spot.id);
+  $("mission-text").textContent = spot.story;
   const lore = $("lore");
+  const dock = $("dock");
   lore.hidden = false;
   lore.innerHTML = loreHtml(spot, needQuiz);
-  if (!needQuiz && state.mode !== "teacher") {
-    $("btn-hint").hidden = state.mode !== "riddle";
+  dock.classList.add("is-reading");
+  dock.scrollTop = 0;
+  if (fromRiddle && needQuiz) {
+    $("btn-hint").hidden = true;
   }
   lore.querySelectorAll(".quiz-btn").forEach((btn) => {
     btn.addEventListener("click", () => grade(spot, Number(btn.dataset.index), btn));
@@ -407,6 +411,7 @@ function markFound(spot) {
   } else if (state.mode === "riddle") {
     const target = nextTarget();
     if (target) {
+      $("btn-hint").hidden = false;
       $("mission-text").textContent = "下一題：" + target.riddle;
     }
   }
@@ -414,14 +419,19 @@ function markFound(spot) {
 
 function showFinale() {
   $("screen-game").hidden = true;
+  $("screen-game").setAttribute("aria-hidden", "true");
   $("screen-finale").hidden = false;
+  $("screen-finale").removeAttribute("aria-hidden");
 }
 
 function start(mode) {
   state.mode = mode;
   $("screen-intro").hidden = true;
+  $("screen-intro").setAttribute("aria-hidden", "true");
   $("screen-finale").hidden = true;
+  $("screen-finale").setAttribute("aria-hidden", "true");
   $("screen-game").hidden = false;
+  $("screen-game").removeAttribute("aria-hidden");
   renderStamps();
   renderHotspots();
   setMission();
