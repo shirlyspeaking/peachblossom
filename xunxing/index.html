@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>尋姓・鑄徽 · 桃花源</title>
+  <meta name="description" content="中國古代姓氏文化課堂：上古八姓、溯源、百家姓、取號，最後鑄一枚只屬於你的族徽。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%237a2a22' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%237a2a22' stroke-width='1.4'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='26' font-family='serif' fill='%237a2a22'%3E姓%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body>
+  <a class="skip" href="#stage">跳到內容</a>
+
+  <section id="screen-intro" class="screen intro" aria-labelledby="intro-title">
+    <a class="back-home" href="../index.html">桃花源</a>
+    <div class="intro-sheet">
+      <p class="kicker">好學 · 中華文化學會 · 初級</p>
+      <h1 id="intro-title">尋姓・鑄徽</h1>
+      <p class="lead">
+        上古有姓有氏。姓是族號，氏是分支。戰國以後，人們以氏為姓。
+        今天從你的姓走一遭：猜起源、取一個號，再鑄一枚族徽帶走。
+      </p>
+      <form id="name-form" class="name-form">
+        <label for="surname-input">你的姓</label>
+        <div class="name-row">
+          <input id="surname-input" name="surname" type="text" maxlength="4" autocomplete="off" placeholder="林、歐陽、西門…" required />
+          <button type="submit" class="btn-primary">開卷</button>
+        </div>
+        <p class="form-hint">複姓請寫全，例如司徒、東郭。投影、手機都能用。</p>
+      </form>
+    </div>
+  </section>
+
+  <section id="screen-workshop" class="screen workshop" hidden>
+    <header class="topbar">
+      <a class="back-home" href="../index.html">桃花源</a>
+      <p class="you">
+        <span id="you-surname">姓</span>
+        <span id="you-hao" hidden></span>
+      </p>
+      <button type="button" class="text-btn" id="btn-restart">換一個姓</button>
+    </header>
+
+    <nav class="stations" aria-label="課堂五站">
+      <button type="button" class="station is-on" data-go="eight"><small>壹</small>八姓</button>
+      <button type="button" class="station" data-go="origin"><small>貳</small>溯源</button>
+      <button type="button" class="station" data-go="baijia"><small>參</small>百家</button>
+      <button type="button" class="station" data-go="hao"><small>肆</small>立號</button>
+      <button type="button" class="station" data-go="crest"><small>伍</small>鑄徽</button>
+    </nav>
+
+    <main id="stage" class="stage" tabindex="-1">
+      <article id="step-eight" class="step is-on" aria-labelledby="eight-title">
+        <p class="step-kicker">上古八大姓</p>
+        <h2 id="eight-title">它們有什麼共同點？</h2>
+        <ul class="eight-grid" id="eight-grid"></ul>
+        <div class="eight-actions">
+          <button type="button" class="btn-primary" id="btn-reveal-nv">找出共同點</button>
+        </div>
+        <div id="nv-reveal" class="nv-reveal" hidden>
+          <p class="nv-punch">都有<b>女</b>字旁。</p>
+          <p>這暗示先民曾經歷過母權社會。姓是一族的族號；後來子孫繁衍、散居各地，每一支另取一個標志，那就是<b>氏</b>。</p>
+          <dl class="clan-dl">
+            <div>
+              <dt>姓</dt>
+              <dd>族號。姬、姜、姚……</dd>
+            </div>
+            <div>
+              <dt>氏</dt>
+              <dd>分支。有巢氏、燧人氏、伏羲氏、神農氏</dd>
+            </div>
+          </dl>
+          <p class="quiet">戰國以後人們以氏為姓，漢代以後就通稱為姓。</p>
+        </div>
+      </article>
+
+      <article id="step-origin" class="step" hidden aria-labelledby="origin-title">
+        <p class="step-kicker">猜猜你的姓從哪裡來</p>
+        <h2 id="origin-title">五種常見的來源</h2>
+        <p class="prompt" id="origin-prompt"></p>
+        <div class="origin-choices" id="origin-choices"></div>
+        <div id="origin-result" class="origin-result" hidden></div>
+      </article>
+
+      <article id="step-baijia" class="step" hidden aria-labelledby="baijia-title">
+        <p class="step-kicker">百家姓前十六</p>
+        <h2 id="baijia-title">按順序點出來</h2>
+        <p class="prompt">趙錢孫李，周吳鄭王，馮陳褚衛，蔣沈韓楊。</p>
+        <p class="baijia-status" id="baijia-status" role="status">下一個：趙</p>
+        <ol class="baijia-grid" id="baijia-grid"></ol>
+        <div class="inline-actions">
+          <button type="button" class="btn-ghost" id="btn-baijia-reset">重來</button>
+          <button type="button" class="btn-ghost" id="btn-baijia-reveal">揭示全表</button>
+        </div>
+      </article>
+
+      <article id="step-hao" class="step" hidden aria-labelledby="hao-title">
+        <p class="step-kicker">名、字、號</p>
+        <h2 id="hao-title">號，是自己取的</h2>
+        <div class="hao-lesson">
+          <p><b>名</b>和<b>字</b>都是父母起的。男子二十歲冠禮取字，女子十五歲笄禮取字。名與字在意義上相關：屈原名平、字原；諸葛亮字孔明；顏回字子淵。</p>
+          <p><b>號</b>是名、字以外的別號。李白號青蓮居士，白居易稱香山居士，蘇軾號東坡居士。</p>
+        </div>
+        <div class="hao-examples" id="hao-examples"></div>
+        <form id="hao-form" class="hao-form">
+          <div class="hao-fields">
+            <label>
+              前詞
+              <input id="hao-prefix" type="text" maxlength="8" placeholder="青蓮、松風、桃源…" />
+            </label>
+            <label>
+              身分
+              <select id="hao-suffix"></select>
+            </label>
+          </div>
+          <p class="hao-preview" id="hao-preview">——</p>
+          <div class="chips" id="hao-prefix-chips"></div>
+        </form>
+      </article>
+
+      <article id="step-crest" class="step" hidden aria-labelledby="crest-title">
+        <p class="step-kicker">設計你的族徽</p>
+        <h2 id="crest-title">鑄一枚只屬於你的印</h2>
+        <div class="forge">
+          <div class="forge-press">
+            <canvas id="crest-canvas" width="720" height="900" aria-label="族徽預覽"></canvas>
+          </div>
+          <form id="crest-form" class="forge-tools">
+            <fieldset>
+              <legend>形制</legend>
+              <label><input type="radio" name="shape" value="round" checked /> 圓印</label>
+              <label><input type="radio" name="shape" value="bi" /> 玉璧</label>
+              <label><input type="radio" name="shape" value="square" /> 方印</label>
+            </fieldset>
+            <fieldset>
+              <legend>設色</legend>
+              <label><input type="radio" name="palette" value="cinnabar" checked /> 朱砂</label>
+              <label><input type="radio" name="palette" value="bronze" /> 青銅</label>
+              <label><input type="radio" name="palette" value="ink" /> 墨</label>
+              <label><input type="radio" name="palette" value="celadon" /> 青瓷</label>
+            </fieldset>
+            <fieldset>
+              <legend>形象</legend>
+              <div id="motif-choices" class="motif-choices"></div>
+            </fieldset>
+            <label class="reason-label">
+              族徽簡介
+              <textarea id="crest-reason" rows="4" maxlength="180"></textarea>
+            </label>
+            <div class="inline-actions">
+              <button type="button" class="btn-primary" id="btn-download">下載族徽</button>
+              <button type="button" class="btn-ghost" id="btn-download-card">下載名片</button>
+            </div>
+          </form>
+        </div>
+      </article>
+    </main>
+
+    <footer class="dock">
+      <button type="button" class="btn-ghost" id="btn-prev">上一站</button>
+      <button type="button" class="btn-primary" id="btn-next">下一站</button>
+    </footer>
+  </section>
+
+  <script src="data.js?v=2"></script>
+  <script src="app.js?v=2"></script>
+</body>
+</html>
