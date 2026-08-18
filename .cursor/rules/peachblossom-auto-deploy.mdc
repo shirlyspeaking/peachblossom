@@ -1,0 +1,32 @@
+---
+description: 桃花源開發完成後自動提交、推送 GitHub，並觸發 Cloudflare 部署
+alwaysApply: true
+---
+
+# 桃花源：做完就提交並部署
+
+桃花源相關開發一完成，助手必須自己走完 Git → GitHub → Cloudflare，不要等使用者再開 Git 面板或手動推送。
+
+## 做完後立刻執行
+
+1. 檢查 `git status`：只提交真正完成、可上線的檔案。
+2. 寫清楚的 commit message（說明「為什麼」，不要只用 `1`）。
+3. 若 `main` 與遠端分叉，先合併或 rebase，解決衝突後再提交。
+4. `git push origin HEAD`。GitHub 的 `main` 會觸發 Cloudflare Pages 自動部署靜態站（`peachspring.cc`）。
+5. 若改了 `workers/` 或各 app 的 `wrangler.toml`，另外執行對應的 `wrangler deploy`。
+
+## 要提交
+
+- 新 app 資料夾、首頁 `index.html` 卡片、`專案架構說明.md` 對應條目
+- Vite/React 類 app：原始碼（`*-demo/`）以及建置產物（首頁連結的靜態資料夾，如 `lottery/`、`class-monster/`、`hua-wu-que/`）
+- `_headers`、Workers 設定、文件
+
+## 不要提交
+
+- `node_modules/`、`.env`、`.dev.vars`、`.wrangler/`、`.DS_Store`
+- 半成品：缺 JS/CSS、首頁還沒掛上、或 Vite 原始碼還沒建置成可靜態開啟的頁面
+- 機密、帳號、金鑰
+
+## Vite app 上線規則
+
+Cloudflare Pages 是部署倉庫根目錄靜態檔，沒有幫子資料夾跑 `npm run build`。因此首頁不能連到還含 `src/main.ts` 的開發用 `index.html`。必須先建置，讓線上資料夾像 `lottery/` 一樣帶好 hash 後的 JS/CSS。
