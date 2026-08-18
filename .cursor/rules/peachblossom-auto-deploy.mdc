@@ -12,8 +12,14 @@ alwaysApply: true
 1. 檢查 `git status`：只提交真正完成、可上線的檔案。
 2. 寫清楚的 commit message（說明「為什麼」，不要只用 `1`）。
 3. 若 `main` 與遠端分叉，先合併或 rebase，解決衝突後再提交。
-4. `git push origin HEAD`。GitHub 的 `main` 會觸發 Cloudflare Pages 自動部署靜態站（`peachspring.cc`）。
-5. 若改了 `workers/` 或各 app 的 `wrangler.toml`，另外執行對應的 `wrangler deploy`。
+4. 推送用 GitHub CLI，不要依賴會跳出帳密視窗的 `git push`：
+   - 先確認 `$HOME/.local/bin/gh auth status`
+   - 若未登入：執行 `gh auth login --hostname github.com --git-protocol https --web --skip-ssh-key`，把一次性驗證碼告訴使用者，等瀏覽器授權完成後再繼續
+   - 登入後執行 `gh auth setup-git`，再 `git push origin HEAD`
+5. GitHub 的 `main` 會觸發 Cloudflare Pages 自動部署靜態站（`peachspring.cc`）。
+6. 若改了 `workers/` 或各 app 的 `wrangler.toml`，另外執行對應的 `wrangler deploy`。
+
+PATH 請包含 `$HOME/.local/bin`，本機 GitHub CLI 裝在那裡。
 
 ## 要提交
 
