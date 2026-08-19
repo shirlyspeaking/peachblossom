@@ -13,3 +13,12 @@
 
 /taoyuan-wanxiang-monopoly/assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/shanhaijing-landing/
+  Cache-Control: no-cache, must-revalidate
+
+/shanhaijing-landing/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/shanhaijing-landing/assets/*
+  Cache-Control: public, max-age=31536000, immutable
