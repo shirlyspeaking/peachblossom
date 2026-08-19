@@ -648,28 +648,28 @@
     ctx.font = `700 ${sealSize}px "LXGW WenKai", "ZCOOL QingKe HuangYou", serif`;
     ctx.fillText(surname, cx, cy + 4);
 
-    ctx.font = `400 40px "ZCOOL QingKe HuangYou", "Huninn", sans-serif`;
+    ctx.font = `400 80px "ZCOOL QingKe HuangYou", "Huninn", sans-serif`;
     ctx.fillStyle = colors.stamp;
-    ctx.fillText(hao, cx, cy + r + 48);
+    ctx.fillText(hao, cx, cy + r + 72);
 
-    ctx.font = `400 18px "Huninn", sans-serif`;
+    ctx.font = `400 36px "Huninn", sans-serif`;
     ctx.fillStyle = colors.soft;
     const origin = info ? originOf(info) : null;
-    ctx.fillText(origin ? origin.verb : "自擇來源", cx, cy + r + 78);
+    ctx.fillText(origin ? origin.verb : "自擇來源", cx, cy + r + 86);
 
     if (withCard) {
       ctx.textAlign = "left";
       ctx.fillStyle = colors.ink;
-      ctx.font = `400 42px "ZCOOL QingKe HuangYou", sans-serif`;
+      ctx.font = `400 84px "ZCOOL QingKe HuangYou", sans-serif`;
       ctx.fillText(surname + "　" + hao, 72, 640);
-      ctx.font = `400 20px "Huninn", sans-serif`;
+      ctx.font = `400 40px "Huninn", sans-serif`;
       ctx.fillStyle = colors.ink;
-      wrapText(ctx, reason, 72, 690, w - 144, 32);
-      ctx.font = `400 16px "Huninn", sans-serif`;
+      wrapText(ctx, reason, 72, 710, w - 144, 56);
+      ctx.font = `400 32px "Huninn", sans-serif`;
       ctx.fillStyle = colors.soft;
-      ctx.fillText("尋姓・鑄徽  ·  好學中華文化學會", 72, h - 56);
+      ctx.fillText("尋姓・鑄徽", 72, h - 56);
     } else {
-      ctx.font = `400 16px "Huninn", sans-serif`;
+      ctx.font = `400 32px "Huninn", sans-serif`;
       ctx.fillStyle = colors.soft;
       ctx.fillText("尋姓・鑄徽", cx, h - 42);
     }
