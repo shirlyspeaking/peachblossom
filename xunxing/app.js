@@ -1,7 +1,13 @@
 (function () {
   const D = window.XunxingData;
   const STEPS = ["eight", "origin", "baijia", "hao", "crest"];
-  const GUESS_MARK = { fief: "邑", totem: "圖", place: "居", office: "官", craft: "業" };
+  const ORIGIN_ICON = {
+    fief: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M8 38V22l8-10 8 10v16M24 22l8-10 8 10v16M8 38h32M16 38v-8h8v8"/></svg>',
+    totem: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M24 42V20M24 22 12 10M24 18 36 8M24 28 16 20M24 28l10 6"/><circle cx="24" cy="12" r="3.2" fill="currentColor"/></svg>',
+    place: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M10 42V20c0-10 28-10 28 0v22M24 20v22M10 42h28"/></svg>',
+    office: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" d="M12 20h24l-4 12H16L12 20Zm6-8 6-6 6 6M18 32v8M30 32v8"/></svg>',
+    craft: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M18 10h12M20 10c-8 8-10 16-6 26h20c4-10 2-18-6-26M16 36h16"/></svg>',
+  };
 
   const PALETTES = {
     cinnabar: { paper: "#f3e4cc", ink: "#6f1d1b", ring: "#8a2e24", soft: "#c4a574", stamp: "#9b2b24" },
@@ -183,7 +189,7 @@
       btn.type = "button";
       btn.className = "origin-choice";
       btn.dataset.id = id;
-      btn.innerHTML = `<span class="mark">${GUESS_MARK[id]}</span><span><strong>${o.verb}</strong><small>${o.hint}　如${o.examples}</small></span>`;
+      btn.innerHTML = `<span class="mark">${ORIGIN_ICON[id]}</span><span><strong>${o.verb}</strong><small>${o.hint}　如${o.examples}</small></span>`;
       btn.addEventListener("click", () => chooseOrigin(id));
       box.appendChild(btn);
     });
@@ -639,14 +645,14 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const sealSize = surname.length > 1 ? 84 : 136;
-    ctx.font = `700 ${sealSize}px "Noto Serif TC", serif`;
+    ctx.font = `700 ${sealSize}px "LXGW WenKai", "ZCOOL QingKe HuangYou", serif`;
     ctx.fillText(surname, cx, cy + 4);
 
-    ctx.font = `400 40px "Ma Shan Zheng", serif`;
+    ctx.font = `400 40px "ZCOOL QingKe HuangYou", "Huninn", sans-serif`;
     ctx.fillStyle = colors.stamp;
     ctx.fillText(hao, cx, cy + r + 48);
 
-    ctx.font = `500 18px "Noto Sans TC", sans-serif`;
+    ctx.font = `400 18px "Huninn", sans-serif`;
     ctx.fillStyle = colors.soft;
     const origin = info ? originOf(info) : null;
     ctx.fillText(origin ? origin.verb : "自擇來源", cx, cy + r + 78);
@@ -654,16 +660,16 @@
     if (withCard) {
       ctx.textAlign = "left";
       ctx.fillStyle = colors.ink;
-      ctx.font = `400 42px "Ma Shan Zheng", serif`;
+      ctx.font = `400 42px "ZCOOL QingKe HuangYou", sans-serif`;
       ctx.fillText(surname + "　" + hao, 72, 640);
-      ctx.font = `400 20px "Noto Sans TC", sans-serif`;
+      ctx.font = `400 20px "Huninn", sans-serif`;
       ctx.fillStyle = colors.ink;
       wrapText(ctx, reason, 72, 690, w - 144, 32);
-      ctx.font = `400 16px "Noto Sans TC", sans-serif`;
+      ctx.font = `400 16px "Huninn", sans-serif`;
       ctx.fillStyle = colors.soft;
       ctx.fillText("尋姓・鑄徽  ·  好學中華文化學會", 72, h - 56);
     } else {
-      ctx.font = `400 16px "Noto Sans TC", sans-serif`;
+      ctx.font = `400 16px "Huninn", sans-serif`;
       ctx.fillStyle = colors.soft;
       ctx.fillText("尋姓・鑄徽", cx, h - 42);
     }
