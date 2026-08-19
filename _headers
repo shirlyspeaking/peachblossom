@@ -1,4 +1,10 @@
 # 子應用入口不長快取，部署後才能立刻載入帶新 hash 的 JS/CSS
+/xunxing/
+  Cache-Control: no-cache, must-revalidate
+
+/xunxing/index.html
+  Cache-Control: no-cache, must-revalidate
+
 /copybook/
   Cache-Control: no-cache, must-revalidate
 

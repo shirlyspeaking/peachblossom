@@ -596,6 +596,11 @@ h2,
   letter-spacing: 0.1em;
 }
 
+.origin-ai {
+  margin: 0;
+  color: oklch(0.38 0.04 40);
+}
+
 .baijia-status {
   margin: 0 0 12px;
   color: var(--cinnabar);

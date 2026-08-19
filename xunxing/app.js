@@ -31,7 +31,10 @@
     palette: "cinnabar",
     motif: "forest",
     nvShown: false,
+    originLookup: 0,
   };
+
+  const originNoteCache = new Map();
 
   const $ = (id) => document.getElementById(id);
   const intro = $("screen-intro");
@@ -73,6 +76,64 @@
     return D.ORIGINS[info.origin] || null;
   }
 
+  function needsOriginLookup(info) {
+    return Boolean(info) && (!info.known || !D.GUESSABLE.includes(info.origin));
+  }
+
+  function originApiBase() {
+    const meta = document.querySelector('meta[name="xunxing-origin-api"]');
+    if (meta && meta.content) return meta.content.replace(/\/$/, "");
+    return "https://peachblossom-enjoyread-quiz.shirlyspeaking.workers.dev";
+  }
+
+  function fetchOriginNote(surname) {
+    if (originNoteCache.has(surname)) return originNoteCache.get(surname);
+    const req = (async () => {
+      try {
+        const base = originApiBase();
+        let text = await postOrigin(base, surname);
+        if (!text) text = await postChatFallback(base, surname);
+        text = Array.from(String(text || "").trim().replace(/\s+/g, "")).slice(0, 50).join("");
+        if (!text) originNoteCache.delete(surname);
+        return text;
+      } catch {
+        originNoteCache.delete(surname);
+        return "";
+      }
+    })();
+    originNoteCache.set(surname, req);
+    return req;
+  }
+
+  async function postOrigin(base, surname) {
+    const res = await fetch(base + "/origin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ surname }),
+    });
+    if (!res.ok) return "";
+    const data = await res.json().catch(() => ({}));
+    return String(data.text || "").trim();
+  }
+
+  async function postChatFallback(base, surname) {
+    const res = await fetch(base + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: `只要一句繁體中文，說明姓「${surname}」最通行的來源或典故，含標點不超過50字。不要標題、不要列點、不要英文。`,
+          },
+        ],
+      }),
+    });
+    if (!res.ok) return "";
+    const data = await res.json().catch(() => ({}));
+    return String(data.answer || "").trim();
+  }
+
   function go(step) {
     state.step = step;
     STEPS.forEach((id) => {
@@ -111,6 +172,9 @@
     state.revealed = false;
     state.nvShown = false;
     state.motif = state.info.motif || "ding";
+    state.info.aiStory = "";
+    state.originLookup += 1;
+    if (needsOriginLookup(state.info)) fetchOriginNote(state.surname);
     state.prefix = defaultPrefix(state.info);
     $("you-surname").textContent = state.surname;
     $("you-hao").hidden = true;
@@ -199,6 +263,7 @@
   function chooseOrigin(id) {
     state.guess = id;
     const info = state.info;
+    const needAi = needsOriginLookup(info);
     if (!info.known) {
       info.origin = id;
       info.motif = defaultMotif(id);
@@ -229,9 +294,37 @@
       <p>${info.story}</p>
       ${badges ? `<p class="origin-badges">${badges}</p>` : ""}
     `;
+    if (needAi) attachOriginNote(result, info);
     renderMotifs();
     fillReason();
     drawCrest();
+  }
+
+  function attachOriginNote(result, info) {
+    const note = document.createElement("p");
+    note.className = "origin-ai";
+    const badges = result.querySelector(".origin-badges");
+    if (badges) result.insertBefore(note, badges);
+    else result.appendChild(note);
+    if (info.aiStory) {
+      note.textContent = info.aiStory;
+      return;
+    }
+    note.textContent = "正在查這個姓的來源…";
+    const token = state.originLookup;
+    fetchOriginNote(info.surname).then((text) => {
+      if (token !== state.originLookup) return;
+      if (text) {
+        info.aiStory = text;
+        note.textContent = text;
+        return;
+      }
+      if (!info.known) {
+        note.textContent = "暫時查不到更多來源，就先用你選的這條路。";
+      } else {
+        note.remove();
+      }
+    });
   }
 
   function defaultMotif(origin) {

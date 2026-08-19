@@ -1,7 +1,11 @@
 /**
  * 悅讀靜態站：POST / — AI 閱讀題；POST /chat — DeepSeek 對話助教。
+ * 尋姓・鑄徽：POST /origin — 姓氏來源短句（≤50 字）。
  * Secret：DEEPSEEK_API_KEY
  */
+
+const originMemo = new Map();
+const ORIGIN_MAX_CHARS = 50;
 
 export default {
   async fetch(request, env) {
@@ -57,6 +61,13 @@ async function handleRequest(request, env) {
     return handleChatRequest(request, env);
   }
 
+  if (path === "/origin") {
+    if (request.method !== "POST") {
+      return jsonErr(request, "Method Not Allowed", 405);
+    }
+    return handleOriginRequest(request, env);
+  }
+
   if (path === "/" || path === "") {
     if (request.method !== "POST") {
       return jsonErr(request, "Method Not Allowed", 405);
@@ -64,7 +75,83 @@ async function handleRequest(request, env) {
     return handleQuizRequest(request, env);
   }
 
-  return jsonErr(request, "Not Found：請使用 POST /（閱讀題）或 POST /chat（對話）", 404);
+  return jsonErr(request, "Not Found：請使用 POST /（閱讀題）、POST /chat（對話）或 POST /origin（姓氏來源）", 404);
+}
+
+function clipChars(text, max) {
+  const cleaned = String(text || "")
+    .replace(/^["「『""]+/, "")
+    .replace(/["」』""]+$/, "")
+    .replace(/\s+/g, "")
+    .trim();
+  return Array.from(cleaned).slice(0, max).join("");
+}
+
+async function handleOriginRequest(request, env) {
+  if (!env.DEEPSEEK_API_KEY) {
+    return jsonErr(
+      request,
+      "Worker 未設定 DEEPSEEK_API_KEY（請執行：wrangler secret put DEEPSEEK_API_KEY）",
+      503
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (_) {
+    return jsonErr(request, "Invalid JSON", 400);
+  }
+
+  const surname = typeof body.surname === "string" ? body.surname.trim() : "";
+  if (!/^[\u3400-\u9FFF]{1,4}$/.test(surname)) {
+    return jsonErr(request, "請提供 1 到 4 個漢字姓", 400);
+  }
+
+  const cached = originMemo.get(surname);
+  if (cached) return jsonOk(request, { text: cached });
+
+  const systemPrompt =
+    "你是中學課堂的姓氏溯源助教。用繁體中文寫一句話，說明這個姓最通行的來源或典故。不超過 50 個字（含標點）。不要標題、不要列點、不要英文、不要用引號包住全文。若不確定，用「一說」帶過最常見的說法。只輸出這一句。";
+
+  try {
+    const raw = await chatDeepSeekShort(env, systemPrompt, `請說明姓「${surname}」的來源。`);
+    const text = clipChars(raw, ORIGIN_MAX_CHARS);
+    if (text) originMemo.set(surname, text);
+    return jsonOk(request, { text });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return jsonOk(request, { text: "", error: msg });
+  }
+}
+
+async function chatDeepSeekShort(env, systemPrompt, userContent) {
+  const baseUrl = (env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
+  const model = env.DEEPSEEK_MODEL || "deepseek-chat";
+  const res = await fetch(`${baseUrl}/v1/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.DEEPSEEK_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent },
+      ],
+      temperature: 0.2,
+      max_tokens: 80,
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`DeepSeek HTTP ${res.status}: ${t.slice(0, 500)}`);
+  }
+  const data = await res.json();
+  const text = extractChatCompletionText(data);
+  if (!text) throw new Error("DeepSeek 回傳為空");
+  return text;
 }
 
 async function handleChatRequest(request, env) {
