@@ -246,20 +246,20 @@ export function tickBeasts(
   t: number,
   time: number,
 ): void {
-  const kunGate = gate(t, 0.3, 0.38, 0.52, 0.6)
+  const kunGate = gate(t, 0.48, 0.54, 0.64, 0.72)
   setOpacity(kun, kunGate)
-  kun.position.x = lerp(-14, 16, clamp((t - 0.3) / 0.24, 0, 1))
+  kun.position.x = lerp(-14, 16, clamp((t - 0.48) / 0.22, 0, 1))
   kun.position.y = -42 + Math.sin(time * 0.7) * 1.4
   kun.position.z = 2
   kun.rotation.y = 0.9
   kun.rotation.z = Math.sin(time * 0.55) * 0.08
   kun.scale.setScalar(1.08 + kunGate * 0.1)
 
-  const pengGate = gate(t, 0.52, 0.6, 0.74, 0.84)
+  const pengGate = gate(t, 0.62, 0.68, 0.78, 0.86)
   setOpacity(peng, pengGate)
   peng.position.set(
     Math.sin(time * 0.25) * 2.4,
-    lerp(18, 40, clamp((t - 0.52) / 0.2, 0, 1)),
+    lerp(18, 40, clamp((t - 0.62) / 0.18, 0, 1)),
     -16,
   )
   peng.rotation.x = -0.35
@@ -269,12 +269,12 @@ export function tickBeasts(
   if (wingL) wingL.rotation.z = 0.28 + flap
   if (wingR) wingR.rotation.z = -0.28 - flap
 
-  const peakGate = gate(t, 0.7, 0.78, 0.9, 0.96)
+  const peakGate = gate(t, 0.74, 0.8, 0.9, 0.96)
   setOpacity(peak, peakGate)
   peak.position.set(1, 14, -34)
   peak.rotation.y = time * 0.04
 
-  const dragonGate = gate(t, 0.72, 0.8, 0.9, 0.97)
+  const dragonGate = gate(t, 0.76, 0.82, 0.9, 0.97)
   setOpacity(dragon, dragonGate)
   dragon.position.set(-1 + Math.sin(time * 0.4) * 0.8, 16, -34)
   dragon.rotation.y = 0.45 + Math.sin(time * 0.5) * 0.12

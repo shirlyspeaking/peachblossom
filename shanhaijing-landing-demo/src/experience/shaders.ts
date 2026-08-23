@@ -86,6 +86,8 @@ export const iceFragment = /* glsl */ `
 
   uniform vec3 uIce;
   uniform vec3 uGlow;
+  uniform vec3 uStone;
+  uniform float uMix;
   uniform float uSeed;
 
   float hash(vec3 p) {
@@ -123,9 +125,11 @@ export const iceFragment = /* glsl */ `
     float grain = noise(vObjectPos * 2.2 + uSeed) * 0.08;
     float crack = smoothstep(0.78, 0.92, noise(vObjectPos * 6.4 + uSeed * 2.1)) * 0.12;
 
-    vec3 ice = uIce * diff + grain;
-    ice = mix(ice, uGlow, 0.1 + fresnel * 0.62 + crack);
-    ice += uGlow * pow(fresnel, 1.6) * 0.35;
+    vec3 base = mix(uIce, uStone, uMix);
+    vec3 glow = mix(uGlow, mix(uGlow, uStone, 0.42) * 1.08, uMix);
+    vec3 ice = base * diff + grain;
+    ice = mix(ice, glow, 0.1 + fresnel * 0.62 + crack);
+    ice += glow * pow(fresnel, 1.6) * 0.35;
     float alpha = 0.84 + fresnel * 0.12;
 
     gl_FragColor = vec4(ice, alpha);

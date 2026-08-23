@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Experience as ExperienceType, FrameState, JadeInfo } from './experience/Experience'
+import { PANGU_CLASSIC } from './experience/createPangu'
 import { WindAudio } from './experience/WindAudio'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const webglOk = ref(true)
 const soundOn = ref(false)
 const hoverJade = ref<JadeInfo | null>(null)
+const typed = ref('')
+const typedDone = ref(false)
+const reducedMotion = ref(false)
 const frame = ref<FrameState>({
   progress: 0,
   chapter: '冰屋',
@@ -15,9 +19,11 @@ const frame = ref<FrameState>({
   beastLine: '',
   hint: 'Scroll down to discover',
   jades: [],
+  panguSheet: false,
 })
 
 let experience: ExperienceType | null = null
+let typeTimer: number | null = null
 const wind = new WindAudio()
 
 function supportsWebGL(): boolean {
@@ -43,7 +49,7 @@ function onPointer(event: PointerEvent): void {
 
 function onClick(event: MouseEvent): void {
   const target = event.target as HTMLElement | null
-  if (target?.closest('a, button')) return
+  if (target?.closest('a, button, .pangu-sheet')) return
   const jade = experience?.pickJade()
   if (jade) {
     window.location.assign(jade.href)
@@ -58,13 +64,54 @@ async function toggleSound(): Promise<void> {
   soundOn.value = await wind.toggle()
 }
 
+function stopType(): void {
+  if (typeTimer !== null) {
+    window.clearInterval(typeTimer)
+    typeTimer = null
+  }
+}
+
+function revealAll(): void {
+  typed.value = PANGU_CLASSIC
+  typedDone.value = true
+  stopType()
+}
+
+function startType(): void {
+  if (typedDone.value || typeTimer !== null) return
+  if (reducedMotion.value) {
+    revealAll()
+    return
+  }
+  typeTimer = window.setInterval(() => {
+    if (typed.value.length >= PANGU_CLASSIC.length) {
+      revealAll()
+      return
+    }
+    typed.value = PANGU_CLASSIC.slice(0, typed.value.length + 1)
+  }, 58)
+}
+
+watch(
+  () => frame.value.panguSheet,
+  (open) => {
+    if (open) startType()
+    else stopType()
+  },
+)
+
 onMounted(async () => {
+  reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   webglOk.value = supportsWebGL()
-  if (!webglOk.value || !canvas.value) return
+  const canvasEl = canvas.value
+  if (!webglOk.value || !canvasEl) return
 
   try {
     const { Experience } = await import('./experience/Experience')
-    experience = new Experience(canvas.value, {
+    const liveCanvas = canvas.value
+    if (!liveCanvas?.isConnected) return
+    experience?.dispose()
+    experience = new Experience(liveCanvas, {
       onFrame: (state) => {
         frame.value = state
       },
@@ -75,7 +122,7 @@ onMounted(async () => {
     })
   } catch (error) {
     console.error(error)
-    webglOk.value = false
+    if (canvas.value?.isConnected) webglOk.value = false
     return
   }
 
@@ -91,6 +138,7 @@ onUnmounted(() => {
   window.removeEventListener('pointermove', onPointer)
   window.removeEventListener('click', onClick)
   window.removeEventListener('resize', onResize)
+  stopType()
   wind.stop()
   experience?.dispose()
   document.body.style.cursor = ''
@@ -115,10 +163,24 @@ onUnmounted(() => {
 
     <p class="chapter">{{ frame.chapter }}</p>
 
-    <div v-if="frame.beastName" class="beast-card">
+    <div v-if="frame.beastName" class="beast-card" :class="{ 'is-pangu': frame.chapter === '盤古' }">
       <strong>{{ frame.beastName }}</strong>
       <span>{{ frame.beastLine }}</span>
     </div>
+
+    <article
+      class="pangu-sheet"
+      :class="{ 'is-on': frame.panguSheet }"
+      :aria-hidden="!frame.panguSheet"
+      @click.stop="revealAll"
+    >
+      <p class="pangu-sheet-title">《盤古開天地》</p>
+      <p class="pangu-sheet-body">
+        <span>{{ typed }}</span>
+        <em v-if="frame.panguSheet && !typedDone" class="pangu-caret" aria-hidden="true"></em>
+      </p>
+      <p v-if="frame.panguSheet && !typedDone" class="pangu-sheet-hint">點一下顯示全文</p>
+    </article>
 
     <div class="dock">
       <p class="hint">{{ frame.hint }} <em>{{ String(Math.round(frame.progress * 100)).padStart(2, '0') }}</em></p>

@@ -267,6 +267,104 @@ a {
   color: var(--ink-soft);
 }
 
+.beast-card.is-pangu {
+  top: 66%;
+}
+
+.pangu-sheet {
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  z-index: 4;
+  width: min(34rem, 88vw);
+  translate: -50% 0;
+  padding: 22px 26px 18px;
+  border: 1px solid oklch(0.92 0.03 85 / 0.42);
+  border-radius: 2px;
+  background: linear-gradient(
+    165deg,
+    oklch(0.97 0.012 95 / 0.34) 0%,
+    oklch(0.94 0.02 80 / 0.22) 52%,
+    oklch(0.9 0.018 240 / 0.18) 100%
+  );
+  box-shadow:
+    0 18px 48px oklch(0.45 0.04 80 / 0.12),
+    inset 0 1px 0 oklch(1 0 0 / 0.46);
+  backdrop-filter: blur(14px) saturate(1.18);
+  -webkit-backdrop-filter: blur(14px) saturate(1.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+  transform-origin: center top;
+  transition:
+    opacity 420ms var(--ease-out-quart),
+    transform 420ms var(--ease-out-quart);
+  cursor: pointer;
+}
+
+.hud > .pangu-sheet {
+  pointer-events: none;
+}
+
+.pangu-sheet.is-on,
+.hud > .pangu-sheet.is-on {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.pangu-sheet-title {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  color: oklch(0.42 0.05 75);
+}
+
+.pangu-sheet-body {
+  margin: 0;
+  font-size: clamp(0.92rem, 2.2vw, 1.08rem);
+  font-weight: 400;
+  line-height: 1.95;
+  letter-spacing: 0.08em;
+  text-wrap: pretty;
+  min-height: 4.8em;
+}
+
+.pangu-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.12em;
+  background: oklch(0.78 0.12 85);
+  animation: pangu-blink 0.9s steps(1) infinite;
+}
+
+  .pangu-sheet-hint {
+  margin: 14px 0 0;
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 900px) {
+  .pangu-sheet {
+    left: auto;
+    right: clamp(20px, 4vw, 48px);
+    top: 52%;
+    width: min(26rem, 34vw);
+    translate: 0 -50%;
+    transform-origin: right center;
+  }
+}
+
+@keyframes pangu-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .fallback {
   position: relative;
   z-index: 4;
@@ -307,12 +405,25 @@ a {
   .chapter {
     display: none;
   }
+
+  .pangu-sheet {
+    top: 68%;
+    padding: 18px 16px 14px;
+  }
+
+  .pangu-sheet-body {
+    font-size: 0.88rem;
+    min-height: 5.6em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .jade-label,
   .ghost,
-  .progress span {
+  .progress span,
+  .pangu-sheet,
+  .pangu-caret {
     transition: none;
+    animation: none;
   }
 }

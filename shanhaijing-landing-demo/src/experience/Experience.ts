@@ -14,6 +14,16 @@ import {
 import { createCloudField, tickClouds } from './createClouds'
 import { createIsland } from './createIsland'
 import { createIceShaft } from './createIceShaft'
+import { setIceStoneMix } from './createIceMaterial'
+import {
+  createGoldBurst,
+  createPanguEgg,
+  panguSheetActive,
+  tickGoldBurst,
+  tickPangu,
+  triggerGoldBurst,
+  type GoldBurst,
+} from './createPangu'
 import { createRelics, JADES, tickRelics, type JadeInfo } from './createJadeGallery'
 import { createMountains } from './createMountains'
 import { clamp, damp, lerp, smoothstep } from './math'
@@ -35,6 +45,7 @@ export type FrameState = {
   beastLine: string
   hint: string
   jades: ScreenJade[]
+  panguSheet: boolean
 }
 
 type Hooks = {
@@ -60,7 +71,7 @@ const STORY = [
     hint: 'Into the crack',
   },
   {
-    until: 0.34,
+    until: 0.3,
     name: '下墜',
     verse: '縫的另一頭是深淵。鏡頭往下掉，冰塊從身側掠過。',
     beastName: '',
@@ -68,7 +79,15 @@ const STORY = [
     hint: 'Falling',
   },
   {
-    until: 0.52,
+    until: 0.46,
+    name: '盤古',
+    verse: '天地渾沌如雞子。盤古生在其中。',
+    beastName: '盤古',
+    beastLine: '生於雞子',
+    hint: 'The egg of chaos',
+  },
+  {
+    until: 0.62,
     name: '鯤',
     verse: '墜入北冥。魚不在前方的地平線上，而從你身側游過。',
     beastName: '鯤',
@@ -76,7 +95,7 @@ const STORY = [
     hint: 'A fish named Kun',
   },
   {
-    until: 0.7,
+    until: 0.76,
     name: '鵬',
     verse: '仰頭。化而為鳥，整座冰層被翅膀掀開。',
     beastName: '鵬',
@@ -130,19 +149,25 @@ export class Experience {
   private readonly jadeMeshes: THREE.Mesh[]
   private readonly island: THREE.Group
   private readonly clouds: THREE.Group
+  private readonly iceShaft: THREE.Group
   private readonly kun: THREE.Group
   private readonly peng: THREE.Group
   private readonly dragon: THREE.Group
   private readonly fox: THREE.Group
   private readonly peak: THREE.Group
+  private readonly pangu: THREE.Group
+  private readonly panguBurst: GoldBurst
   private readonly dust: THREE.Points
   private readonly dustBase: Float32Array
   private readonly hoverScale = new THREE.Vector3()
   private composer: EffectComposer | null = null
   private bloom: UnrealBloomPass | null = null
+  private readonly bloomBase = 0.22
   private scrollTarget = 0
   private scrollCurrent = 0
   private hoverJade: JadeInfo | null = null
+  private panguBurstPlayed = false
+  private panguBurstAt = -1
   private raf = 0
   private disposed = false
 
@@ -173,6 +198,8 @@ export class Experience {
       new THREE.Vector3(0.45, 2.5, 1.3),
       new THREE.Vector3(0.15, 1.5, -0.2),
       new THREE.Vector3(1.1, -18, 1.4),
+      new THREE.Vector3(-3.2, -36, 7.8),
+      new THREE.Vector3(0.4, -40.2, 6.6),
       new THREE.Vector3(-8.5, -40, 7.5),
       new THREE.Vector3(-3.5, -43, 4.5),
       new THREE.Vector3(0.4, -24, 2.5),
@@ -188,6 +215,8 @@ export class Experience {
       new THREE.Vector3(0, 1.9, -1.6),
       new THREE.Vector3(0, -14, -1),
       new THREE.Vector3(0.2, -36, 0.4),
+      new THREE.Vector3(0.15, -39.6, 0.35),
+      new THREE.Vector3(0.1, -40.4, 0.2),
       new THREE.Vector3(5, -43, 0),
       new THREE.Vector3(10, -42, -2),
       new THREE.Vector3(0, 22, -8),
@@ -203,16 +232,19 @@ export class Experience {
     this.island = createIsland()
     this.island.scale.setScalar(1.45)
     this.scene.add(this.island)
-    this.scene.add(createIceShaft())
+    this.iceShaft = createIceShaft()
+    this.scene.add(this.iceShaft)
     this.clouds = createCloudField(isMobile)
     this.scene.add(this.clouds)
 
+    this.pangu = createPanguEgg()
+    this.panguBurst = createGoldBurst(isMobile ? 90 : 240)
     this.kun = createKunBeast()
     this.peng = createPengBeast()
     this.dragon = createDragonBeast()
     this.fox = createFoxBeast()
     this.peak = createBrokenPeak()
-    this.scene.add(this.kun, this.peng, this.dragon, this.fox, this.peak)
+    this.scene.add(this.pangu, this.panguBurst.points, this.kun, this.peng, this.dragon, this.fox, this.peak)
 
     const relics = createRelics()
     this.jadeMeshes = relics.meshes
@@ -321,8 +353,11 @@ export class Experience {
     this.lookCurve.getPointAt(t, this.targetLook)
 
     const squeeze = smoothstep(0.1, 0.18, t) * (1 - smoothstep(0.26, 0.34, t))
-    const falling = smoothstep(0.28, 0.4, t) * (1 - smoothstep(0.52, 0.62, t))
-    const soar = smoothstep(0.55, 0.68, t)
+    const falling = smoothstep(0.22, 0.3, t) * (1 - smoothstep(0.3, 0.38, t))
+    const panguHold = smoothstep(0.32, 0.38, t) * (1 - smoothstep(0.46, 0.54, t))
+    const soar = smoothstep(0.62, 0.74, t)
+    this.targetLook.lerp(new THREE.Vector3(0.12, -40.4, 0.22), panguHold)
+    this.targetPos.lerp(new THREE.Vector3(0.4, -40.0, 11.2), panguHold * 0.9)
     const parallax = reducedMotion ? 0 : 0.9 * (1 - t * 0.35)
     this.targetPos.x += this.pointer.x * (parallax + falling * 1.6)
     this.targetPos.y += this.pointer.y * (parallax * 0.55 + falling * 0.9)
@@ -332,22 +367,44 @@ export class Experience {
     this.camera.lookAt(this.lookAt)
 
     this.camera.fov = lerp(36, 24, squeeze)
-    this.camera.fov = lerp(this.camera.fov, 58, falling)
+    this.camera.fov = lerp(this.camera.fov, 56, falling)
+    this.camera.fov = lerp(this.camera.fov, 30, panguHold)
     this.camera.fov = lerp(this.camera.fov, 46, soar)
     this.camera.updateProjectionMatrix()
     if (!reducedMotion) {
-      this.camera.rotateZ(squeeze * 0.07 + falling * Math.sin(t * 20 + time * 0.45) * 0.18 + soar * -0.09)
+      this.camera.rotateZ(
+        squeeze * 0.07 + falling * Math.sin(t * 20 + time * 0.45) * 0.18 + panguHold * 0.02 + soar * -0.09,
+      )
     }
 
-    this.fogColor.copy(this.mistNear).lerp(this.mistFar, lerp(squeeze * 0.15, 0.72, falling + soar * 0.4))
+    this.fogColor.copy(this.mistNear).lerp(this.mistFar, lerp(squeeze * 0.15, 0.72, falling + panguHold * 0.35 + soar * 0.4))
+    this.fogColor.lerp(new THREE.Color(0xd7c4a0), panguHold * 0.4)
     const fog = this.scene.fog as THREE.Fog
     fog.color.copy(this.fogColor)
-    fog.near = lerp(lerp(10, 1.15, squeeze), 7, falling + soar * 0.5)
-    fog.far = lerp(lerp(40, 8.5, squeeze), 72, Math.max(falling, soar))
+    fog.near = lerp(lerp(10, 1.15, squeeze), 7, falling + panguHold + soar * 0.5)
+    fog.far = lerp(lerp(40, 8.5, squeeze), 72, Math.max(falling, panguHold, soar))
     this.renderer.setClearColor(this.fogColor, 1)
 
     this.island.visible = true
     this.island.scale.setScalar(1.45)
+    setIceStoneMix(this.iceShaft, smoothstep(0.22, 0.34, t))
+
+    const pangu = tickPangu(this.pangu, t, reducedMotion ? 0 : time, this.panguBurstAt < 0 ? -1 : time - this.panguBurstAt)
+    if (!this.panguBurstPlayed && pangu.centered) {
+      this.panguBurstPlayed = true
+      this.panguBurstAt = time
+      if (!reducedMotion) {
+        triggerGoldBurst(this.panguBurst, this.pangu.position)
+      }
+    }
+    if (!reducedMotion) {
+      tickGoldBurst(this.panguBurst, dt)
+    }
+    const burstAge = this.panguBurstAt < 0 ? 99 : time - this.panguBurstAt
+    if (this.bloom) {
+      const flash = this.panguBurstPlayed && !reducedMotion && burstAge < 1.8 ? Math.exp(-burstAge * 2.4) : 0
+      this.bloom.strength = this.bloomBase + flash * 1.15
+    }
 
     if (!reducedMotion) {
       tickClouds(this.clouds, time, dt)
@@ -369,6 +426,7 @@ export class Experience {
       beastLine: story?.beastLine ?? '',
       hint: story?.hint ?? '',
       jades: this.projectJades(),
+      panguSheet: panguSheetActive(t) && this.panguBurstPlayed,
     })
 
     if (this.composer) this.composer.render()
