@@ -39,7 +39,6 @@ function supportsWebGL(): boolean {
 }
 
 function onScroll(): void {
-  burst.unlock()
   const max = document.documentElement.scrollHeight - window.innerHeight
   const t = max <= 0 ? 0 : window.scrollY / max
   experience?.setScrollTarget(t)
@@ -50,7 +49,6 @@ function onPointerDown(): void {
 }
 
 function onPointer(event: PointerEvent): void {
-  burst.unlock()
   const nx = (event.clientX / window.innerWidth) * 2 - 1
   const ny = -(event.clientY / window.innerHeight) * 2 + 1
   experience?.setPointer(nx, ny)
