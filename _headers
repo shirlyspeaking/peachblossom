@@ -28,3 +28,6 @@
 
 /shanhaijing-landing/assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/shanhaijing-landing/audio/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -46,6 +46,7 @@ export type FrameState = {
   hint: string
   jades: ScreenJade[]
   panguSheet: boolean
+  panguBurst: boolean
 }
 
 type Hooks = {
@@ -427,6 +428,7 @@ export class Experience {
       hint: story?.hint ?? '',
       jades: this.projectJades(),
       panguSheet: panguSheetActive(t) && this.panguBurstPlayed,
+      panguBurst: this.panguBurstPlayed,
     })
 
     if (this.composer) this.composer.render()

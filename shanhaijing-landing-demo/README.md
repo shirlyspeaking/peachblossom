@@ -21,4 +21,4 @@ cd shanhaijing-landing-demo
 npm run build
 ```
 
-會把 hash 後的 JS/CSS 寫進 `../shanhaijing-landing/`，線上才能當成靜態頁打開。
+會把 hash 後的 JS/CSS 寫進 `../shanhaijing-landing/`，線上才能當成靜態頁打開。盤古爆炸音效放在 `public/audio/kaiduan-bao.mp3`，建置後會跟著靜態站上線，網址為 `/shanhaijing-landing/audio/kaiduan-bao.mp3`。

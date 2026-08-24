@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Experience as ExperienceType, FrameState, JadeInfo } from './experience/Experience'
 import { PANGU_CLASSIC } from './experience/createPangu'
+import { BurstAudio } from './experience/BurstAudio'
 import { WindAudio } from './experience/WindAudio'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -20,11 +21,13 @@ const frame = ref<FrameState>({
   hint: 'Scroll down to discover',
   jades: [],
   panguSheet: false,
+  panguBurst: false,
 })
 
 let experience: ExperienceType | null = null
 let typeTimer: number | null = null
 const wind = new WindAudio()
+const burst = new BurstAudio()
 
 function supportsWebGL(): boolean {
   try {
@@ -36,12 +39,18 @@ function supportsWebGL(): boolean {
 }
 
 function onScroll(): void {
+  burst.unlock()
   const max = document.documentElement.scrollHeight - window.innerHeight
   const t = max <= 0 ? 0 : window.scrollY / max
   experience?.setScrollTarget(t)
 }
 
+function onPointerDown(): void {
+  burst.unlock()
+}
+
 function onPointer(event: PointerEvent): void {
+  burst.unlock()
   const nx = (event.clientX / window.innerWidth) * 2 - 1
   const ny = -(event.clientY / window.innerHeight) * 2 + 1
   experience?.setPointer(nx, ny)
@@ -61,6 +70,7 @@ function onResize(): void {
 }
 
 async function toggleSound(): Promise<void> {
+  burst.unlock()
   soundOn.value = await wind.toggle()
 }
 
@@ -111,6 +121,13 @@ watch(
   },
 )
 
+watch(
+  () => frame.value.panguBurst,
+  (bursting) => {
+    if (bursting && !reducedMotion.value) burst.play()
+  },
+)
+
 onMounted(async () => {
   reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   webglOk.value = supportsWebGL()
@@ -138,6 +155,7 @@ onMounted(async () => {
   }
 
   window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('pointerdown', onPointerDown, { passive: true })
   window.addEventListener('pointermove', onPointer, { passive: true })
   window.addEventListener('click', onClick)
   window.addEventListener('resize', onResize)
@@ -146,6 +164,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('pointerdown', onPointerDown)
   window.removeEventListener('pointermove', onPointer)
   window.removeEventListener('click', onClick)
   window.removeEventListener('resize', onResize)
