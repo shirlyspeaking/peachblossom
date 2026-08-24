@@ -71,10 +71,21 @@ function stopType(): void {
   }
 }
 
+const PANGU_READING =
+  'https://taixu.app/judou/reading/4333e22d-b726-4cbb-9f5a-31b419644f99'
+
 function revealAll(): void {
   typed.value = PANGU_CLASSIC
   typedDone.value = true
   stopType()
+}
+
+function onPanguSheetClick(): void {
+  if (!typedDone.value) {
+    revealAll()
+    return
+  }
+  window.location.assign(PANGU_READING)
 }
 
 function startType(): void {
@@ -172,7 +183,7 @@ onUnmounted(() => {
       class="pangu-sheet"
       :class="{ 'is-on': frame.panguSheet }"
       :aria-hidden="!frame.panguSheet"
-      @click.stop="revealAll"
+      @click.stop="onPanguSheetClick"
     >
       <p class="pangu-sheet-title">《盤古開天地》</p>
       <p class="pangu-sheet-body">
@@ -180,6 +191,7 @@ onUnmounted(() => {
         <em v-if="frame.panguSheet && !typedDone" class="pangu-caret" aria-hidden="true"></em>
       </p>
       <p v-if="frame.panguSheet && !typedDone" class="pangu-sheet-hint">點一下顯示全文</p>
+      <p v-else-if="frame.panguSheet" class="pangu-sheet-hint">點一下進入句讀</p>
     </article>
 
     <div class="dock">
