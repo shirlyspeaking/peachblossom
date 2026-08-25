@@ -180,7 +180,7 @@ onUnmounted(() => {
 
   <div v-if="webglOk" class="hud">
     <header class="brand">
-      <h1>山海經</h1>
+      <h1>神話與山海經</h1>
       <p>// Copyright · 北冥冰屋 / Peachblossom</p>
     </header>
 
@@ -240,7 +240,7 @@ onUnmounted(() => {
   <div v-if="hoverJade" class="hover-card">點入 · {{ hoverJade.name }}</div>
 
   <section v-if="!webglOk" class="fallback">
-    <h1>山海經</h1>
+    <h1>神話與山海經</h1>
     <p>此頁需要 WebGL。你仍可從下方冰塊進入既有的山海應用。</p>
     <nav>
       <a class="ghost" href="../shanhai-jing-escape/index.html">山海密室</a>
