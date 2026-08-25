@@ -344,8 +344,20 @@ body::after {
 #sheetLore[hidden],
 #revealChar[hidden],
 .sheet-badge[hidden],
-.intro [hidden] {
+.intro [hidden],
+.how-play[hidden],
+.seal-lede[hidden] {
   display: none !important;
+}
+
+.seal-lede {
+  width: min(100%, 640px);
+  margin: 0 auto 14px;
+  text-align: center;
+  font-family: "Noto Serif TC", serif;
+  font-size: 0.98rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
 }
 
 .play-hint {
@@ -761,17 +773,20 @@ body::after {
 
 .mode-switch {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   margin: 22px auto 0;
+  max-width: 36rem;
 }
 
 .mode-switch button {
   cursor: pointer;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 8px 18px;
+  padding: 8px 14px;
   font: inherit;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--bone) 70%, white);
 }
@@ -995,6 +1010,93 @@ body::after {
   transform: rotate(0deg) scale(1.08);
 }
 
+.seal-piece {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 118px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  perspective: 640px;
+  transform: rotate(var(--r, 0deg));
+  animation: piece-pop 640ms var(--ease) both;
+  animation-delay: var(--pop-delay, 0ms);
+  z-index: 1;
+  transition: transform 280ms var(--ease);
+}
+
+.seal-piece .face {
+  border-radius: 16px;
+  clip-path: none;
+}
+
+.face-seal {
+  color: #3a2a1c;
+  background:
+    radial-gradient(circle at 28% 18%, #fff8ec 0%, transparent 42%),
+    linear-gradient(165deg, #f3e4c8 0%, #d7be93 48%, #c4a06a 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 58%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #8a6a3a 28%, transparent),
+    0 16px 28px color-mix(in srgb, #8a4a58 16%, transparent);
+}
+
+.seal-glyph {
+  display: grid;
+  place-items: center;
+  font-family: "EBAS", "Noto Serif TC", serif;
+  font-size: 3.15rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.face-seal svg,
+.face-seal .fallback-glyph {
+  width: 68%;
+  height: 68%;
+}
+
+.seal-piece:focus-visible {
+  outline: 2px solid var(--cinnabar);
+  outline-offset: 8px;
+  z-index: 3;
+}
+
+.slab-glyphs .seal-piece:hover,
+.slab-glyphs .seal-piece:focus-visible {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.slab-glyphs .seal-piece.is-spotlight {
+  z-index: 4;
+  transform: rotate(0deg) scale(1.08);
+}
+
+.name-wall.is-seal .name-slab {
+  background:
+    radial-gradient(circle at 14% 0%, oklch(0.97 0.03 85 / 0.85) 0%, transparent 46%),
+    color-mix(in srgb, var(--shell) 82%, transparent);
+}
+
+.name-wall.is-seal .name-slab.is-decoded {
+  background:
+    radial-gradient(circle at 82% 100%, oklch(0.93 0.05 80 / 0.5) 0%, transparent 42%),
+    color-mix(in srgb, var(--shell) 90%, white);
+}
+
+.sheet-glyph.is-seal {
+  background:
+    radial-gradient(circle at 30% 24%, #fff8ec 0%, transparent 42%),
+    linear-gradient(180deg, #f3e4c8 0%, #d7be93 100%);
+}
+
+.sheet-glyph.is-seal .seal-glyph {
+  font-size: 4.2rem;
+}
+
 .slab-name {
   font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
   font-size: 1.7rem;
@@ -1009,9 +1111,14 @@ body::after {
 }
 
 @container (max-width: 280px) {
-  .slab-glyphs .bone-piece {
+  .slab-glyphs .bone-piece,
+  .slab-glyphs .seal-piece {
     width: 88px;
     height: 100px;
+  }
+
+  .seal-glyph {
+    font-size: 2.6rem;
   }
 }
 

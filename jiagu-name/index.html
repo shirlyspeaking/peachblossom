@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=riddle1" />
+  <link rel="stylesheet" href="https://fontsapi.zeoseven.com/37/main/result.css" />
+  <link rel="stylesheet" href="styles.css?v=seal1" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -35,12 +36,13 @@
 
       <nav class="mode-switch" role="tablist" aria-label="使用方式">
         <button type="button" role="tab" id="modeWall" aria-selected="true" class="is-on">本班名牆</button>
+        <button type="button" role="tab" id="modeSeal" aria-selected="false">本班名牆小篆體</button>
         <button type="button" role="tab" id="modeClass" aria-selected="false">猜字謎</button>
         <button type="button" role="tab" id="modeSolo" aria-selected="false">自己查名字</button>
       </nav>
 
       <section class="wall-panel" id="wallPanel">
-        <details class="how-play">
+        <details class="how-play" id="howOracle">
           <summary>這節課怎麼玩</summary>
           <ol class="play-steps">
             <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
@@ -49,6 +51,16 @@
             <li>沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件。</li>
           </ol>
         </details>
+        <details class="how-play" id="howSeal" hidden>
+          <summary>這節課怎麼玩</summary>
+          <ol class="play-steps">
+            <li>這一牆用秦朝統一後的小篆來寫全班名字，線條圓轉，像刻在玉或銅上。</li>
+            <li>每一排仍是同一個人。先認小篆，點下去會翻成現在的字。</li>
+            <li>同一排都認完，這位同學的名字就會現身。</li>
+            <li>說文裡還沒有的字，會改用教學零件圖，避免空白缺字。</li>
+          </ol>
+        </details>
+        <p class="seal-lede" id="sealLede" hidden>秦始皇統一文字後的小篆。同一排是同一個人的名字。</p>
         <div class="wall-toolbar">
           <p class="play-hint" id="wallHint">同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。</p>
           <p class="class-progress" id="wallProgress" role="status"></p>
@@ -123,6 +135,10 @@
             <li>最後請那位同學站起來，用一句話介紹自己。</li>
           </ol>
         </div>
+        <div id="introSeal" hidden>
+          <h2>什麼是小篆？</h2>
+          <p>秦始皇統一文字時，把各國寫法收成比較整齊、圓轉的小篆。它比甲骨文晚，也比我們現在的楷書早。名牆上的字，就是用這種秦篆的樣子來寫同學的名字。</p>
+        </div>
         <div id="introSolo" hidden>
           <h2>什麼是甲骨文？</h2>
           <p>三千多年前，商朝的人把字刻在龜甲或牛骨上。那些字常常像一幅小畫：太陽是圓的，山是三座峰，雨是雲底下的水滴。我們現在寫的漢字，就是從這些小畫慢慢長出來的。</p>
@@ -166,12 +182,12 @@
     </div>
 
     <footer class="page-foot">
-      字形是為小朋友辨認而畫的教學象形，重點在「像什麼」。沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件來看。
+      甲骨字形是為小朋友辨認而畫的教學象形。小篆名牆使用全字庫《說文解字》篆體；說文還沒有的字，改用教學零件圖。
     </footer>
   </div>
 
-  <script src="glyphs.js?v=riddle1"></script>
-  <script src="characters.js?v=riddle1"></script>
-  <script src="app.js?v=riddle1"></script>
+  <script src="glyphs.js?v=seal1"></script>
+  <script src="characters.js?v=seal1"></script>
+  <script src="app.js?v=seal1"></script>
 </body>
 </html>

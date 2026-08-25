@@ -48,12 +48,18 @@
   const revealWho = document.getElementById("revealWho");
   const sheetLore = document.getElementById("sheetLore");
   const modeWall = document.getElementById("modeWall");
+  const modeSeal = document.getElementById("modeSeal");
   const modeClass = document.getElementById("modeClass");
   const modeSolo = document.getElementById("modeSolo");
   const wallPanel = document.getElementById("wallPanel");
   const nameWall = document.getElementById("nameWall");
   const wallHint = document.getElementById("wallHint");
   const wallProgress = document.getElementById("wallProgress");
+  const howOracle = document.getElementById("howOracle");
+  const howSeal = document.getElementById("howSeal");
+  const sealLede = document.getElementById("sealLede");
+
+  const SEAL_MISSING = new Set(["鏘", "浠", "晟", "陚"]);
 
   if (!playfield || !scatter || !sheet) return;
 
@@ -72,6 +78,19 @@
     const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char);
     if (svg) return svg;
     return `<span class="fallback-glyph" aria-hidden="true">兆</span>`;
+  }
+
+  function hasSealFont(ch) {
+    return Boolean(ch) && !SEAL_MISSING.has(ch);
+  }
+
+  function sealMarkup(entry) {
+    if (!hasSealFont(entry.char)) return glyphMarkup(entry);
+    return `<span class="seal-glyph" lang="zh-Hant" aria-hidden="true">${entry.char}</span>`;
+  }
+
+  function isNameWall() {
+    return mode === "wall" || mode === "seal";
   }
 
   function shuffle(list) {
@@ -140,7 +159,7 @@
   }
 
   function setIntro(which) {
-    ["introWall", "introClass", "introSolo"].forEach((id) => {
+    ["introWall", "introSeal", "introClass", "introSolo"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.hidden = id !== which;
     });
@@ -149,20 +168,33 @@
   function setMode(next) {
     mode = next;
     const isWall = mode === "wall";
+    const isSeal = mode === "seal";
     const isClass = mode === "class";
     modeWall.classList.toggle("is-on", isWall);
+    if (modeSeal) modeSeal.classList.toggle("is-on", isSeal);
     modeClass.classList.toggle("is-on", isClass);
-    modeSolo.classList.toggle("is-on", !isWall && !isClass);
+    modeSolo.classList.toggle("is-on", !isWall && !isSeal && !isClass);
     modeWall.setAttribute("aria-selected", String(isWall));
+    if (modeSeal) modeSeal.setAttribute("aria-selected", String(isSeal));
     modeClass.setAttribute("aria-selected", String(isClass));
-    modeSolo.setAttribute("aria-selected", String(!isWall && !isClass));
-    wallPanel.hidden = !isWall;
+    modeSolo.setAttribute("aria-selected", String(!isWall && !isSeal && !isClass));
+    wallPanel.hidden = !isNameWall();
+    if (howOracle) howOracle.hidden = !isWall;
+    if (howSeal) howSeal.hidden = !isSeal;
+    if (sealLede) sealLede.hidden = !isSeal;
+    if (nameWall) nameWall.classList.toggle("is-seal", isSeal);
     classPanel.hidden = !isClass;
-    form.hidden = isWall || isClass;
+    form.hidden = isNameWall() || isClass;
     if (isWall) {
       heroCopy.textContent =
         "九個名字藏進古文字裡。先看圖畫畫的是什麼，點下去會翻成現在的字，再跳出一塊磨砂小百科。";
       setIntro("introWall");
+      hidePlay();
+      renderWall(true);
+    } else if (isSeal) {
+      heroCopy.textContent =
+        "九個名字改用秦朝小篆來寫。線條圓轉，像刻在玉上。點下去會翻成現在的字。";
+      setIntro("introSeal");
       hidePlay();
       renderWall(true);
     } else if (isClass) {
@@ -177,14 +209,14 @@
       setIntro("introSolo");
       hidePlay();
     }
-    if (intro) intro.hidden = isWall;
+    if (intro) intro.hidden = isNameWall();
   }
 
   function hidePlay() {
     playfield.hidden = true;
     playfield.classList.remove("is-on");
-    if (page) page.classList.toggle("is-playing", mode === "wall");
-    if (intro) intro.hidden = mode === "wall";
+    if (page) page.classList.toggle("is-playing", isNameWall());
+    if (intro) intro.hidden = isNameWall();
     scatter.innerHTML = "";
     scatter.classList.remove("is-drawing");
     pieces = [];
@@ -206,6 +238,27 @@
         <span class="bone-float">
           <span class="bone-flip">
             <span class="face face-oracle">${glyphMarkup(entry)}</span>
+            <span class="face face-modern">${entry.char}</span>
+          </span>
+        </span>
+      </button>`;
+  }
+
+  function sealButton(entry, index, extraClass, label) {
+    const rot = ((index * 17) % 9) - 4;
+    const delay = Math.min(index * 45, 600);
+    const missing = !hasSealFont(entry.char);
+    return `
+      <button
+        type="button"
+        class="seal-piece${missing ? " is-parts" : ""}${extraClass ? " " + extraClass : ""}"
+        data-index="${index}"
+        style="--r:${rot}deg; --pop-delay:${delay}ms;"
+        aria-label="${label || "一塊小篆，點擊翻成現在的字"}"
+      >
+        <span class="bone-float">
+          <span class="bone-flip">
+            <span class="face face-seal">${sealMarkup(entry)}</span>
             <span class="face face-modern">${entry.char}</span>
           </span>
         </span>
@@ -234,11 +287,17 @@
     wallProgress.textContent =
       "已翻開 " + flipped + "／" + all + " 個字 · 認出 " + decoded + "／" + wallSlabs.length + " 個名字";
     if (decoded >= wallSlabs.length && wallSlabs.length) {
-      wallHint.textContent = "九個名字都現身了。再點任何一塊，還可以重看故事。";
+      wallHint.textContent =
+        mode === "seal"
+          ? "九個小篆名字都現身了。再點任何一塊，還可以重看故事。"
+          : "九個名字都現身了。再點任何一塊，還可以重看故事。";
     } else if (flipped) {
       wallHint.textContent = "同一排都翻開，這位同學的名字就會出現。";
     } else {
-      wallHint.textContent = "同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。";
+      wallHint.textContent =
+        mode === "seal"
+          ? "同一排是同一個人的名字。先認小篆，整排翻開後現代姓名就會出現。"
+          : "同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。";
     }
   }
 
@@ -266,22 +325,27 @@
     if (reset || !wallSlabs.length) wallSlabs = buildWallSlabs();
     if (page) page.classList.add("is-playing");
     if (intro) intro.hidden = true;
+    const makeTile = mode === "seal" ? sealButton : boneButton;
+    const tileSel = mode === "seal" ? ".seal-piece" : ".bone-piece";
+    const hiddenLabel = mode === "seal" ? "小篆，點擊翻開" : "古文字，點擊翻開";
+    const countWord = mode === "seal" ? "小篆" : "古字";
     nameWall.innerHTML = wallSlabs
       .map((slab, slabIndex) => {
-        const countLabel = slab.chars.length === 2 ? "兩個古字" : "三個古字";
+        const countLabel =
+          slab.chars.length === 2 ? "兩個" + countWord : "三個" + countWord;
         return `
           <article class="name-slab${slab.decoded ? " is-decoded" : ""}" data-slab="${slabIndex}">
             <p class="slab-kicker">${slab.decoded ? "名字現身了" : countLabel}</p>
             <div class="slab-glyphs">
               ${slab.chars
                 .map((entry, charIndex) =>
-                  boneButton(
+                  makeTile(
                     entry,
                     slabIndex * 4 + charIndex,
                     entry.flipped ? "is-flipped" : "",
                     entry.flipped
                       ? "現在的字：" + entry.char
-                      : "古文字，點擊翻開"
+                      : hiddenLabel
                   )
                 )
                 .join("")}
@@ -292,14 +356,16 @@
       })
       .join("");
 
-    nameWall.querySelectorAll(".bone-piece").forEach((piece) => {
+    nameWall.querySelectorAll(tileSel).forEach((piece) => {
       piece.addEventListener("click", () => onWallClick(piece));
     });
     updateWallProgress();
   }
 
   function fillSheet(entry, classGuess) {
-    document.getElementById("sheetOracle").innerHTML = glyphMarkup(entry);
+    const oracleEl = document.getElementById("sheetOracle");
+    oracleEl.innerHTML = mode === "seal" ? sealMarkup(entry) : glyphMarkup(entry);
+    oracleEl.classList.toggle("is-seal", mode === "seal");
     const kicker = document.getElementById("sheetKicker");
     const title = document.getElementById("sheetTitle");
     const pinyin = document.getElementById("sheetPinyin");
@@ -308,10 +374,15 @@
     badge.textContent = entry.eraMeta.label;
     badge.className = "sheet-badge badge " + entry.era;
     document.getElementById("sheetMeaning").textContent = entry.meaning;
-    document.getElementById("sheetEra").textContent = entry.eraMeta.note;
+    document.getElementById("sheetEra").textContent =
+      mode === "seal" && hasSealFont(entry.char)
+        ? "這一邊是《說文解字》裡的小篆寫法。"
+        : mode === "seal"
+          ? "說文小篆還沒有這個字，所以改看教學零件圖。"
+          : entry.eraMeta.note;
     document.getElementById("sheetStory").textContent = entry.story;
 
-    if (mode === "wall") {
+    if (isNameWall()) {
       const slab = wallSlabs[entry.slabIndex];
       const decoded = slab && slab.decoded;
       kicker.textContent = "現在這樣寫";
@@ -451,7 +522,7 @@
     const slabIndex = Number(slabEl.dataset.slab);
     const slab = wallSlabs[slabIndex];
     if (!slab) return;
-    const buttons = Array.from(slabEl.querySelectorAll(".bone-piece"));
+    const buttons = Array.from(slabEl.querySelectorAll(".bone-piece, .seal-piece"));
     const charIndex = buttons.indexOf(piece);
     const entry = slab.chars[charIndex];
     if (!entry) return;
@@ -588,12 +659,16 @@
   }
 
   modeWall.addEventListener("click", () => setMode("wall"));
+  if (modeSeal) modeSeal.addEventListener("click", () => setMode("seal"));
   modeClass.addEventListener("click", () => setMode("class"));
   modeSolo.addEventListener("click", () => setMode("solo"));
   document.getElementById("resetWall").addEventListener("click", () => {
     closeSheet();
     renderWall(true);
-    wallHint.textContent = "同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。";
+    wallHint.textContent =
+      mode === "seal"
+        ? "同一排是同一個人的名字。先認小篆，整排翻開後現代姓名就會出現。"
+        : "同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。";
   });
 
   document.getElementById("carveClass").addEventListener("click", startClass);
@@ -625,5 +700,6 @@
 
   rosterInput.value = CLASS_NAMES.join("\n");
   rosterBox.open = false;
-  setMode("wall");
+  const startMode = new URLSearchParams(location.search).get("mode");
+  setMode(startMode === "seal" || startMode === "class" || startMode === "solo" ? startMode : "wall");
 })();
