@@ -33,13 +33,9 @@
   Cache-Control: public, max-age=31536000, immutable
 
 /mawangdui-silk/
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, must-revalidate
+  CDN-Cache-Control: no-store
 
-/mawangdui-silk/index.html
-  Cache-Control: no-cache, must-revalidate
-
-/mawangdui-silk/app.js
-  Cache-Control: no-cache, must-revalidate
-
-/mawangdui-silk/styles.css
-  Cache-Control: no-cache, must-revalidate
+/mawangdui-silk/*
+  Cache-Control: no-store, must-revalidate
+  CDN-Cache-Control: no-store

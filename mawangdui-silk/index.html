@@ -2,107 +2,12 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>帛畫探秘 · 馬王堆升天圖</title>
-  <meta name="description" content="給五年級同學的古代神話互動課：在馬王堆帛畫上尋找人物、動物、植物與禮器，認識它們背後的意義。" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%238a3a2a' d='M16 24L50 16l4 28L20 52z'/%3E%3Cpath fill='none' stroke='%23f4ebe3' stroke-width='2' d='M22 28L46 22l2.6 18L24.6 46z'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Serif+TC:wght@600;700&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260825b" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="refresh" content="0; url=play.html" />
+  <title>帛畫探秘</title>
+  <script>location.replace("play.html");</script>
 </head>
 <body>
-  <a class="skip-link" href="#main">跳到帛畫</a>
-
-  <section id="screen-intro" class="screen screen-intro" aria-labelledby="intro-title">
-    <div class="intro-frame">
-      <p class="eyebrow">馬王堆一號漢墓 · 西漢</p>
-      <h1 id="intro-title">帛畫探秘</h1>
-      <p class="intro-lead">
-        兩千一百多年前，長沙馬王堆漢墓裡出土了一幅畫在絲綢上的 T 形帛畫。
-        古人相信：人過世以後，靈魂會經過地下、人間，再升上天庭。
-      </p>
-      <p class="intro-lead">
-        現在請你當小小探險家。圖上已經有一個紅圈——從那裡開始，找出神話裡的人物、動物、植物和寶物。
-      </p>
-      <ul class="intro-realms" aria-label="三界">
-        <li><span>天上</span>日月、天帝、閶闔</li>
-        <li><span>人間</span>墓主、華蓋、祭案</li>
-        <li><span>地下</span>力士、鯨鯢、靈龜</li>
-      </ul>
-      <div class="intro-actions">
-        <button type="button" class="btn-primary" id="btn-start">開始尋寶</button>
-        <button type="button" class="btn-ghost" id="btn-teacher">老師導覽</button>
-      </div>
-      <p class="intro-note">適合五年級課堂 · 約 25 分鐘 · 可點、可滑、可放大</p>
-    </div>
-  </section>
-
-  <section id="screen-game" class="screen screen-game" hidden aria-hidden="true">
-    <header class="topbar">
-      <a class="brand" href="../index.html">桃花源</a>
-      <div class="topbar-title">
-        <strong>帛畫探秘</strong>
-        <span id="progress-label">已找到 0 / 17</span>
-      </div>
-      <div class="topbar-tools">
-        <button type="button" class="icon-btn" id="btn-zoom-out" aria-label="縮小">−</button>
-        <button type="button" class="icon-btn" id="btn-zoom-in" aria-label="放大">+</button>
-        <button type="button" class="icon-btn" id="btn-mute" aria-label="關閉音效" aria-pressed="false">音</button>
-        <button type="button" class="icon-btn" id="btn-reset" aria-label="重新開始">重置</button>
-      </div>
-    </header>
-
-    <div class="game-shell">
-      <aside class="stamp-rail" aria-label="已收集的印記">
-        <p class="rail-label">收集</p>
-        <ol id="stamp-list" class="stamp-list"></ol>
-      </aside>
-
-      <main id="main" class="viewport" tabindex="-1">
-        <div class="silk-mount" id="silk-mount">
-          <div class="rod" aria-hidden="true"></div>
-          <figure class="silk" id="silk">
-            <img
-              src="images/banner.png"
-              alt="馬王堆一號漢墓 T 形帛畫線描圖，由上到下為天界、人間與地下。"
-              draggable="false"
-            />
-            <div id="hotspot-layer" class="hotspot-layer"></div>
-          </figure>
-          <div class="rod rod-bottom" aria-hidden="true"></div>
-        </div>
-      </main>
-
-      <aside class="dock" id="dock" aria-live="polite">
-        <p class="realm-chip" id="realm-chip" data-realm="人間">人間</p>
-        <h2 id="mission-title">今日謎題</h2>
-        <p id="mission-text" class="mission-text"></p>
-        <div class="dock-actions">
-          <button type="button" class="btn-secondary" id="btn-hint">給我提示</button>
-          <button type="button" class="btn-ghost" id="btn-free">自由探索</button>
-        </div>
-        <div id="lore" class="lore" hidden></div>
-      </aside>
-    </div>
-  </section>
-
-  <section id="screen-finale" class="screen screen-finale" hidden aria-hidden="true" aria-labelledby="finale-title">
-    <div class="finale-card">
-      <p class="eyebrow">魂兮歸來</p>
-      <h2 id="finale-title">靈魂穿過玉璧，走到了天門</h2>
-      <p>
-        你已經走完帛畫上的天界、人間與冥界。西漢的人用這幅畫告訴我們：
-        冥界有力士托住大地、鯨鯢載著世界；人間有華蓋、祭案與親人送行；天上有閶闔、日月與人首蛇身的天帝在等候。
-      </p>
-      <p>這不是嚇人的鬼故事，而是古人對「生命往哪裡去」最溫柔的想像。</p>
-      <div class="intro-actions">
-        <button type="button" class="btn-primary" id="btn-replay">再走一趟</button>
-        <a class="btn-ghost" href="../index.html">返回桃花源</a>
-      </div>
-    </div>
-  </section>
-
-  <script src="app.js?v=20260825b"></script>
+  <p><a href="play.html">進入帛畫探秘</a></p>
 </body>
 </html>
