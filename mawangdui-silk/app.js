@@ -324,6 +324,84 @@ const SPOTS = [
   }
 ];
 
+const FACTS = {
+  greeters: [
+    "夫人前方有兩人捧案跪迎。",
+    "有人認為他們是方士，也有人認為是僕役。",
+    "這是接引靈魂上路的畫面，不是普通問好。"
+  ],
+  "lady-dai": [
+    "一位拄杖老婦人面向西方，一般認為是墓主人辛追。",
+    "她身後有三位侍女隨從。",
+    "這幅帛畫蓋在內棺上，像靈魂升天的通行證。"
+  ],
+  phoenix: [
+    "人間最上端是三角華蓋，由華紋、鳥紋構成。",
+    "華蓋上站立兩隻鳳凰。",
+    "華蓋下有一隻展翅的有翼怪獸，有人認為是鴟鴞，也有人認為是風神飛廉。"
+  ],
+  ritual: [
+    "再下面有一張設祭的食案，陳列俎、豆等禮器。",
+    "這表示用酒食獻給死者。",
+    "有數人踞案對飲，很像家屬在給老婦人送行。"
+  ],
+  bi: [
+    "兩側有兩條龍，交錯穿過中間的玉璧。",
+    "玉璧圓形有孔，象徵天，龍穿璧像打開通天的通道。"
+  ],
+  yuren: [
+    "玉璧之下，有身著白衣、長著翅膀、似人非人的羽人相對而望。",
+    "他們是人首鳥身，守在人間通往天上的路口。"
+  ],
+  giant: [
+    "一位裸體的力士作馬步下蹲。",
+    "雙手向上托舉一塊白色扁平物，那一塊象徵大地。",
+    "有人認為他是北海神禺強，也有人認為是鯀。"
+  ],
+  fish: [
+    "力士站在兩條交纏的水族動物鯨鯢身上。",
+    "鯨鯢尾端還有兩隻異獸。"
+  ],
+  turtles: [
+    "在大地和地下的交界處，有兩隻靈龜浮游。",
+    "龜殼上站著鴟鳥（貓頭鷹一類）。"
+  ],
+  gate: [
+    "天界與人間相隔的是天門「閶闔」。",
+    "兩隻豹攀騰在門上。",
+    "門吏拱手對坐；有人認為是帝閽，也有人認為是大司命、少司命。"
+  ],
+  bells: [
+    "天門上方，有騎獸的怪物把鐘鐸懸在空中。",
+    "鐘上有俯身的鴻雁。",
+    "旁邊有神龍張嘴呼嘯。"
+  ],
+  sun: [
+    "右上角是一輪紅日。",
+    "日中有金烏。"
+  ],
+  fusang: [
+    "紅日之下是扶桑神樹。",
+    "扶桑樹間還有八個太陽。"
+  ],
+  moon: [
+    "左上角是一彎新月。",
+    "月上有蟾蜍和玉兔。"
+  ],
+  change: [
+    "月亮下面畫著奔月的嫦娥。"
+  ],
+  crane: [
+    "天帝周圍有仰首的立鶴。",
+    "牠們是屬於天上的瑞鳥仙禽。"
+  ],
+  deity: [
+    "日、月之間端坐一位披髮的人首蛇身天帝。",
+    "一條紅色長尾自環於身體之中。",
+    "有人認為是女媧，也有人認為是燭龍、太一或伏羲。"
+  ]
+};
+
 const STORAGE_KEY = "mawangdui-silk-found";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -421,17 +499,25 @@ function setMission() {
   if (state.mode === "teacher") {
     setRealmChip("導覽");
     $("mission-title").textContent = "老師導覽";
-    $("mission-text").textContent = "點圖上任何光圈，就可以直接講解。學生不會被謎題卡住。";
+    $("mission-text").textContent = "右邊列出全部細節。點名稱會跳到圖上，並顯示完整講解。";
     $("btn-hint").hidden = true;
     $("btn-free").textContent = "改回尋寶";
+    lore.hidden = false;
+    lore.innerHTML = catalogHtml();
+    bindCatalog();
+    dock.classList.add("is-reading");
     return;
   }
   if (state.mode === "free") {
     setRealmChip("三界");
     $("mission-title").textContent = "自由探索";
-    $("mission-text").textContent = "想點哪裡就點哪裡。找到一處，就能聽到它的故事。";
+    $("mission-text").textContent = "點右邊的名稱，或直接點圖。每一處都會列出完整細節。";
     $("btn-hint").hidden = true;
     $("btn-free").textContent = "改回尋寶";
+    lore.hidden = false;
+    lore.innerHTML = catalogHtml();
+    bindCatalog();
+    dock.classList.add("is-reading");
     return;
   }
   const target = nextTarget();
@@ -449,17 +535,45 @@ function setMission() {
   $("mission-text").textContent = target.riddle;
 }
 
+function catalogHtml() {
+  return ["天上", "人間", "地下"].map((realm) => {
+    const items = SPOTS.filter((spot) => spot.realm === realm)
+      .map((spot) => `<button type="button" class="catalog-btn" data-id="${spot.id}">${spot.name}</button>`)
+      .join("");
+    return `<section class="catalog-group"><p class="realm-chip" data-realm="${realm}">${realm}</p>${items}</section>`;
+  }).join("");
+}
+
+function bindCatalog() {
+  $("lore").querySelectorAll(".catalog-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const spot = SPOTS.find((item) => item.id === btn.dataset.id);
+      if (!spot) return;
+      openSpot(spot, false);
+      const pin = document.querySelector(`[data-id="${spot.id}"]`);
+      if (pin) pin.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+    });
+  });
+}
+
 function loreHtml(spot, withQuiz) {
+  const facts = (FACTS[spot.id] || [])
+    .map((line) => `<li>${line}</li>`)
+    .join("");
   const options = spot.quiz.options
     .map((text, index) => `<button type="button" class="quiz-btn" data-index="${index}">${text}</button>`)
     .join("");
+  const back = state.mode === "teacher"
+    ? `<button type="button" class="btn-ghost" id="btn-catalog">返回目錄</button>`
+    : "";
   return `
     <div class="kind-row">
-      <span>${spot.realm}</span>
       <span>${spot.kind}</span>
     </div>
+    <ul class="lore-facts">${facts}</ul>
     <p class="lore-meaning"><strong>它代表：</strong>${spot.meaning}</p>
     ${withQuiz ? `<div class="quiz"><h3>${spot.quiz.q}</h3>${options}<p class="feedback" id="quiz-feedback"></p></div>` : ""}
+    ${back}
   `;
 }
 
@@ -475,6 +589,8 @@ function openSpot(spot, fromRiddle) {
   lore.innerHTML = loreHtml(spot, needQuiz);
   dock.classList.add("is-reading");
   dock.scrollTop = 0;
+  const back = $("btn-catalog");
+  if (back) back.addEventListener("click", () => setMission());
   if (fromRiddle && needQuiz) {
     $("btn-hint").hidden = true;
   }

@@ -534,10 +534,38 @@ h2,
   font-size: 1.25rem;
 }
 
-.lore {
+.lore-facts {
+  margin: 0;
+  padding-left: 1.2em;
   display: grid;
-  gap: 12px;
-  padding-top: 8px;
+  gap: 10px;
+  font-family: var(--font-story);
+  font-size: 2rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.catalog-group {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.catalog-btn {
+  min-height: 52px;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 1.6rem;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: oklch(0.97 0.01 80);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.catalog-btn:hover,
+.catalog-btn:focus-visible {
+  background: oklch(0.94 0.03 80);
 }
 
 .lore[hidden] {
