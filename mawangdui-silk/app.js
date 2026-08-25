@@ -117,7 +117,7 @@ const SPOTS = [
     id: "giant",
     name: "托地力士",
     short: "力士",
-    realm: "冥界",
+    realm: "地下",
     kind: "人物",
     x: 50,
     y: 82.5,
@@ -136,7 +136,7 @@ const SPOTS = [
     id: "fish",
     name: "交纏鯨鯢",
     short: "鯨鯢",
-    realm: "冥界",
+    realm: "地下",
     kind: "動物",
     x: 50,
     y: 93.5,
@@ -155,7 +155,7 @@ const SPOTS = [
     id: "turtles",
     name: "靈龜與鴟鳥",
     short: "靈龜",
-    realm: "冥界",
+    realm: "地下",
     kind: "動物",
     x: 28,
     y: 79.2,
@@ -405,6 +405,12 @@ function renderHotspots() {
   $("silk").classList.toggle("mode-riddle", state.mode === "riddle");
 }
 
+function setRealmChip(label) {
+  const el = $("realm-chip");
+  el.textContent = label;
+  el.dataset.realm = ["天上", "人間", "地下"].includes(label) ? label : "";
+}
+
 function setMission() {
   const lore = $("lore");
   const dock = $("dock");
@@ -413,7 +419,7 @@ function setMission() {
   dock.classList.remove("is-reading");
   dock.scrollTop = 0;
   if (state.mode === "teacher") {
-    $("realm-chip").textContent = "導覽";
+    setRealmChip("導覽");
     $("mission-title").textContent = "老師導覽";
     $("mission-text").textContent = "點圖上任何光圈，就可以直接講解。學生不會被謎題卡住。";
     $("btn-hint").hidden = true;
@@ -421,7 +427,7 @@ function setMission() {
     return;
   }
   if (state.mode === "free") {
-    $("realm-chip").textContent = "三界";
+    setRealmChip("三界");
     $("mission-title").textContent = "自由探索";
     $("mission-text").textContent = "想點哪裡就點哪裡。找到一處，就能聽到它的故事。";
     $("btn-hint").hidden = true;
@@ -432,13 +438,13 @@ function setMission() {
   $("btn-hint").hidden = false;
   $("btn-free").textContent = "自由探索";
   if (!target) {
-    $("realm-chip").textContent = "完成";
+    setRealmChip("完成");
     $("mission-title").textContent = `${SPOTS.length} 處都找到了`;
     $("mission-text").textContent = "靈魂已經走到天門。往下看看結局。";
     showFinale();
     return;
   }
-  $("realm-chip").textContent = target.realm;
+  setRealmChip(target.realm);
   $("mission-title").textContent = "今日謎題";
   $("mission-text").textContent = target.riddle;
 }
@@ -460,7 +466,7 @@ function loreHtml(spot, withQuiz) {
 function openSpot(spot, fromRiddle) {
   state.selected = spot.id;
   const needQuiz = state.mode !== "teacher" && !state.found.has(spot.id);
-  $("realm-chip").textContent = spot.realm;
+  setRealmChip(spot.realm);
   $("mission-title").textContent = spot.name;
   $("mission-text").textContent = spot.story;
   const lore = $("lore");
