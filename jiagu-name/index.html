@@ -9,7 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fontsapi.zeoseven.com/37/main/result.css" />
-  <link rel="stylesheet" href="styles.css?v=seal1" />
+  <link rel="stylesheet" href="https://fontsapi.zeoseven.com/2214/main/result.css" />
+  <link rel="stylesheet" href="https://fontsapi.zeoseven.com/957/main/result.css" />
+  <link rel="stylesheet" href="styles.css?v=lookup1" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
@@ -31,17 +33,55 @@
           <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
         </svg>
         <h1>桃源契文</h1>
-        <p id="heroCopy">九個名字藏進古文字裡。先看圖畫畫的是什麼，點下去會翻成現在的字，再跳出一塊磨砂小百科。</p>
+        <p id="heroCopy">輸入任何字，再用下拉選單選甲骨文、金文或小篆，看看這個字在不同時代長什麼樣子。</p>
       </section>
 
       <nav class="mode-switch" role="tablist" aria-label="使用方式">
-        <button type="button" role="tab" id="modeWall" aria-selected="true" class="is-on">本班名牆</button>
+        <button type="button" role="tab" id="modeLookup" aria-selected="true" class="is-on">查古字</button>
+        <button type="button" role="tab" id="modeWall" aria-selected="false">本班名牆</button>
         <button type="button" role="tab" id="modeSeal" aria-selected="false">本班名牆小篆體</button>
         <button type="button" role="tab" id="modeClass" aria-selected="false">猜字謎</button>
         <button type="button" role="tab" id="modeSolo" aria-selected="false">自己查名字</button>
       </nav>
 
-      <section class="wall-panel" id="wallPanel">
+      <section class="lookup-panel" id="lookupPanel">
+        <form class="lookup-form" id="lookupForm">
+          <div class="lookup-row">
+            <label class="skip" for="lookupInput">要查的字</label>
+            <input
+              id="lookupInput"
+              name="chars"
+              type="text"
+              maxlength="16"
+              autocomplete="off"
+              placeholder="寫下任何字，例如：日月山"
+            />
+            <label class="script-field">
+              <span class="skip">字體</span>
+              <select id="scriptSelect" aria-label="選擇古文字體">
+                <option value="oracle">甲骨文</option>
+                <option value="bronze">金文</option>
+                <option value="seal">小篆</option>
+              </select>
+            </label>
+            <button type="submit">查字型</button>
+          </div>
+        </form>
+        <div class="chips" id="lookupChips" aria-label="試試這些字">
+          <button type="button" data-chars="日">日</button>
+          <button type="button" data-chars="月">月</button>
+          <button type="button" data-chars="山">山</button>
+          <button type="button" data-chars="水">水</button>
+          <button type="button" data-chars="人">人</button>
+          <button type="button" data-chars="木">木</button>
+          <button type="button" data-chars="馬">馬</button>
+          <button type="button" data-chars="雨">雨</button>
+        </div>
+        <p class="status" id="lookupStatus" role="status"></p>
+        <div class="lookup-gallery" id="lookupGallery"></div>
+      </section>
+
+      <section class="wall-panel" id="wallPanel" hidden>
         <details class="how-play" id="howOracle">
           <summary>這節課怎麼玩</summary>
           <ol class="play-steps">
@@ -117,7 +157,11 @@
       </form>
 
       <aside class="intro" id="intro">
-        <div id="introWall">
+        <div id="introLookup">
+          <h2>三種古文字，三種樣子</h2>
+          <p>甲骨文刻在龜甲或牛骨上，金文鑄在青銅器上，小篆是秦始皇統一文字以後比較圓轉的寫法。先選一種字體，再寫下想查的字；點開圖樣，還能讀一小段故事。</p>
+        </div>
+        <div id="introWall" hidden>
           <h2>這節課怎麼玩</h2>
           <ol class="play-steps">
             <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
@@ -182,12 +226,12 @@
     </div>
 
     <footer class="page-foot">
-      甲骨字形是為小朋友辨認而畫的教學象形。小篆名牆使用全字庫《說文解字》篆體；說文還沒有的字，改用教學零件圖。
+      查古字：甲骨文用鏡原甲骨文，金文用敬峰中山王篆（青銅器銘文風格），小篆用全字庫《說文解字》。字庫沒有的字，改用教學零件圖。課堂名牆的甲骨字形是為小朋友辨認而畫的教學象形。
     </footer>
   </div>
 
-  <script src="glyphs.js?v=seal1"></script>
-  <script src="characters.js?v=seal1"></script>
-  <script src="app.js?v=seal1"></script>
+  <script src="glyphs.js?v=lookup1"></script>
+  <script src="characters.js?v=lookup1"></script>
+  <script src="app.js?v=lookup1"></script>
 </body>
 </html>

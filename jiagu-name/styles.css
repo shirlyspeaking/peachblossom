@@ -156,6 +156,226 @@ body::after {
   width: min(100%, 640px);
 }
 
+.lookup-panel {
+  display: grid;
+  gap: 14px;
+  margin: 28px auto 0;
+  width: min(100%, 720px);
+}
+
+.lookup-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--shell) 92%, white);
+  box-shadow: var(--shadow);
+}
+
+.lookup-row input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 14px 18px;
+  font: inherit;
+  font-size: 1.12rem;
+  color: var(--ink);
+  outline: none;
+}
+
+.lookup-row input::placeholder {
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
+.script-field {
+  display: grid;
+  align-items: center;
+}
+
+.script-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  min-width: 7.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 12px 38px 12px 16px;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, #fff 0%, var(--bone) 100%) padding-box,
+    transparent;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236a5560' d='M1 1.2 6 6.4 11 1.2'/></svg>"),
+    linear-gradient(180deg, #fff 0%, var(--bone) 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: right 14px center, 0 0;
+  outline: none;
+}
+
+.script-field select:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cinnabar) 45%, white);
+}
+
+.lookup-row button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff8f2;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cinnabar) 92%, white) 0%, var(--cinnabar-deep) 100%);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--cinnabar) 28%, transparent);
+}
+
+.lookup-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 16px;
+}
+
+.lookup-card {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 18px 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--shell) 88%, white);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  animation: rise 560ms var(--ease) both;
+}
+
+.lookup-card:hover,
+.lookup-card:focus-visible {
+  transform: translateY(-3px);
+  outline: none;
+}
+
+.lookup-tile {
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 148px;
+  margin-bottom: 4px;
+}
+
+.lookup-card.is-oracle .lookup-tile {
+  border-radius: 42% 52% 46% 38%;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 30% 22%, #fffdf8 0%, transparent 40%),
+    linear-gradient(160deg, #fff3e8 0%, #edd2c0 52%, #e2c0a8 100%);
+  box-shadow: 0 14px 26px color-mix(in srgb, #8a4a58 14%, transparent);
+}
+
+.lookup-card.is-bronze .lookup-tile {
+  border-radius: 18px;
+  color: #2b2418;
+  background:
+    radial-gradient(circle at 24% 18%, #efe4c4 0%, transparent 42%),
+    linear-gradient(165deg, #c9b27a 0%, #8f7a48 52%, #6e5a32 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #4a3a1c 35%, transparent),
+    0 14px 26px color-mix(in srgb, #6a4a20 18%, transparent);
+}
+
+.lookup-card.is-seal .lookup-tile {
+  border-radius: 16px;
+  color: #3a2a1c;
+  background:
+    radial-gradient(circle at 28% 18%, #fff8ec 0%, transparent 42%),
+    linear-gradient(165deg, #f3e4c8 0%, #d7be93 48%, #c4a06a 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #8a6a3a 28%, transparent),
+    0 14px 26px color-mix(in srgb, #8a4a58 14%, transparent);
+}
+
+.script-glyph {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.script-glyph.is-oracle {
+  font-family: "Oracular", "Noto Serif TC", serif;
+  font-size: 4.2rem;
+}
+
+.script-glyph.is-bronze {
+  font-family: "Jingfeng_ZSKSS", "Noto Serif TC", serif;
+  font-size: 3.8rem;
+}
+
+.script-glyph.is-seal {
+  font-family: "EBAS", "Noto Serif TC", serif;
+  font-size: 3.6rem;
+}
+
+.lookup-tile svg,
+.lookup-tile .fallback-glyph {
+  width: 72%;
+  height: 72%;
+}
+
+.lookup-missing {
+  font-size: 0.92rem;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--muted) 80%, white);
+}
+
+.lookup-modern {
+  font-family: "ZCOOL XiaoWei", "Noto Serif TC", serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.12em;
+  color: var(--cinnabar-deep);
+}
+
+.lookup-pinyin {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.lookup-script {
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  color: var(--moss);
+}
+
+.lookup-note {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.sheet-glyph.is-oracle-font .script-glyph {
+  font-family: "Oracular", "Noto Serif TC", serif;
+  font-size: 4.4rem;
+}
+
+.sheet-glyph.is-bronze {
+  background:
+    radial-gradient(circle at 30% 24%, #efe4c4 0%, transparent 42%),
+    linear-gradient(180deg, #c9b27a 0%, #8f7a48 100%);
+}
+
+.sheet-glyph.is-bronze .script-glyph {
+  font-family: "Jingfeng_ZSKSS", "Noto Serif TC", serif;
+  font-size: 4.2rem;
+}
+
 .search-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -336,6 +556,7 @@ body::after {
 
 .playfield[hidden],
 .search-panel[hidden],
+.lookup-panel[hidden],
 .class-panel[hidden],
 .wall-panel[hidden],
 .class-toolbar[hidden],
@@ -777,7 +998,7 @@ body::after {
   justify-content: center;
   gap: 8px;
   margin: 22px auto 0;
-  max-width: 36rem;
+  max-width: 44rem;
 }
 
 .mode-switch button {
@@ -1093,8 +1314,15 @@ body::after {
     linear-gradient(180deg, #f3e4c8 0%, #d7be93 100%);
 }
 
-.sheet-glyph.is-seal .seal-glyph {
+.sheet-glyph.is-seal .seal-glyph,
+.sheet-glyph.is-seal .script-glyph {
   font-size: 4.2rem;
+}
+
+.sheet-glyph.is-oracle-font {
+  background:
+    radial-gradient(circle at 30% 24%, #fffdf8 0%, transparent 42%),
+    linear-gradient(180deg, #fff4ee 0%, #f0d8ce 100%);
 }
 
 .slab-name {
@@ -1143,11 +1371,14 @@ body::after {
 }
 
 @media (max-width: 640px) {
-  .search-row {
+  .search-row,
+  .lookup-row {
     grid-template-columns: 1fr;
   }
 
-  .search-row button {
+  .search-row button,
+  .lookup-row button,
+  .script-field select {
     width: 100%;
   }
 

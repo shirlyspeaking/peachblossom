@@ -47,10 +47,17 @@
   const revealChar = document.getElementById("revealChar");
   const revealWho = document.getElementById("revealWho");
   const sheetLore = document.getElementById("sheetLore");
+  const modeLookup = document.getElementById("modeLookup");
   const modeWall = document.getElementById("modeWall");
   const modeSeal = document.getElementById("modeSeal");
   const modeClass = document.getElementById("modeClass");
   const modeSolo = document.getElementById("modeSolo");
+  const lookupPanel = document.getElementById("lookupPanel");
+  const lookupForm = document.getElementById("lookupForm");
+  const lookupInput = document.getElementById("lookupInput");
+  const scriptSelect = document.getElementById("scriptSelect");
+  const lookupStatus = document.getElementById("lookupStatus");
+  const lookupGallery = document.getElementById("lookupGallery");
   const wallPanel = document.getElementById("wallPanel");
   const nameWall = document.getElementById("nameWall");
   const wallHint = document.getElementById("wallHint");
@@ -60,19 +67,36 @@
   const sealLede = document.getElementById("sealLede");
 
   const SEAL_MISSING = new Set(["鏘", "浠", "晟", "陚"]);
+  const SCRIPT_FONTS = {
+    oracle: "Oracular",
+    bronze: "Jingfeng_ZSKSS",
+    seal: "EBAS",
+  };
+  const SCRIPT_LABELS = {
+    oracle: "甲骨文",
+    bronze: "金文",
+    seal: "小篆",
+  };
+  const SCRIPT_NOTES = {
+    oracle: "三千多年前刻在龜甲或牛骨上的樣子。",
+    bronze: "鑄在青銅器上的銘文風格，比甲骨文稍晚。",
+    seal: "秦始皇統一文字後，比較圓轉整齊的小篆。",
+  };
 
   if (!playfield || !scatter || !sheet) return;
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const BONE_SHAPES = 5;
 
-  let mode = "wall";
+  let mode = "lookup";
   let pieces = [];
   let wallSlabs = [];
   let activeIndex = -1;
   let activeWall = null;
   let lastFocus = null;
   let whoRevealed = false;
+  let lookupScript = "oracle";
+  let lookupEntries = [];
 
   function glyphMarkup(entry) {
     const svg = window.JiaguGlyphs && JiaguGlyphs.getGlyph(entry.char);
@@ -91,6 +115,30 @@
 
   function isNameWall() {
     return mode === "wall" || mode === "seal";
+  }
+
+  async function fontCovers(family, ch) {
+    if (!family || !ch) return false;
+    try {
+      await document.fonts.load('72px "' + family + '"', ch);
+    } catch (err) {}
+    return document.fonts.check('72px "' + family + '"', ch);
+  }
+
+  function parseChars(raw, max) {
+    return Array.from((raw || "").trim())
+      .filter((ch) => window.JiaguChars && JiaguChars.isCjk(ch))
+      .slice(0, max || 16);
+  }
+
+  function scriptFaceMarkup(entry, script, covered) {
+    if (covered) {
+      return `<span class="script-glyph is-${script}" lang="zh-Hant" aria-hidden="true">${entry.char}</span>`;
+    }
+    if (window.JiaguGlyphs && JiaguGlyphs.hasGlyph(entry.char)) {
+      return glyphMarkup(entry);
+    }
+    return `<span class="lookup-missing">尚未收錄</span>`;
   }
 
   function shuffle(list) {
@@ -159,33 +207,44 @@
   }
 
   function setIntro(which) {
-    ["introWall", "introSeal", "introClass", "introSolo"].forEach((id) => {
+    ["introLookup", "introWall", "introSeal", "introClass", "introSolo"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.hidden = id !== which;
     });
   }
 
+  function setTab(btn, on) {
+    if (!btn) return;
+    btn.classList.toggle("is-on", on);
+    btn.setAttribute("aria-selected", String(on));
+  }
+
   function setMode(next) {
     mode = next;
+    const isLookup = mode === "lookup";
     const isWall = mode === "wall";
     const isSeal = mode === "seal";
     const isClass = mode === "class";
-    modeWall.classList.toggle("is-on", isWall);
-    if (modeSeal) modeSeal.classList.toggle("is-on", isSeal);
-    modeClass.classList.toggle("is-on", isClass);
-    modeSolo.classList.toggle("is-on", !isWall && !isSeal && !isClass);
-    modeWall.setAttribute("aria-selected", String(isWall));
-    if (modeSeal) modeSeal.setAttribute("aria-selected", String(isSeal));
-    modeClass.setAttribute("aria-selected", String(isClass));
-    modeSolo.setAttribute("aria-selected", String(!isWall && !isSeal && !isClass));
+    const isSolo = mode === "solo";
+    setTab(modeLookup, isLookup);
+    setTab(modeWall, isWall);
+    setTab(modeSeal, isSeal);
+    setTab(modeClass, isClass);
+    setTab(modeSolo, isSolo);
+    if (lookupPanel) lookupPanel.hidden = !isLookup;
     wallPanel.hidden = !isNameWall();
     if (howOracle) howOracle.hidden = !isWall;
     if (howSeal) howSeal.hidden = !isSeal;
     if (sealLede) sealLede.hidden = !isSeal;
     if (nameWall) nameWall.classList.toggle("is-seal", isSeal);
     classPanel.hidden = !isClass;
-    form.hidden = isNameWall() || isClass;
-    if (isWall) {
+    form.hidden = !isSolo;
+    if (isLookup) {
+      heroCopy.textContent =
+        "輸入任何字，再用下拉選單選甲骨文、金文或小篆，看看這個字在不同時代長什麼樣子。";
+      setIntro("introLookup");
+      hidePlay();
+    } else if (isWall) {
       heroCopy.textContent =
         "九個名字藏進古文字裡。先看圖畫畫的是什麼，點下去會翻成現在的字，再跳出一塊磨砂小百科。";
       setIntro("introWall");
@@ -221,6 +280,71 @@
     scatter.classList.remove("is-drawing");
     pieces = [];
     activeIndex = -1;
+  }
+
+  async function searchLookup(raw) {
+    if (!window.JiaguChars || !lookupGallery) return;
+    const chars = parseChars(raw, 16);
+    lookupScript = (scriptSelect && scriptSelect.value) || "oracle";
+    if (!chars.length) {
+      lookupStatus.textContent = "先寫下一個中文字吧。";
+      lookupGallery.innerHTML = "";
+      lookupEntries = [];
+      return;
+    }
+    lookupStatus.textContent = "正在找" + SCRIPT_LABELS[lookupScript] + "……";
+    const family = SCRIPT_FONTS[lookupScript];
+    const next = [];
+    for (const ch of chars) {
+      const entry = JiaguChars.lookup(ch);
+      next.push(
+        Object.assign({}, entry, {
+          covered: await fontCovers(family, entry.char),
+        })
+      );
+    }
+    lookupEntries = next;
+    renderLookupGallery();
+    if (intro) intro.hidden = true;
+    const missing = next.filter(
+      (item) => !item.covered && !(window.JiaguGlyphs && JiaguGlyphs.hasGlyph(item.char))
+    ).length;
+    lookupStatus.textContent = missing
+      ? SCRIPT_LABELS[lookupScript] + " · " + next.length + " 個字，其中 " + missing + " 個字型還沒收到"
+      : SCRIPT_LABELS[lookupScript] + " · " + next.length + " 個字";
+  }
+
+  function renderLookupGallery() {
+    lookupGallery.innerHTML = lookupEntries
+      .map((entry, index) => {
+        const hasParts = !entry.covered && window.JiaguGlyphs && JiaguGlyphs.hasGlyph(entry.char);
+        const note = entry.covered
+          ? SCRIPT_NOTES[lookupScript]
+          : hasParts
+            ? "這種字體還沒有這個字，先看教學零件圖。"
+            : "這種字體還沒有這個字。";
+        return `
+          <button type="button" class="lookup-card is-${lookupScript}" data-index="${index}" aria-label="${entry.char}的${SCRIPT_LABELS[lookupScript]}">
+            <span class="lookup-tile">
+              ${scriptFaceMarkup(entry, lookupScript, entry.covered)}
+            </span>
+            <span class="lookup-modern">${entry.char}</span>
+            <span class="lookup-pinyin">${entry.pinyin || ""}</span>
+            <span class="lookup-script">${SCRIPT_LABELS[lookupScript]}</span>
+            <span class="lookup-note">${note}</span>
+          </button>`;
+      })
+      .join("");
+    lookupGallery.querySelectorAll(".lookup-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const index = Number(card.dataset.index);
+        const entry = lookupEntries[index];
+        if (!entry) return;
+        lastFocus = card;
+        activeIndex = index;
+        openSheet(entry, false);
+      });
+    });
   }
 
   function boneButton(entry, index, extraClass, label) {
@@ -364,8 +488,15 @@
 
   function fillSheet(entry, classGuess) {
     const oracleEl = document.getElementById("sheetOracle");
-    oracleEl.innerHTML = mode === "seal" ? sealMarkup(entry) : glyphMarkup(entry);
-    oracleEl.classList.toggle("is-seal", mode === "seal");
+    oracleEl.innerHTML =
+      mode === "lookup"
+        ? scriptFaceMarkup(entry, lookupScript, entry.covered)
+        : mode === "seal"
+          ? sealMarkup(entry)
+          : glyphMarkup(entry);
+    oracleEl.classList.toggle("is-seal", mode === "seal" || (mode === "lookup" && lookupScript === "seal"));
+    oracleEl.classList.toggle("is-bronze", mode === "lookup" && lookupScript === "bronze");
+    oracleEl.classList.toggle("is-oracle-font", mode === "lookup" && lookupScript === "oracle");
     const kicker = document.getElementById("sheetKicker");
     const title = document.getElementById("sheetTitle");
     const pinyin = document.getElementById("sheetPinyin");
@@ -375,12 +506,30 @@
     badge.className = "sheet-badge badge " + entry.era;
     document.getElementById("sheetMeaning").textContent = entry.meaning;
     document.getElementById("sheetEra").textContent =
-      mode === "seal" && hasSealFont(entry.char)
-        ? "這一邊是《說文解字》裡的小篆寫法。"
-        : mode === "seal"
-          ? "說文小篆還沒有這個字，所以改看教學零件圖。"
-          : entry.eraMeta.note;
+      mode === "lookup"
+        ? entry.covered
+          ? SCRIPT_NOTES[lookupScript]
+          : "這種字體還沒有這個字，所以改看教學零件圖。"
+        : mode === "seal" && hasSealFont(entry.char)
+          ? "這一邊是《說文解字》裡的小篆寫法。"
+          : mode === "seal"
+            ? "說文小篆還沒有這個字，所以改看教學零件圖。"
+            : entry.eraMeta.note;
     document.getElementById("sheetStory").textContent = entry.story;
+
+    if (mode === "lookup") {
+      kicker.textContent = SCRIPT_LABELS[lookupScript];
+      title.textContent = entry.char;
+      title.classList.remove("is-mystery");
+      pinyin.textContent = entry.pinyin || "";
+      badge.hidden = false;
+      if (sheetLore) sheetLore.hidden = false;
+      whoBox.hidden = true;
+      whoResult.hidden = true;
+      if (revealChar) revealChar.hidden = true;
+      revealWho.hidden = true;
+      return;
+    }
 
     if (isNameWall()) {
       const slab = wallSlabs[entry.slabIndex];
@@ -658,6 +807,7 @@
     playHint.textContent = "點一點散落的甲骨，把它翻成現在的字。";
   }
 
+  if (modeLookup) modeLookup.addEventListener("click", () => setMode("lookup"));
   modeWall.addEventListener("click", () => setMode("wall"));
   if (modeSeal) modeSeal.addEventListener("click", () => setMode("seal"));
   modeClass.addEventListener("click", () => setMode("class"));
@@ -677,6 +827,24 @@
   document.getElementById("editRoster").addEventListener("click", () => {
     rosterBox.open = true;
     rosterInput.focus();
+  });
+
+  if (lookupForm) {
+    lookupForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      searchLookup(lookupInput.value);
+    });
+  }
+  if (scriptSelect) {
+    scriptSelect.addEventListener("change", () => {
+      if (lookupInput && lookupInput.value.trim()) searchLookup(lookupInput.value);
+    });
+  }
+  document.querySelectorAll("#lookupChips [data-chars]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      lookupInput.value = btn.dataset.chars;
+      searchLookup(btn.dataset.chars);
+    });
   });
 
   form.addEventListener("submit", (event) => {
@@ -701,5 +869,6 @@
   rosterInput.value = CLASS_NAMES.join("\n");
   rosterBox.open = false;
   const startMode = new URLSearchParams(location.search).get("mode");
-  setMode(startMode === "seal" || startMode === "class" || startMode === "solo" ? startMode : "wall");
+  const allowed = { lookup: 1, wall: 1, seal: 1, class: 1, solo: 1 };
+  setMode(allowed[startMode] ? startMode : "lookup");
 })();
