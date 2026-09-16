@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>王小毛成長記 · 桃花源</title>
+  <meta name="description" content="給 15 歲同學的課堂闖關：跟著王小毛從中學走到三十多歲，看兩會、五年規劃怎樣進到生活，普通人又能怎樣把意見送回去。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='14' y='10' width='36' height='44' rx='3' fill='%237a2f28'/%3E%3Cpath fill='%23f4ebe3' d='M20 18h24v4H20zm0 10h18v3H20zm0 8h22v3H20z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Serif+TC:wght@600;700&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#scene-title">跳到內容</a>
+
+  <section id="screen-intro" class="screen screen-intro" aria-labelledby="intro-title">
+    <div class="intro-frame">
+      <p class="eyebrow">公民課堂 · 成長闖關</p>
+      <h1 id="intro-title">王小毛成長記</h1>
+      <p class="intro-lead">政策和機關，怎樣進到一個人的生活。</p>
+      <p class="intro-lead">這不是當官遊戲。請你替香港中學生王小毛做選擇：在哪裡讀書、做哪一行、要不要把意見送回去。故事走到三十多歲就停。</p>
+      <ul class="intro-realms" aria-label="課堂三件事">
+        <li><span>機關</span>人大、政協、政府</li>
+        <li><span>規劃</span>怎樣進到日常</li>
+        <li><span>意見</span>諮詢、團體、代表</li>
+      </ul>
+      <div class="intro-actions">
+        <button type="button" class="btn-primary" id="btn-start">開始成長</button>
+        <button type="button" class="btn-ghost" id="btn-teacher">老師導覽</button>
+      </div>
+      <p class="intro-note">適合 15 歲課堂 · 約 20–25 分鐘 · 投影、平板都能用</p>
+    </div>
+  </section>
+
+  <section id="screen-game" class="screen screen-game" hidden>
+    <header class="topbar">
+      <a class="brand" href="../index.html">桃花源</a>
+      <ol id="progress-list" class="progress" aria-label="進度"></ol>
+      <div class="topbar-tools">
+        <button type="button" class="text-btn" id="btn-album">知識卡</button>
+        <button type="button" class="text-btn" id="btn-teacher-game">老師</button>
+        <button type="button" class="text-btn" id="btn-restart">重來</button>
+      </div>
+    </header>
+
+    <div class="game-shell">
+      <aside class="stamp-rail" aria-label="生活印章">
+        <p class="rail-label">生活</p>
+        <ol id="stamp-list" class="stamp-list"></ol>
+      </aside>
+
+      <main class="stage" id="main">
+        <p class="eyebrow" id="scene-eyebrow"></p>
+        <h2 id="scene-title"></h2>
+        <p class="scene-body" id="scene-body"></p>
+        <ol id="npc-diagram" class="npc-diagram" hidden>
+          <li><small>一</small>提名</li>
+          <li><small>二</small>選舉會議投票</li>
+          <li><small>三</small>全國人大常委會確認資格</li>
+        </ol>
+        <div class="scene-actions" id="scene-actions"></div>
+      </main>
+
+      <aside class="org-rail" aria-label="機關地圖">
+        <p class="rail-label">機關</p>
+        <ul id="org-list" class="org-list"></ul>
+      </aside>
+    </div>
+  </section>
+
+  <section id="screen-summary" class="screen screen-finale" hidden aria-labelledby="summary-heading">
+    <div class="finale-card">
+      <p class="eyebrow">三十多歲</p>
+      <h2 id="summary-heading">成長總結</h2>
+      <p id="summary-text" class="summary-text"></p>
+      <ul id="summary-tags" class="summary-tags"></ul>
+      <div class="intro-actions">
+        <button type="button" class="btn-primary" id="btn-play-again">再走一次</button>
+        <a class="btn-ghost" href="../index.html">回桃花源</a>
+      </div>
+      <p class="intro-note">老師可問：兩會差在哪？你這條路哪一件事連上規劃？意見最貼近普通人的一步是什麼？</p>
+    </div>
+  </section>
+
+  <div id="card-toast" class="toast" hidden>
+    <p class="toast-kicker">知識卡</p>
+    <h3 id="toast-title"></h3>
+    <p id="toast-body"></p>
+    <button type="button" class="text-btn" id="btn-toast-close">收起</button>
+  </div>
+
+  <div id="teacher-panel" class="panel" hidden>
+    <div class="panel-sheet">
+      <p class="eyebrow">老師導覽</p>
+      <h2>不是當官模擬器</h2>
+      <p id="teacher-goal"></p>
+      <p id="teacher-time"></p>
+      <ol id="teacher-discuss"></ol>
+      <button type="button" class="btn-primary" id="btn-teacher-close">關閉</button>
+    </div>
+  </div>
+
+  <div id="album-panel" class="panel" hidden>
+    <div class="panel-sheet panel-sheet--wide">
+      <p class="eyebrow">知識圖鑑</p>
+      <h2>收集到的機關與渠道</h2>
+      <div id="album-list" class="album-grid"></div>
+      <button type="button" class="btn-primary" id="btn-album-close">關閉</button>
+    </div>
+  </div>
+
+  <script src="content.js"></script>
+  <script src="game.js"></script>
+  <script>
+    (function fillTeacher() {
+      var t = window.XIAOMAO.teacher;
+      document.getElementById("teacher-goal").textContent = t.goal;
+      document.getElementById("teacher-time").textContent = t.time;
+      document.getElementById("teacher-discuss").innerHTML = t.discuss.map(function (q) {
+        return "<li>" + q + "</li>";
+      }).join("");
+    })();
+  </script>
+</body>
+</html>
