@@ -305,8 +305,6 @@ def build():
         ("鐵棍山藥", "320 g", "選這個口感更粉糯"),
         ("熟糯米粉", "25 g", "讓它能搓成團"),
         ("白砂糖", "25 g", "甜度剛剛好"),
-        ("茯苓粉", "10 g", "參考「三白飲」"),
-        ("百合粉", "10 g", "一起揉進山藥泥"),
         ("蝶豆花粉", "適量", "染出青花藍"),
     ]
     y = Inches(1.90)
@@ -316,7 +314,7 @@ def build():
         add_textbox(s, Inches(9.85), y, Inches(1.2), Inches(0.38), amt, 15, BLUE, True)
         add_textbox(s, Inches(11.05), y, Inches(1.6), Inches(0.38), note, 12, INK_SOFT)
         y += Inches(0.48)
-    add_textbox(s, Inches(7.05), Inches(5.00), Inches(5.6), Inches(1.5),
+    add_textbox(s, Inches(7.05), Inches(4.20), Inches(5.6), Inches(1.5),
                 "透明外衣：椰子水 + 白涼粉（約 10：1）\n可包喜歡的餡，也可以不包，直接搓球。",
                 14, INK)
 
@@ -343,7 +341,7 @@ def build():
     }, {
         "num": "4", "color": PINK, "title": "加粉揉成團",
         "photo": "qh_knead.jpg",
-        "body": "加入熟糯米粉 25g、白砂糖 25g、茯苓粉 10g、百合粉 10g，揉到不黏手的光滑麵團。",
+        "body": "加入熟糯米粉 25g、白砂糖 25g，揉到不黏手的光滑麵團。",
     })
 
     # ---------- 7 青花 5-6 ----------
