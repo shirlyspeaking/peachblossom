@@ -38,3 +38,9 @@ wrangler-account.json
 *.njsproj
 *.sln
 *.sw?
+
+# 甜點教學簡報：原影片與逐格畫面不上線（簡報本身已內嵌截圖）
+ziliao/dessert-assets/*.mp4
+ziliao/dessert-assets/qh/
+ziliao/dessert-assets/xl/
+ziliao/dessert-assets/preview/
