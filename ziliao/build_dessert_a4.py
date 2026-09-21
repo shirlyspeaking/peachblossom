@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""兩份可編輯的一頁 A4 講義：材料 + 步驟，只放一張成品圖。"""
+"""兩份可編輯的一頁 A4 講義：材料 + 步驟小圖。"""
 
 from pathlib import Path
 
@@ -166,90 +166,59 @@ def prevent_break(table):
         trPr.append(cant)
 
 
+def set_row_height(row, height, rule="atLeast"):
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+    for old in trPr.findall(qn("w:trHeight")):
+        trPr.remove(old)
+    trHeight = OxmlElement("w:trHeight")
+    trHeight.set(qn("w:val"), str(int(to_emu(height).twips)))
+    trHeight.set(qn("w:hRule"), rule)
+    trPr.append(trHeight)
+
+
 def add_picture_cell(cell, path, width):
     p = cell.paragraphs[0]
     p.clear()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_before = Pt(2)
-    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
     run = p.add_run()
     run.add_picture(str(path), width=width)
 
 
+def fill_step(img_cell, text_cell, num, text, photo, accent, bg, colors):
+    shade(img_cell, bg)
+    shade(text_cell, bg)
+    set_cell_margin(img_cell, 40, 40, 40, 40)
+    set_cell_margin(text_cell, 50, 50, 60, 80)
+    img_cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    text_cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    add_picture_cell(img_cell, IMG / photo, Cm(3.05))
+    p = first_p(text_cell, "", 1, after=0)
+    p.clear()
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
+    p.paragraph_format.line_spacing = 1.08
+    n = p.add_run()
+    set_run(n, f"{num}.  ", 11, True, colors[(num - 1) % len(colors)])
+    t = p.add_run()
+    set_run(t, text, 11, False, (58, 42, 66))
+
+
 def build(title, kicker, accent, accent_hex, soft_hex, hero, materials, extra, steps, note):
+    """steps: [(text, photo), ...] 共 8 步，兩欄配小圖。"""
     doc = Document()
     sec = doc.sections[0]
     sec.page_width = Cm(21.0)
     sec.page_height = Cm(29.7)
-    sec.top_margin = Cm(1.15)
-    sec.bottom_margin = Cm(1.15)
-    sec.left_margin = Cm(1.25)
-    sec.right_margin = Cm(1.25)
+    sec.top_margin = Cm(0.95)
+    sec.bottom_margin = Cm(0.9)
+    sec.left_margin = Cm(1.1)
+    sec.right_margin = Cm(1.1)
     usable = to_emu(sec.page_width - sec.left_margin - sec.right_margin)
-    left_w = Cm(11.2)
-    right_w = to_emu(usable - left_w)
-
-    n_rows = 5 + len(steps) + 1
-    table = doc.add_table(rows=n_rows, cols=2)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    set_col_widths(table, [left_w, right_w])
-    set_table_width(table, usable)
-    no_borders(table)
-
-    def merge_row(r):
-        table.cell(r, 0).merge(table.cell(r, 1))
-        return table.cell(r, 0)
-
-    title_cell = merge_row(0)
-    shade(title_cell, accent_hex)
-    set_cell_margin(title_cell, 90, 90, 140, 140)
-    first_p(title_cell, kicker, 10, True, (255, 255, 255), after=0)
-    p_in(title_cell, title, 22, True, (255, 255, 255), after=2)
-    p_in(title_cell, "家政課一頁講義  ·  材料＋步驟  ·  看完就能做", 10, False, (255, 255, 255), after=2)
-
-    bar = merge_row(1)
-    shade(bar, accent_hex)
-    set_cell_margin(bar, 50, 50, 120, 120)
-    first_p(bar, "一、所需要的材料", 13, True, (255, 255, 255), after=0)
-
-    mat = table.cell(2, 0)
-    pic = table.cell(2, 1)
-    shade(mat, soft_hex)
-    shade(pic, soft_hex)
-    set_cell_margin(mat, 80, 80, 120, 80)
-    set_cell_margin(pic, 80, 50, 50, 80)
-    mat.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-    pic.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-
-    first_p(mat, "", 1, after=0)
-    mat.paragraphs[0].clear()
-    for i, (name, amt) in enumerate(materials):
-        p = mat.paragraphs[0] if i == 0 else mat.add_paragraph()
-        p.paragraph_format.space_before = Pt(1)
-        p.paragraph_format.space_after = Pt(3)
-        p.paragraph_format.line_spacing = 1.05
-        r1 = p.add_run()
-        set_run(r1, f"•  {name}", 12, True, accent)
-        r2 = p.add_run()
-        set_run(r2, f"　　{amt}", 12, True, (58, 42, 66))
-
-    add_picture_cell(pic, IMG / hero, Cm(7.0))
-    cap = pic.add_paragraph()
-    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cap.paragraph_format.space_before = Pt(2)
-    cap.paragraph_format.space_after = Pt(0)
-    cr = cap.add_run()
-    set_run(cr, "成品參考", 9, True, accent)
-
-    tip = merge_row(3)
-    shade(tip, soft_hex)
-    set_cell_margin(tip, 40, 80, 120, 120)
-    first_p(tip, extra or "", 10, False, (90, 80, 96), after=0)
-
-    h = merge_row(4)
-    shade(h, accent_hex)
-    set_cell_margin(h, 50, 50, 120, 120)
-    first_p(h, "二、製作步驟", 13, True, (255, 255, 255), after=0)
+    img_w = Cm(3.35)
+    txt_w = to_emu((usable - img_w * 2) / 2)
 
     colors = [
         (255, 92, 138),
@@ -259,29 +228,88 @@ def build(title, kicker, accent, accent_hex, soft_hex, hero, materials, extra, s
         (91, 141, 255),
         (184, 107, 255),
         (255, 107, 107),
-        (255, 208, 59),
+        (255, 92, 138),
     ]
-    row_bg = ["FFFFFF", soft_hex]
-    for i, text in enumerate(steps, start=1):
-        cell = merge_row(4 + i)
-        shade(cell, row_bg[(i - 1) % 2])
-        set_cell_margin(cell, 50, 50, 120, 120)
-        p = first_p(cell, "", 1, after=0)
-        p.clear()
-        p.paragraph_format.space_before = Pt(1)
+
+    # 0 標題 / 1 材料標題 / 2 材料+成品 / 3 補充 / 4 步驟標題 / 5-8 四列步驟 / 9 叮嚀
+    table = doc.add_table(rows=10, cols=4)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_col_widths(table, [img_w, txt_w, img_w, txt_w])
+    set_table_width(table, usable)
+    no_borders(table)
+
+    def merge_span(r, c0, c1):
+        table.cell(r, c0).merge(table.cell(r, c1))
+        return table.cell(r, c0)
+
+    def merge_row(r):
+        return merge_span(r, 0, 3)
+
+    title_cell = merge_row(0)
+    shade(title_cell, accent_hex)
+    set_cell_margin(title_cell, 60, 60, 120, 120)
+    first_p(title_cell, kicker, 9, True, (255, 255, 255), after=0)
+    p_in(title_cell, title, 20, True, (255, 255, 255), after=1)
+    p_in(title_cell, "家政課一頁講義  ·  材料＋步驟＋小圖  ·  看完就能做", 9, False, (255, 255, 255), after=1)
+
+    bar = merge_row(1)
+    shade(bar, accent_hex)
+    set_cell_margin(bar, 36, 36, 120, 120)
+    first_p(bar, "一、所需要的材料", 12, True, (255, 255, 255), after=0)
+
+    mat = merge_span(2, 0, 1)
+    pic = merge_span(2, 2, 3)
+    shade(mat, soft_hex)
+    shade(pic, soft_hex)
+    set_cell_margin(mat, 50, 50, 100, 60)
+    set_cell_margin(pic, 50, 30, 40, 50)
+    mat.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    pic.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+
+    first_p(mat, "", 1, after=0)
+    mat.paragraphs[0].clear()
+    for i, (name, amt) in enumerate(materials):
+        p = mat.paragraphs[0] if i == 0 else mat.add_paragraph()
+        p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(1)
-        p.paragraph_format.line_spacing = 1.08
-        n = p.add_run()
-        set_run(n, f"{i}.  ", 12, True, colors[(i - 1) % len(colors)])
-        t = p.add_run()
-        set_run(t, text, 12, False, (58, 42, 66))
+        p.paragraph_format.line_spacing = 1.02
+        r1 = p.add_run()
+        set_run(r1, f"•  {name}", 11, True, accent)
+        r2 = p.add_run()
+        set_run(r2, f"　　{amt}", 11, True, (58, 42, 66))
 
-    foot = merge_row(5 + len(steps))
+    add_picture_cell(pic, IMG / hero, Cm(5.4))
+    cap = pic.add_paragraph()
+    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cap.paragraph_format.space_before = Pt(1)
+    cap.paragraph_format.space_after = Pt(0)
+    cr = cap.add_run()
+    set_run(cr, "成品參考", 8, True, accent)
+
+    tip = merge_row(3)
+    shade(tip, soft_hex)
+    set_cell_margin(tip, 30, 50, 120, 120)
+    first_p(tip, extra or "", 9, False, (90, 80, 96), after=0)
+
+    h = merge_row(4)
+    shade(h, accent_hex)
+    set_cell_margin(h, 36, 36, 120, 120)
+    first_p(h, "二、製作步驟", 12, True, (255, 255, 255), after=0)
+
+    for pair in range(4):
+        r = 5 + pair
+        left = steps[pair * 2]
+        right = steps[pair * 2 + 1]
+        bg = "FFFFFF" if pair % 2 == 0 else soft_hex
+        fill_step(table.cell(r, 0), table.cell(r, 1), pair * 2 + 1, left[0], left[1], accent, bg, colors)
+        fill_step(table.cell(r, 2), table.cell(r, 3), pair * 2 + 2, right[0], right[1], accent, bg, colors)
+        set_row_height(table.rows[r], Cm(2.55))
+
+    foot = merge_row(9)
     shade(foot, "FFFFFF")
-    set_cell_margin(foot, 80, 40, 120, 120)
-    first_p(foot, note, 9, False, (122, 100, 120), after=0)
+    set_cell_margin(foot, 50, 20, 120, 120)
+    first_p(foot, note, 8, False, (122, 100, 120), after=0)
 
-    prevent_break(table)
     return doc
 
 
@@ -302,14 +330,14 @@ def main():
         ],
         extra="小提醒：椰子水 150 毫升配白涼粉 15 克。可包喜歡的餡，也可以不包。山藥請戴手套。",
         steps=[
-            "選鐵棍山藥，戴手套削皮。",
-            "切成小塊，放入蒸烤箱，蒸到筷子能輕易插入。",
-            "趁熱壓成細泥，壓到沒有顆粒。",
-            "加入熟糯米粉 25g、白砂糖 25g，揉成光滑麵團。",
-            "麵團分成兩份。其中一份加少量蝶豆花粉，揉成藍色。",
-            "藍白兩色輕輕捏在一起（不要揉太勻，才有雲紋）。可包餡，再搓成圓球。",
-            "椰子水加白涼粉攪勻，煮沸。",
-            "先倒一層進模具，稍稍定型後放入山藥團，再倒滿。冷藏定型後脫模。",
+            ("選鐵棍山藥，戴手套削皮。", "qh_peel.jpg"),
+            ("切成小塊，放入蒸烤箱，蒸到筷子能輕易插入。", "qh_steam.jpg"),
+            ("趁熱壓成細泥，壓到沒有顆粒。", "qh_mash.jpg"),
+            ("加入熟糯米粉 25g、白砂糖 25g，揉成光滑麵團。", "qh_knead.jpg"),
+            ("麵團分成兩份。其中一份加少量蝶豆花粉，揉成藍色。", "qh_blue.jpg"),
+            ("藍白輕輕捏成雲紋。可包餡，再搓成圓球。", "qh_fill.jpg"),
+            ("椰子水加白涼粉攪勻，煮沸。", "qh_whisk.jpg"),
+            ("先倒一層進模具，稍定型後放山藥團，再倒滿。冷藏後脫模。", "qh_set.jpg"),
         ],
         note="課堂小叮嚀：刀子請小心、熱的東西會燙、白涼粉一定要煮沸才會凝固。",
     )
@@ -334,14 +362,14 @@ def main():
         ],
         extra="好記口訣：湯／茶 : 白涼粉 ＝ 10 : 1。這樣凍起來 Q 彈，又不會太硬。",
         steps=[
-            "先用熱水泡一壺菊花茶，備用。",
-            "雪梨削皮、去核，切成均勻小丁。",
-            "雪梨丁放進熱水，加入銀耳，蓋上蓋子悶煮大約半小時。",
-            "銀耳軟了以後，加入冰糖攪到溶化並煮沸。",
-            "舀出雪梨銀耳湯 200 克，加入白涼粉 20 克，攪勻煮沸。",
-            "趁熱舀進花形模具（連同雪梨塊和銀耳），送進冰箱冷藏定型。",
-            "另取菊花茶 100 克，加白涼粉 10 克，攪勻煮沸。",
-            "倒進圓球模具，中間放一朵泡好的菊花，再補滿。冷藏後疊在雪梨凍上。",
+            ("先用熱水泡一壺菊花茶，備用。", "xl_bloom.jpg"),
+            ("雪梨削皮、去核，切成均勻小丁。", "xl_cut.jpg"),
+            ("雪梨丁加銀耳，蓋上蓋子悶煮大約半小時。", "xl_fungus.jpg"),
+            ("銀耳軟了以後，加入冰糖攪到溶化並煮沸。", "xl_sugar.jpg"),
+            ("舀出雪梨銀耳湯 200 克，加入白涼粉 20 克，攪勻煮沸。", "xl_powder.jpg"),
+            ("趁熱舀進花形模具，連同雪梨和銀耳，冷藏定型。", "xl_mold.jpg"),
+            ("另取菊花茶 100 克，加白涼粉 10 克，攪勻煮沸。", "xl_jupowder.jpg"),
+            ("倒進圓球模具，中間放一朵菊花，再補滿。冷藏後疊盤。", "xl_flowerin.jpg"),
         ],
         note="課堂小叮嚀：刀子請小心、熱湯會燙、白涼粉一定要煮沸才會凝固。",
     )
