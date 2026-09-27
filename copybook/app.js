@@ -796,10 +796,8 @@
         var n = Math.min(srcEls.length, dstEls.length);
         for (var i = 0; i < n; i++) {
             var cs = window.getComputedStyle(srcEls[i]);
-            dstEls[i].style.color = cs.color;
-            dstEls[i].style.opacity = cs.opacity;
-            if (cs.webkitTextFillColor) {
-                dstEls[i].style.webkitTextFillColor = cs.webkitTextFillColor;
+            if (cs.color && cs.color !== 'rgba(0, 0, 0, 0)') {
+                dstEls[i].style.color = cs.color;
             }
         }
     }
@@ -857,14 +855,35 @@
             if (!svg) continue;
             var text = svg.querySelector('text');
             if (!text) continue;
-            backups.push({ el: el, html: el.innerHTML, className: el.className });
+            backups.push({
+                el: el,
+                html: el.innerHTML,
+                className: el.className,
+                color: el.style.color,
+                opacity: el.style.opacity
+            });
+            var fill = text.getAttribute('fill');
+            var stroke = text.getAttribute('stroke');
             el.className = 'cell-inner';
             el.textContent = text.textContent || '';
+            if (fill && fill !== 'none' && fill !== 'currentColor') {
+                el.style.color = fill;
+                if (text.getAttribute('fill-opacity')) {
+                    el.style.opacity = text.getAttribute('fill-opacity');
+                }
+            } else if (fill === 'none' && stroke && stroke !== 'none') {
+                el.style.color = stroke;
+                if (text.getAttribute('stroke-opacity')) {
+                    el.style.opacity = text.getAttribute('stroke-opacity');
+                }
+            }
         }
         return function restore() {
             for (var j = 0; j < backups.length; j++) {
                 backups[j].el.className = backups[j].className;
                 backups[j].el.innerHTML = backups[j].html;
+                backups[j].el.style.color = backups[j].color;
+                backups[j].el.style.opacity = backups[j].opacity;
             }
         };
     }
@@ -961,32 +980,28 @@
         ]);
     }
 
-    function captureOptions(pageEl, paper, foreign) {
-        return {
-            scale: foreign ? 1 : 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: paper,
-            logging: false,
-            imageTimeout: 2000,
-            foreignObjectRendering: !!foreign,
-            onclone: function (clonedDoc, clonedEl) {
-                sanitizeClonedDocument(clonedDoc);
-                prepareClonedPage(clonedDoc, clonedEl, pageEl, paper);
-            }
-        };
-    }
-
     async function rasterizePage(pageEl, paper) {
-        var canvas = await withTimeout(
-            window.html2canvas(pageEl, captureOptions(pageEl, paper, true)),
-            15000,
-            '畫面擷取逾時，請再試一次'
-        );
-        if (canvas && canvas.width > 8 && canvas.height > 8) return canvas;
+        var w = Math.max(1, pageEl.offsetWidth || pageEl.scrollWidth);
+        var h = Math.max(1, pageEl.offsetHeight || pageEl.scrollHeight);
         return withTimeout(
-            window.html2canvas(pageEl, captureOptions(pageEl, paper, false)),
-            15000,
+            window.html2canvas(pageEl, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: paper,
+                width: w,
+                height: h,
+                windowWidth: w,
+                windowHeight: h,
+                logging: false,
+                imageTimeout: 4000,
+                foreignObjectRendering: false,
+                onclone: function (clonedDoc, clonedEl) {
+                    sanitizeClonedDocument(clonedDoc);
+                    prepareClonedPage(clonedDoc, clonedEl, pageEl, paper);
+                }
+            }),
+            20000,
             '畫面擷取逾時，請再試一次'
         );
     }
@@ -994,14 +1009,22 @@
     async function capturePageElements(pageEls, scale, type) {
         var blobs = [];
         var paper = getExportFill();
+        if (document.fonts && document.fonts.ready) {
+            try { await document.fonts.ready; } catch (_) {}
+        }
         if (preview) preview.classList.add('preview--exporting');
         await yieldUi();
         try {
             for (var i = 0; i < pageEls.length; i++) {
                 setStatus('繪製第 ' + (i + 1) + ' 頁…');
                 var pageEl = pageEls[i];
-                var canvas = await rasterizePage(pageEl, paper);
-                blobs.push(await canvasToBlob(paintOpaqueCanvas(canvas, paper), type || 'image/png'));
+                var restore = flattenCharSvgs(pageEl);
+                try {
+                    var canvas = await rasterizePage(pageEl, paper);
+                    blobs.push(await canvasToBlob(paintOpaqueCanvas(canvas, paper), type || 'image/png'));
+                } finally {
+                    restore();
+                }
             }
         } finally {
             if (preview) preview.classList.remove('preview--exporting');
@@ -1091,7 +1114,20 @@
                 pdf.setPage(page);
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, wMm, hMm, 'F');
-                pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
+                var img = await new Promise(function (resolve, reject) {
+                    var image = new Image();
+                    image.onload = function () { resolve(image); };
+                    image.onerror = function () { reject(new Error('圖片讀取失敗')); };
+                    image.src = dataUrl;
+                });
+                var drawW = wMm;
+                var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
+                if (drawH > hMm) {
+                    var fit = hMm / drawH;
+                    drawW *= fit;
+                    drawH = hMm;
+                }
+                pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
             }
             pdf.save('字帖.pdf');
             setStatus('已下載 PDF（' + blobs.length + ' 頁）');

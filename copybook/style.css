@@ -503,10 +503,15 @@ button:hover {
     zoom: 2;
 }
 
+.preview.preview--exporting {
+    zoom: 1 !important;
+    transform: none !important;
+}
+
 .preview.preview--exporting .page {
     box-shadow: none;
-    border: none;
-    border-radius: 0;
+    border-color: rgba(160, 120, 128, 0.12);
+    background: #fffdfb;
 }
 
 @supports not (zoom: 1) {
@@ -544,9 +549,9 @@ button:hover {
 .preview--a4 .page {
     width: 210mm;
     max-width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
-    max-height: 297mm;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     margin-left: auto;
     margin-right: auto;
 }
@@ -554,9 +559,9 @@ button:hover {
 .preview--a4l .page {
     width: 297mm;
     max-width: 297mm;
-    height: 210mm;
-    min-height: 210mm;
-    max-height: 210mm;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     margin-left: auto;
     margin-right: auto;
 }
@@ -564,9 +569,9 @@ button:hover {
 .preview--letter .page {
     width: 8.5in;
     max-width: 8.5in;
-    height: 11in;
-    min-height: 11in;
-    max-height: 11in;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     margin-left: auto;
     margin-right: auto;
 }
@@ -580,13 +585,13 @@ button:hover {
     align-items: stretch;
     justify-content: flex-start;
     box-sizing: border-box;
-    background: transparent;
-    border-radius: 0;
+    background: rgba(255, 249, 246, 0.56);
+    border-radius: 8px;
     box-shadow: none;
     padding: 14mm 12mm 16mm;
-    border: none;
+    border: 1px solid rgba(168, 124, 132, 0.14);
     overflow: hidden;
-    transition: background 0.3s;
+    transition: background 0.3s, border-color 0.3s;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
 }
