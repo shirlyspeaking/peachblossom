@@ -56,20 +56,6 @@
     var btnBgImageClear = document.getElementById('btnBgImageClear');
     var uploadedBgUrl = '';
 
-    function mmToCssPx(mm) {
-        return (mm * 96) / 25.4;
-    }
-
-    function drawImageCover(ctx, img, dw, dh) {
-        var sw = img.width;
-        var sh = img.height;
-        if (!sw || !sh) return;
-        var scale = Math.max(dw / sw, dh / sh);
-        var w = sw * scale;
-        var h = sh * scale;
-        ctx.drawImage(img, (dw - w) / 2, (dh - h) / 2, w, h);
-    }
-
     function loadImageFromFile(file) {
         if (typeof createImageBitmap === 'function') {
             return createImageBitmap(file);
@@ -89,27 +75,42 @@
         });
     }
 
-    /** 依預覽 zoom×dpr 把原圖 cover 重繪成高解析 blob，避免 zoom:2 先降採樣再放大 */
-    function rasterizeUploadBg(file) {
+    /**
+     * 上傳背景：優先保留原圖像素。
+     * 僅當最長邊超過 5120px 才縮小，避免再壓成低解析正方形 JPEG。
+     */
+    function prepareUploadBg(file) {
         return loadImageFromFile(file).then(function (img) {
-            var cssSide = mmToCssPx(297);
-            var zoom = 2;
-            var dpr = Math.max(1, window.devicePixelRatio || 1);
-            var px = Math.round(cssSide * zoom * dpr);
-            px = Math.max(1200, Math.min(4096, px));
+            var srcW = img.width || img.naturalWidth || 0;
+            var srcH = img.height || img.naturalHeight || 0;
+            var maxSide = 5120;
+            var tooBig = srcW > maxSide || srcH > maxSide;
+            function closeImg() {
+                if (img.close) {
+                    try {
+                        img.close();
+                    } catch (_) {}
+                }
+            }
+            if (!tooBig || !srcW || !srcH) {
+                closeImg();
+                return URL.createObjectURL(file);
+            }
+            var scale = maxSide / Math.max(srcW, srcH);
+            var w = Math.max(1, Math.round(srcW * scale));
+            var h = Math.max(1, Math.round(srcH * scale));
             var canvas = document.createElement('canvas');
-            canvas.width = px;
-            canvas.height = px;
+            canvas.width = w;
+            canvas.height = h;
             var ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('無法處理圖片');
+            if (!ctx) {
+                closeImg();
+                throw new Error('無法處理圖片');
+            }
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            drawImageCover(ctx, img, px, px);
-            if (img.close) {
-                try {
-                    img.close();
-                } catch (_) {}
-            }
+            ctx.drawImage(img, 0, 0, w, h);
+            closeImg();
             return new Promise(function (resolve, reject) {
                 canvas.toBlob(
                     function (blob) {
@@ -117,7 +118,7 @@
                         else resolve(URL.createObjectURL(blob));
                     },
                     'image/jpeg',
-                    0.92
+                    0.96
                 );
             });
         });
@@ -351,11 +352,14 @@
             settled = true;
             finish();
         }
-        Promise.all([
-            document.fonts.load('36px "YShiPenShutiTC"'),
-            document.fonts.ready
-        ]).then(once).catch(once);
-        setTimeout(once, 4000);
+        document.fonts.load('36px "YShiPenShutiTC"').then(function () {
+            if (document.fonts.check('36px "YShiPenShutiTC"')) {
+                once();
+                return;
+            }
+            return document.fonts.ready.then(once);
+        }).catch(once);
+        setTimeout(once, 20000);
     }
 
     function parseHanziChars(text) {
@@ -607,6 +611,7 @@
             if (uploadedBgUrl) {
                 var bgImg = document.createElement('img');
                 bgImg.className = 'page-upload-bg';
+                bgImg.decoding = 'async';
                 bgImg.src = uploadedBgUrl;
                 bgImg.alt = '';
                 bgImg.setAttribute('aria-hidden', 'true');
@@ -769,7 +774,7 @@
     }
 
     async function capturePageElements(pageEls, scale) {
-        var s = scale || 2;
+        var s = scale || 3;
         var blobs = [];
         var prevZoom = '';
         var prevTransform = '';
@@ -811,7 +816,7 @@
         }
         btnPng.disabled = true;
         try {
-            var blobs = await capturePageElements(pages, 2);
+            var blobs = await capturePageElements(pages, 3);
             if (blobs.length === 1) {
                 downloadBlob('字帖.png', blobs[0]);
             } else {
@@ -840,7 +845,7 @@
         }
         btnPdf.disabled = true;
         try {
-            var blobs = await capturePageElements(pages, 2);
+            var blobs = await capturePageElements(pages, 3);
             var pdf = null;
             for (var i = 0; i < blobs.length; i++) {
                 var imgData = URL.createObjectURL(blobs[i]);
@@ -936,13 +941,13 @@
                 bgImageInput.value = '';
                 return;
             }
-            if (file.size > 8 * 1024 * 1024) {
-                window.alert('圖片請小於 8MB');
+            if (file.size > 20 * 1024 * 1024) {
+                window.alert('圖片請小於 20MB');
                 bgImageInput.value = '';
                 return;
             }
             btnBgImageUpload.disabled = true;
-            rasterizeUploadBg(file)
+            prepareUploadBg(file)
                 .then(function (url) {
                     if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
                     uploadedBgUrl = url;
