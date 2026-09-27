@@ -283,7 +283,7 @@ body {
 
 .panel-section-title {
     margin: 0 0 10px;
-    font-size: 1.02rem;
+    font-size: 1.14rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     color: var(--page-title-color);
@@ -307,7 +307,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     padding: 11px 14px;
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     color: #fff;
@@ -390,7 +390,7 @@ body {
 
 label {
     display: block;
-    font-size: 0.9rem;
+    font-size: 1.04rem;
     margin: 10px 0 6px;
     color: var(--label-color);
     transition: color 0.3s;
