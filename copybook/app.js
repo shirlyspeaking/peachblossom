@@ -56,6 +56,8 @@
     var pdfPreviewCancel = document.getElementById('pdfPreviewCancel');
     var pdfPreviewDownload = document.getElementById('pdfPreviewDownload');
     var pendingPdf = null;
+    var pdfModalCanAct = false;
+    var pdfModalBusy = false;
     var btnPng = document.getElementById('btnPng');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
     var bgImageInput = document.getElementById('bgImageInput');
@@ -1095,7 +1097,6 @@
 
     function revokePendingPdf() {
         if (!pendingPdf) return;
-        if (pendingPdf.url) URL.revokeObjectURL(pendingPdf.url);
         if (pendingPdf.previewUrls) {
             for (var i = 0; i < pendingPdf.previewUrls.length; i++) {
                 URL.revokeObjectURL(pendingPdf.previewUrls[i]);
@@ -1105,20 +1106,39 @@
     }
 
     function closePdfPreview() {
-        if (pdfPreviewModal) pdfPreviewModal.hidden = true;
+        if (pdfModalBusy) return;
+        pdfModalCanAct = false;
+        if (pdfPreviewModal) {
+            pdfPreviewModal.classList.remove('is-open');
+            pdfPreviewModal.hidden = true;
+        }
         document.body.classList.remove('pdf-modal-open');
         if (pdfPreviewPages) pdfPreviewPages.innerHTML = '';
         revokePendingPdf();
-        if (btnPdf) btnPdf.focus();
+        if (pdfPreviewDownload) {
+            pdfPreviewDownload.disabled = false;
+            pdfPreviewDownload.textContent = '確認下載';
+        }
+        if (pdfPreviewCancel) pdfPreviewCancel.disabled = false;
     }
 
     function openPdfPreview(pageCount) {
+        pdfModalCanAct = false;
         if (pdfPreviewSub) {
-            pdfPreviewSub.textContent = '共 ' + pageCount + ' 頁 · 確認無誤後再下載';
+            pdfPreviewSub.textContent = '共 ' + pageCount + ' 頁 · 看過之後再按確認下載';
         }
-        if (pdfPreviewModal) pdfPreviewModal.hidden = false;
+        if (pdfPreviewModal) {
+            pdfPreviewModal.hidden = false;
+            requestAnimationFrame(function () {
+                pdfPreviewModal.classList.add('is-open');
+            });
+        }
         document.body.classList.add('pdf-modal-open');
-        if (pdfPreviewDownload) pdfPreviewDownload.focus();
+        var dialog = pdfPreviewModal && pdfPreviewModal.querySelector('.pdf-modal-dialog');
+        if (dialog) dialog.focus();
+        setTimeout(function () {
+            pdfModalCanAct = true;
+        }, 450);
     }
 
     function blobToDataUrl(blob) {
@@ -1139,30 +1159,49 @@
         });
     }
 
-    async function makeSheetPreviewUrl(pageBlob, paper, fillSheet) {
-        var dataUrl = await blobToDataUrl(pageBlob);
-        var img = await loadImage(dataUrl);
-        var canvas = document.createElement('canvas');
-        var scale = 3.2;
-        canvas.width = Math.max(1, Math.round(paper.w * scale));
-        canvas.height = Math.max(1, Math.round(paper.h * scale));
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        if (fillSheet) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } else {
-            var drawW = canvas.width;
-            var drawH = canvas.width * (img.naturalHeight / Math.max(1, img.naturalWidth));
-            if (drawH > canvas.height) {
-                var fit = canvas.height / drawH;
-                drawW *= fit;
-                drawH = canvas.height;
+    function sheetWrapClass(paper, fillSheet) {
+        var cls = 'pdf-preview-sheet-wrap';
+        if (fillSheet) cls += ' is-cover';
+        if (paper.orientation === 'l') cls += ' is-landscape';
+        if (paper.format === 'letter') cls += ' is-letter';
+        return cls;
+    }
+
+    async function buildPdfBlob(pageBlobs, paper, fillSheet) {
+        var jsPDF = window.jspdf.jsPDF;
+        var pdf = null;
+        for (var i = 0; i < pageBlobs.length; i++) {
+            var dataUrl = await blobToDataUrl(pageBlobs[i]);
+            if (!pdf) {
+                pdf = new jsPDF({
+                    orientation: paper.orientation,
+                    unit: 'mm',
+                    format: paper.format,
+                    compress: true
+                });
+            } else {
+                pdf.addPage(paper.format, paper.orientation);
             }
-            ctx.drawImage(img, 0, 0, drawW, drawH);
+            var wMm = paper.w;
+            var hMm = paper.h;
+            pdf.setPage(pdf.internal.getCurrentPageInfo().pageNumber);
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(0, 0, wMm, hMm, 'F');
+            if (fillSheet) {
+                pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
+            } else {
+                var img = await loadImage(dataUrl);
+                var drawW = wMm;
+                var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
+                if (drawH > hMm) {
+                    var fit = hMm / drawH;
+                    drawW *= fit;
+                    drawH = hMm;
+                }
+                pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
+            }
         }
-        var blob = await canvasToBlob(canvas, 'image/jpeg', 0.9);
-        return URL.createObjectURL(blob);
+        return pdf.output('blob');
     }
 
     async function onPdf() {
@@ -1182,64 +1221,34 @@
         try {
             await yieldUi();
             var blobs = await capturePageElements(pages, 1, 'image/png');
-            var pdf = null;
-            var previewUrls = [];
             var fillSheet = preview && preview.classList.contains('preview--bg-upload');
             var paper = getPdfPaper();
+            var previewUrls = [];
             for (var i = 0; i < blobs.length; i++) {
-                btnPdf.textContent = '寫入第 ' + (i + 1) + ' 頁…';
-                await yieldUi();
-                var dataUrl = await blobToDataUrl(blobs[i]);
-                if (!pdf) {
-                    pdf = new jsPDF({
-                        orientation: paper.orientation,
-                        unit: 'mm',
-                        format: paper.format,
-                        compress: true
-                    });
-                } else {
-                    pdf.addPage(paper.format, paper.orientation);
-                }
-                var wMm = paper.w;
-                var hMm = paper.h;
-                var page = pdf.internal.getCurrentPageInfo().pageNumber;
-                pdf.setPage(page);
-                pdf.setFillColor(255, 255, 255);
-                pdf.rect(0, 0, wMm, hMm, 'F');
-                if (fillSheet) {
-                    pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
-                } else {
-                    var img = await loadImage(dataUrl);
-                    var drawW = wMm;
-                    var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
-                    if (drawH > hMm) {
-                        var fit = hMm / drawH;
-                        drawW *= fit;
-                        drawH = hMm;
-                    }
-                    pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
-                }
-                previewUrls.push(await makeSheetPreviewUrl(blobs[i], paper, fillSheet));
+                previewUrls.push(URL.createObjectURL(blobs[i]));
             }
             revokePendingPdf();
-            var pdfBlob = pdf.output('blob');
             pendingPdf = {
-                blob: pdfBlob,
-                url: URL.createObjectURL(pdfBlob),
+                pageBlobs: blobs,
+                paper: paper,
+                fillSheet: fillSheet,
                 previewUrls: previewUrls
             };
             if (pdfPreviewPages) {
                 pdfPreviewPages.innerHTML = '';
                 for (var p = 0; p < previewUrls.length; p++) {
+                    var wrap = document.createElement('div');
+                    wrap.className = sheetWrapClass(paper, fillSheet);
                     var sheet = document.createElement('img');
                     sheet.className = 'pdf-preview-sheet';
                     sheet.src = previewUrls[p];
                     sheet.alt = '第 ' + (p + 1) + ' 頁';
-                    pdfPreviewPages.appendChild(sheet);
+                    wrap.appendChild(sheet);
+                    pdfPreviewPages.appendChild(wrap);
                 }
             }
             openPdfPreview(blobs.length);
-            setStatus('已產生預覽（' + blobs.length + ' 頁），確認後再下載');
+            setStatus('已開啟預覽（' + blobs.length + ' 頁），確認後才會下載');
         } catch (e) {
             window.alert('PDF 下載失敗：' + (e.message || String(e)));
             setStatus('PDF 失敗：' + (e.message || String(e)));
@@ -1283,25 +1292,39 @@
         renderNow();
     });
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
-    if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', closePdfPreview);
-    if (pdfPreviewCancel) pdfPreviewCancel.addEventListener('click', closePdfPreview);
-    if (pdfPreviewModal) {
-        pdfPreviewModal.addEventListener('click', function (e) {
-            if (e.target && e.target.getAttribute('data-pdf-close') === '1') closePdfPreview();
-        });
-    }
+    if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', function () { closePdfPreview(); });
+    if (pdfPreviewCancel) pdfPreviewCancel.addEventListener('click', function () { closePdfPreview(); });
     if (pdfPreviewDownload) {
-        pdfPreviewDownload.addEventListener('click', function () {
-            if (!pendingPdf || !pendingPdf.blob) return;
-            downloadBlob('字帖.pdf', pendingPdf.blob);
-            setStatus('已下載 PDF');
-            closePdfPreview();
+        pdfPreviewDownload.addEventListener('click', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!pdfModalCanAct || pdfModalBusy || !pendingPdf || !pendingPdf.pageBlobs) return;
+            pdfModalBusy = true;
+            pdfPreviewDownload.disabled = true;
+            pdfPreviewDownload.textContent = '下載中…';
+            if (pdfPreviewCancel) pdfPreviewCancel.disabled = true;
+            try {
+                var blob = await buildPdfBlob(pendingPdf.pageBlobs, pendingPdf.paper, pendingPdf.fillSheet);
+                downloadBlob('字帖.pdf', blob);
+                setStatus('已下載 PDF');
+                pdfModalBusy = false;
+                closePdfPreview();
+            } catch (err) {
+                window.alert('PDF 下載失敗：' + (err.message || String(err)));
+                setStatus('PDF 失敗：' + (err.message || String(err)));
+                pdfPreviewDownload.disabled = false;
+                pdfPreviewDownload.textContent = '確認下載';
+                if (pdfPreviewCancel) pdfPreviewCancel.disabled = false;
+            } finally {
+                pdfModalBusy = false;
+            }
         });
     }
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && pdfPreviewModal && !pdfPreviewModal.hidden) {
-            closePdfPreview();
-        }
+        if (e.key !== 'Escape') return;
+        if (!pdfPreviewModal || pdfPreviewModal.hidden || !pdfModalCanAct) return;
+        e.preventDefault();
+        closePdfPreview();
     });
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
