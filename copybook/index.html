@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
     <link rel="preload" href="fonts/YshiPenShutiTC-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="style.css?v=56">
+    <link rel="stylesheet" href="style.css?v=57">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.4.5/dist/html2canvas-pro.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -43,6 +43,7 @@
                 <label for="textInput">字帖內容</label>
                 <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
+                <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
                 <details class="tune-details">
                     <summary>
                         <span>自訂格式</span>
@@ -105,13 +106,13 @@
                         </div>
                     </div>
                 </details>
-                <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
             </section>
 
             <section class="panel-section panel-section--stroke">
                 <h2 class="panel-section-title">筆順字帖生成</h2>
                 <label for="autoStrokeChars">筆順字帖輸入</label>
                 <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
+                <button id="btnAutoStrokeFromChars" type="button" class="btn-generate">生成筆順字帖</button>
                 <details class="tune-details">
                     <summary>
                         <span>自訂格式</span>
@@ -174,7 +175,6 @@
                         </div>
                     </div>
                 </details>
-                <button id="btnAutoStrokeFromChars" type="button" class="btn-generate">生成筆順字帖</button>
             </section>
 
             <div class="panel-footer">
