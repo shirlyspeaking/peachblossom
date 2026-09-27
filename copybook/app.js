@@ -772,6 +772,69 @@
         });
     }
 
+    function getPaperHex() {
+        var theme = document.body.getAttribute('data-theme');
+        if (theme === 'green') return '#fbfcfa';
+        if (theme === 'blue') return '#f8fafd';
+        if (theme === 'silver') return '#fafafc';
+        return '#fff8f4';
+    }
+
+    function hexToRgb(hex) {
+        var m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+        if (!m) return { r: 255, g: 248, b: 244 };
+        var n = parseInt(m[1], 16);
+        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+
+    function paintOpaqueCanvas(source, fill) {
+        var out = document.createElement('canvas');
+        out.width = source.width;
+        out.height = source.height;
+        var ctx = out.getContext('2d');
+        ctx.fillStyle = fill || '#fff8f4';
+        ctx.fillRect(0, 0, out.width, out.height);
+        ctx.drawImage(source, 0, 0);
+        return out;
+    }
+
+    function prepareClonedPage(clonedDoc, clonedPage, sourcePage, paper) {
+        if (clonedDoc.documentElement) {
+            clonedDoc.documentElement.style.background = paper;
+            clonedDoc.documentElement.style.backgroundColor = paper;
+        }
+        if (clonedDoc.body) {
+            clonedDoc.body.style.background = paper;
+            clonedDoc.body.style.backgroundColor = paper;
+        }
+        if (!clonedPage && clonedDoc.querySelector) {
+            clonedPage = clonedDoc.querySelector('.page');
+        }
+        if (!clonedPage) return;
+
+        var cs = sourcePage ? window.getComputedStyle(sourcePage) : null;
+        clonedPage.style.boxShadow = 'none';
+        clonedPage.style.borderRadius = '0';
+        clonedPage.style.backgroundColor = (cs && cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent')
+            ? cs.backgroundColor
+            : paper;
+        if (cs && cs.backgroundImage && cs.backgroundImage !== 'none') {
+            clonedPage.style.backgroundImage = cs.backgroundImage;
+            clonedPage.style.backgroundSize = cs.backgroundSize;
+            clonedPage.style.backgroundRepeat = cs.backgroundRepeat;
+            clonedPage.style.backgroundPosition = cs.backgroundPosition;
+        }
+        if (sourcePage) {
+            clonedPage.style.width = sourcePage.offsetWidth + 'px';
+            clonedPage.style.height = sourcePage.offsetHeight + 'px';
+            clonedPage.style.minWidth = sourcePage.offsetWidth + 'px';
+            clonedPage.style.minHeight = sourcePage.offsetHeight + 'px';
+            clonedPage.style.maxWidth = 'none';
+            clonedPage.style.maxHeight = 'none';
+        }
+        clonedPage.style.overflow = 'hidden';
+    }
+
     function canvasToBlob(canvas, type, quality) {
         return new Promise(function (resolve, reject) {
             canvas.toBlob(
@@ -901,28 +964,38 @@
     async function capturePageElements(pageEls, scale, type) {
         var s = Math.min(1.5, scale || 1.5);
         var blobs = [];
+        var paper = getPaperHex();
         if (preview) preview.classList.add('preview--exporting');
         await yieldUi();
         try {
             for (var i = 0; i < pageEls.length; i++) {
                 setStatus('繪製第 ' + (i + 1) + ' 頁…');
-                var restore = flattenCharSvgs(pageEls[i]);
+                var pageEl = pageEls[i];
+                var restore = flattenCharSvgs(pageEl);
                 try {
+                    var w = Math.max(1, pageEl.offsetWidth || pageEl.scrollWidth);
+                    var h = Math.max(1, pageEl.offsetHeight || pageEl.scrollHeight);
                     var canvas = await withTimeout(
-                        window.html2canvas(pageEls[i], {
+                        window.html2canvas(pageEl, {
                             scale: s,
                             useCORS: true,
-                            backgroundColor: '#ffffff',
+                            allowTaint: false,
+                            backgroundColor: paper,
+                            width: w,
+                            height: h,
+                            windowWidth: w,
+                            windowHeight: h,
                             logging: false,
                             imageTimeout: 2000,
-                            onclone: function (clonedDoc) {
+                            onclone: function (clonedDoc, clonedEl) {
                                 sanitizeClonedDocument(clonedDoc);
+                                prepareClonedPage(clonedDoc, clonedEl, pageEl, paper);
                             }
                         }),
                         15000,
                         '畫面擷取逾時，請再試一次'
                     );
-                    blobs.push(await canvasToBlob(canvas, type || 'image/jpeg', 0.88));
+                    blobs.push(await canvasToBlob(paintOpaqueCanvas(canvas, paper), type || 'image/jpeg', 0.92));
                 } finally {
                     restore();
                 }
@@ -1013,6 +1086,9 @@
                 var hMm = paper.h;
                 var page = pdf.internal.getCurrentPageInfo().pageNumber;
                 pdf.setPage(page);
+                var fill = hexToRgb(getPaperHex());
+                pdf.setFillColor(fill.r, fill.g, fill.b);
+                pdf.rect(0, 0, wMm, hMm, 'F');
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, wMm, hMm, undefined, 'FAST');
             }
             pdf.save('字帖.pdf');

@@ -51,7 +51,7 @@
     --pb-bg-soft: oklch(0.953 0.018 8);
     --accent-dark: oklch(0.42 0.11 8);
     --accent-mid: oklch(0.61 0.17 10);
-    --paper: oklch(0.995 0.006 8);
+    --paper: #fff8f4;
     --line-soft: color-mix(in oklch, oklch(0.61 0.17 10) 32%, transparent);
     --line-soft-hong: color-mix(in oklch, oklch(0.61 0.17 10) 22%, transparent);
     --line-soft-light: color-mix(in oklch, oklch(0.61 0.17 10) 16%, transparent);
@@ -504,6 +504,11 @@ button:hover {
 .preview.preview--exporting {
     zoom: 1 !important;
     transform: none !important;
+}
+
+.preview.preview--exporting .page {
+    box-shadow: none;
+    border-radius: 0;
 }
 
 @supports not (zoom: 1) {
