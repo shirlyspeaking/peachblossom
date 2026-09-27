@@ -49,6 +49,13 @@
     var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
     var preview = document.getElementById('preview');
     var btnPdf = document.getElementById('btnPdf');
+    var pdfPreviewModal = document.getElementById('pdfPreviewModal');
+    var pdfPreviewPages = document.getElementById('pdfPreviewPages');
+    var pdfPreviewSub = document.getElementById('pdfPreviewSub');
+    var pdfPreviewClose = document.getElementById('pdfPreviewClose');
+    var pdfPreviewCancel = document.getElementById('pdfPreviewCancel');
+    var pdfPreviewDownload = document.getElementById('pdfPreviewDownload');
+    var pendingPdf = null;
     var btnPng = document.getElementById('btnPng');
     var btnChenyuFont = document.getElementById('btnChenyuFont');
     var bgImageInput = document.getElementById('bgImageInput');
@@ -1086,6 +1093,78 @@
         return { format: 'a4', orientation: 'p', w: 210, h: 297 };
     }
 
+    function revokePendingPdf() {
+        if (!pendingPdf) return;
+        if (pendingPdf.url) URL.revokeObjectURL(pendingPdf.url);
+        if (pendingPdf.previewUrls) {
+            for (var i = 0; i < pendingPdf.previewUrls.length; i++) {
+                URL.revokeObjectURL(pendingPdf.previewUrls[i]);
+            }
+        }
+        pendingPdf = null;
+    }
+
+    function closePdfPreview() {
+        if (pdfPreviewModal) pdfPreviewModal.hidden = true;
+        document.body.classList.remove('pdf-modal-open');
+        if (pdfPreviewPages) pdfPreviewPages.innerHTML = '';
+        revokePendingPdf();
+        if (btnPdf) btnPdf.focus();
+    }
+
+    function openPdfPreview(pageCount) {
+        if (pdfPreviewSub) {
+            pdfPreviewSub.textContent = '共 ' + pageCount + ' 頁 · 確認無誤後再下載';
+        }
+        if (pdfPreviewModal) pdfPreviewModal.hidden = false;
+        document.body.classList.add('pdf-modal-open');
+        if (pdfPreviewDownload) pdfPreviewDownload.focus();
+    }
+
+    function blobToDataUrl(blob) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function () { resolve(reader.result); };
+            reader.onerror = function () { reject(new Error('圖片讀取失敗')); };
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function loadImage(src) {
+        return new Promise(function (resolve, reject) {
+            var image = new Image();
+            image.onload = function () { resolve(image); };
+            image.onerror = function () { reject(new Error('圖片讀取失敗')); };
+            image.src = src;
+        });
+    }
+
+    async function makeSheetPreviewUrl(pageBlob, paper, fillSheet) {
+        var dataUrl = await blobToDataUrl(pageBlob);
+        var img = await loadImage(dataUrl);
+        var canvas = document.createElement('canvas');
+        var scale = 3.2;
+        canvas.width = Math.max(1, Math.round(paper.w * scale));
+        canvas.height = Math.max(1, Math.round(paper.h * scale));
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (fillSheet) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } else {
+            var drawW = canvas.width;
+            var drawH = canvas.width * (img.naturalHeight / Math.max(1, img.naturalWidth));
+            if (drawH > canvas.height) {
+                var fit = canvas.height / drawH;
+                drawW *= fit;
+                drawH = canvas.height;
+            }
+            ctx.drawImage(img, 0, 0, drawW, drawH);
+        }
+        var blob = await canvasToBlob(canvas, 'image/jpeg', 0.9);
+        return URL.createObjectURL(blob);
+    }
+
     async function onPdf() {
         if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
             setStatus('缺少 html2canvas 或 jsPDF');
@@ -1104,16 +1183,13 @@
             await yieldUi();
             var blobs = await capturePageElements(pages, 1, 'image/png');
             var pdf = null;
+            var previewUrls = [];
+            var fillSheet = preview && preview.classList.contains('preview--bg-upload');
+            var paper = getPdfPaper();
             for (var i = 0; i < blobs.length; i++) {
                 btnPdf.textContent = '寫入第 ' + (i + 1) + ' 頁…';
                 await yieldUi();
-                var dataUrl = await new Promise(function (resolve, reject) {
-                    var reader = new FileReader();
-                    reader.onload = function () { resolve(reader.result); };
-                    reader.onerror = function () { reject(new Error('圖片讀取失敗')); };
-                    reader.readAsDataURL(blobs[i]);
-                });
-                var paper = getPdfPaper();
+                var dataUrl = await blobToDataUrl(blobs[i]);
                 if (!pdf) {
                     pdf = new jsPDF({
                         orientation: paper.orientation,
@@ -1130,16 +1206,10 @@
                 pdf.setPage(page);
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, wMm, hMm, 'F');
-                var fillSheet = preview && preview.classList.contains('preview--bg-upload');
                 if (fillSheet) {
                     pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
                 } else {
-                    var img = await new Promise(function (resolve, reject) {
-                        var image = new Image();
-                        image.onload = function () { resolve(image); };
-                        image.onerror = function () { reject(new Error('圖片讀取失敗')); };
-                        image.src = dataUrl;
-                    });
+                    var img = await loadImage(dataUrl);
                     var drawW = wMm;
                     var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
                     if (drawH > hMm) {
@@ -1149,9 +1219,27 @@
                     }
                     pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
                 }
+                previewUrls.push(await makeSheetPreviewUrl(blobs[i], paper, fillSheet));
             }
-            pdf.save('字帖.pdf');
-            setStatus('已下載 PDF（' + blobs.length + ' 頁）');
+            revokePendingPdf();
+            var pdfBlob = pdf.output('blob');
+            pendingPdf = {
+                blob: pdfBlob,
+                url: URL.createObjectURL(pdfBlob),
+                previewUrls: previewUrls
+            };
+            if (pdfPreviewPages) {
+                pdfPreviewPages.innerHTML = '';
+                for (var p = 0; p < previewUrls.length; p++) {
+                    var sheet = document.createElement('img');
+                    sheet.className = 'pdf-preview-sheet';
+                    sheet.src = previewUrls[p];
+                    sheet.alt = '第 ' + (p + 1) + ' 頁';
+                    pdfPreviewPages.appendChild(sheet);
+                }
+            }
+            openPdfPreview(blobs.length);
+            setStatus('已產生預覽（' + blobs.length + ' 頁），確認後再下載');
         } catch (e) {
             window.alert('PDF 下載失敗：' + (e.message || String(e)));
             setStatus('PDF 失敗：' + (e.message || String(e)));
@@ -1195,6 +1283,26 @@
         renderNow();
     });
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
+    if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', closePdfPreview);
+    if (pdfPreviewCancel) pdfPreviewCancel.addEventListener('click', closePdfPreview);
+    if (pdfPreviewModal) {
+        pdfPreviewModal.addEventListener('click', function (e) {
+            if (e.target && e.target.getAttribute('data-pdf-close') === '1') closePdfPreview();
+        });
+    }
+    if (pdfPreviewDownload) {
+        pdfPreviewDownload.addEventListener('click', function () {
+            if (!pendingPdf || !pendingPdf.blob) return;
+            downloadBlob('字帖.pdf', pendingPdf.blob);
+            setStatus('已下載 PDF');
+            closePdfPreview();
+        });
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && pdfPreviewModal && !pdfPreviewModal.hidden) {
+            closePdfPreview();
+        }
+    });
     if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
     if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
 
