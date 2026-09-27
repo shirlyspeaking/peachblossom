@@ -11,7 +11,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=41">
+    <link rel="preload" href="fonts/YshiPenShutiTC-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="style.css?v=42">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -53,9 +54,9 @@
                         <div class="field">
                             <label for="fontPreset">字體選擇</label>
                             <select id="fontPreset">
+                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif" selected>Y式筆書（毛筆）</option>
                                 <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
                                 <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
                                 <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
                                 <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
                                 <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
@@ -123,9 +124,9 @@
                         <div class="field">
                             <label for="fontPresetStroke">字體選擇</label>
                             <select id="fontPresetStroke">
+                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif" selected>Y式筆書（毛筆）</option>
                                 <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">楷體</option>
                                 <option id="fontOptChenyuStroke" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">Y式筆書</option>
                                 <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
                                 <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
                                 <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
@@ -188,6 +189,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=48"></script>
+    <script src="app.js?v=49"></script>
 </body>
 </html>

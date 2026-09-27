@@ -46,6 +46,7 @@
     var DEFAULT_CHARS_PER_LINE = 12;
     var DEFAULT_LINES_PER_PAGE = 12;
     var DEFAULT_STROKE_LINES_PER_PAGE = 10;
+    var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
     var preview = document.getElementById('preview');
     var btnPdf = document.getElementById('btnPdf');
     var btnPng = document.getElementById('btnPng');
@@ -202,7 +203,7 @@
             fontSizeU +
             '" font-family="' +
             ff +
-            '" text-anchor="middle" dominant-baseline="middle" fill="#2f2a28">' +
+            '" text-anchor="middle" dominant-baseline="middle" fill="currentColor">' +
             body +
             '</text></svg>'
         );
@@ -334,7 +335,27 @@
 
     function getFontFamily() {
         var c = getActiveControls();
-        return c.fontPreset && c.fontPreset.value ? c.fontPreset.value.trim() : '';
+        var value = c.fontPreset && c.fontPreset.value ? c.fontPreset.value.trim() : '';
+        return value || BRUSH_FONT_STACK;
+    }
+
+    function whenBrushFontReady(done) {
+        var finish = typeof done === 'function' ? done : function () {};
+        if (!document.fonts || !document.fonts.load) {
+            finish();
+            return;
+        }
+        var settled = false;
+        function once() {
+            if (settled) return;
+            settled = true;
+            finish();
+        }
+        Promise.all([
+            document.fonts.load('36px "YShiPenShutiTC"'),
+            document.fonts.ready
+        ]).then(once).catch(once);
+        setTimeout(once, 4000);
     }
 
     function parseHanziChars(text) {
@@ -681,7 +702,8 @@
                             inner.className = 'cell-inner cell-inner--hong';
                             inner.innerHTML = buildLightPinkSolidSvgChar(ch, font, fs);
                         } else {
-                            inner.textContent = ch;
+                            inner.className = 'cell-inner cell-inner--hong';
+                            inner.innerHTML = buildReferenceFontSvgChar(ch, font, fs);
                         }
                         cell2.appendChild(inner);
                         grid.appendChild(cell2);
@@ -939,4 +961,7 @@
     if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
     renderNow();
+    whenBrushFontReady(function () {
+        renderNow();
+    });
 })();
