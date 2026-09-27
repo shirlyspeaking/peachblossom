@@ -764,42 +764,87 @@
         }, 2000);
     }
 
-    function canvasToBlob(canvas) {
-        return new Promise(function (resolve, reject) {
-            canvas.toBlob(function (b) {
-                if (b) resolve(b);
-                else reject(new Error('無法產生圖片'));
-            }, 'image/png');
+    function yieldUi() {
+        return new Promise(function (resolve) {
+            requestAnimationFrame(function () {
+                setTimeout(resolve, 50);
+            });
         });
     }
 
-    async function capturePageElements(pageEls, scale) {
-        var s = scale || 3;
-        var blobs = [];
-        var prevZoom = '';
-        var prevTransform = '';
-        if (preview) {
-            prevZoom = preview.style.zoom;
-            prevTransform = preview.style.transform;
-            preview.style.zoom = '1';
-            preview.style.transform = 'none';
+    function canvasToBlob(canvas, type, quality) {
+        return new Promise(function (resolve, reject) {
+            canvas.toBlob(
+                function (b) {
+                    if (b) resolve(b);
+                    else reject(new Error('無法產生圖片'));
+                },
+                type || 'image/jpeg',
+                quality == null ? 0.92 : quality
+            );
+        });
+    }
+
+    function flattenCharSvgs(pageEl) {
+        var inners = pageEl.querySelectorAll('.cell-inner--hong');
+        var backups = [];
+        for (var i = 0; i < inners.length; i++) {
+            var el = inners[i];
+            var svg = el.querySelector('svg');
+            if (!svg) continue;
+            var text = svg.querySelector('text');
+            if (!text) continue;
+            backups.push({ el: el, html: el.innerHTML, className: el.className });
+            el.className = 'cell-inner';
+            el.textContent = text.textContent || '';
         }
+        return function restore() {
+            for (var j = 0; j < backups.length; j++) {
+                backups[j].el.className = backups[j].className;
+                backups[j].el.innerHTML = backups[j].html;
+            }
+        };
+    }
+
+    function withTimeout(promise, ms, label) {
+        return Promise.race([
+            promise,
+            new Promise(function (_, reject) {
+                setTimeout(function () {
+                    reject(new Error(label || '處理逾時'));
+                }, ms);
+            })
+        ]);
+    }
+
+    async function capturePageElements(pageEls, scale, type) {
+        var s = Math.min(1.5, scale || 1.5);
+        var blobs = [];
+        if (preview) preview.classList.add('preview--exporting');
+        await yieldUi();
         try {
             for (var i = 0; i < pageEls.length; i++) {
                 setStatus('繪製第 ' + (i + 1) + ' 頁…');
-                var canvas = await window.html2canvas(pageEls[i], {
-                    scale: s,
-                    useCORS: true,
-                    backgroundColor: null,
-                    logging: false
-                });
-                blobs.push(await canvasToBlob(canvas));
+                var restore = flattenCharSvgs(pageEls[i]);
+                try {
+                    var canvas = await withTimeout(
+                        window.html2canvas(pageEls[i], {
+                            scale: s,
+                            useCORS: true,
+                            backgroundColor: '#ffffff',
+                            logging: false,
+                            imageTimeout: 2000
+                        }),
+                        15000,
+                        '畫面擷取逾時，請再試一次'
+                    );
+                    blobs.push(await canvasToBlob(canvas, type || 'image/jpeg', 0.88));
+                } finally {
+                    restore();
+                }
             }
         } finally {
-            if (preview) {
-                preview.style.zoom = prevZoom;
-                preview.style.transform = prevTransform;
-            }
+            if (preview) preview.classList.remove('preview--exporting');
         }
         return blobs;
     }
@@ -816,7 +861,7 @@
         }
         btnPng.disabled = true;
         try {
-            var blobs = await capturePageElements(pages, 3);
+            var blobs = await capturePageElements(pages, 1.5, 'image/png');
             if (blobs.length === 1) {
                 downloadBlob('字帖.png', blobs[0]);
             } else {
@@ -843,41 +888,48 @@
             setStatus('沒有可匯出的內容');
             return;
         }
+        var oldLabel = btnPdf.textContent;
         btnPdf.disabled = true;
+        btnPdf.textContent = '產生 PDF 中…';
         try {
-            var blobs = await capturePageElements(pages, 3);
+            await yieldUi();
+            var blobs = await capturePageElements(pages, 1.5, 'image/jpeg');
             var pdf = null;
             for (var i = 0; i < blobs.length; i++) {
-                var imgData = URL.createObjectURL(blobs[i]);
-                var img = new Image();
-                await new Promise(function (resolve, reject) {
-                    img.onload = resolve;
-                    img.onerror = reject;
-                    img.src = imgData;
+                btnPdf.textContent = '寫入第 ' + (i + 1) + ' 頁…';
+                await yieldUi();
+                var dataUrl = await new Promise(function (resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onload = function () { resolve(reader.result); };
+                    reader.onerror = function () { reject(new Error('圖片讀取失敗')); };
+                    reader.readAsDataURL(blobs[i]);
                 });
-                var wPx = img.naturalWidth;
-                var hPx = img.naturalHeight;
-                var wMm = (wPx * 25.4) / 96;
-                var hMm = (hPx * 25.4) / 96;
+                var pageEl = pages[i];
+                var cssW = Math.max(pageEl.offsetWidth, 320);
+                var cssH = Math.max(pageEl.offsetHeight, 320);
+                var wMm = (cssW * 25.4) / 96;
+                var hMm = (cssH * 25.4) / 96;
                 if (!pdf) {
                     pdf = new jsPDF({
                         orientation: wMm >= hMm ? 'l' : 'p',
                         unit: 'mm',
-                        format: [wMm, hMm]
+                        format: [wMm, hMm],
+                        compress: true
                     });
                 } else {
                     pdf.addPage([wMm, hMm], wMm >= hMm ? 'l' : 'p');
                 }
                 var page = pdf.internal.getCurrentPageInfo().pageNumber;
                 pdf.setPage(page);
-                pdf.addImage(img, 'PNG', 0, 0, wMm, hMm, undefined, 'FAST');
-                URL.revokeObjectURL(imgData);
+                pdf.addImage(dataUrl, 'JPEG', 0, 0, wMm, hMm, undefined, 'FAST');
             }
             pdf.save('字帖.pdf');
             setStatus('已下載 PDF（' + blobs.length + ' 頁）');
         } catch (e) {
+            window.alert('PDF 下載失敗：' + (e.message || String(e)));
             setStatus('PDF 失敗：' + (e.message || String(e)));
         } finally {
+            btnPdf.textContent = oldLabel;
             btnPdf.disabled = false;
         }
     }
