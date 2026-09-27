@@ -46,6 +46,7 @@
     var DEFAULT_CHARS_PER_LINE = 12;
     var DEFAULT_LINES_PER_PAGE = 12;
     var DEFAULT_STROKE_LINES_PER_PAGE = 10;
+    var STROKE_CELLS_PER_LINE = 12;
     var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
     var preview = document.getElementById('preview');
     var btnPdf = document.getElementById('btnPdf');
@@ -419,23 +420,18 @@
             blocks.push(cells);
         }
 
-        // 筆順字帖固定一行一字，避免不同字同列造成閱讀干擾
-        var charsPerRow = 1;
+        // 一行最多 12 格；筆畫很多的字自動折到下一行
+        var maxCols = STROKE_CELLS_PER_LINE;
         var rows = [];
-        var maxCols = 1;
-
-        for (var i = 0; i < blocks.length; i += charsPerRow) {
-            var rowBlocks = blocks.slice(i, i + charsPerRow);
-            var rowCells = [];
-            for (var bi = 0; bi < rowBlocks.length; bi++) {
-                if (bi > 0) rowCells.push({ kind: 'blank' });
-                rowCells = rowCells.concat(rowBlocks[bi]);
+        for (var i = 0; i < blocks.length; i++) {
+            var block = blocks[i];
+            if (!block.length) continue;
+            for (var start = 0; start < block.length; start += maxCols) {
+                rows.push(block.slice(start, start + maxCols));
             }
-            if (rowCells.length > maxCols) maxCols = rowCells.length;
-            rows.push(rowCells);
         }
 
-        return { rows: rows, cpl: maxCols, charsPerRow: charsPerRow };
+        return { rows: rows, cpl: maxCols, charsPerRow: 1 };
     }
 
     function applyStrokePathDefaults() {
