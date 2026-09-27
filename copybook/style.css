@@ -499,8 +499,8 @@ button:hover {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    /* 螢幕預覽約 2 倍面積觀感；列印／匯出不受影響 */
-    zoom: 2;
+    /* 螢幕預覽放大，方便看字與格線；列印／匯出不受影響 */
+    zoom: 2.45;
 }
 
 .preview.preview--exporting {
@@ -517,7 +517,7 @@ button:hover {
 @supports not (zoom: 1) {
     .preview {
         zoom: unset;
-        transform: scale(2);
+        transform: scale(2.45);
         transform-origin: top center;
         width: max-content;
         margin-left: auto;
@@ -834,13 +834,13 @@ button:hover {
     }
 
     .preview {
-        zoom: 1.35;
+        zoom: 1.6;
     }
 
     @supports not (zoom: 1) {
         .preview {
             zoom: unset;
-            transform: scale(1.35);
+            transform: scale(1.6);
             width: 74%;
         }
     }
