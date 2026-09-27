@@ -576,6 +576,24 @@ button:hover {
     margin-right: auto;
 }
 
+.preview--a4.preview--bg-upload .page {
+    height: 297mm;
+    min-height: 297mm;
+    max-height: 297mm;
+}
+
+.preview--a4l.preview--bg-upload .page {
+    height: 210mm;
+    min-height: 210mm;
+    max-height: 210mm;
+}
+
+.preview--letter.preview--bg-upload .page {
+    height: 11in;
+    min-height: 11in;
+    max-height: 11in;
+}
+
 /* ===== Page Card ===== */
 
 .page {
@@ -841,6 +859,12 @@ button:hover {
         transform: none;
         width: auto;
         gap: 0;
+    }
+
+    .preview--a4.preview--bg-upload .page {
+        height: 297mm;
+        min-height: 297mm;
+        max-height: 297mm;
     }
 
     .page {

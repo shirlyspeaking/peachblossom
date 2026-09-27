@@ -1006,6 +1006,21 @@
         );
     }
 
+    function waitForPageImages(pageEl) {
+        var imgs = pageEl.querySelectorAll('img');
+        var pending = [];
+        for (var i = 0; i < imgs.length; i++) {
+            (function (img) {
+                if (img.complete && img.naturalWidth) return;
+                pending.push(new Promise(function (resolve) {
+                    img.addEventListener('load', resolve, { once: true });
+                    img.addEventListener('error', resolve, { once: true });
+                }));
+            })(imgs[i]);
+        }
+        return pending.length ? Promise.all(pending) : Promise.resolve();
+    }
+
     async function capturePageElements(pageEls, scale, type) {
         var blobs = [];
         var paper = getExportFill();
@@ -1018,6 +1033,7 @@
             for (var i = 0; i < pageEls.length; i++) {
                 setStatus('繪製第 ' + (i + 1) + ' 頁…');
                 var pageEl = pageEls[i];
+                await waitForPageImages(pageEl);
                 var restore = flattenCharSvgs(pageEl);
                 try {
                     var canvas = await rasterizePage(pageEl, paper);
@@ -1114,20 +1130,25 @@
                 pdf.setPage(page);
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, wMm, hMm, 'F');
-                var img = await new Promise(function (resolve, reject) {
-                    var image = new Image();
-                    image.onload = function () { resolve(image); };
-                    image.onerror = function () { reject(new Error('圖片讀取失敗')); };
-                    image.src = dataUrl;
-                });
-                var drawW = wMm;
-                var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
-                if (drawH > hMm) {
-                    var fit = hMm / drawH;
-                    drawW *= fit;
-                    drawH = hMm;
+                var fillSheet = preview && preview.classList.contains('preview--bg-upload');
+                if (fillSheet) {
+                    pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
+                } else {
+                    var img = await new Promise(function (resolve, reject) {
+                        var image = new Image();
+                        image.onload = function () { resolve(image); };
+                        image.onerror = function () { reject(new Error('圖片讀取失敗')); };
+                        image.src = dataUrl;
+                    });
+                    var drawW = wMm;
+                    var drawH = wMm * (img.naturalHeight / Math.max(1, img.naturalWidth));
+                    if (drawH > hMm) {
+                        var fit = hMm / drawH;
+                        drawW *= fit;
+                        drawH = hMm;
+                    }
+                    pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
                 }
-                pdf.addImage(dataUrl, 'PNG', 0, 0, drawW, drawH);
             }
             pdf.save('字帖.pdf');
             setStatus('已下載 PDF（' + blobs.length + ' 頁）');
