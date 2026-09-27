@@ -499,8 +499,8 @@ button:hover {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    /* 螢幕預覽放大，方便看字與格線；列印／匯出不受影響 */
-    zoom: 2.45;
+    /* 螢幕預覽約 2 倍面積觀感；列印／匯出不受影響 */
+    zoom: 2;
 }
 
 .preview.preview--exporting {
@@ -517,7 +517,7 @@ button:hover {
 @supports not (zoom: 1) {
     .preview {
         zoom: unset;
-        transform: scale(2.45);
+        transform: scale(2);
         transform-origin: top center;
         width: max-content;
         margin-left: auto;
@@ -834,13 +834,13 @@ button:hover {
     }
 
     .preview {
-        zoom: 1.6;
+        zoom: 1.35;
     }
 
     @supports not (zoom: 1) {
         .preview {
             zoom: unset;
-            transform: scale(1.6);
+            transform: scale(1.35);
             width: 74%;
         }
     }
@@ -916,7 +916,7 @@ body.pdf-modal-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 18px;
+    padding: 16px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.28s ease;
@@ -940,8 +940,8 @@ body.pdf-modal-open {
     z-index: 1;
     display: flex;
     flex-direction: column;
-    width: min(720px, 100%);
-    max-height: min(92vh, 980px);
+    width: min(980px, 96vw);
+    max-height: min(96vh, 1280px);
     background: rgba(255, 252, 250, 0.58);
     border: 1px solid rgba(255, 255, 255, 0.46);
     border-radius: 20px;
@@ -1001,7 +1001,7 @@ body.pdf-modal-open {
 }
 
 .pdf-preview-sheet-wrap {
-    width: min(100%, 520px);
+    width: min(100%, 780px);
     margin: 0 auto 16px;
     background: #fff;
     border-radius: 4px;
