@@ -806,6 +806,87 @@
         };
     }
 
+    var colorResolveProbe = null;
+    var colorResolveCache = {};
+
+    function resolveModernColor(value) {
+        if (!value) return value;
+        if (colorResolveCache[value]) return colorResolveCache[value];
+        if (!colorResolveProbe) {
+            colorResolveProbe = document.createElement('span');
+            colorResolveProbe.setAttribute('aria-hidden', 'true');
+            colorResolveProbe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;';
+            document.body.appendChild(colorResolveProbe);
+        }
+        colorResolveProbe.style.color = '';
+        try {
+            colorResolveProbe.style.color = value;
+        } catch (_) {
+            colorResolveCache[value] = '#333333';
+            return colorResolveCache[value];
+        }
+        var resolved = window.getComputedStyle(colorResolveProbe).color;
+        if (!resolved || /oklch|oklab|color-mix/i.test(resolved)) {
+            resolved = '#333333';
+        }
+        colorResolveCache[value] = resolved;
+        return resolved;
+    }
+
+    function sanitizeCssColorValue(value) {
+        if (!value || !/oklch|oklab|color-mix/i.test(value)) return value;
+        var whole = resolveModernColor(value);
+        if (whole && !/oklch|oklab|color-mix/i.test(whole)) return whole;
+        return value
+            .replace(/oklch\((?:[^)(]+|\([^)(]*\))*\)/gi, function (m) {
+                return resolveModernColor(m);
+            })
+            .replace(/color-mix\((?:[^)(]+|\([^)(]*\))*\)/gi, function (m) {
+                return resolveModernColor(m);
+            });
+    }
+
+    function sanitizeStyleDeclaration(style) {
+        if (!style) return;
+        for (var i = style.length - 1; i >= 0; i--) {
+            var prop = style.item(i);
+            var val = style.getPropertyValue(prop);
+            if (!val || !/oklch|oklab|color-mix/i.test(val)) continue;
+            style.setProperty(prop, sanitizeCssColorValue(val), style.getPropertyPriority(prop));
+        }
+    }
+
+    function sanitizeStyleSheet(sheet) {
+        var rules;
+        try {
+            rules = sheet.cssRules || sheet.rules;
+        } catch (_) {
+            return;
+        }
+        if (!rules) return;
+        for (var i = 0; i < rules.length; i++) {
+            var rule = rules[i];
+            if (rule.style) sanitizeStyleDeclaration(rule.style);
+            if (rule.cssRules) sanitizeStyleSheet(rule);
+        }
+    }
+
+    function sanitizeClonedDocument(clonedDoc) {
+        var sheets = clonedDoc.styleSheets;
+        for (var i = 0; i < sheets.length; i++) {
+            sanitizeStyleSheet(sheets[i]);
+        }
+        var els = clonedDoc.querySelectorAll('*');
+        for (var j = 0; j < els.length; j++) {
+            if (els[j].style && els[j].style.length) {
+                sanitizeStyleDeclaration(els[j].style);
+            }
+        }
+        if (clonedDoc.documentElement && clonedDoc.documentElement.style) {
+            sanitizeStyleDeclaration(clonedDoc.documentElement.style);
+        }
+    }
+
     function withTimeout(promise, ms, label) {
         return Promise.race([
             promise,
@@ -833,7 +914,10 @@
                             useCORS: true,
                             backgroundColor: '#ffffff',
                             logging: false,
-                            imageTimeout: 2000
+                            imageTimeout: 2000,
+                            onclone: function (clonedDoc) {
+                                sanitizeClonedDocument(clonedDoc);
+                            }
                         }),
                         15000,
                         '畫面擷取逾時，請再試一次'

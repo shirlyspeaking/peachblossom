@@ -402,18 +402,20 @@ textarea {
 }
 
 .btn-generate {
-    margin-top: 8px;
+    margin-top: 12px;
     width: 100%;
     background: linear-gradient(135deg, #e03b4f, #b82035);
     color: #fff;
 }
 
 .btn-secondary {
-    margin-top: 8px;
+    margin-top: 12px;
     width: 100%;
     padding: 8px 10px;
     font-size: 0.86rem;
     border-radius: 10px;
+    background: linear-gradient(135deg, #e03b4f, #b82035);
+    color: #fff;
 }
 
 #autoStrokeChars {
