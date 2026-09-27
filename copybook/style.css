@@ -539,22 +539,31 @@ button:hover {
 }
 
 .preview--a4 .page {
-    max-width: 210mm;
     width: 210mm;
+    max-width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    max-height: 297mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--a4l .page {
-    max-width: 297mm;
     width: 297mm;
+    max-width: 297mm;
+    height: 210mm;
+    min-height: 210mm;
+    max-height: 210mm;
     margin-left: auto;
     margin-right: auto;
 }
 
 .preview--letter .page {
-    max-width: 8.5in;
     width: 8.5in;
+    max-width: 8.5in;
+    height: 11in;
+    min-height: 11in;
+    max-height: 11in;
     margin-left: auto;
     margin-right: auto;
 }
@@ -563,12 +572,17 @@ button:hover {
 
 .page {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    box-sizing: border-box;
     background: var(--paper);
-    border-radius: 10px;
+    border-radius: 6px;
     box-shadow: 0 8px 30px var(--page-shadow);
-    padding: 18px;
+    padding: 14mm 12mm 16mm;
     border: 1px solid var(--ui-border);
-    overflow-x: auto;
+    overflow: hidden;
     transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
@@ -795,6 +809,11 @@ button:hover {
 /* ===== Print ===== */
 
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
     body {
         background: #fff;
     }
@@ -820,8 +839,7 @@ button:hover {
         box-shadow: none;
         border: none;
         margin: 0;
-        padding: 0;
-        overflow: visible;
+        overflow: hidden;
         break-after: page;
         page-break-after: always;
     }

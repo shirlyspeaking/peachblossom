@@ -961,6 +961,16 @@
         }
     }
 
+    function getPdfPaper() {
+        if (preview && preview.classList.contains('preview--a4l')) {
+            return { format: 'a4', orientation: 'l', w: 297, h: 210 };
+        }
+        if (preview && preview.classList.contains('preview--letter')) {
+            return { format: 'letter', orientation: 'p', w: 215.9, h: 279.4 };
+        }
+        return { format: 'a4', orientation: 'p', w: 210, h: 297 };
+    }
+
     async function onPdf() {
         if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
             setStatus('缺少 html2canvas 或 jsPDF');
@@ -988,21 +998,19 @@
                     reader.onerror = function () { reject(new Error('圖片讀取失敗')); };
                     reader.readAsDataURL(blobs[i]);
                 });
-                var pageEl = pages[i];
-                var cssW = Math.max(pageEl.offsetWidth, 320);
-                var cssH = Math.max(pageEl.offsetHeight, 320);
-                var wMm = (cssW * 25.4) / 96;
-                var hMm = (cssH * 25.4) / 96;
+                var paper = getPdfPaper();
                 if (!pdf) {
                     pdf = new jsPDF({
-                        orientation: wMm >= hMm ? 'l' : 'p',
+                        orientation: paper.orientation,
                         unit: 'mm',
-                        format: [wMm, hMm],
+                        format: paper.format,
                         compress: true
                     });
                 } else {
-                    pdf.addPage([wMm, hMm], wMm >= hMm ? 'l' : 'p');
+                    pdf.addPage(paper.format, paper.orientation);
                 }
+                var wMm = paper.w;
+                var hMm = paper.h;
                 var page = pdf.internal.getCurrentPageInfo().pageNumber;
                 pdf.setPage(page);
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, wMm, hMm, undefined, 'FAST');
