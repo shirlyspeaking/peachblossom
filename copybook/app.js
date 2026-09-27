@@ -439,20 +439,24 @@
         if (fontSizeStroke) fontSizeStroke.value = '40';
     }
 
-    function chunkLayoutRows(rows, lpp) {
+    function chunkLayoutRows(rows, lpp, padEmpty) {
         var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
         for (var i = 0; i < rows.length; i += n) {
             var pageRows = rows.slice(i, i + n);
-            while (pageRows.length < n) {
-                pageRows.push([]);
+            if (padEmpty !== false) {
+                while (pageRows.length < n) {
+                    pageRows.push([]);
+                }
             }
             pages.push(pageRows);
         }
         if (pages.length === 0) {
-            var emptyPage = [];
-            while (emptyPage.length < n) emptyPage.push([]);
-            pages.push(emptyPage);
+            pages.push(padEmpty === false ? [] : (function () {
+                var emptyPage = [];
+                while (emptyPage.length < n) emptyPage.push([]);
+                return emptyPage;
+            })());
         }
         return pages;
     }
@@ -579,7 +583,17 @@
         var rows;
         var pages;
         if (useStrokePaths) {
-            pages = chunkLayoutRows(strokePathLayout.rows, lpp);
+            var wrappedStrokeRows = [];
+            var srcRows = strokePathLayout.rows || [];
+            for (var wr = 0; wr < srcRows.length; wr++) {
+                var srcRow = srcRows[wr] || [];
+                if (!srcRow.length) continue;
+                for (var ws = 0; ws < srcRow.length; ws += STROKE_CELLS_PER_LINE) {
+                    wrappedStrokeRows.push(srcRow.slice(ws, ws + STROKE_CELLS_PER_LINE));
+                }
+            }
+            strokePathLayout.cpl = STROKE_CELLS_PER_LINE;
+            pages = chunkLayoutRows(wrappedStrokeRows, lpp, false);
         } else {
             rows = buildRows(text, cpl);
             pages = chunkPages(rows, lpp);
@@ -599,6 +613,7 @@
         preview.className =
             'preview preview--' +
             psize +
+            (useStrokePaths ? ' preview--stroke' : '') +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
             (uploadedBgUrl ? ' preview--bg-upload' : '') +
@@ -630,24 +645,21 @@
             pageEl.appendChild(title);
 
             for (var r = 0; r < pageRows.length; r++) {
+                if (useStrokePaths && !(pageRows[r] && pageRows[r].length)) continue;
                 var grid = document.createElement('div');
                 grid.className = 'grid';
                 var cellSize = Math.max(Math.round(fs * lh), fs + 8);
 
                 if (useStrokePaths) {
-                    var layoutCpl = strokePathLayout.cpl || 1;
+                    var layoutCpl = STROKE_CELLS_PER_LINE;
                     var rowCells = pageRows[r] || [];
-                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', ' + cellSize + 'px)';
-                    grid.style.gridTemplateRows = cellSize + 'px';
+                    grid.classList.add('grid--stroke');
+                    grid.style.gridTemplateColumns = 'repeat(' + layoutCpl + ', minmax(0, 1fr))';
 
                     for (var sc = 0; sc < layoutCpl; sc++) {
                         var item = rowCells[sc] || { kind: 'blank' };
                         var cell = document.createElement('div');
                         cell.className = cellClassForGrid(gtype);
-                        cell.style.width = cellSize + 'px';
-                        cell.style.minWidth = cellSize + 'px';
-                        cell.style.height = cellSize + 'px';
-                        cell.style.minHeight = cellSize + 'px';
                         if (sc === layoutCpl - 1) cell.classList.add('col-last');
                         if (r === pageRows.length - 1) cell.classList.add('row-last');
 

@@ -696,6 +696,20 @@ button:hover {
     transition: border-color 0.3s;
 }
 
+.preview--stroke .grid {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.preview--stroke .cell {
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1;
+}
+
 .cell {
     position: relative;
     border-right: 1px solid var(--line-soft);
