@@ -49,11 +49,11 @@
     var STROKE_CELLS_PER_LINE = 12;
     var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
     var PHOTO_BGS = {
-        plum: 'backgrounds/\u6885\u82b1.jpg?v=3',
-        orchid: 'backgrounds/\u862d\u82b1.jpg?v=3',
-        bamboo: 'backgrounds/\u7af9\u5b50.jpg?v=3',
-        chrysanthemum: 'backgrounds/\u83ca\u82b1.jpg?v=3',
-        peony: 'backgrounds/\u7261\u4e39.jpg?v=3'
+        plum: 'backgrounds/\u6885\u82b1.jpg?v=4',
+        orchid: 'backgrounds/\u862d\u82b1.jpg?v=4',
+        bamboo: 'backgrounds/\u7af9\u5b50.jpg?v=4',
+        chrysanthemum: 'backgrounds/\u83ca\u82b1.jpg?v=4',
+        peony: 'backgrounds/\u7261\u4e39.jpg?v=4'
     };
     var preview = document.getElementById('preview');
     var btnPdf = document.getElementById('btnPdf');
