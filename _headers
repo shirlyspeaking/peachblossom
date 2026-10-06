@@ -11,6 +11,15 @@
 /copybook/index.html
   Cache-Control: no-cache, must-revalidate
 
+/copybook/app.js
+  Cache-Control: no-cache, must-revalidate
+
+/copybook/style.css
+  Cache-Control: no-cache, must-revalidate
+
+/copybook/backgrounds/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /copybook/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -38,6 +47,9 @@
 /mawangdui-silk/
   Cache-Control: no-store, must-revalidate
   CDN-Cache-Control: no-store
+
+/enjoyread/app.html
+  Cache-Control: no-cache, must-revalidate
 
 /mawangdui-silk/*
   Cache-Control: no-store, must-revalidate

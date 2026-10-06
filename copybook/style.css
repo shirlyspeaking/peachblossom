@@ -533,6 +533,10 @@ button:hover {
     --cell-bg: rgba(255, 255, 255, 0.62);
 }
 
+.preview--cellbg-paper {
+    --cell-bg: rgba(255, 255, 255, 0.18);
+}
+
 .preview--cellbg-transparent {
     --cell-bg: transparent;
 }
@@ -615,6 +619,11 @@ button:hover {
     transition: background 0.3s, border-color 0.3s;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+}
+
+.preview--bg-sheet .page,
+.preview.preview--exporting.preview--bg-sheet .page {
+    background: transparent;
 }
 
 .page-upload-bg,
