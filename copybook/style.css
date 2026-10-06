@@ -576,18 +576,21 @@ button:hover {
     margin-right: auto;
 }
 
+.preview--a4.preview--bg-sheet .page,
 .preview--a4.preview--bg-upload .page {
     height: 297mm;
     min-height: 297mm;
     max-height: 297mm;
 }
 
+.preview--a4l.preview--bg-sheet .page,
 .preview--a4l.preview--bg-upload .page {
     height: 210mm;
     min-height: 210mm;
     max-height: 210mm;
 }
 
+.preview--letter.preview--bg-sheet .page,
 .preview--letter.preview--bg-upload .page {
     height: 11in;
     min-height: 11in;
@@ -614,7 +617,8 @@ button:hover {
     -webkit-print-color-adjust: exact;
 }
 
-.page-upload-bg {
+.page-upload-bg,
+.page-photo-bg {
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -622,17 +626,27 @@ button:hover {
     height: 100%;
     object-fit: cover;
     object-position: center;
-    opacity: 0.38;
     pointer-events: none;
     image-rendering: auto;
 }
 
-.preview--bg-upload .page > * {
+.page-upload-bg {
+    opacity: 0.38;
+}
+
+.page-photo-bg {
+    opacity: 1;
+}
+
+.preview--bg-upload .page > *,
+.preview--bg-sheet .page > * {
     position: relative;
     z-index: 1;
 }
 
-.preview--bg-upload .page > .page-upload-bg {
+.preview--bg-upload .page > .page-upload-bg,
+.preview--bg-sheet .page > .page-photo-bg,
+.preview--bg-sheet .page > .page-upload-bg {
     position: absolute;
     z-index: 0;
 }
@@ -868,6 +882,7 @@ button:hover {
         gap: 0;
     }
 
+    .preview--a4.preview--bg-sheet .page,
     .preview--a4.preview--bg-upload .page {
         height: 297mm;
         min-height: 297mm;

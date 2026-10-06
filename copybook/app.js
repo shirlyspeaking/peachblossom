@@ -48,6 +48,13 @@
     var DEFAULT_STROKE_LINES_PER_PAGE = 10;
     var STROKE_CELLS_PER_LINE = 12;
     var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
+    var PHOTO_BGS = {
+        plum: 'backgrounds/\u6885\u82b1.jpg',
+        orchid: 'backgrounds/\u862d\u82b1.jpg',
+        bamboo: 'backgrounds/\u7af9\u5b50.jpg',
+        chrysanthemum: 'backgrounds/\u83ca\u82b1.jpg',
+        peony: 'backgrounds/\u7261\u4e39.jpg'
+    };
     var preview = document.getElementById('preview');
     var btnPdf = document.getElementById('btnPdf');
     var pdfPreviewModal = document.getElementById('pdfPreviewModal');
@@ -601,13 +608,16 @@
 
         preview.innerHTML = '';
         var rawBg = ctrls.pageBackground && ctrls.pageBackground.value ? ctrls.pageBackground.value : 'none';
+        var photoBgUrl = PHOTO_BGS[rawBg] || '';
         var bgVal =
             rawBg === 'xuan' ||
             rawBg === 'letter' ||
             rawBg === 'scroll' ||
-            rawBg === 'redLines'
+            rawBg === 'redLines' ||
+            PHOTO_BGS[rawBg]
                 ? rawBg
                 : 'none';
+        var useSheetBg = !!(uploadedBgUrl || photoBgUrl);
         var cellBgVal = uploadedBgUrl ? 'translucent' : 'white';
         preview.className =
             'preview preview--' +
@@ -615,6 +625,7 @@
             (useStrokePaths ? ' preview--stroke' : '') +
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
+            (useSheetBg ? ' preview--bg-sheet' : '') +
             (uploadedBgUrl ? ' preview--bg-upload' : '') +
             (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
             ' preview--cellbg-' +
@@ -627,11 +638,11 @@
             pageEl.className = 'page';
             pageEl.setAttribute('data-page-index', String(p + 1));
 
-            if (uploadedBgUrl) {
+            if (uploadedBgUrl || photoBgUrl) {
                 var bgImg = document.createElement('img');
-                bgImg.className = 'page-upload-bg';
+                bgImg.className = uploadedBgUrl ? 'page-upload-bg' : 'page-photo-bg';
                 bgImg.decoding = 'async';
-                bgImg.src = uploadedBgUrl;
+                bgImg.src = uploadedBgUrl || photoBgUrl;
                 bgImg.alt = '';
                 bgImg.setAttribute('aria-hidden', 'true');
                 bgImg.draggable = false;
@@ -1228,7 +1239,7 @@
         try {
             await yieldUi();
             var blobs = await capturePageElements(pages, 1, 'image/png');
-            var fillSheet = preview && preview.classList.contains('preview--bg-upload');
+            var fillSheet = preview && preview.classList.contains('preview--bg-sheet');
             var paper = getPdfPaper();
             var previewUrls = [];
             for (var i = 0; i < blobs.length; i++) {
