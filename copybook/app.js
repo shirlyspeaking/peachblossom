@@ -605,8 +605,7 @@
             rawBg === 'xuan' ||
             rawBg === 'letter' ||
             rawBg === 'scroll' ||
-            rawBg === 'redLines' ||
-            rawBg === 'cloud'
+            rawBg === 'redLines'
                 ? rawBg
                 : 'none';
         var cellBgVal = uploadedBgUrl ? 'translucent' : 'white';

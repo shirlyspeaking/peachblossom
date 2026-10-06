@@ -668,13 +668,6 @@ button:hover {
     background-repeat: repeat;
 }
 
-.preview--bg-cloud .page {
-    background-color: #faf6ee;
-    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'80'%20height%3D'80'%3E%3Crect%20fill%3D'%23faf6ee'%20width%3D'80'%20height%3D'80'%2F%3E%3Cpath%20fill%3D'%23bdb8b0'%20opacity%3D'0.16'%20d%3D'M10%2040%20Q20%2025%2035%2032%20Q48%2018%2062%2028%20Q72%2038%2068%2050%20Q58%2058%2042%2054%20Q28%2062%2015%2052%20Q8%2048%2010%2040'%2F%3E%3Cpath%20fill%3D'%23ada8a0'%20opacity%3D'0.1'%20d%3D'M45%2018%20Q58%2012%2068%2022%20Q75%2035%2065%2045%20Q50%2048%2040%2040%20Q32%2022%2045%2018'%2F%3E%3C%2Fsvg%3E");
-    background-size: 80px 80px;
-    background-repeat: repeat;
-}
-
 .page-title {
     font-size: 0.85rem;
     color: var(--page-title-color);
