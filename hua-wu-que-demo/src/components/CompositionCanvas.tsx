@@ -1,5 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { VASE_LAYER_Z } from '../constants/layers'
+import {
+  FLOWER_BEHIND_VASE_Z,
+  FLOWER_FRONT_Z,
+  VASE_LAYER_Z,
+} from '../constants/layers'
 import { roomImagePath, vaseImagePath } from '../data/assetPaths'
 import { getRoom } from '../data/rooms'
 import { getVase } from '../data/vases'
@@ -27,6 +31,7 @@ export function CompositionCanvas({
 }: CompositionCanvasProps) {
   const [canvasEl, setCanvasEl] = useState<HTMLDivElement | null>(null)
   const vaseRef = useRef<HTMLImageElement>(null)
+  const clipRef = useRef<HTMLDivElement>(null)
   const vase = getVase(vaseId)
   const roomSpec = getRoom(room)
 
@@ -39,9 +44,15 @@ export function CompositionCanvas({
       const c = canvas.getBoundingClientRect()
       const i = img.getBoundingClientRect()
       if (c.width === 0 || i.width === 0) return
+      const lip =
+        ((i.top - c.top + i.height * vase.mouthY) / c.height) * 100
+      if (clipRef.current) {
+        const belowLip = Math.min(100, Math.max(0, 100 - lip))
+        clipRef.current.style.clipPath = `inset(0 0 ${belowLip}% 0)`
+      }
       onMouth({
         x: ((i.left - c.left + i.width * vase.mouthX) / c.width) * 100,
-        y: ((i.top - c.top + i.height * vase.mouthY) / c.height) * 100,
+        y: ((i.top - c.top + i.height * vase.rootY) / c.height) * 100,
       })
     }
 
@@ -53,9 +64,8 @@ export function CompositionCanvas({
       observer.disconnect()
       img.removeEventListener('load', measure)
     }
-  }, [canvasEl, vase.mouthX, vase.mouthY, vaseId, onMouth])
+  }, [canvasEl, vase.mouthX, vase.mouthY, vase.rootY, vaseId, onMouth])
 
-  const behind = flowers.filter((flower) => flower.zIndex < VASE_LAYER_Z)
   const front = flowers.filter((flower) => flower.zIndex >= VASE_LAYER_Z)
 
   return (
@@ -73,11 +83,13 @@ export function CompositionCanvas({
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/20" />
 
-      {behind.map((flower) => (
+      {flowers.map((flower) => (
         <FlowerPiece
-          key={flower.id}
+          key={`${flower.id}-seat`}
           flower={flower}
-          selected={flower.id === selectedId}
+          passive={flower.zIndex >= VASE_LAYER_Z}
+          layerZ={FLOWER_BEHIND_VASE_Z}
+          selected={flower.zIndex < VASE_LAYER_Z && flower.id === selectedId}
           canvas={canvasEl}
           onSelect={() => onSelectFlower(flower.id)}
           onDragEnd={(dx, dy) =>
@@ -104,24 +116,30 @@ export function CompositionCanvas({
         />
       </div>
 
-      {front.map((flower) => (
-        <FlowerPiece
-          key={flower.id}
-          flower={flower}
-          selected={flower.id === selectedId}
-          canvas={canvasEl}
-          onSelect={() => onSelectFlower(flower.id)}
-          onDragEnd={(dx, dy) =>
-            onUpdateFlower(flower.id, { x: flower.x + dx, y: flower.y + dy })
-          }
-          onWheelGesture={(dRot, dScale) =>
-            onUpdateFlower(flower.id, {
-              rotation: flower.rotation + dRot,
-              scale: clamp(flower.scale + dScale, 0.35, 2.4),
-            })
-          }
-        />
-      ))}
+      <div
+        ref={clipRef}
+        className="pointer-events-none absolute inset-0"
+        style={{ zIndex: FLOWER_FRONT_Z }}
+      >
+        {front.map((flower) => (
+          <FlowerPiece
+            key={`${flower.id}-front`}
+            flower={flower}
+            selected={flower.id === selectedId}
+            canvas={canvasEl}
+            onSelect={() => onSelectFlower(flower.id)}
+            onDragEnd={(dx, dy) =>
+              onUpdateFlower(flower.id, { x: flower.x + dx, y: flower.y + dy })
+            }
+            onWheelGesture={(dRot, dScale) =>
+              onUpdateFlower(flower.id, {
+                rotation: flower.rotation + dRot,
+                scale: clamp(flower.scale + dScale, 0.35, 2.4),
+              })
+            }
+          />
+        ))}
+      </div>
 
       <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-white/55 px-3 py-1 text-xs text-stone-600 backdrop-blur-sm">
         點選折枝；拖曳移位；滾輪轉枝，Alt 加滾輪縮放

@@ -81,7 +81,7 @@ export function ControlPanel(props: ControlPanelProps) {
           花無缺
         </h1>
         <p className="text-sm leading-relaxed text-stone-500">
-          選一只瓶子，把折枝放進瓶口。
+          選一只瓶子，把折枝插進瓶裡。
         </p>
       </header>
 
@@ -107,7 +107,7 @@ export function ControlPanel(props: ControlPanelProps) {
             onClick={onAddFlower}
             className="rounded-full bg-stone-900 px-3 py-1 text-xs text-[#f7f4ee] shadow-sm transition hover:bg-stone-800"
           >
-            放入瓶口
+            插入瓶中
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2">

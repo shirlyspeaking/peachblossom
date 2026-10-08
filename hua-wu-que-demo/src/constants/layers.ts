@@ -1,6 +1,6 @@
 /** Z-index choreography: vase sits between background stems and foreground stems. */
 export const VASE_LAYER_Z = 48
-/** Stems visually tucked “inside / behind” the rim silhouette. */
+/** Whole branch tucked behind the vase. */
 export const FLOWER_BEHIND_VASE_Z = 36
-/** Default foreground placement for new blooms. */
+/** Default. The stem is drawn into the mouth, then cut off so the end stays inside. */
 export const FLOWER_FRONT_Z = 62

@@ -7,6 +7,9 @@ interface FlowerPieceProps {
   flower: PlacedFlower
   selected: boolean
   canvas: HTMLElement | null
+  /** Drawn under the vase so the cut end stays hidden. Not draggable. */
+  passive?: boolean
+  layerZ?: number
   onSelect: () => void
   onDragEnd: (dxPercent: number, dyPercent: number) => void
   onWheelGesture: (deltaRotate: number, deltaScale: number) => void
@@ -16,6 +19,8 @@ export function FlowerPiece({
   flower,
   selected,
   canvas,
+  passive = false,
+  layerZ,
   onSelect,
   onDragEnd,
   onWheelGesture,
@@ -26,16 +31,19 @@ export function FlowerPiece({
 
   return (
     <div
-      className="absolute size-0"
+      className={[
+        'absolute size-0',
+        passive ? 'pointer-events-none' : 'pointer-events-auto',
+      ].join(' ')}
       style={{
         left: `${flower.x}%`,
         top: `${flower.y}%`,
-        zIndex: flower.zIndex,
+        zIndex: layerZ ?? flower.zIndex,
       }}
     >
       <div className="absolute bottom-0 left-0 -translate-x-1/2">
       <motion.div
-        drag
+        drag={!passive}
         dragMomentum={false}
         dragElastic={0.04}
         onPointerDown={(event) => {
@@ -58,7 +66,10 @@ export function FlowerPiece({
           const scaleStep = event.altKey ? -event.deltaY * 0.0015 : 0
           onWheelGesture(rotateStep, scaleStep)
         }}
-        className="cursor-grab active:cursor-grabbing"
+        className={[
+          'cursor-grab active:cursor-grabbing',
+          passive ? 'pointer-events-none' : 'pointer-events-auto',
+        ].join(' ')}
         style={{ transformOrigin: 'center bottom' }}
         animate={{
           rotate: flower.rotation,
