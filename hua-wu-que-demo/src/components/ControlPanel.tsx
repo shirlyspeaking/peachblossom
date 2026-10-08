@@ -1,37 +1,23 @@
-import { ChineseColorSelector } from './ChineseColorSelector'
+import { flowerImagePath } from '../data/assetPaths'
+import { FLOWERS, getFlower } from '../data/flowers'
+import { getVase } from '../data/vases'
 import {
   FLOWER_BEHIND_VASE_Z,
   FLOWER_FRONT_Z,
   VASE_LAYER_Z,
 } from '../constants/layers'
-import type { ContainerKind, PlacedFlower, RoomId, SpeciesId } from '../types'
-
-const containers: { id: ContainerKind; zh: string; sub: string }[] = [
-  { id: 'ping', zh: '瓶花', sub: 'Ping — 高瓶清雅' },
-  { id: 'lan', zh: '籃花', sub: 'Lan — 藤籃野趣' },
-  { id: 'pan', zh: '盤花', sub: 'Pan — 淺盤留白' },
-]
-
-const rooms: { id: RoomId; zh: string }[] = [
-  { id: 'shufang', zh: '書齋疏影' },
-  { id: 'tea', zh: '茶寮靜照' },
-  { id: 'window', zh: '窗影留白' },
-]
-
-const speciesList: { id: SpeciesId; zh: string }[] = [
-  { id: 'peony', zh: '牡丹' },
-  { id: 'lotus', zh: '荷花' },
-  { id: 'plum', zh: '梅花' },
-  { id: 'magnolia', zh: '玉蘭' },
-]
+import type { PlacedFlower, RoomId, SpeciesId, VaseId } from '../types'
+import { ChineseColorSelector } from './ChineseColorSelector'
+import { RoomSelect } from './RoomSelect'
+import { VaseSelect } from './VaseSelect'
 
 interface ControlPanelProps {
-  container: ContainerKind
-  onContainer: (v: ContainerKind) => void
+  vaseId: VaseId
+  onVase: (id: VaseId) => void
   room: RoomId
-  onRoom: (v: RoomId) => void
+  onRoom: (id: RoomId) => void
   librarySpecies: SpeciesId
-  onLibrarySpecies: (v: SpeciesId) => void
+  onLibrarySpecies: (id: SpeciesId) => void
   pendingColorId: string
   onPendingColor: (id: string) => void
   onAddFlower: () => void
@@ -39,16 +25,19 @@ interface ControlPanelProps {
   onPatchSelectedFlower: (patch: Partial<PlacedFlower>) => void
   onBringFront: () => void
   onSendBack: () => void
+  onDeleteSelected: () => void
+  onClear: () => void
   rotationDeg: number
   scalePct: number
   onRotationSlider: (deg: number) => void
   onScaleSlider: (pct: number) => void
+  canClear: boolean
 }
 
 export function ControlPanel(props: ControlPanelProps) {
   const {
-    container,
-    onContainer,
+    vaseId,
+    onVase,
     room,
     onRoom,
     librarySpecies,
@@ -60,18 +49,24 @@ export function ControlPanel(props: ControlPanelProps) {
     onPatchSelectedFlower,
     onBringFront,
     onSendBack,
+    onDeleteSelected,
+    onClear,
     rotationDeg,
     scalePct,
     onRotationSlider,
     onScaleSlider,
+    canClear,
   } = props
 
-  const selectedId = selectedFlower?.id ?? null
+  const vase = getVase(vaseId)
+  const library = getFlower(librarySpecies)
   const behind =
     selectedFlower != null && selectedFlower.zIndex < VASE_LAYER_Z
+  const named = FLOWERS.filter((flower) => flower.group === 'flower')
+  const foliage = FLOWERS.filter((flower) => flower.group === 'foliage')
 
   return (
-    <aside className="flex h-full min-h-0 w-full max-w-[320px] flex-col gap-5 overflow-y-auto border-r border-stone-200/90 bg-[#fbfaf7] p-5 shadow-[inset_-1px_0_0_rgba(44,40,36,0.04)]">
+    <aside className="order-2 flex max-h-[46dvh] w-full min-h-0 flex-col gap-5 overflow-y-auto border-t border-stone-200/90 bg-[#fbfaf7] p-5 shadow-[inset_0_1px_0_rgba(44,40,36,0.04)] lg:order-1 lg:h-full lg:max-h-none lg:max-w-[320px] lg:border-t-0 lg:border-r lg:shadow-[inset_-1px_0_0_rgba(44,40,36,0.04)]">
       <a
         href="../index.html"
         className="inline-flex w-fit items-center gap-2 rounded-xl border border-stone-300/80 bg-white/90 px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:border-stone-400 hover:bg-white hover:text-stone-900"
@@ -81,109 +76,102 @@ export function ControlPanel(props: ControlPanelProps) {
       </a>
 
       <header className="space-y-1 border-b border-stone-200/80 pb-4">
-        <p className="text-xs tracking-[0.28em] text-stone-400">中式插花</p>
+        <p className="text-xs tracking-[0.28em] text-stone-400">古典插花</p>
         <h1 className="text-2xl font-semibold tracking-wide text-stone-800">
           花無缺
         </h1>
         <p className="text-sm leading-relaxed text-stone-500">
-          以留白與景深，佈一席紙上花席。
+          選一只畫中的瓶子，把折枝放進瓶口。
         </p>
       </header>
 
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-stone-700">花器</h2>
-        <div className="grid gap-2">
-          {containers.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => onContainer(c.id)}
-              className={[
-                'rounded-xl border px-3 py-2 text-left transition',
-                container === c.id
-                  ? 'border-amber-900/35 bg-white shadow-sm'
-                  : 'border-stone-200/80 hover:border-stone-300',
-              ].join(' ')}
-            >
-              <div className="text-sm font-medium text-stone-800">{c.zh}</div>
-              <div className="text-[11px] text-stone-400">{c.sub}</div>
-            </button>
-          ))}
-        </div>
+        <VaseSelect value={vaseId} onChange={onVase} />
+        <p className="text-[11px] leading-relaxed text-stone-500">
+          {vase.painting} · {vase.name}
+        </p>
+        <p className="text-[11px] leading-relaxed text-stone-400">{vase.note}</p>
       </section>
 
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-stone-700">居室背景</h2>
-        <div className="flex flex-wrap gap-2">
-          {rooms.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => onRoom(r.id)}
-              className={[
-                'rounded-full px-3 py-1.5 text-xs transition',
-                room === r.id
-                  ? 'bg-stone-800 text-[#f7f4ee]'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200/90',
-              ].join(' ')}
-            >
-              {r.zh}
-            </button>
-          ))}
-        </div>
+        <RoomSelect value={room} onChange={onRoom} />
       </section>
 
       <section className="space-y-3 rounded-xl border border-stone-200/90 bg-white/70 p-3 shadow-sm">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium text-stone-700">花材庫</h2>
+          <h2 className="text-sm font-medium text-stone-700">名花</h2>
           <button
             type="button"
             onClick={onAddFlower}
             className="rounded-full bg-stone-900 px-3 py-1 text-xs text-[#f7f4ee] shadow-sm transition hover:bg-stone-800"
           >
-            點擊加入畫布
+            放入瓶口
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {speciesList.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => onLibrarySpecies(s.id)}
-              className={[
-                'rounded-lg border px-2 py-2 text-sm transition',
-                librarySpecies === s.id
-                  ? 'border-amber-900/35 bg-amber-50/80'
-                  : 'border-stone-200/80 hover:border-stone-300',
-              ].join(' ')}
-            >
-              {s.zh}
-            </button>
+          {named.map((flower) => (
+            <SpeciesButton
+              key={flower.id}
+              species={flower.id}
+              label={flower.labelZh}
+              colorId={
+                flower.id === librarySpecies
+                  ? pendingColorId
+                  : flower.colors[0].id
+              }
+              active={librarySpecies === flower.id}
+              onClick={() => onLibrarySpecies(flower.id)}
+            />
           ))}
         </div>
         <ChineseColorSelector
-          species={librarySpecies}
+          colors={library.colors}
           value={pendingColorId}
           onChange={onPendingColor}
         />
+        <h3 className="pt-1 text-sm font-medium text-stone-700">配枝</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {foliage.map((flower) => (
+            <SpeciesButton
+              key={flower.id}
+              species={flower.id}
+              label={flower.labelZh}
+              colorId={flower.colors[0].id}
+              active={librarySpecies === flower.id}
+              onClick={() => onLibrarySpecies(flower.id)}
+            />
+          ))}
+        </div>
       </section>
 
       <section className="space-y-3 rounded-xl border border-dashed border-stone-300/90 bg-stone-50/70 p-3">
-        <h2 className="text-sm font-medium text-stone-700">選取花材</h2>
-        {!selectedId ? (
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-medium text-stone-700">選取花材</h2>
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={!canClear}
+            className="text-xs text-stone-500 underline-offset-2 hover:text-stone-800 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            清空花席
+          </button>
+        </div>
+        {!selectedFlower ? (
           <p className="text-xs leading-relaxed text-stone-400">
-            於畫布點選一枝花以調整層次、角度與尺寸。
+            於畫布點選一枝，可改色、轉枝、縮放，或收到瓶後。
           </p>
         ) : (
           <>
-            {selectedFlower ? (
-              <ChineseColorSelector
-                species={selectedFlower.species}
-                value={selectedFlower.colorId}
-                onChange={(id) => onPatchSelectedFlower({ colorId: id })}
-                prioritizeHints={false}
-              />
-            ) : null}
+            <p className="text-xs text-stone-500">
+              {getFlower(selectedFlower.species).labelZh}
+            </p>
+            <ChineseColorSelector
+              colors={getFlower(selectedFlower.species).colors}
+              value={selectedFlower.colorId}
+              onChange={(id) => onPatchSelectedFlower({ colorId: id })}
+            />
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -199,15 +187,20 @@ export function ControlPanel(props: ControlPanelProps) {
               >
                 收到瓶後 ({FLOWER_BEHIND_VASE_Z})
               </button>
+              <button
+                type="button"
+                onClick={onDeleteSelected}
+                className="rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 hover:border-stone-400"
+              >
+                刪除此枝
+              </button>
             </div>
             <p className="text-[11px] text-stone-400">
-              目前層次：
-              {behind ? '瓶後（景深內）' : '瓶前（為前景枝）'}
-              {selectedFlower != null ? `（z=${selectedFlower.zIndex}）` : ''}
+              目前層次：{behind ? '瓶後' : '瓶前'}
             </p>
             <label className="flex flex-col gap-1 text-xs text-stone-600">
               <span className="flex justify-between">
-                <span>仰俯角度（旋轉）</span>
+                <span>仰俯角度</span>
                 <span>{rotationDeg.toFixed(0)}°</span>
               </span>
               <input
@@ -216,7 +209,9 @@ export function ControlPanel(props: ControlPanelProps) {
                 max={85}
                 step={1}
                 value={rotationDeg}
-                onChange={(e) => onRotationSlider(Number(e.target.value))}
+                onChange={(event) =>
+                  onRotationSlider(Number(event.target.value))
+                }
                 className="accent-stone-800"
               />
             </label>
@@ -231,19 +226,47 @@ export function ControlPanel(props: ControlPanelProps) {
                 max={240}
                 step={1}
                 value={scalePct}
-                onChange={(e) => onScaleSlider(Number(e.target.value))}
+                onChange={(event) => onScaleSlider(Number(event.target.value))}
                 className="accent-stone-800"
               />
             </label>
           </>
         )}
       </section>
-
-      <footer className="mt-auto pt-2 text-[11px] leading-relaxed text-stone-400">
-        素材占位路徑：<code className="rounded bg-stone-100 px-1">/assets/vases/…</code>、
-        <code className="rounded bg-stone-100 px-1">/assets/flowers/…</code>、
-        <code className="rounded bg-stone-100 px-1">/assets/rooms/…</code>
-      </footer>
     </aside>
+  )
+}
+
+function SpeciesButton({
+  species,
+  label,
+  colorId,
+  active,
+  onClick,
+}: {
+  species: SpeciesId
+  label: string
+  colorId: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        'flex flex-col items-center gap-1 rounded-lg border px-1 py-1.5 text-xs transition',
+        active
+          ? 'border-amber-900/35 bg-amber-50/80'
+          : 'border-stone-200/80 hover:border-stone-300',
+      ].join(' ')}
+    >
+      <img
+        src={flowerImagePath(species, colorId)}
+        alt=""
+        className="h-12 w-full object-contain"
+      />
+      <span className="text-stone-700">{label}</span>
+    </button>
   )
 }

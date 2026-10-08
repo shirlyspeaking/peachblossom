@@ -1,129 +1,130 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { VASE_LAYER_Z } from '../constants/layers'
 import { roomImagePath, vaseImagePath } from '../data/assetPaths'
-import type { ContainerKind, PlacedFlower, RoomId } from '../types'
+import { getRoom } from '../data/rooms'
+import { getVase } from '../data/vases'
+import type { MouthPoint, PlacedFlower, RoomId, VaseId } from '../types'
 import { FlowerPiece } from './FlowerPiece'
 
 interface CompositionCanvasProps {
   room: RoomId
-  container: ContainerKind
+  vaseId: VaseId
   flowers: PlacedFlower[]
   selectedId: string | null
   onSelectFlower: (id: string | null) => void
   onUpdateFlower: (id: string, patch: Partial<PlacedFlower>) => void
+  onMouth: (mouth: MouthPoint) => void
 }
 
 export function CompositionCanvas({
   room,
-  container,
+  vaseId,
   flowers,
   selectedId,
   onSelectFlower,
   onUpdateFlower,
+  onMouth,
 }: CompositionCanvasProps) {
-  const bgUrl = roomImagePath(room)
-  const vaseUrl = vaseImagePath(container)
-  const [brokenByKind, setBrokenByKind] = useState<
-    Partial<Record<ContainerKind, boolean>>
-  >({})
-  const vaseBroken = brokenByKind[container] === true
+  const [canvasEl, setCanvasEl] = useState<HTMLDivElement | null>(null)
+  const vaseRef = useRef<HTMLImageElement>(null)
+  const vase = getVase(vaseId)
+  const roomSpec = getRoom(room)
+
+  useLayoutEffect(() => {
+    const canvas = canvasEl
+    const img = vaseRef.current
+    if (!canvas || !img) return
+
+    const measure = () => {
+      const c = canvas.getBoundingClientRect()
+      const i = img.getBoundingClientRect()
+      if (c.width === 0 || i.width === 0) return
+      onMouth({
+        x: ((i.left - c.left + i.width * vase.mouthX) / c.width) * 100,
+        y: ((i.top - c.top + i.height * vase.mouthY) / c.height) * 100,
+      })
+    }
+
+    if (img.complete) measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(canvas)
+    img.addEventListener('load', measure)
+    return () => {
+      observer.disconnect()
+      img.removeEventListener('load', measure)
+    }
+  }, [canvasEl, vase.mouthX, vase.mouthY, vaseId, onMouth])
+
+  const behind = flowers.filter((flower) => flower.zIndex < VASE_LAYER_Z)
+  const front = flowers.filter((flower) => flower.zIndex >= VASE_LAYER_Z)
 
   return (
     <div
-      className="relative mx-auto aspect-[5/4] w-full max-w-[920px] overflow-hidden rounded-2xl border border-stone-200/90 bg-[#ebe7df] shadow-[0_22px_55px_rgba(44,40,36,0.12)]"
+      ref={setCanvasEl}
+      className="relative mx-auto aspect-[5/4] w-full max-w-[920px] overflow-hidden rounded-2xl border border-stone-200/90 shadow-[0_22px_55px_rgba(44,40,36,0.12)] [container-type:size]"
+      style={{ background: '#ebe6dc' }}
       onPointerDown={() => onSelectFlower(null)}
     >
-      {/* Room */}
       <div
         className="pointer-events-none absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${bgUrl}), linear-gradient(160deg, #f3eee6, #dcd6cb)`,
-        }}
+        style={{ backgroundImage: `url(${roomImagePath(room)})` }}
+        role="img"
+        aria-label={roomSpec.label}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/[0.06] via-transparent to-white/25" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/20" />
 
-      {/* Floral layer (behind vase) */}
-      {flowers
-        .filter((f) => f.zIndex < VASE_LAYER_Z)
-        .map((f) => (
-          <FlowerPiece
-            key={f.id}
-            flower={f}
-            selected={f.id === selectedId}
-            onSelect={() => onSelectFlower(f.id)}
-            onDragEnd={(dx, dy) =>
-              onUpdateFlower(f.id, { x: f.x + dx, y: f.y + dy })
-            }
-            onWheelGesture={(dRot, dScale) =>
-              onUpdateFlower(f.id, {
-                rotation: f.rotation + dRot,
-                scale: clamp(f.scale + dScale, 0.35, 2.4),
-              })
-            }
-          />
-        ))}
+      {behind.map((flower) => (
+        <FlowerPiece
+          key={flower.id}
+          flower={flower}
+          selected={flower.id === selectedId}
+          canvas={canvasEl}
+          onSelect={() => onSelectFlower(flower.id)}
+          onDragEnd={(dx, dy) =>
+            onUpdateFlower(flower.id, { x: flower.x + dx, y: flower.y + dy })
+          }
+          onWheelGesture={(dRot, dScale) =>
+            onUpdateFlower(flower.id, {
+              rotation: flower.rotation + dRot,
+              scale: clamp(flower.scale + dScale, 0.35, 2.4),
+            })
+          }
+        />
+      ))}
 
-      {/* Vessel */}
       <div
-        className="pointer-events-none absolute inset-x-[18%] bottom-[6%] top-auto flex items-end justify-center"
+        className="pointer-events-none absolute inset-x-[8%] bottom-[4%] flex items-end justify-center"
         style={{ zIndex: VASE_LAYER_Z }}
       >
-        {!vaseBroken ? (
-          <img
-            src={vaseUrl}
-            alt=""
-            className="max-h-[58%] w-auto object-contain opacity-[0.97] drop-shadow-[0_18px_36px_rgba(44,40,36,0.22)]"
-            width={280}
-            height={340}
-            onError={() =>
-              setBrokenByKind((m) => ({ ...m, [container]: true }))
-            }
-          />
-        ) : (
-          <svg
-            viewBox="0 0 200 260"
-            className="h-[52%] w-auto max-w-[42%] opacity-95 drop-shadow-[0_18px_36px_rgba(44,40,36,0.22)]"
-            aria-hidden
-          >
-            <defs>
-              <linearGradient id="vGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#dcd6cf" />
-                <stop offset="100%" stopColor="#a89682" />
-              </linearGradient>
-            </defs>
-            <path
-              fill="url(#vGrad)"
-              stroke="rgba(44,40,36,0.28)"
-              strokeWidth={1}
-              d="M72 36 h56 l8 26 q22 10 34 38 q14 34 14 74 q0 52 -34 76 q-34 22 -76 22 q-42 0 -76 -22 q-34 -24 -34 -76 q0 -40 14 -74 q12 -28 34 -38 l8 -26z"
-            />
-          </svg>
-        )}
+        <img
+          ref={vaseRef}
+          src={vaseImagePath(vaseId)}
+          alt={vase.name}
+          className="h-[52cqh] w-auto max-w-full object-contain drop-shadow-[0_18px_28px_rgba(44,40,36,0.2)]"
+        />
       </div>
 
-      {/* Floral layer (in front of vase) */}
-      {flowers
-        .filter((f) => f.zIndex >= VASE_LAYER_Z)
-        .map((f) => (
-          <FlowerPiece
-            key={f.id}
-            flower={f}
-            selected={f.id === selectedId}
-            onSelect={() => onSelectFlower(f.id)}
-            onDragEnd={(dx, dy) =>
-              onUpdateFlower(f.id, { x: f.x + dx, y: f.y + dy })
-            }
-            onWheelGesture={(dRot, dScale) =>
-              onUpdateFlower(f.id, {
-                rotation: f.rotation + dRot,
-                scale: clamp(f.scale + dScale, 0.35, 2.4),
-              })
-            }
-          />
-        ))}
+      {front.map((flower) => (
+        <FlowerPiece
+          key={flower.id}
+          flower={flower}
+          selected={flower.id === selectedId}
+          canvas={canvasEl}
+          onSelect={() => onSelectFlower(flower.id)}
+          onDragEnd={(dx, dy) =>
+            onUpdateFlower(flower.id, { x: flower.x + dx, y: flower.y + dy })
+          }
+          onWheelGesture={(dRot, dScale) =>
+            onUpdateFlower(flower.id, {
+              rotation: flower.rotation + dRot,
+              scale: clamp(flower.scale + dScale, 0.35, 2.4),
+            })
+          }
+        />
+      ))}
 
-      <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-white/45 px-3 py-1 text-xs text-stone-600 backdrop-blur-sm">
-        點選花材以編輯 · 滾輪旋轉 · Alt&nbsp;+&nbsp;滾輪縮放
+      <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-white/55 px-3 py-1 text-xs text-stone-600 backdrop-blur-sm">
+        點選折枝；拖曳移位；滾輪轉枝，Alt 加滾輪縮放
       </div>
     </div>
   )

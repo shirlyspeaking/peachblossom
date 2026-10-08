@@ -1,0 +1,7 @@
+# Workers Builds 從倉庫根目錄執行 `wrangler deploy` / `wrangler preview`。
+# 沒有這份設定時，建置會立刻因缺少進入點失敗。
+# 桃花源靜態站仍由 Cloudflare Pages 發布，這裡不綁網域。
+name = "peachblossom"
+main = "workers/ci-placeholder/worker.js"
+compatibility_date = "2026-04-28"
+workers_dev = false
