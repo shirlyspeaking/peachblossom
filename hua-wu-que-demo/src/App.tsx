@@ -52,15 +52,16 @@ export default function App() {
   function addFlower() {
     const id = crypto.randomUUID()
     const index = flowers.length
+    const spread = [0, -1, 1, -2, 2][index % 5]
     setFlowers((prev) => [
       ...prev,
       {
         id,
         species: librarySpecies,
         colorId: pendingColorId,
-        x: mouth.x + ((index % 5) - 2) * 2.2,
-        y: mouth.y + (index % 3) * 1.2,
-        rotation: -10 + (index % 5) * 5,
+        x: mouth.x + spread * 0.45,
+        y: mouth.y + (index % 3) * 0.45,
+        rotation: spread * 2.5,
         scale: 1,
         zIndex: FLOWER_FRONT_Z,
       },
