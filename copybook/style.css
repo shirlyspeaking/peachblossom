@@ -365,17 +365,17 @@ body {
 }
 
 .panel-footer {
-    margin-top: 28px;
-    padding-top: 0;
+    margin-top: 8px;
+    padding: 0 4px;
     border-top: none;
     display: flex;
     justify-content: center;
 }
 
 .btn-pdf {
-    width: auto;
+    width: 100%;
     min-width: 0;
-    padding: 13px 48px;
+    padding: 13px 20px;
     font-size: 1.02rem;
     font-weight: 700;
     letter-spacing: 0.06em;
