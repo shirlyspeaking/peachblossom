@@ -81,7 +81,7 @@ export function ControlPanel(props: ControlPanelProps) {
           花無缺
         </h1>
         <p className="text-sm leading-relaxed text-stone-500">
-          選一只畫中的瓶子，把折枝放進瓶口。
+          選一只瓶子，把折枝放進瓶口。
         </p>
       </header>
 

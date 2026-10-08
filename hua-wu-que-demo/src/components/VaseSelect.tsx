@@ -62,7 +62,7 @@ export function VaseSelect({ value, onChange }: VaseSelectProps) {
           id={listId}
           role="listbox"
           aria-label="花器"
-          className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-stone-200 bg-[#fbfaf7] p-1 shadow-lg"
+          className="absolute z-30 mt-1 max-h-96 w-full overflow-auto rounded-xl border border-stone-200 bg-[#fbfaf7] p-1 shadow-lg"
         >
           {VASES.map((vase) => {
             const selected = vase.id === value

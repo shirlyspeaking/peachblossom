@@ -46,6 +46,38 @@ export const VASES: VaseSpec[] = [
     mouthX: 0.5,
     mouthY: 0.52,
   },
+  {
+    id: 'taibai-jiangdou',
+    painting: '清康熙官窯',
+    name: '豇豆紅太白尊',
+    note: '短頸幾乎貼肩，蘋果圓腹，釉裡苔點。',
+    mouthX: 0.5,
+    mouthY: 0.06,
+  },
+  {
+    id: 'danping-fencai',
+    painting: '清粉彩',
+    name: '牡丹膽瓶',
+    note: '長頸、圓腹，腹繪牡丹。',
+    mouthX: 0.5,
+    mouthY: 0.08,
+  },
+  {
+    id: 'yuhuchun-wucai',
+    painting: '明五彩',
+    name: '玉壺春',
+    note: '撇口、中頸、垂腹，紅黃藍綠同器。',
+    mouthX: 0.5,
+    mouthY: 0.07,
+  },
+  {
+    id: 'tianqiu-doucai',
+    painting: '清鬥彩',
+    name: '天球瓶',
+    note: '直頸、大圓腹，腹繪折枝花。',
+    mouthX: 0.5,
+    mouthY: 0.08,
+  },
 ]
 
 export function getVase(id: VaseId): VaseSpec {

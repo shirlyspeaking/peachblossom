@@ -3,6 +3,10 @@ export type VaseId =
   | 'pinghua-zhefang'
   | 'suichao-fanggu'
   | 'lisong-hualan'
+  | 'taibai-jiangdou'
+  | 'danping-fencai'
+  | 'yuhuchun-wucai'
+  | 'tianqiu-doucai'
 
 export type RoomId = 'shufang' | 'tea' | 'window' | 'garden' | 'palace'
 
