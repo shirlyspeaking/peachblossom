@@ -365,7 +365,7 @@ body {
 }
 
 .panel-footer {
-    margin-top: 20px;
+    margin-top: calc(20px + 5mm);
     padding: 0 4px;
     border-top: none;
     display: flex;
