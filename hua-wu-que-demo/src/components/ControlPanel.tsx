@@ -8,13 +8,8 @@ import {
 } from '../constants/layers'
 import type { PlacedFlower, RoomId, SpeciesId, VaseId } from '../types'
 import { ChineseColorSelector } from './ChineseColorSelector'
+import { RoomSelect } from './RoomSelect'
 import { VaseSelect } from './VaseSelect'
-
-const rooms: { id: RoomId; zh: string }[] = [
-  { id: 'shufang', zh: '書齋疏影' },
-  { id: 'tea', zh: '茶寮靜照' },
-  { id: 'window', zh: '窗影留白' },
-]
 
 interface ControlPanelProps {
   vaseId: VaseId
@@ -101,23 +96,7 @@ export function ControlPanel(props: ControlPanelProps) {
 
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-stone-700">居室背景</h2>
-        <div className="flex flex-wrap gap-2">
-          {rooms.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onRoom(item.id)}
-              className={[
-                'rounded-full px-3 py-1.5 text-xs transition',
-                room === item.id
-                  ? 'bg-stone-800 text-[#f7f4ee]'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200/90',
-              ].join(' ')}
-            >
-              {item.zh}
-            </button>
-          ))}
-        </div>
+        <RoomSelect value={room} onChange={onRoom} />
       </section>
 
       <section className="space-y-3 rounded-xl border border-stone-200/90 bg-white/70 p-3 shadow-sm">

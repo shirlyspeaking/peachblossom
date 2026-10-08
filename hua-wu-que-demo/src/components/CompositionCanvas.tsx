@@ -1,15 +1,10 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { VASE_LAYER_Z } from '../constants/layers'
-import { vaseImagePath } from '../data/assetPaths'
+import { roomImagePath, vaseImagePath } from '../data/assetPaths'
+import { getRoom } from '../data/rooms'
 import { getVase } from '../data/vases'
 import type { MouthPoint, PlacedFlower, RoomId, VaseId } from '../types'
 import { FlowerPiece } from './FlowerPiece'
-
-const roomWash: Record<RoomId, string> = {
-  shufang: 'linear-gradient(165deg, #f6f1e8 0%, #e6dfd3 100%)',
-  tea: 'linear-gradient(165deg, #f3ece1 0%, #ddd3c4 100%)',
-  window: 'linear-gradient(180deg, #f8f6f1 0%, #e4ddd2 100%)',
-}
 
 interface CompositionCanvasProps {
   room: RoomId
@@ -33,6 +28,7 @@ export function CompositionCanvas({
   const [canvasEl, setCanvasEl] = useState<HTMLDivElement | null>(null)
   const vaseRef = useRef<HTMLImageElement>(null)
   const vase = getVase(vaseId)
+  const roomSpec = getRoom(room)
 
   useLayoutEffect(() => {
     const canvas = canvasEl
@@ -66,10 +62,16 @@ export function CompositionCanvas({
     <div
       ref={setCanvasEl}
       className="relative mx-auto aspect-[5/4] w-full max-w-[920px] overflow-hidden rounded-2xl border border-stone-200/90 shadow-[0_22px_55px_rgba(44,40,36,0.12)] [container-type:size]"
-      style={{ background: roomWash[room] }}
+      style={{ background: '#ebe6dc' }}
       onPointerDown={() => onSelectFlower(null)}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/[0.05] via-transparent to-white/30" />
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${roomImagePath(room)})` }}
+        role="img"
+        aria-label={roomSpec.label}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/20" />
 
       {behind.map((flower) => (
         <FlowerPiece

@@ -4,7 +4,7 @@ export type VaseId =
   | 'suichao-fanggu'
   | 'lisong-hualan'
 
-export type RoomId = 'shufang' | 'tea' | 'window'
+export type RoomId = 'shufang' | 'tea' | 'window' | 'garden' | 'palace'
 
 export type SpeciesId =
   | 'peony'

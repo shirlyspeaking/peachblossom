@@ -1,4 +1,4 @@
-import type { SpeciesId, VaseId } from '../types'
+import type { RoomId, SpeciesId, VaseId } from '../types'
 
 /** Public dir files are emitted under build `base` (e.g. `/hua-wu-que/` on peachspring.cc). */
 function publicAsset(pathFromPublicRoot: string): string {
@@ -15,4 +15,8 @@ export function flowerImagePath(species: SpeciesId, colorId: string): string {
 
 export function vaseImagePath(id: VaseId): string {
   return publicAsset(`assets/vases/${id}.png`)
+}
+
+export function roomImagePath(id: RoomId): string {
+  return publicAsset(`assets/rooms/${id}.jpg`)
 }
