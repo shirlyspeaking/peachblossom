@@ -365,8 +365,8 @@ body {
 }
 
 .panel-footer {
-    margin-top: 48px;
-    padding-top: 8px;
+    margin-top: 28px;
+    padding-top: 0;
     border-top: none;
     display: flex;
     justify-content: center;
@@ -375,7 +375,7 @@ body {
 .btn-pdf {
     width: auto;
     min-width: 0;
-    padding: 13px 28px;
+    padding: 13px 48px;
     font-size: 1.02rem;
     font-weight: 700;
     letter-spacing: 0.06em;
