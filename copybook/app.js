@@ -1393,6 +1393,32 @@
     }
     if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
+    var modeTabs = document.querySelectorAll('.mode-tab');
+    function activateMode(tab) {
+        modeTabs.forEach(function (item) {
+            var selected = item === tab;
+            item.classList.toggle('is-active', selected);
+            item.setAttribute('aria-selected', selected ? 'true' : 'false');
+            item.tabIndex = selected ? 0 : -1;
+            var panel = document.getElementById(item.getAttribute('aria-controls'));
+            if (panel) panel.hidden = !selected;
+        });
+    }
+    modeTabs.forEach(function (tab, index) {
+        tab.addEventListener('click', function () {
+            activateMode(tab);
+        });
+        tab.addEventListener('keydown', function (e) {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            e.preventDefault();
+            var next = e.key === 'ArrowRight' ? index + 1 : index - 1;
+            if (next < 0) next = modeTabs.length - 1;
+            if (next >= modeTabs.length) next = 0;
+            activateMode(modeTabs[next]);
+            modeTabs[next].focus();
+        });
+    });
+
     renderNow();
     whenBrushFontReady(function () {
         renderNow();
