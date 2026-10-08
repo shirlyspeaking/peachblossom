@@ -1,0 +1,7 @@
+{
+  "name": "peachblossom",
+  "private": true,
+  "scripts": {
+    "pages:build": "npm --prefix zhishang-feihua install && npm --prefix zhishang-feihua run pages:build"
+  }
+}
