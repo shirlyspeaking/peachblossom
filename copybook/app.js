@@ -580,7 +580,7 @@
         var gtype = ctrls.gridType && ctrls.gridType.value ? ctrls.gridType.value : 'tian';
         var psize = ctrls.pageSize && ctrls.pageSize.value ? ctrls.pageSize.value : 'a4';
         var font = getFontFamily();
-        var styleVal = ctrls.copyStyle && ctrls.copyStyle.value ? ctrls.copyStyle.value : 'standard';
+        var styleVal = ctrls.copyStyle && ctrls.copyStyle.value ? ctrls.copyStyle.value : 'lightPinkHong';
         var hongMode = styleVal === 'hong' || styleVal === 'trace';
         var lightPinkHongMode = styleVal === 'lightPinkHong';
 
