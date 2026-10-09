@@ -1,6 +1,7 @@
 /**
  * 悅讀靜態站：POST / — AI 閱讀題；POST /chat — DeepSeek 對話助教。
  * 尋姓・鑄徽：POST /origin — 姓氏來源短句（≤50 字）。
+ * 入史・燕市：POST /rushi/judge — 翻譯意思是否達到八成；POST /rushi/ask — 只解釋一個字詞。
  * Secret：DEEPSEEK_API_KEY
  */
 
@@ -68,6 +69,20 @@ async function handleRequest(request, env) {
     return handleOriginRequest(request, env);
   }
 
+  if (path === "/rushi/judge") {
+    if (request.method !== "POST") {
+      return jsonErr(request, "Method Not Allowed", 405);
+    }
+    return handleRushiJudge(request, env);
+  }
+
+  if (path === "/rushi/ask") {
+    if (request.method !== "POST") {
+      return jsonErr(request, "Method Not Allowed", 405);
+    }
+    return handleRushiAsk(request, env);
+  }
+
   if (path === "/" || path === "") {
     if (request.method !== "POST") {
       return jsonErr(request, "Method Not Allowed", 405);
@@ -75,7 +90,7 @@ async function handleRequest(request, env) {
     return handleQuizRequest(request, env);
   }
 
-  return jsonErr(request, "Not Found：請使用 POST /（閱讀題）、POST /chat（對話）或 POST /origin（姓氏來源）", 404);
+  return jsonErr(request, "Not Found：請使用 POST /（閱讀題）、POST /chat（對話）、POST /origin（姓氏來源）、POST /rushi/judge 或 POST /rushi/ask", 404);
 }
 
 function clipChars(text, max) {
@@ -268,6 +283,81 @@ async function chatDeepSeekConversation(env, systemPrompt, messages) {
   const text = extractChatCompletionText(data);
   if (!text) throw new Error("DeepSeek 回傳為空");
   return text;
+}
+
+async function handleRushiJudge(request, env) {
+  if (!env.DEEPSEEK_API_KEY) {
+    return jsonErr(request, "Worker 未設定 DEEPSEEK_API_KEY", 503);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch (_) {
+    return jsonErr(request, "Invalid JSON", 400);
+  }
+  const original = clipPlain(body.original, 80);
+  const reference = clipPlain(body.reference, 120);
+  const answer = clipPlain(body.answer, 200);
+  if (!original || !answer) return jsonErr(request, "需要原文和譯文", 400);
+
+  const systemPrompt =
+    "你評閱中學生用白話翻譯的一句《史記》。只看意思是否重合，不要求用詞相同。score 是 0 到 100 的整數，80 分以上表示意思大致正確。reply 用繁體中文，不超過 36 個字，口吻像酒桌上的宋意。通過時只說意思對了，不要寫出標準譯文。不通過時只點出還沒譯到的一個要點，禁止寫出整句正確翻譯。只回 JSON：{\"score\":80,\"reply\":\"...\"}";
+  try {
+    const raw = await chatDeepSeekShort(
+      env,
+      systemPrompt,
+      `原文：${original}\n參考譯法（不要複述）：${reference}\n學生譯文：${answer}`
+    );
+    const parsed = extractJson(raw);
+    let score = Number(parsed.score);
+    if (!Number.isFinite(score)) score = 0;
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    const reply = clipChars(typeof parsed.reply === "string" ? parsed.reply : "", 36);
+    return jsonOk(request, {
+      score,
+      ok: score >= 80,
+      reply: reply || (score >= 80 ? "這句意思對上了。" : "還差一點，再看一個詞。"),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return jsonErr(request, msg, 502);
+  }
+}
+
+async function handleRushiAsk(request, env) {
+  if (!env.DEEPSEEK_API_KEY) {
+    return jsonErr(request, "Worker 未設定 DEEPSEEK_API_KEY", 503);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch (_) {
+    return jsonErr(request, "Invalid JSON", 400);
+  }
+  const original = clipPlain(body.original, 80);
+  const question = clipPlain(body.question, 24);
+  if (!question) return jsonErr(request, "要問一個字或一個詞", 400);
+  if (/整句|全句|翻譯這|幫我譯|譯出來|這句話/.test(question)) {
+    return jsonOk(request, { answer: "你問一個字就好，整句我不相。" });
+  }
+
+  const systemPrompt =
+    "你是《燕丹子》裡的宋意，坐在燕市酒桌旁。學生翻譯《史記》時只問你一個字或一個詞。只解釋那個字詞在給定原文裡的意思，必要時帶一個讀音。不超過 36 個字。繁體中文，口語。不要寫出整句白話譯文。如果對方要你翻譯整句，只回答：你問一個字就好，整句我不相。只輸出回答本身。";
+  try {
+    const raw = await chatDeepSeekShort(
+      env,
+      systemPrompt,
+      `原文：${original || "（沒有給句子）"}\n學生問：${question}`
+    );
+    return jsonOk(request, { answer: clipChars(raw, 36) || "這個字我再想想。" });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return jsonErr(request, msg, 502);
+  }
+}
+
+function clipPlain(value, max) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
 async function handleQuizRequest(request, env) {
