@@ -394,10 +394,7 @@
       state.bubble = { id: "songyi", name: "宋意", text: stayText(false), ask: false };
       return;
     }
-    if (step.type === "map") {
-      state.bubble = { id: "songyi", name: "宋意", text: "再點一次那座城。", ask: false };
-      return;
-    }
+    if (step.type === "map") return;
     if (step.type === "crowd") {
       state.bubble = { id: "songyi", name: "宋意", text: "人還在市上。你點點他們。", ask: false };
     }
@@ -846,14 +843,16 @@
   function renderMap(step) {
     var frame = el("div", "frame");
     var board = el("div", "board");
-    board.appendChild(el("p", "map-copy", "秦往東。衛的位子，要自己點。"));
+    board.appendChild(el("p", "map-copy", state.mapMoved
+      ? "衛被遷到野王。你出來的那座城，已經不在原來的位子。"
+      : "點左邊的「衛」。秦往東，把衛元君的親族遷去野王。"));
     var road = el("div", "road");
     var pin = el("button", "pin" + (state.mapMoved ? " is-moved" : ""), state.mapMoved ? "野王" : "衛");
     pin.type = "button";
     pin.disabled = state.mapMoved;
+    pin.setAttribute("aria-label", state.mapMoved ? "衛已經遷到野王" : "點衛，看這座城被遷去哪裡");
     pin.addEventListener("click", function () {
       state.mapMoved = true;
-      state.bubble = { id: "songyi", name: "宋意", text: "連那個不用你的地方，也不在原來的位子了。你後來才到燕。", ask: false };
       save();
       render();
     });
@@ -861,24 +860,12 @@
     if (!state.mapMoved) road.appendChild(el("span", "dest", "野王"));
     board.appendChild(road);
     frame.appendChild(board);
-    var songyi = el("button", "spot" + (state.bubble && state.bubble.id === "songyi" ? " is-speaking" : ""));
-    songyi.type = "button";
-    songyi.style.left = "8%";
-    songyi.style.top = "58%";
-    songyi.style.width = "22%";
-    songyi.style.height = "28%";
-    songyi.setAttribute("aria-label", "點宋意");
-    songyi.appendChild(el("span", null, "宋意"));
-    songyi.addEventListener("click", function () {
-      state.bubble = { id: "songyi", name: "宋意", text: state.askAnswer || "想問哪個字？", ask: true };
-      render();
-    });
-    frame.appendChild(songyi);
-    placeBubble(frame, [{ id: "songyi", x: 8, y: 58, w: 22, h: 28 }], step);
     stage.appendChild(frame);
-    stage.appendChild(originalCard("秦伐魏，置東郡，徙衛元君之支屬於野王。"));
+    var card = originalCard("秦伐魏，置東郡，徙衛元君之支屬於野王。");
+    card.appendChild(el("p", "gloss", "秦打下魏國東邊，設置東郡，把衛元君的旁支親屬遷到野王。荊軻出來的衛，從此不是回得去的那座城。"));
+    stage.appendChild(card);
     var actions = el("div", "actions");
-    var next = button("城已經不在了", "primary", function () { go(step.next); });
+    var next = button(state.mapMoved ? "去榆次" : "先點地圖上的衛", "primary", function () { go(step.next); });
     next.disabled = !state.mapMoved;
     actions.appendChild(next);
     stage.appendChild(actions);

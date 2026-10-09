@@ -371,9 +371,10 @@ textarea:focus-visible,
 
 .road {
   position: absolute;
+  z-index: 2;
   left: 8%;
   right: 8%;
-  top: 58%;
+  top: 62%;
   height: 14px;
   border-radius: 999px;
   background: #4a3022;
@@ -407,11 +408,17 @@ textarea:focus-visible,
 .map-copy {
   position: absolute;
   left: 8%;
-  top: 16%;
+  right: 8%;
+  top: 12%;
   margin: 0;
   color: var(--ink);
   font-family: var(--serif);
   font-size: 1.15rem;
+}
+
+.gloss {
+  margin: 12px 0 0;
+  color: var(--ink-soft, #5c4636);
 }
 
 .sheet {
