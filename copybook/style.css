@@ -706,6 +706,27 @@ button:hover {
     z-index: 0;
 }
 
+/* 字帖格子整塊壓在背景圖上面，底圖只留在頁面留白，不透進格子 */
+.preview--bg-sheet .grid,
+.preview--bg-upload .grid,
+.preview--bg-xuan .grid,
+.preview--bg-letter .grid,
+.preview--bg-scroll .grid,
+.preview--bg-redLines .grid {
+    position: relative;
+    z-index: 2;
+    background-color: #fff;
+}
+
+.preview--bg-sheet .cell,
+.preview--bg-upload .cell,
+.preview--bg-xuan .cell,
+.preview--bg-letter .cell,
+.preview--bg-scroll .cell,
+.preview--bg-redLines .cell {
+    background: #fff;
+}
+
 /* 古風紙底須寫在 .page 之後，否則 background 簡寫會蓋掉 background-image */
 .preview--bg-xuan .page {
     background-color: #f4ead8;

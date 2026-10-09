@@ -618,7 +618,7 @@
                 ? rawBg
                 : 'none';
         var useSheetBg = !!(uploadedBgUrl || photoBgUrl);
-        var cellBgVal = photoBgUrl ? 'paper' : (uploadedBgUrl ? 'translucent' : 'white');
+        var cellBgVal = 'white';
         preview.className =
             'preview preview--' +
             psize +
