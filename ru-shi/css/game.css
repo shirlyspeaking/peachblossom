@@ -346,6 +346,11 @@ textarea:focus-visible,
 .actions .ghost:hover,
 .actions .choice:hover { background: rgba(243, 230, 208, 0.08); }
 
+.actions .ghost:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .paper .texty { color: var(--ink); }
 
 .sheet .who { color: var(--lantern); }

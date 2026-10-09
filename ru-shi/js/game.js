@@ -61,12 +61,36 @@
       askBusy: false,
       feedback: null,
       helpOpen: false,
-      shouldFocus: false
+      shouldFocus: false,
+      trail: []
     };
   }
 
+  var PREV = {
+    pro2: "pro1",
+    pro3: "pro2",
+    pro4: "pro3",
+    wake: "pro4",
+    wei: "wake",
+    court: "wei",
+    map: "court",
+    yuci: "map",
+    "yuci-choice": "yuci",
+    "yuci-stay": "yuci-choice",
+    "yuci-leave": "yuci-choice",
+    handan: "yuci-leave",
+    "handan-feel": "handan",
+    joy: "handan-feel",
+    weep: "joy",
+    crowd: "weep",
+    deep: "crowd",
+    tian: "deep",
+    end: "tian"
+  };
+
   var state = fresh();
   var lastSrc = "";
+  var scrollTopNext = false;
   var placeNode = document.getElementById("place");
   var progressNode = document.getElementById("progress");
   var pipsNode = document.getElementById("pips");
@@ -357,10 +381,19 @@
   }
 
   function go(id) {
-    state.step = id;
-    state.line = 0;
+    applyPosition({ step: id, line: 0 }, true);
+  }
+
+  function applyPosition(pos, record) {
+    if (record && state.step && STEPS[state.step]) {
+      if (!state.trail) state.trail = [];
+      state.trail.push({ step: state.step, line: state.line || 0, draft: state.draft || "" });
+      if (state.trail.length > 60) state.trail.shift();
+    }
+    state.step = pos.step;
+    state.line = pos.line || 0;
     state.mode = "ask";
-    state.draft = "";
+    state.draft = pos.draft || "";
     state.aside = null;
     state.bubble = null;
     state.askDraft = "";
@@ -368,10 +401,52 @@
     state.feedback = null;
     state.helpOpen = false;
     state.shouldFocus = false;
-    primeBubble(STEPS[id]);
+    var step = STEPS[state.step];
+    if (step && step.type === "translate" && state.answers[step.puzzle]) {
+      state.mode = "ok";
+      state.draft = state.answers[step.puzzle];
+    }
+    if (step && step.type === "talk") {
+      var spoken = step.lines[state.line] || step.lines[0];
+      state.bubble = {
+        id: spoken.speaker === "史記" ? "narrator" : idByName(spoken.speaker),
+        name: spoken.speaker,
+        text: spoken.text,
+        ask: false
+      };
+    } else if (state.mode === "ok" && step && step.ok) {
+      state.bubble = { id: idByName(step.ok[0]), name: step.ok[0], text: step.ok[1], ask: false };
+    } else {
+      primeBubble(step);
+    }
     save();
+    scrollTopNext = true;
     render();
-    window.scrollTo(0, 0);
+  }
+
+  function takePrev() {
+    if (state.trail && state.trail.length) return state.trail.pop();
+    if ((state.line || 0) > 0) return { step: state.step, line: state.line - 1, draft: state.draft || "" };
+    if (PREV[state.step]) return { step: PREV[state.step], line: 0 };
+    return { step: "title", line: 0 };
+  }
+
+  function back() {
+    var prev = takePrev();
+    if (!prev || prev.step === "title" || !STEPS[prev.step]) {
+      home();
+      return;
+    }
+    applyPosition(prev, false);
+  }
+
+  function home() {
+    if (state.step !== "title") save();
+    state.step = "title";
+    state.bubble = null;
+    lastSrc = "";
+    scrollTopNext = true;
+    render();
   }
 
   function primeBubble(step) {
@@ -382,7 +457,7 @@
       return;
     }
     if (step.type === "talk" && step.lines && step.lines[0]) {
-      var line = step.lines[0];
+      var line = step.lines[state.line] || step.lines[0];
       state.bubble = { id: line.speaker === "史記" ? "narrator" : idByName(line.speaker), name: line.speaker, text: line.text, ask: false };
       return;
     }
@@ -453,8 +528,8 @@
     Object.keys(state).forEach(function (key) { delete state[key]; });
     Object.assign(state, next);
     lastSrc = "";
+    scrollTopNext = true;
     render();
-    window.scrollTo(0, 0);
   }
 
   function leadOf(step) {
@@ -467,7 +542,8 @@
 
   function render() {
     var step = STEPS[state.step] || STEPS.title;
-    var scroll = window.scrollY;
+    var scroll = scrollTopNext ? 0 : window.scrollY;
+    scrollTopNext = false;
     placeNode.textContent = step.place || "";
     document.querySelector(".top").hidden = step.type === "title";
     renderPips(step);
@@ -480,7 +556,8 @@
     else if (step.type === "map") renderMap(step);
     else if (step.type === "crowd") renderCrowd(step);
     else if (step.type === "end") renderEnd();
-    if (state.step !== "title") window.scrollTo(0, scroll);
+    if (step.type !== "title") mountNav();
+    window.scrollTo(0, scroll);
     var box = stage.querySelector("textarea");
     if (box && state.shouldFocus) {
       box.focus();
@@ -488,6 +565,18 @@
       box.setSelectionRange(end, end);
       state.shouldFocus = false;
     }
+  }
+
+  function mountNav() {
+    var actions = stage.querySelector(".actions");
+    if (!actions) {
+      actions = el("div", "actions");
+      stage.appendChild(actions);
+    }
+    var prev = button("上一頁", "ghost", back);
+    var start = button("回到開頭", "ghost", home);
+    actions.insertBefore(start, actions.firstChild);
+    actions.insertBefore(prev, actions.firstChild);
   }
 
   function renderPips(step) {
@@ -657,16 +746,7 @@
     var last = state.line >= step.lines.length - 1;
     actions.appendChild(button(last ? (step.doneLabel || "繼續") : "下一句", "primary", function () {
       if (!last) {
-        state.line += 1;
-        var nextLine = step.lines[state.line];
-        state.bubble = {
-          id: nextLine.speaker === "史記" ? "narrator" : idByName(nextLine.speaker),
-          name: nextLine.speaker,
-          text: nextLine.text,
-          ask: false
-        };
-        save();
-        render();
+        applyPosition({ step: state.step, line: state.line + 1 }, true);
         return;
       }
       go(step.next);
