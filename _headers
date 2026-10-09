@@ -17,6 +17,18 @@
 /copybook/style.css
   Cache-Control: no-cache, must-revalidate
 
+/ru-shi/
+  Cache-Control: no-cache, must-revalidate
+
+/ru-shi/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/ru-shi/js/*
+  Cache-Control: no-cache, must-revalidate
+
+/ru-shi/css/*
+  Cache-Control: no-cache, must-revalidate
+
 /copybook/backgrounds/*
   Cache-Control: public, max-age=0, must-revalidate
 
