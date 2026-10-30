@@ -609,14 +609,7 @@
         preview.innerHTML = '';
         var rawBg = ctrls.pageBackground && ctrls.pageBackground.value ? ctrls.pageBackground.value : 'none';
         var photoBgUrl = PHOTO_BGS[rawBg] || '';
-        var bgVal =
-            rawBg === 'xuan' ||
-            rawBg === 'letter' ||
-            rawBg === 'scroll' ||
-            rawBg === 'redLines' ||
-            PHOTO_BGS[rawBg]
-                ? rawBg
-                : 'none';
+        var bgVal = PHOTO_BGS[rawBg] ? rawBg : 'none';
         var useSheetBg = !!(uploadedBgUrl || photoBgUrl);
         var cellBgVal = 'white';
         preview.className =
