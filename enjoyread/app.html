@@ -459,6 +459,7 @@
     <div class="container">
         <div id="feedHeader">
             <h1 class="page-title" style="margin-bottom: 8px;">最新 · 最有趣的文章</h1>
+            <p class="page-desc" id="feedStatus">正在整理最近一週的文章…</p>
             <div class="voice-controls">
                 <label for="mandarinVoice">聲音選擇</label>
                 <select id="mandarinVoice" aria-label="聲音選擇">
@@ -487,7 +488,6 @@
     </div>
 
     <script>
-        const SUMMARY_LENGTH = 150; // 約 150 字
         const READ_HISTORY_KEY = 'enjoyread-read-history';
         /** 滾動 7 天內已在列表出現過的文章 key；按「更新」時會排除。舊鍵 enjoyread-feed-shown-week-v1 已不再讀寫。 */
         const FEED_SHOWN_7D_KEY = 'enjoyread-feed-shown-7d-v1';
@@ -600,105 +600,11 @@
             }).join('') + '<p style="text-align:center"><button type="button" class="clear-history-btn" onclick="clearReadHistory()">清空歷史</button></p>';
         }
 
-        /**
-         * RSS 來源（可再自行增刪）。建議：挑「有全文摘要、更新頻繁、HTTPS」的 feed；
-         * 教育向可加：科學人、親子天下、國語日報、公共電視、各縣市教育局公告 RSS（若有）。
-         * 若某來源經 CORS 代理失敗，可註解掉該列或換成該站其他分類 feed。
-         */
-        const RSS_SOURCES = [
-            { name: '泛科學', url: 'https://pansci.asia/feed/', desc: '科學、醫療、生活科技' },
-            { name: '科技新報', url: 'https://technews.tw/feed', desc: '科技產業動態' },
-            { name: '環境資訊中心', url: 'https://e-info.org.tw/feed', desc: '環境與生態' },
-            { name: '三聯生活周刊', url: 'http://app.lifeweek.com.cn/rss.php?catid=1', desc: '文化、生活、深度報導' },
-            { name: '運動去', url: 'https://feeds.feedburner.com/go-sport', desc: '運動健身、體育資訊' },
-            { name: '運動視界', url: 'https://www.sportsv.net/feed', desc: '運動賽事、體育評論' },
-            { name: '台視娛樂', url: 'https://www.ttv.com.tw/rss/RSSHandler.ashx?d=news&t=F', desc: '娛樂新聞' },
-            { name: '風傳媒', url: 'https://www.storm.mg/feed', desc: '時事、娛樂、生活' },
-            { name: '上下游 NewsMarket', url: 'https://www.newsmarket.tw/feed', desc: '農食、環境、社會' },
-            { name: '報導者', url: 'https://www.twreporter.org/rss/category/post_rss.xml', desc: '深度專題' },
-            { name: '天下雜誌', url: 'https://www.cw.com.tw/rss', desc: '財經與趨勢' },
-            { name: '聯合報', url: 'https://udn.com/rssfeed/news/1', desc: '綜合新聞' },
-            { name: '關鍵評論網', url: 'https://www.thenewslens.com/rss/main/posts/rss', desc: '觀點與國際' }
-        ];
+        /** 站內 API：由 Cloudflare Pages Function 在伺服器抓 RSS，只回最近 7 天。 */
+        const FEED_API_PATH = '/api/enjoyread-feed';
+        const FEED_CACHE_KEY = 'enjoyread-feed-cache-v2';
 
-        const CORS_PROXIES = [
-            'https://corsproxy.io/?',
-            'https://api.allorigins.win/raw?url='
-        ];
-
-        const FALLBACK_ARTICLES = [
-            { title: '生成式 AI 如何重塑創作與學習', source: '科技新報', summary: 'ChatGPT、Midjourney 等工具正改變我們創作與學習的方式。學生可用 AI 輔助寫作與研究，但如何分辨 AI 產出與原創內容成為新課題。教育界思考如何將 AI 融入教學，同時培養批判思考能力。', link: 'https://technews.tw/', date: '' },
-            { title: '巴黎奧運之後：運動員的下一站', source: '運動視界', summary: '奧運落幕後，選手們如何規劃職業生涯？有人轉戰職業聯賽，有人投入教練或體育行政。運動員的轉型之路充滿挑戰，也需要社會支持系統的協助，讓他們的專業得以延續。', link: 'https://www.sportsv.net/', date: '' },
-            { title: '慢生活：在快節奏時代找回自己的步調', source: '三聯生活周刊', summary: '現代人總在趕路，慢下來成了一種奢侈。三聯生活周刊探討慢食、慢旅行、慢閱讀的意義。放慢腳步不是偷懶，而是更清醒地感受當下，在效率至上的時代找回生活的質感。', link: 'https://www.lifeweek.com.cn/', date: '' },
-            { title: '電動車時代來臨：你準備好了嗎？', source: '泛科學', summary: '各國紛紛訂出燃油車退場時程，電動車成為未來趨勢。充電基礎設施、電池技術、續航力與價格，是消費者最關心的議題。了解電動車的優缺點，有助於做出適合自己的選擇。', link: 'https://pansci.asia/', date: '' },
-            { title: '串流大戰：你訂閱了幾個平台？', source: '風傳媒', summary: 'Netflix、Disney+、愛奇藝、KKTV……串流平台百花齊放，訂閱費加總可能比有線電視還貴。如何聰明選擇、避免訂閱疲勞？分享帳號的爭議也引發討論，串流生態正在重新洗牌。', link: 'https://www.storm.mg/', date: '' },
-            { title: '青少年心理健康：我們能做些什麼', source: '環境資訊中心', summary: '學業壓力、人際關係、社群媒體，都可能影響青少年的心理健康。傾聽、陪伴、減少污名化是關鍵。學校與家庭如何建立支持系統？及早發現、適時求助，每個人都能成為他人的光。', link: 'https://e-info.org.tw/', date: '' },
-            { title: '路跑熱潮：從休閒到競技的跑步文化', source: '運動去', summary: '台灣路跑賽事一年超過數百場，從休閒跑者到菁英選手各有舞台。跑步不只強身，更形成社群與文化。如何避免運動傷害、選擇適合的賽事？跑出健康也跑出樂趣。', link: 'https://go-sport.tw/', date: '' },
-            { title: '韓流、日流與華語娛樂的共舞', source: '台視娛樂', summary: 'K-pop、日劇、華語影視在全球市場交會。跨國合作、IP 改編、串流平台推波助瀾，娛樂產業的疆界越來越模糊。觀眾的選擇更多元，創作者也迎來新的機會與挑戰。', link: 'https://www.ttv.com.tw/', date: '' }
-        ];
-
-        function shuffleFallback() {
-            const arr = [...FALLBACK_ARTICLES];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr.slice(0, 15);
-        }
-
-        function stripHtml(html) {
-            const div = document.createElement('div');
-            div.innerHTML = html || '';
-            return div.textContent || div.innerText || '';
-        }
-
-        function createSummary(text, maxLen) {
-            const clean = stripHtml(text).replace(/\s+/g, ' ').trim();
-            if (clean.length <= maxLen) return clean;
-            let cut = clean.slice(0, maxLen);
-            const lastPunct = cut.search(/[。！？]$/);
-            if (lastPunct === -1) {
-                const lastComma = cut.lastIndexOf('，');
-                if (lastComma > maxLen * 0.5) cut = cut.slice(0, lastComma + 1);
-                else cut = cut + '…';
-            }
-            return cut;
-        }
-
-        /** 從 RSS item / Atom entry 取出單篇文章網址（避免選到 rel=self 或只連到網站首頁） */
-        function getItemPermalink(el) {
-            const links = el.querySelectorAll('link');
-            for (let j = 0; j < links.length; j++) {
-                const node = links[j];
-                let href = (node.getAttribute('href') || '').trim();
-                if (!href) href = (node.textContent || '').trim();
-                if (!href || !/^https?:\/\//i.test(href)) continue;
-                const rel = (node.getAttribute('rel') || '').toLowerCase();
-                const type = (node.getAttribute('type') || '').toLowerCase();
-                if (rel === 'self' || rel === 'enclosure' || rel === 'replies') continue;
-                if (type === 'application/atom+xml' || type === 'application/rss+xml') continue;
-                if (rel === 'alternate' || rel === 'edit' || rel === '') {
-                    if (!type || type.includes('html') || type === '') return href;
-                }
-            }
-            const rssLink = el.querySelector('link');
-            if (rssLink) {
-                const href = (rssLink.getAttribute('href') || '').trim();
-                if (href && /^https?:\/\//i.test(href)) return href;
-                const txt = (rssLink.textContent || '').trim();
-                if (/^https?:\/\//i.test(txt)) return txt;
-            }
-            const guid = el.querySelector('guid');
-            if (guid) {
-                const g = (guid.textContent || '').trim();
-                if (/^https?:\/\//i.test(g)) return g;
-            }
-            return '#';
-        }
-
-        const ITEMS_PER_FEED = 14;
-
-        /** 滾動 7 天：發布時間在「現在往前 7×24 小時」內（本地時間） */
+        /** 滾動 7 天：發布時間在「現在往前 7×24 小時」內 */
         function getRolling7DaysWindowMs() {
             const nowMs = Date.now();
             const startMs = nowMs - 7 * 24 * 60 * 60 * 1000;
@@ -740,10 +646,6 @@
             saveFeedShown7d([...set]);
         }
 
-        function wrapFallbackList(list) {
-            return list.map((item) => ({ ...item, _fromFallback: true }));
-        }
-
         function parsePubDateToMs(dateStr) {
             if (!dateStr || !String(dateStr).trim()) return NaN;
             const t = Date.parse(String(dateStr).trim());
@@ -763,120 +665,112 @@
             return a;
         }
 
-        function parseRssXml(xmlText) {
-            const items = [];
+        function feedApiUrl() {
             try {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(xmlText, 'text/xml');
-                let entries = doc.querySelectorAll('item');
-                if (entries.length === 0) entries = doc.querySelectorAll('entry');
-                entries.forEach((el, i) => {
-                    if (i >= ITEMS_PER_FEED) return;
-                    const title = el.querySelector('title')?.textContent?.trim() || '';
-                    const link = getItemPermalink(el);
-                    const desc = el.querySelector('description')?.textContent?.trim()
-                        || el.querySelector('content')?.textContent?.trim()
-                        || el.querySelector('summary')?.textContent?.trim() || '';
-                    const pubDate = el.querySelector('pubDate')?.textContent?.trim()
-                        || el.querySelector('published')?.textContent?.trim()
-                        || el.querySelector('updated')?.textContent?.trim() || '';
-                    const dateMs = parsePubDateToMs(pubDate);
-                    if (title && (desc || title)) {
-                        items.push({
-                            title,
-                            link,
-                            summary: createSummary(desc || title, SUMMARY_LENGTH),
-                            date: pubDate,
-                            dateMs
-                        });
-                    }
-                });
-            } catch (e) { console.warn('RSS parse error', e); }
-            return items;
+                if (location.protocol === 'http:' || location.protocol === 'https:') {
+                    return new URL(FEED_API_PATH, location.origin).href;
+                }
+            } catch (e) { /* file:// */ }
+            return '';
         }
 
-        async function fetchRss(source) {
-            const sep = source.url.includes('?') ? '&' : '?';
-            const bustedUrl = source.url + sep + '_nocache=' + Date.now() + '_' + Math.random().toString(36).slice(2);
-            for (const proxy of CORS_PROXIES) {
-                const proxyUrl = proxy + encodeURIComponent(bustedUrl) + (proxy.includes('allorigins') ? '&_=' + Date.now() : '');
-                try {
-                    const ctrl = new AbortController();
-                    const t = setTimeout(() => ctrl.abort(), 12000);
-                    const res = await fetch(proxyUrl, {
-                        signal: ctrl.signal,
-                        cache: 'no-store',
-                        mode: 'cors'
-                    });
-                    clearTimeout(t);
-                    if (!res.ok) continue;
-                    const text = await res.text();
-                    const items = parseRssXml(text);
-                    if (items.length > 0) return items.map(it => ({ ...it, source: source.name }));
-                } catch (e) { continue; }
+        function readFeedCache() {
+            try {
+                const raw = localStorage.getItem(FEED_CACHE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
             }
-            return [];
+        }
+
+        function writeFeedCache(payload) {
+            try {
+                localStorage.setItem(FEED_CACHE_KEY, JSON.stringify(payload));
+            } catch (e) { /* quota */ }
+        }
+
+        function articlesInWindow(list) {
+            const { startMs, nowMs } = getRolling7DaysWindowMs();
+            const upperMs = nowMs + 6 * 60 * 60 * 1000;
+            return (Array.isArray(list) ? list : []).filter((item) => {
+                const dateMs = Number.isFinite(item.dateMs) ? item.dateMs : parsePubDateToMs(item.date);
+                item.dateMs = dateMs;
+                return Number.isFinite(dateMs) && dateMs >= startMs && dateMs <= upperMs && item.title && item.link;
+            });
+        }
+
+        function formatFeedTime(iso) {
+            const t = Date.parse(iso || '');
+            if (!Number.isFinite(t)) return '';
+            return new Date(t).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function updateFeedStatus(text) {
+            const el = document.getElementById('feedStatus');
+            if (el) el.textContent = text;
         }
 
         /**
-         * 從 RSS 取得文章；僅保留發布時間在「現在起往回滾動 7 天」內的項目（本地時間）。
-         * 若 7 天內沒有任何符合筆數，或按「更新」時已無未顯示過的項目，則回傳示範清單（與舊版相同 fallback）。
-         * @param {{ shuffleForRefresh?: boolean, excludeShown?: boolean }} options
+         * 向站內 API 取最近 7 天文章。按「更新」時優先換尚未看過的；
+         * 若這一週剩下的新文章太少，就從同一週裡再換一批，不再改顯示寫死的舊文。
          */
         async function loadArticles(options) {
             const shuffleForRefresh = Boolean(options && options.shuffleForRefresh);
             const excludeShown = Boolean(options && options.excludeShown);
-            const { startMs, nowMs } = getRolling7DaysWindowMs();
-            const upperMs = nowMs + 120000;
-
-            const results = await Promise.all(RSS_SOURCES.map((src) => fetchRss(src)));
-            let all = results.flat();
-            const seenDup = new Set();
-            all = all.filter((item) => {
-                const key = articleStableKey(item);
-                if (seenDup.has(key)) return false;
-                seenDup.add(key);
-                return true;
-            });
-
-            all.forEach((item) => {
-                if (!Number.isFinite(item.dateMs)) {
-                    item.dateMs = parsePubDateToMs(item.date);
+            const url = feedApiUrl();
+            let payload = null;
+            let fromCache = false;
+            if (url) {
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 20000);
+                    const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+                    clearTimeout(timer);
+                    if (res.ok) payload = await res.json();
+                } catch (e) {
+                    console.warn('feed api', e);
                 }
-            });
-
-            all = all.filter(
-                (item) =>
-                    Number.isFinite(item.dateMs) &&
-                    item.dateMs >= startMs &&
-                    item.dateMs <= upperMs
-            );
-
-            if (all.length === 0) {
-                return wrapFallbackList(shuffleFallback());
+            }
+            let all = articlesInWindow(payload && payload.articles);
+            if (all.length) {
+                writeFeedCache({ fetchedAt: payload.fetchedAt || new Date().toISOString(), articles: all });
+            } else {
+                const cached = readFeedCache();
+                all = articlesInWindow(cached && cached.articles);
+                if (all.length) {
+                    fromCache = true;
+                    payload = cached;
+                }
+            }
+            if (!all.length) {
+                return { articles: [], fetchedAt: '', fromCache: false, replaceShown: false, offline: !url };
             }
 
             all.sort((a, b) => (b.dateMs || 0) - (a.dateMs || 0));
-
             pruneFeedShownToPool(all);
 
             let pool = all;
+            let replaceShown = false;
             if (excludeShown) {
                 const shown = new Set(loadFeedShown7d());
-                pool = all.filter((item) => !shown.has(articleStableKey(item)));
-                if (pool.length === 0) {
-                    return wrapFallbackList(shuffleFallback());
+                const unseen = all.filter((item) => !shown.has(articleStableKey(item)));
+                if (unseen.length >= 8) {
+                    pool = unseen;
+                } else {
+                    pool = shuffleArray(all);
+                    replaceShown = true;
                 }
             }
 
-            const limit = 30;
-            if (shuffleForRefresh) {
-                pool = shuffleArray(pool).slice(0, limit);
-            } else {
-                pool = pool.slice(0, limit);
-            }
-
-            return pool;
+            const limit = 24;
+            if (shuffleForRefresh) pool = shuffleArray(pool);
+            return {
+                articles: pool.slice(0, limit),
+                fetchedAt: (payload && payload.fetchedAt) || '',
+                fromCache,
+                replaceShown,
+                offline: false
+            };
         }
 
         function esc(s) {
@@ -1423,26 +1317,38 @@
                 '<div class="loading"><div class="loading-spinner"></div><p>' + msg + '</p></div>';
         }
 
+        function renderFeedError(message) {
+            articles = [];
+            document.getElementById('contentArea').innerHTML =
+                '<div class="history-empty">' + esc(message) + '</div>';
+        }
+
         async function loadAndRenderArticles(loadingMsg, options) {
             if (loadingMsg) showLoadingMessage(loadingMsg);
             try {
-                articles = await loadArticles(options || {});
-                if (!articles || articles.length === 0) {
-                    articles = wrapFallbackList(shuffleFallback());
+                const result = await loadArticles(options || {});
+                articles = result.articles || [];
+                if (!articles.length) {
+                    updateFeedStatus('最近一週的文章暫時抓不到');
+                    renderFeedError(result.offline
+                        ? '請用網站開啟「摸魚」俱樂部，才能載入最近一週的文章。'
+                        : '最近一週的文章暫時抓不到。請稍後再按「更新」。');
+                    return;
                 }
-                const fromFb = articles.some((a) => a._fromFallback === true);
-                articles = articles.map((a) => {
-                    const { _fromFallback, ...rest } = a;
-                    return rest;
-                });
-                if (!fromFb) {
+                if (result.replaceShown) {
+                    saveFeedShown7d(articles.map((a) => articleStableKey(a)));
+                } else {
                     appendFeedShownKeys(articles.map((a) => articleStableKey(a)));
                 }
+                const when = formatFeedTime(result.fetchedAt);
+                updateFeedStatus(result.fromCache
+                    ? '網路暫時不穩，先顯示上次抓到的近一週文章' + (when ? '（' + when + '）' : '')
+                    : '最近 7 天的文章' + (when ? ' · ' + when + ' 更新' : ''));
                 renderArticles(articles);
             } catch (e) {
                 console.warn(e);
-                articles = wrapFallbackList(shuffleFallback()).map(({ _fromFallback, ...r }) => r);
-                renderArticles(articles);
+                updateFeedStatus('最近一週的文章暫時抓不到');
+                renderFeedError('最近一週的文章暫時抓不到。請稍後再按「更新」。');
             }
         }
 
