@@ -556,6 +556,11 @@ textarea {
     line-height: 1.6;
 }
 
+textarea::placeholder {
+    color: #A9A39C;
+    opacity: 1;
+}
+
 input[type="range"] {
     width: 100%;
     margin: 4px 0 0;

@@ -607,7 +607,7 @@
 
     function render() {
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
-        var raw = textInput.value;
+        var raw = textInput.value.trim() ? textInput.value : textInput.placeholder;
         var text = normalizeText(raw);
         var cpl = DEFAULT_CHARS_PER_LINE;
         var lpp = isStrokeMode() ? DEFAULT_STROKE_LINES_PER_PAGE : DEFAULT_LINES_PER_PAGE;
@@ -1362,7 +1362,10 @@
     }
 
     function restoreSettings() {
-        if (textInput && typeof settings.text === 'string') textInput.value = settings.text;
+        if (textInput && typeof settings.text === 'string' &&
+            settings.text.replace(/\r/g, '') !== textInput.placeholder) {
+            textInput.value = settings.text;
+        }
         if (autoStrokeChars && typeof settings.strokeChars === 'string') autoStrokeChars.value = settings.strokeChars;
         setSelectIfValid(fontPreset, settings.font);
         setSelectIfValid(copyStyle, settings.style);
