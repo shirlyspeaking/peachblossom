@@ -42,16 +42,49 @@
     /* ---- 落英 ---- */
     var petalsLayer = document.getElementById('petals');
     var btnPetals = document.getElementById('btnPetals');
-    var PETAL_SVG =
-        '<svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 23C4.6 19.4 1.2 14.6 1.6 9.4 2 4.6 5.6 1.2 8.6 2.6 9.3 3 9.7 3.6 10 4.4 10.3 3.6 10.7 3 11.4 2.6 14.4 1.2 18 4.6 18.4 9.4 18.8 14.6 15.4 19.4 10 23Z"/></svg>';
+    var PETAL_IMG_COUNT = 9;
+    var fallingPetals = [];
+    var petalFrame = 0;
+    var petalLastT = 0;
+    var petalClock = 0;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function rand(min, max) {
         return min + Math.random() * (max - min);
     }
 
+    function petalImg(cls, w) {
+        var img = document.createElement('img');
+        img.className = 'petal ' + cls;
+        img.src = 'petals/petal-' + (1 + Math.floor(Math.random() * PETAL_IMG_COUNT)) + '.webp';
+        img.alt = '';
+        img.draggable = false;
+        img.style.width = w.toFixed(1) + 'px';
+        return img;
+    }
+
+    function resetFallingPetal(p, initial) {
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        // 遠的花瓣小、淡、慢，做出前後層次
+        p.depth = rand(0.55, 1);
+        p.el.style.width = (p.baseW * p.depth).toFixed(1) + 'px';
+        p.el.style.opacity = (0.45 + 0.45 * p.depth).toFixed(2);
+        p.x = rand(-0.05, 1.0) * vw;
+        p.y = initial ? rand(-0.1, 1) * vh : rand(-120, -40);
+        p.fall = rand(22, 42) * p.depth;
+        p.swayAmp = rand(28, 80);
+        p.swayFreq = rand(0.22, 0.42);
+        p.phase = rand(0, Math.PI * 2);
+        p.tiltBase = rand(-40, 40);
+        p.flipFreq = rand(0.25, 0.6);
+        p.flipPhase = rand(0, Math.PI * 2);
+        p.spin = rand(-18, 18);
+        p.drift = 0;
+    }
+
     function buildPetals() {
         if (!petalsLayer || petalsLayer.childElementCount) return;
-        var html = '';
         // 靜態散落在頁面四周，避開中央內容區
         var spots = [
             [3, 18], [6, 46], [2, 72], [8, 88], [12, 8],
@@ -59,27 +92,65 @@
             [30, 96], [62, 97], [48, 3], [76, 5]
         ];
         for (var i = 0; i < spots.length; i++) {
-            html +=
-                '<span class="petal petal--still" style="left:' + spots[i][0] + '%;top:' + spots[i][1] + '%;' +
-                '--size:' + rand(12, 20).toFixed(1) + 'px;--rot:' + Math.round(rand(0, 360)) + 'deg;' +
-                '--alpha:' + rand(0.35, 0.6).toFixed(2) + '">' + PETAL_SVG + '</span>';
+            var still = petalImg('petal--still', rand(13, 22));
+            still.style.left = spots[i][0] + '%';
+            still.style.top = spots[i][1] + '%';
+            still.style.opacity = rand(0.45, 0.75).toFixed(2);
+            still.style.transform = 'rotate(' + Math.round(rand(0, 360)) + 'deg)';
+            petalsLayer.appendChild(still);
         }
-        var falling = 9;
-        for (var f = 0; f < falling; f++) {
-            var dur = rand(12, 20);
-            html +=
-                '<span class="petal petal--fall" style="--x:' + rand(2, 96).toFixed(1) + '%;' +
-                '--size:' + rand(13, 21).toFixed(1) + 'px;--alpha:' + rand(0.4, 0.7).toFixed(2) + ';' +
-                '--dur:' + dur.toFixed(1) + 's;--delay:-' + rand(0, dur).toFixed(1) + 's;' +
-                '--drift:' + Math.round(rand(-80, 120)) + 'px;--spin:' + Math.round(rand(160, 420)) + 'deg">' +
-                '<span class="petal-inner">' + PETAL_SVG + '</span></span>';
+        if (reduceMotion) return;
+        var count = window.innerWidth < 600 ? 7 : 13;
+        for (var f = 0; f < count; f++) {
+            var p = { baseW: rand(18, 30) };
+            p.el = petalImg('petal--fall', p.baseW);
+            resetFallingPetal(p, true);
+            petalsLayer.appendChild(p.el);
+            fallingPetals.push(p);
         }
-        petalsLayer.innerHTML = html;
+    }
+
+    function stepPetals(now) {
+        petalFrame = 0;
+        if (!fallingPetals.length || document.body.classList.contains('petals-off')) return;
+        var dt = petalLastT ? Math.min(0.05, (now - petalLastT) / 1000) : 0;
+        petalLastT = now;
+        if (!document.body.classList.contains('pdf-modal-open')) {
+            petalClock += dt;
+            var t = petalClock;
+            // 全域微風：緩慢變化的陣風，讓花瓣不會整齊同向
+            var wind = 14 * Math.sin(t * 0.13) + 9 * Math.sin(t * 0.37 + 1.3);
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+            for (var i = 0; i < fallingPetals.length; i++) {
+                var p = fallingPetals[i];
+                var ang = t * p.swayFreq * Math.PI * 2 + p.phase;
+                var swing = Math.cos(ang);
+                // 擺到兩側時下落變慢，擺回中間時加速，像落葉一樣蕩著下來
+                p.y += p.fall * (0.45 + 0.75 * Math.abs(swing)) * dt;
+                p.drift += wind * p.depth * dt;
+                var x = p.x + p.drift + p.swayAmp * Math.sin(ang);
+                var tilt = p.tiltBase + 32 * swing + p.spin * t;
+                var flip = 62 * Math.sin(t * p.flipFreq * Math.PI * 2 + p.flipPhase);
+                p.el.style.transform =
+                    'translate3d(' + x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,0) rotate(' +
+                    tilt.toFixed(1) + 'deg) rotateX(' + flip.toFixed(1) + 'deg)';
+                if (p.y > vh + 40 || x < -120 || x > vw + 120) resetFallingPetal(p, false);
+            }
+        }
+        petalFrame = requestAnimationFrame(stepPetals);
+    }
+
+    function startPetals() {
+        if (petalFrame || !fallingPetals.length) return;
+        petalLastT = 0;
+        petalFrame = requestAnimationFrame(stepPetals);
     }
 
     function applyPetals(on) {
         if (on) buildPetals();
         document.body.classList.toggle('petals-off', !on);
+        if (on) startPetals();
         if (btnPetals) btnPetals.setAttribute('aria-pressed', on ? 'true' : 'false');
         settings.petals = on;
     }
