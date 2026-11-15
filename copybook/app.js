@@ -96,7 +96,22 @@
 
     function buildPetals() {
         if (!petalsLayer || petalsLayer.childElementCount) return;
-        // 靜態散落在頁面四周，避開中央內容區
+        if (reduceMotion) {
+            buildStillPetals();
+            return;
+        }
+        var count = window.innerWidth < 600 ? 11 : 20;
+        for (var f = 0; f < count; f++) {
+            var p = { baseW: rand(28, 42) };
+            p.el = petalImg('petal--fall', p.baseW);
+            resetFallingPetal(p, true);
+            petalsLayer.appendChild(p.el);
+            fallingPetals.push(p);
+        }
+    }
+
+    // 系統要求減少動態時，改為靜態散落在頁面四周
+    function buildStillPetals() {
         var spots = [
             [3, 18], [6, 46], [2, 72], [8, 88], [12, 8],
             [94, 14], [97, 38], [91, 62], [96, 84], [88, 94],
@@ -109,15 +124,6 @@
             still.style.opacity = rand(0.45, 0.75).toFixed(2);
             still.style.transform = 'rotate(' + Math.round(rand(0, 360)) + 'deg)';
             petalsLayer.appendChild(still);
-        }
-        if (reduceMotion) return;
-        var count = window.innerWidth < 600 ? 7 : 13;
-        for (var f = 0; f < count; f++) {
-            var p = { baseW: rand(28, 42) };
-            p.el = petalImg('petal--fall', p.baseW);
-            resetFallingPetal(p, true);
-            petalsLayer.appendChild(p.el);
-            fallingPetals.push(p);
         }
     }
 
