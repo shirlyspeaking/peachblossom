@@ -556,6 +556,16 @@ textarea {
     line-height: 1.6;
 }
 
+.content-input {
+    height: 132px;
+    resize: none;
+}
+
+.field-hint {
+    color: var(--primary);
+    font-size: 0.8rem;
+}
+
 textarea::placeholder {
     color: #A9A39C;
     opacity: 1;

@@ -94,9 +94,8 @@
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
-    var btnGenerate = document.getElementById('btnGenerate');
     var autoStrokeChars = document.getElementById('autoStrokeChars');
-    var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
+    var strokeHint = document.getElementById('strokeHint');
     var fontPreset = document.getElementById('fontPreset');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
@@ -461,9 +460,17 @@
     async function buildStrokePathLayoutRows(chars) {
         var blocks = [];
         var totalCells = 0;
+        var missing = [];
+        var results = await Promise.all(chars.map(function (ch) {
+            return fetchHanziWriterData(ch).catch(function () { return null; });
+        }));
         for (var ci = 0; ci < chars.length; ci++) {
             var ch = chars[ci];
-            var data = await fetchHanziWriterData(ch);
+            var data = results[ci];
+            if (!data) {
+                if (missing.indexOf(ch) < 0) missing.push(ch);
+                continue;
+            }
             var strokes = data.strokes;
             var cells = [{ kind: 'ref', ch: ch, total: strokes.length, pathDs: strokes }];
             for (var si = 0; si < strokes.length; si++) {
@@ -490,7 +497,7 @@
             }
         }
 
-        return { rows: rows, cpl: maxCols, charsPerRow: 1 };
+        return { rows: rows, cpl: maxCols, charsPerRow: 1, missing: missing };
     }
 
     function chunkLayoutRows(rows, lpp, padEmpty) {
@@ -515,28 +522,39 @@
         return pages;
     }
 
+    var strokeRequestId = 0;
+    var strokeTimer = null;
+
+    function setStrokeHint(text) {
+        if (!strokeHint) return;
+        strokeHint.textContent = text || '';
+        strokeHint.hidden = !text;
+    }
+
     async function onAutoStrokeFromChars() {
-        var sourceText = '';
-        if (autoStrokeChars && String(autoStrokeChars.value || '').trim()) {
-            sourceText = autoStrokeChars.value;
-        } else if (textInput) {
-            sourceText = textInput.value;
-        }
+        if (!autoStrokeChars) return;
+        var sourceText = autoStrokeChars.value.trim() ? autoStrokeChars.value : autoStrokeChars.placeholder;
         var chars = parseHanziChars(sourceText);
+        var requestId = ++strokeRequestId;
         if (!chars.length) {
-            window.alert('請先輸入至少一個漢字（可在筆順字帖輸入或字帖內容中輸入，多行可用）');
+            strokePathLayout = null;
+            setStrokeHint(autoStrokeChars.value.trim() ? '請輸入漢字' : '');
+            renderNow();
             return;
         }
-        if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = true;
-        try {
-            var layout = await buildStrokePathLayoutRows(chars);
-            strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
-            renderNow();
-        } catch (e) {
-            window.alert('筆畫拆解失敗：' + (e.message || String(e)));
-        } finally {
-            if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.disabled = false;
-        }
+        var layout = await buildStrokePathLayoutRows(chars);
+        if (requestId !== strokeRequestId) return;
+        strokePathLayout = layout.rows.length ? { rows: layout.rows, cpl: layout.cpl } : null;
+        setStrokeHint(layout.missing.length ? '找不到筆順資料：' + layout.missing.join('、') : '');
+        renderNow();
+    }
+
+    function scheduleStrokeBuild() {
+        if (strokeTimer) clearTimeout(strokeTimer);
+        strokeTimer = setTimeout(function () {
+            strokeTimer = null;
+            onAutoStrokeFromChars();
+        }, 500);
     }
 
     /** 保留換行；每個半形空格對應字帖一格（不併格、不刪行尾空格）；Tab 轉為單一空格 */
@@ -1399,11 +1417,12 @@
             saveSettings();
         });
     }
-    if (autoStrokeChars) autoStrokeChars.addEventListener('input', saveSettings);
-    if (btnGenerate) btnGenerate.addEventListener('click', function () {
-        renderNow();
-        closePanelSheet();
-    });
+    if (autoStrokeChars) {
+        autoStrokeChars.addEventListener('input', function () {
+            scheduleStrokeBuild();
+            saveSettings();
+        });
+    }
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', function () { closePdfPreview(); });
     if (pdfPreviewCancel) pdfPreviewCancel.addEventListener('click', function () { closePdfPreview(); });
@@ -1443,11 +1462,6 @@
         }
         if (panel && panel.classList.contains('is-open')) closePanelSheet();
     });
-    if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () {
-        saveSettings();
-        onAutoStrokeFromChars().then(closePanelSheet);
-    });
-
     /* ---- 字帖背景 ---- */
     function selectBg(value) {
         if (value === 'upload' && !uploadedBgUrl) value = 'none';
@@ -1571,8 +1585,7 @@
         currentMode = tab && tab.id === 'tabStroke' ? 'stroke' : 'free';
         if (silent) return;
         saveSettings();
-        if (currentMode === 'stroke' && !strokePathLayout &&
-            autoStrokeChars && parseHanziChars(autoStrokeChars.value).length) {
+        if (currentMode === 'stroke' && !strokePathLayout) {
             onAutoStrokeFromChars();
             return;
         }
@@ -1599,9 +1612,7 @@
     setZoom(currentZoom);
     if (settings.mode === 'stroke') {
         activateMode(document.getElementById('tabStroke'), true);
-        if (autoStrokeChars && parseHanziChars(autoStrokeChars.value).length) {
-            onAutoStrokeFromChars();
-        }
+        onAutoStrokeFromChars();
     }
     renderNow();
     whenBrushFontReady(function () {
