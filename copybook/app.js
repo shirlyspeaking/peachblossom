@@ -70,7 +70,8 @@
         p.depth = rand(0.6, 1);
         p.el.style.width = (p.baseW * p.depth).toFixed(1) + 'px';
         p.el.style.opacity = (0.5 + 0.4 * p.depth).toFixed(2);
-        p.x = rand(-0.05, 1.0) * vw;
+        // 出生位置略偏右，左側設定區的花瓣稍少
+        p.x = (Math.pow(Math.random(), 0.8) * 1.05 - 0.05) * vw;
         p.y = initial ? rand(-0.1, 1) * vh : rand(-140, -50);
         p.t = rand(0, 60);
         p.fall = rand(13, 24) * p.depth;

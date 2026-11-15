@@ -346,10 +346,11 @@ summary:focus-visible {
 
 /* ===== 落英：整頁背景的花瓣層 ===== */
 
+/* 花瓣在設定面板之上、字帖預覽之下 */
 .petals {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     overflow: hidden;
     pointer-events: none;
 }
@@ -376,7 +377,6 @@ body.petals-off .petals {
 
 .layout {
     position: relative;
-    z-index: 1;
     display: grid;
     grid-template-columns: minmax(270px, 310px) minmax(0, 1fr);
     gap: 20px;
@@ -605,6 +605,8 @@ input[type="range"] {
 /* ===== Preview column ===== */
 
 .preview-col {
+    position: relative;
+    z-index: 2;
     min-width: 0;
 }
 
