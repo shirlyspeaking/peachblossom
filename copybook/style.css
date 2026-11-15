@@ -386,8 +386,8 @@ body.petals-off .petals {
 
 .panel {
     position: sticky;
-    top: 16px;
-    max-height: calc(100vh - 32px);
+    top: 12px;
+    max-height: calc(100vh - 24px);
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -397,7 +397,7 @@ body.petals-off .petals {
 }
 
 .panel-section {
-    padding: 16px;
+    padding: 14px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -410,13 +410,13 @@ body.petals-off .petals {
     grid-template-columns: 1fr 1fr;
     gap: 3px;
     padding: 3px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     background: var(--primary-soft);
     border-radius: 8px;
 }
 
 .mode-tab {
-    padding: 8px 6px;
+    padding: 7px 6px;
     border: 1px solid transparent;
     border-radius: 6px;
     color: var(--muted);
@@ -445,7 +445,7 @@ body.petals-off .petals {
 label,
 .field-label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-family: "Noto Serif TC", "Songti TC", serif;
     font-size: 0.92rem;
     font-weight: 500;
@@ -456,7 +456,7 @@ label,
 select,
 textarea {
     width: 100%;
-    padding: 8px 10px;
+    padding: 7px 10px;
     font: inherit;
     font-size: 0.95rem;
     color: var(--ink);
@@ -479,7 +479,7 @@ textarea {
 }
 
 .content-input {
-    height: 108px;
+    height: 82px;
     resize: none;
 }
 
@@ -500,13 +500,13 @@ input[type="range"] {
 }
 
 .settings {
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 1px solid var(--line);
 }
 
 .settings > * + * {
-    margin-top: 14px;
+    margin-top: 10px;
 }
 
 .field-row {
@@ -518,7 +518,7 @@ input[type="range"] {
 .panel-pdf {
     position: sticky;
     bottom: 0;
-    margin-top: 16px;
+    margin-top: 14px;
     padding-top: 2px;
     background: var(--card);
 }
@@ -544,16 +544,16 @@ input[type="range"] {
 
 .bg-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 5px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
 }
 
 .bg-tile {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 3px 3px 4px;
+    gap: 2px;
+    padding: 3px 3px 2px;
     border: 1px solid var(--line);
     border-radius: 5px;
     background: var(--card);
@@ -573,7 +573,7 @@ input[type="range"] {
 .bg-thumb {
     display: block;
     width: 100%;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 3px;
     background: var(--page-surface);
