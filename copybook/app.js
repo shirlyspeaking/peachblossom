@@ -11,8 +11,8 @@
 
     /* ---- Theme Picker ---- */
     var themeChips = document.querySelectorAll('.theme-chip');
-    var THEMES = ['jun', 'ru', 'ding', 'longquan'];
-    var LEGACY_THEMES = { silk: 'jun', qinglv: 'longquan', pink: 'jun', green: 'longquan', blue: 'ru', silver: 'ding' };
+    var THEMES = ['jun', 'ru', 'ding'];
+    var LEGACY_THEMES = { silk: 'jun', longquan: 'ru', qinglv: 'ru', pink: 'jun', green: 'ru', blue: 'ru', silver: 'ding' };
 
     function applyTheme(name) {
         if (LEGACY_THEMES[name]) name = LEGACY_THEMES[name];

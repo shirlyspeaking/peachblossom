@@ -95,20 +95,6 @@ body[data-theme="ding"] {
     --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%2386704E' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%2386704E' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
-body[data-theme="longquan"] {
-    /* 龍泉窯：梅子青、山桃 */
-    --bg: #ECF1EA;
-    --card: #F8FAF6;
-    --page-surface: #FCFDFB;
-    --primary: #4E7D63;
-    --primary-strong: #406951;
-    --primary-soft: #DCE8DE;
-    --ink: #26302A;
-    --muted: #56655A;
-    --line: #C9D7CB;
-    --petal: #EBC9C0;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%234E7D63' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%234E7D63' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
-}
 
 body {
     --seal: #B5473A;
@@ -332,7 +318,6 @@ summary:focus-visible {
 .theme-dot--jun { background: #A64B5A; border-color: #EEDCE0; }
 .theme-dot--ru { background: #5C7C82; border-color: #DAE5E3; }
 .theme-dot--ding { background: #86704E; border-color: #EAE1CE; }
-.theme-dot--longquan { background: #4E7D63; border-color: #DCE8DE; }
 
 .petal-toggle {
     display: inline-flex;
