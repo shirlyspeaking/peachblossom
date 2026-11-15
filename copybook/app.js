@@ -236,12 +236,12 @@
     var STROKE_CELLS_PER_LINE = 12;
     var BRUSH_FONT_STACK = "'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif";
     var PHOTO_BGS = {
-        plum: 'backgrounds/\u6885\u82b1.jpg?v=5',
+        plum: 'backgrounds/\u6885\u82b1.jpg?v=6',
         orchid: 'backgrounds/\u862d\u82b1.jpg?v=5',
         bamboo: 'backgrounds/\u7af9\u5b50.jpg?v=5',
         chrysanthemum: 'backgrounds/\u83ca\u82b1.jpg?v=5',
         peony: 'backgrounds/\u7261\u4e39.jpg?v=5',
-        lotus: 'backgrounds/\u8377\u82b1.jpg?v=6'
+        waterlily: 'backgrounds/\u7761\u84ee.jpg?v=1'
     };
     var preview = document.getElementById('preview');
     var pdfButtons = [document.getElementById('btnPdf'), document.getElementById('btnPdfMobile')].filter(Boolean);
@@ -1498,6 +1498,7 @@
         setSelectIfValid(pageSize, settings.paper);
         var size = parseInt(settings.size, 10);
         if (fontSize && Number.isFinite(size)) fontSize.value = String(Math.max(18, Math.min(72, size)));
+        if (settings.bg === 'lotus') settings.bg = 'waterlily';
         if (settings.bg && PHOTO_BGS[settings.bg]) currentBg = settings.bg;
     }
 
