@@ -568,8 +568,7 @@ input[type="range"] {
     border-top: 1px solid var(--line);
 }
 
-.field + .field,
-.field + .advanced {
+.field + .field {
     margin-top: 16px;
 }
 
@@ -585,20 +584,6 @@ input[type="range"] {
     font-variant-numeric: tabular-nums;
 }
 
-.font-sample {
-    margin-top: 8px;
-    padding: 6px 10px;
-    font-size: 1.5rem;
-    line-height: 1.35;
-    letter-spacing: 0.12em;
-    text-align: center;
-    color: var(--ink);
-    background: var(--page-surface);
-    border: 1px dashed var(--line);
-    border-radius: 6px;
-    overflow: hidden;
-    white-space: nowrap;
-}
 
 /* 背景縮圖 */
 
@@ -678,42 +663,6 @@ input[type="range"] {
 
 .bg-clear[hidden] {
     display: none;
-}
-
-/* 進階設定 */
-
-.advanced {
-    margin-top: 16px;
-    border-top: 1px solid var(--line);
-}
-
-.advanced > summary {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 0 4px;
-    list-style: none;
-    color: var(--primary);
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.advanced > summary::-webkit-details-marker {
-    display: none;
-}
-
-.advanced > summary::before {
-    content: "▸";
-    font-size: 0.8rem;
-    transition: transform 0.2s;
-}
-
-.advanced[open] > summary::before {
-    transform: rotate(90deg);
-}
-
-.advanced[open] > summary {
-    margin-bottom: 10px;
 }
 
 /* ===== Preview column ===== */

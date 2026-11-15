@@ -98,7 +98,6 @@
     var autoStrokeChars = document.getElementById('autoStrokeChars');
     var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
     var fontPreset = document.getElementById('fontPreset');
-    var fontSample = document.getElementById('fontSample');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
@@ -1376,7 +1375,6 @@
     }
 
     function syncFontUi() {
-        if (fontSample && fontPreset) fontSample.style.fontFamily = getFontFamily();
         if (fontSizeValue && fontSize) fontSizeValue.textContent = fontSize.value;
     }
 

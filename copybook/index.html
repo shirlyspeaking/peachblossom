@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
     <link rel="preload" href="fonts/YshiPenShutiTC-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="style.css?v=71">
+    <link rel="stylesheet" href="style.css?v=72">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.4.5/dist/html2canvas-pro.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -78,9 +78,7 @@
                             <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
                             <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
                             <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
-                        </select>
-                        <div class="font-sample" id="fontSample" aria-hidden="true">春眠不覺曉</div>
-                    </div>
+                        </select>                    </div>
 
                     <div class="field">
                         <label for="copyStyle">字帖版本</label>
@@ -128,24 +126,22 @@
                         <button type="button" id="btnBgImageClear" class="btn-text bg-clear" hidden>清除上傳的背景</button>
                     </div>
 
-                    <details class="advanced">
-                        <summary>進階設定</summary>
-                        <div class="field">
-                            <label for="gridType">格線樣式</label>
-                            <select id="gridType">
-                                <option value="tian">田字格</option>
-                                <option value="mi">米字格</option>
-                                <option value="blank">空白格</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="pageSize">紙張方向</label>
-                            <select id="pageSize">
-                                <option value="a4">A4 直式</option>
-                                <option value="a4l">A4 橫式</option>
-                            </select>
-                        </div>
-                    </details>
+                    <div class="field">
+                        <label for="gridType">格線樣式</label>
+                        <select id="gridType">
+                            <option value="tian">田字格</option>
+                            <option value="mi">米字格</option>
+                            <option value="blank">空白格</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="pageSize">紙張方向</label>
+                        <select id="pageSize">
+                            <option value="a4">A4 直式</option>
+                            <option value="a4l">A4 橫式</option>
+                        </select>
+                    </div>
                 </div>
             </section>
         </aside>
@@ -185,6 +181,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=73"></script>
+    <script src="app.js?v=74"></script>
 </body>
 </html>
