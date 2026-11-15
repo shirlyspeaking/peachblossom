@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { flowerImagePath } from '../data/assetPaths'
 import type { PlacedFlower } from '../types'
+import { useDirectManipulate } from '../useDirectManipulate'
+import { ScaleHandle } from './ScaleHandle'
 
 interface FlowerPieceProps {
   flower: PlacedFlower
@@ -11,8 +12,7 @@ interface FlowerPieceProps {
   passive?: boolean
   layerZ?: number
   onSelect: () => void
-  onDragEnd: (dxPercent: number, dyPercent: number) => void
-  onWheelGesture: (deltaRotate: number, deltaScale: number) => void
+  onChange: (patch: Partial<PlacedFlower>) => void
 }
 
 export function FlowerPiece({
@@ -22,12 +22,28 @@ export function FlowerPiece({
   passive = false,
   layerZ,
   onSelect,
-  onDragEnd,
-  onWheelGesture,
+  onChange,
 }: FlowerPieceProps) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null)
   const src = flowerImagePath(flower.species, flower.colorId)
   const broken = brokenSrc === src
+  const gesture = useDirectManipulate({
+    enabled: !passive,
+    canvas,
+    x: flower.x,
+    y: flower.y,
+    scale: flower.scale,
+    minScale: 0.35,
+    maxScale: 2.4,
+    ySign: 1,
+    minX: -8,
+    maxX: 108,
+    minY: -8,
+    maxY: 108,
+    onMove: (x, y) => onChange({ x, y }),
+    onScale: (scale) => onChange({ scale }),
+    onSelect,
+  })
 
   return (
     <div
@@ -42,55 +58,52 @@ export function FlowerPiece({
       }}
     >
       <div className="absolute bottom-0 left-0 -translate-x-1/2">
-      <motion.div
-        drag={!passive}
-        dragMomentum={false}
-        dragElastic={0.04}
-        onPointerDown={(event) => {
-          event.stopPropagation()
-          onSelect()
-        }}
-        onDragEnd={(_, info) => {
-          const rect = canvas?.getBoundingClientRect()
-          if (!rect || rect.width === 0 || rect.height === 0) return
-          onDragEnd(
-            (info.offset.x / rect.width) * 100,
-            (info.offset.y / rect.height) * 100,
-          )
-        }}
-        onWheel={(event) => {
-          if (!selected) return
-          event.preventDefault()
-          event.stopPropagation()
-          const rotateStep = event.altKey ? 0 : event.deltaY * -0.15
-          const scaleStep = event.altKey ? -event.deltaY * 0.0015 : 0
-          onWheelGesture(rotateStep, scaleStep)
-        }}
-        className={[
-          'cursor-grab active:cursor-grabbing',
-          passive ? 'pointer-events-none' : 'pointer-events-auto',
-        ].join(' ')}
-        style={{ transformOrigin: 'center bottom' }}
-        animate={{
-          rotate: flower.rotation,
-          scale: flower.scale,
-        }}
-      >
-        {broken ? null : (
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            onError={() => setBrokenSrc(src)}
-            className={[
-              'block h-[42cqh] w-auto max-w-[64cqw] select-none',
-              selected
-                ? 'drop-shadow-[0_0_8px_rgba(120,78,32,0.85)]'
-                : 'drop-shadow-[0_10px_16px_rgba(44,40,36,0.18)]',
-            ].join(' ')}
-          />
-        )}
-      </motion.div>
+        <div
+          className={[
+            'relative touch-none',
+            passive
+              ? 'pointer-events-none'
+              : 'pointer-events-auto cursor-grab active:cursor-grabbing',
+          ].join(' ')}
+          style={{
+            transform: `rotate(${flower.rotation}deg) scale(${flower.scale})`,
+            transformOrigin: 'center bottom',
+          }}
+          onPointerDown={gesture.onPointerDown}
+          onPointerMove={gesture.onPointerMove}
+          onPointerUp={gesture.onPointerUp}
+          onPointerCancel={gesture.onPointerCancel}
+          onWheel={(event) => {
+            if (passive || !selected) return
+            event.preventDefault()
+            event.stopPropagation()
+            if (event.altKey) {
+              const scale = Math.min(
+                2.4,
+                Math.max(0.35, flower.scale - event.deltaY * 0.0015),
+              )
+              onChange({ scale })
+              return
+            }
+            onChange({ rotation: flower.rotation + event.deltaY * -0.15 })
+          }}
+        >
+          {broken ? null : (
+            <img
+              src={src}
+              alt=""
+              draggable={false}
+              onError={() => setBrokenSrc(src)}
+              className={[
+                'block h-[42cqh] w-auto max-w-[64cqw] select-none',
+                selected
+                  ? 'drop-shadow-[0_0_8px_rgba(120,78,32,0.85)]'
+                  : 'drop-shadow-[0_10px_16px_rgba(44,40,36,0.18)]',
+              ].join(' ')}
+            />
+          )}
+          {selected && !passive ? <ScaleHandle /> : null}
+        </div>
       </div>
     </div>
   )

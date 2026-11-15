@@ -3,16 +3,20 @@ import { CompositionCanvas } from './components/CompositionCanvas'
 import { ControlPanel } from './components/ControlPanel'
 import { FLOWER_BEHIND_VASE_Z, FLOWER_FRONT_Z } from './constants/layers'
 import { getFlower } from './data/flowers'
-import type {
-  MouthPoint,
-  PlacedFlower,
-  RoomId,
-  SpeciesId,
-  VaseId,
+import {
+  DEFAULT_VASE_POSE,
+  type MouthPoint,
+  type PlacedFlower,
+  type RoomId,
+  type SpeciesId,
+  type VaseId,
+  type VasePose,
 } from './types'
 
 export default function App() {
-  const [vaseId, setVaseId] = useState<VaseId>('jurui-xianwen')
+  const [vaseId, setVaseId] = useState<VaseId>('danping-qiuhui')
+  const [vasePose, setVasePose] = useState<VasePose>(DEFAULT_VASE_POSE)
+  const [vaseSelected, setVaseSelected] = useState(false)
   const [room, setRoom] = useState<RoomId>('shufang')
   const [librarySpecies, setLibrarySpecies] = useState<SpeciesId>('peony')
   const [pendingColorId, setPendingColorId] = useState('yaohuang')
@@ -67,6 +71,22 @@ export default function App() {
       },
     ])
     setSelectedId(id)
+    setVaseSelected(false)
+  }
+
+  function selectFlower(id: string) {
+    setSelectedId(id)
+    setVaseSelected(false)
+  }
+
+  function selectVase() {
+    setVaseSelected(true)
+    setSelectedId(null)
+  }
+
+  function deselect() {
+    setSelectedId(null)
+    setVaseSelected(false)
   }
 
   function deleteSelected() {
@@ -99,7 +119,12 @@ export default function App() {
     <div className="flex h-[100dvh] min-h-0 flex-col bg-(--color-zen-paper) font-[family-name:var(--font-serif-sc)] text-(--color-zen-ink) lg:flex-row">
       <ControlPanel
         vaseId={vaseId}
-        onVase={setVaseId}
+        onVase={(id) => {
+          setVaseId(id)
+          setVasePose(DEFAULT_VASE_POSE)
+          setVaseSelected(true)
+          setSelectedId(null)
+        }}
         room={room}
         onRoom={setRoom}
         librarySpecies={librarySpecies}
@@ -123,31 +148,23 @@ export default function App() {
           setFlowers([])
           setSelectedId(null)
         }}
-        rotationDeg={selectedFlower?.rotation ?? 0}
-        scalePct={Math.round((selectedFlower?.scale ?? 1) * 100)}
-        onRotationSlider={(deg) => {
-          if (selectedId) patchFlower(selectedId, { rotation: deg })
-        }}
-        onScaleSlider={(pct) => {
-          if (selectedId) patchFlower(selectedId, { scale: pct / 100 })
-        }}
         canClear={flowers.length > 0}
       />
 
-      <main className="order-1 flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden p-4 lg:order-2 lg:p-6">
-        <header className="shrink-0 space-y-1">
-          <p className="text-xs tracking-[0.35em] text-stone-400">紙上花席</p>
-          <h2 className="text-xl font-medium text-stone-800">插花·無聲之詩</h2>
-        </header>
-
-        <div className="min-h-0 min-w-0 flex-1 overflow-auto pb-2">
+      <main className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-3 lg:order-2 lg:p-5">
+        <div className="min-h-0 min-w-0 flex-1 overflow-auto">
           <CompositionCanvas
             room={room}
             vaseId={vaseId}
+            vasePose={vasePose}
+            vaseSelected={vaseSelected}
             flowers={flowers}
             selectedId={selectedId}
-            onSelectFlower={setSelectedId}
+            onSelectFlower={selectFlower}
+            onDeselect={deselect}
+            onSelectVase={selectVase}
             onUpdateFlower={patchFlower}
+            onVasePose={setVasePose}
             onMouth={onMouth}
           />
         </div>
