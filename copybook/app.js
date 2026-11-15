@@ -11,12 +11,12 @@
 
     /* ---- Theme Picker ---- */
     var themeChips = document.querySelectorAll('.theme-chip');
-    var THEMES = ['silk', 'ru', 'ding', 'qinglv'];
-    var LEGACY_THEMES = { pink: 'silk', green: 'qinglv', blue: 'ru', silver: 'ding' };
+    var THEMES = ['jun', 'ru', 'ding', 'longquan'];
+    var LEGACY_THEMES = { silk: 'jun', qinglv: 'longquan', pink: 'jun', green: 'longquan', blue: 'ru', silver: 'ding' };
 
     function applyTheme(name) {
         if (LEGACY_THEMES[name]) name = LEGACY_THEMES[name];
-        if (THEMES.indexOf(name) < 0) name = 'silk';
+        if (THEMES.indexOf(name) < 0) name = 'jun';
         document.body.setAttribute('data-theme', name);
         themeChips.forEach(function (chip) {
             chip.setAttribute('aria-checked', chip.getAttribute('data-theme') === name ? 'true' : 'false');
@@ -29,7 +29,7 @@
         if (!saved) {
             try { saved = localStorage.getItem('copybook-theme'); } catch (_) {}
         }
-        applyTheme(saved || 'silk');
+        applyTheme(saved || 'jun');
     })();
 
     themeChips.forEach(function (chip) {

@@ -50,19 +50,19 @@
    每組只定義基本色票；衍生的線色由 body 規則以 color-mix 統一計算。 */
 
 body,
-body[data-theme="silk"] {
-    /* 絹素：絹本米白、檀紅 */
-    --bg: #F3EDE2;
-    --card: #FBF8F2;
-    --page-surface: #FDFBF7;
-    --primary: #9C4F49;
-    --primary-strong: #84403B;
-    --primary-soft: #EEDDD6;
-    --ink: #2F2A26;
-    --muted: #6B5D55;
-    --line: #DDD0C0;
-    --petal: #E7B9B4;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%239C4F49' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%239C4F49' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+body[data-theme="jun"] {
+    /* 鈞窯：月白、海棠紅 */
+    --bg: #F1EEF0;
+    --card: #FAF8F9;
+    --page-surface: #FDFCFD;
+    --primary: #A64B5A;
+    --primary-strong: #8C3D4B;
+    --primary-soft: #EEDCE0;
+    --ink: #2E2A2C;
+    --muted: #685C61;
+    --line: #DCD1D5;
+    --petal: #E9B7C0;
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%23A64B5A' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%23A64B5A' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
 body[data-theme="ru"] {
@@ -95,19 +95,19 @@ body[data-theme="ding"] {
     --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%2386704E' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%2386704E' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
-body[data-theme="qinglv"] {
-    /* 青綠：石綠、山桃 */
-    --bg: #EDF0E9;
-    --card: #F9FAF6;
-    --page-surface: #FCFDFA;
-    --primary: #3E6A5D;
-    --primary-strong: #33584D;
-    --primary-soft: #DAE5DD;
-    --ink: #26302C;
-    --muted: #56645D;
-    --line: #CAD6CD;
+body[data-theme="longquan"] {
+    /* 龍泉窯：梅子青、山桃 */
+    --bg: #ECF1EA;
+    --card: #F8FAF6;
+    --page-surface: #FCFDFB;
+    --primary: #4E7D63;
+    --primary-strong: #406951;
+    --primary-soft: #DCE8DE;
+    --ink: #26302A;
+    --muted: #56655A;
+    --line: #C9D7CB;
     --petal: #EBC9C0;
-    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%233E6A5D' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%233E6A5D' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
+    --mi-diag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='0' y1='0' x2='100' y2='100' stroke='%234E7D63' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3Cline x1='100' y1='0' x2='0' y2='100' stroke='%234E7D63' stroke-opacity='0.34' stroke-width='1.2' stroke-dasharray='5 4' fill='none'/%3E%3C/svg%3E");
 }
 
 body {
@@ -329,10 +329,10 @@ summary:focus-visible {
     flex: none;
 }
 
-.theme-dot--silk { background: #9C4F49; border-color: #EEDDD6; }
+.theme-dot--jun { background: #A64B5A; border-color: #EEDCE0; }
 .theme-dot--ru { background: #5C7C82; border-color: #DAE5E3; }
 .theme-dot--ding { background: #86704E; border-color: #EAE1CE; }
-.theme-dot--qinglv { background: #3E6A5D; border-color: #DAE5DD; }
+.theme-dot--longquan { background: #4E7D63; border-color: #DCE8DE; }
 
 .petal-toggle {
     display: inline-flex;
