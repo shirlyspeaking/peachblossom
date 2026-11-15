@@ -67,19 +67,30 @@
         var vw = window.innerWidth;
         var vh = window.innerHeight;
         // 遠的花瓣小、淡、慢，做出前後層次
-        p.depth = rand(0.55, 1);
+        p.depth = rand(0.6, 1);
         p.el.style.width = (p.baseW * p.depth).toFixed(1) + 'px';
-        p.el.style.opacity = (0.45 + 0.45 * p.depth).toFixed(2);
+        p.el.style.opacity = (0.5 + 0.4 * p.depth).toFixed(2);
         p.x = rand(-0.05, 1.0) * vw;
-        p.y = initial ? rand(-0.1, 1) * vh : rand(-120, -40);
-        p.fall = rand(22, 42) * p.depth;
-        p.swayAmp = rand(28, 80);
-        p.swayFreq = rand(0.22, 0.42);
-        p.phase = rand(0, Math.PI * 2);
-        p.tiltBase = rand(-40, 40);
-        p.flipFreq = rand(0.25, 0.6);
+        p.y = initial ? rand(-0.1, 1) * vh : rand(-140, -50);
+        p.t = rand(0, 60);
+        p.fall = rand(13, 24) * p.depth;
+        p.fallVar = rand(0.25, 0.6);
+        p.fallFreq = rand(0.02, 0.06);
+        // 主擺動＋副擺動疊加，頻率比各不相同，路徑不會重複
+        p.amp1 = rand(25, 75);
+        p.freq1 = rand(0.05, 0.11);
+        p.amp2 = rand(6, 26);
+        p.freq2 = p.freq1 * rand(1.6, 3.1);
+        p.ph1 = rand(0, Math.PI * 2);
+        p.ph2 = rand(0, Math.PI * 2);
+        p.bias = rand(-8, 8);
+        p.vx = 0;
+        p.tiltBase = rand(-50, 50);
+        p.tiltAmp = rand(15, 40);
+        p.flipFreq = rand(0.05, 0.16);
+        p.flipAmp = rand(30, 70);
         p.flipPhase = rand(0, Math.PI * 2);
-        p.spin = rand(-18, 18);
+        p.spin = rand(-8, 8);
         p.drift = 0;
     }
 
@@ -92,7 +103,7 @@
             [30, 96], [62, 97], [48, 3], [76, 5]
         ];
         for (var i = 0; i < spots.length; i++) {
-            var still = petalImg('petal--still', rand(13, 22));
+            var still = petalImg('petal--still', rand(20, 32));
             still.style.left = spots[i][0] + '%';
             still.style.top = spots[i][1] + '%';
             still.style.opacity = rand(0.45, 0.75).toFixed(2);
@@ -102,7 +113,7 @@
         if (reduceMotion) return;
         var count = window.innerWidth < 600 ? 7 : 13;
         for (var f = 0; f < count; f++) {
-            var p = { baseW: rand(18, 30) };
+            var p = { baseW: rand(28, 42) };
             p.el = petalImg('petal--fall', p.baseW);
             resetFallingPetal(p, true);
             petalsLayer.appendChild(p.el);
@@ -118,24 +129,29 @@
         if (!document.body.classList.contains('pdf-modal-open')) {
             petalClock += dt;
             var t = petalClock;
-            // 全域微風：緩慢變化的陣風，讓花瓣不會整齊同向
-            var wind = 14 * Math.sin(t * 0.13) + 9 * Math.sin(t * 0.37 + 1.3);
+            // 全域微風：緩慢變化的陣風
+            var wind = 8 * Math.sin(t * 0.07) + 5 * Math.sin(t * 0.19 + 1.3);
             var vw = window.innerWidth;
             var vh = window.innerHeight;
             for (var i = 0; i < fallingPetals.length; i++) {
                 var p = fallingPetals[i];
-                var ang = t * p.swayFreq * Math.PI * 2 + p.phase;
-                var swing = Math.cos(ang);
-                // 擺到兩側時下落變慢，擺回中間時加速，像落葉一樣蕩著下來
-                p.y += p.fall * (0.45 + 0.75 * Math.abs(swing)) * dt;
-                p.drift += wind * p.depth * dt;
-                var x = p.x + p.drift + p.swayAmp * Math.sin(ang);
-                var tilt = p.tiltBase + 32 * swing + p.spin * t;
-                var flip = 62 * Math.sin(t * p.flipFreq * Math.PI * 2 + p.flipPhase);
+                p.t += dt;
+                var a1 = p.t * p.freq1 * Math.PI * 2 + p.ph1;
+                var a2 = p.t * p.freq2 * Math.PI * 2 + p.ph2;
+                var swing = Math.cos(a1);
+                // 擺到兩側時下落變慢、擺回中間時稍快；整體速度也隨時間緩緩起伏
+                var pace = 1 + p.fallVar * Math.sin(p.t * p.fallFreq * Math.PI * 2);
+                p.y += p.fall * pace * (0.5 + 0.7 * Math.abs(swing)) * dt;
+                // 每片各自的小亂流，讓路線不規則
+                p.vx += (rand(-1, 1) * 18 - p.vx * 0.6) * dt;
+                p.drift += (wind * p.depth + p.bias + p.vx) * dt;
+                var x = p.x + p.drift + p.amp1 * Math.sin(a1) + p.amp2 * Math.sin(a2);
+                var tilt = p.tiltBase + p.tiltAmp * swing + p.spin * p.t;
+                var flip = p.flipAmp * Math.sin(p.t * p.flipFreq * Math.PI * 2 + p.flipPhase);
                 p.el.style.transform =
                     'translate3d(' + x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,0) rotate(' +
                     tilt.toFixed(1) + 'deg) rotateX(' + flip.toFixed(1) + 'deg)';
-                if (p.y > vh + 40 || x < -120 || x > vw + 120) resetFallingPetal(p, false);
+                if (p.y > vh + 60 || x < -160 || x > vw + 160) resetFallingPetal(p, false);
             }
         }
         petalFrame = requestAnimationFrame(stepPetals);
