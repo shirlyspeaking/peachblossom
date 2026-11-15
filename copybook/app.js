@@ -240,7 +240,8 @@
         orchid: 'backgrounds/\u862d\u82b1.jpg?v=5',
         bamboo: 'backgrounds/\u7af9\u5b50.jpg?v=5',
         chrysanthemum: 'backgrounds/\u83ca\u82b1.jpg?v=5',
-        peony: 'backgrounds/\u7261\u4e39.jpg?v=5'
+        peony: 'backgrounds/\u7261\u4e39.jpg?v=5',
+        lotus: 'backgrounds/\u8377\u82b1.jpg?v=5'
     };
     var preview = document.getElementById('preview');
     var pdfButtons = [document.getElementById('btnPdf'), document.getElementById('btnPdfMobile')].filter(Boolean);
