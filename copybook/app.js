@@ -75,7 +75,8 @@
         }
         var wrap = previewWrap.getBoundingClientRect();
         var pr = page.getBoundingClientRect();
-        var top = Math.max(0, toolbar ? toolbar.getBoundingClientRect().bottom : wrap.top);
+        var toolbarShown = toolbar && toolbar.offsetParent !== null;
+        var top = Math.max(0, toolbarShown ? toolbar.getBoundingClientRect().bottom : wrap.top);
         var lw = pr.left - wrap.left;
         var rw = wrap.right - pr.right;
         petalZones.L = lw >= 36 ? { left: wrap.left, width: lw, top: top } : null;
@@ -218,7 +219,6 @@
     var pageSize = document.getElementById('pageSize');
     var bgTiles = document.querySelectorAll('.bg-tile');
     var bgUploadThumb = document.getElementById('bgUploadThumb');
-    var pageCountEl = document.getElementById('pageCount');
     var previewWrap = document.getElementById('previewWrap');
     var panel = document.getElementById('panel');
     var panelBackdrop = document.getElementById('panelBackdrop');
@@ -241,7 +241,7 @@
         peony: 'backgrounds/\u7261\u4e39.jpg?v=5'
     };
     var preview = document.getElementById('preview');
-    var btnPdf = document.getElementById('btnPdf');
+    var pdfButtons = [document.getElementById('btnPdf'), document.getElementById('btnPdfMobile')].filter(Boolean);
     var pdfPreviewModal = document.getElementById('pdfPreviewModal');
     var pdfPreviewPages = document.getElementById('pdfPreviewPages');
     var pdfPreviewSub = document.getElementById('pdfPreviewSub');
@@ -912,7 +912,6 @@
             preview.appendChild(pageEl);
         }
 
-        if (pageCountEl) pageCountEl.textContent = '共 ' + pages.length + ' 頁';
         applyZoom();
 
         if (typeof performance !== 'undefined') {
@@ -1409,9 +1408,11 @@
             setStatus('沒有可匯出的內容');
             return;
         }
-        var oldLabel = btnPdf.textContent;
-        btnPdf.disabled = true;
-        btnPdf.textContent = '產生 PDF 中…';
+        var oldLabel = pdfButtons.length ? pdfButtons[0].textContent : '下載 PDF';
+        pdfButtons.forEach(function (btn) {
+            btn.disabled = true;
+            btn.textContent = '產生 PDF 中…';
+        });
         try {
             await yieldUi();
             var blobs = await capturePageElements(pages, 1, 'image/png');
@@ -1447,8 +1448,10 @@
             window.alert('PDF 下載失敗：' + (e.message || String(e)));
             setStatus('PDF 失敗：' + (e.message || String(e)));
         } finally {
-            btnPdf.textContent = oldLabel;
-            btnPdf.disabled = false;
+            pdfButtons.forEach(function (btn) {
+                btn.textContent = oldLabel;
+                btn.disabled = false;
+            });
         }
     }
 
@@ -1523,7 +1526,9 @@
             saveSettings();
         });
     }
-    if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
+    pdfButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () { onPdf(); });
+    });
     if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', function () { closePdfPreview(); });
     if (pdfPreviewCancel) pdfPreviewCancel.addEventListener('click', function () { closePdfPreview(); });
     if (pdfPreviewDownload) {
