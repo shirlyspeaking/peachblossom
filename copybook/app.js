@@ -87,8 +87,8 @@
         var vh = window.innerHeight;
         // 大小混合：小的像在遠處，較淡、較慢；大的像在近處
         var r = Math.random();
-        p.baseW = r < 0.35 ? rand(12, 20) : r < 0.75 ? rand(22, 32) : rand(36, 50);
-        p.depth = 0.55 + 0.45 * (p.baseW - 12) / 38;
+        p.baseW = r < 0.35 ? rand(16, 21) : r < 0.75 ? rand(23, 29) : rand(31, 38);
+        p.depth = 0.6 + 0.4 * (p.baseW - 16) / 22;
         p.el.style.width = p.baseW.toFixed(1) + 'px';
         p.el.style.opacity = (0.5 + 0.4 * p.depth).toFixed(2);
         p.u = rand(0.3, 0.7);
