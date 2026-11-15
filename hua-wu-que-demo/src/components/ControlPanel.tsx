@@ -1,11 +1,6 @@
 import { flowerImagePath } from '../data/assetPaths'
 import { FLOWERS, getFlower } from '../data/flowers'
 import { getVase } from '../data/vases'
-import {
-  FLOWER_BEHIND_VASE_Z,
-  FLOWER_FRONT_Z,
-  VASE_LAYER_Z,
-} from '../constants/layers'
 import type { PlacedFlower, RoomId, SpeciesId, VaseId } from '../types'
 import { ChineseColorSelector } from './ChineseColorSelector'
 import { RoomSelect } from './RoomSelect'
@@ -27,10 +22,6 @@ interface ControlPanelProps {
   onSendBack: () => void
   onDeleteSelected: () => void
   onClear: () => void
-  rotationDeg: number
-  scalePct: number
-  onRotationSlider: (deg: number) => void
-  onScaleSlider: (pct: number) => void
   canClear: boolean
 }
 
@@ -51,17 +42,11 @@ export function ControlPanel(props: ControlPanelProps) {
     onSendBack,
     onDeleteSelected,
     onClear,
-    rotationDeg,
-    scalePct,
-    onRotationSlider,
-    onScaleSlider,
     canClear,
   } = props
 
   const vase = getVase(vaseId)
   const library = getFlower(librarySpecies)
-  const behind =
-    selectedFlower != null && selectedFlower.zIndex < VASE_LAYER_Z
   const named = FLOWERS.filter((flower) => flower.group === 'flower')
   const foliage = FLOWERS.filter((flower) => flower.group === 'foliage')
 
@@ -81,17 +66,14 @@ export function ControlPanel(props: ControlPanelProps) {
           花無缺
         </h1>
         <p className="text-sm leading-relaxed text-stone-500">
-          選一只瓶子，把折枝插進瓶裡。
+          拖動花瓶和花枝。拖右上角，或按住 Alt 再拖，可放大縮小。滾輪轉枝。
         </p>
       </header>
 
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-stone-700">花器</h2>
         <VaseSelect value={vaseId} onChange={onVase} />
-        <p className="text-[11px] leading-relaxed text-stone-500">
-          {vase.painting} · {vase.name}
-        </p>
-        <p className="text-[11px] leading-relaxed text-stone-400">{vase.note}</p>
+        <p className="text-[11px] leading-relaxed text-stone-500">{vase.note}</p>
       </section>
 
       <section className="space-y-2">
@@ -160,7 +142,7 @@ export function ControlPanel(props: ControlPanelProps) {
         </div>
         {!selectedFlower ? (
           <p className="text-xs leading-relaxed text-stone-400">
-            於畫布點選一枝，可改色、轉枝、縮放，或收到瓶後。
+            點一枝，可改色、移到瓶前或瓶後、刪除。
           </p>
         ) : (
           <>
@@ -178,14 +160,14 @@ export function ControlPanel(props: ControlPanelProps) {
                 onClick={onBringFront}
                 className="rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 hover:border-stone-400"
               >
-                移到瓶前 ({FLOWER_FRONT_Z})
+                移到瓶前
               </button>
               <button
                 type="button"
                 onClick={onSendBack}
                 className="rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 hover:border-stone-400"
               >
-                收到瓶後 ({FLOWER_BEHIND_VASE_Z})
+                收到瓶後
               </button>
               <button
                 type="button"
@@ -195,43 +177,47 @@ export function ControlPanel(props: ControlPanelProps) {
                 刪除此枝
               </button>
             </div>
-            <p className="text-[11px] text-stone-400">
-              目前層次：{behind ? '瓶後' : '瓶前'}
-            </p>
-            <label className="flex flex-col gap-1 text-xs text-stone-600">
-              <span className="flex justify-between">
-                <span>仰俯角度</span>
-                <span>{rotationDeg.toFixed(0)}°</span>
-              </span>
-              <input
-                type="range"
-                min={-85}
-                max={85}
-                step={1}
-                value={rotationDeg}
-                onChange={(event) =>
-                  onRotationSlider(Number(event.target.value))
-                }
-                className="accent-stone-800"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-stone-600">
-              <span className="flex justify-between">
-                <span>枝態尺度</span>
-                <span>{scalePct}%</span>
-              </span>
-              <input
-                type="range"
-                min={35}
-                max={240}
-                step={1}
-                value={scalePct}
-                onChange={(event) => onScaleSlider(Number(event.target.value))}
-                className="accent-stone-800"
-              />
-            </label>
           </>
         )}
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium text-stone-700">宋代插花</h2>
+        <div className="aspect-video overflow-hidden rounded-lg border border-stone-200 bg-stone-900">
+          <iframe
+            title="鄧菲：自然美學——宋代的插花風尚"
+            src="https://player.bilibili.com/player.html?bvid=BV1qC4y197CG&page=1&autoplay=0"
+            className="h-full w-full"
+            loading="lazy"
+            allow="fullscreen"
+            allowFullScreen
+          />
+        </div>
+        <p className="text-[11px] leading-relaxed text-stone-500">
+          鄧菲〈自然美學——宋代的插花風尚〉，上海圖書館。講宋人怎麼看花、怎麼插。
+        </p>
+        <ul className="space-y-1 text-[11px] leading-relaxed text-stone-500">
+          <li>
+            <a
+              className="underline-offset-2 hover:text-stone-800 hover:underline"
+              href="https://www.bilibili.com/video/BV1LdQPYkEJD/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              《風雅宋》〈滿插瓶花罷出游〉
+            </a>
+          </li>
+          <li>
+            <a
+              className="underline-offset-2 hover:text-stone-800 hover:underline"
+              href="https://tv.cctv.cn/2019/03/31/VIDEMXy4tzSDRNc8e7pVrZEN190331.shtml"
+              target="_blank"
+              rel="noreferrer"
+            >
+              《我有傳家寶》瓶中插花
+            </a>
+          </li>
+        </ul>
       </section>
     </aside>
   )

@@ -1,12 +1,18 @@
 export type VaseId =
-  | 'jurui-xianwen'
-  | 'pinghua-zhefang'
-  | 'suichao-fanggu'
+  | 'danping-qiuhui'
   | 'lisong-hualan'
-  | 'taibai-jiangdou'
-  | 'danping-fencai'
-  | 'yuhuchun-wucai'
-  | 'tianqiu-doucai'
+  | 'wenhui-xiaoping'
+  | 'tingqin-guding'
+
+export interface VasePose {
+  /** Center of the vessel, percent of the canvas width. */
+  x: number
+  /** Distance from the canvas bottom, percent of the canvas height. */
+  bottom: number
+  scale: number
+}
+
+export const DEFAULT_VASE_POSE: VasePose = { x: 50, bottom: 4, scale: 1 }
 
 export type RoomId = 'shufang' | 'tea' | 'window' | 'garden' | 'palace'
 
