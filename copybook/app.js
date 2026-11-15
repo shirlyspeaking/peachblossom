@@ -85,9 +85,11 @@
 
     function resetFallingPetal(p, initial) {
         var vh = window.innerHeight;
-        // 遠的花瓣小、淡、慢，做出前後層次
-        p.depth = rand(0.6, 1);
-        p.el.style.width = (p.baseW * p.depth).toFixed(1) + 'px';
+        // 大小混合：小的像在遠處，較淡、較慢；大的像在近處
+        var r = Math.random();
+        p.baseW = r < 0.35 ? rand(12, 20) : r < 0.75 ? rand(22, 32) : rand(36, 50);
+        p.depth = 0.55 + 0.45 * (p.baseW - 12) / 38;
+        p.el.style.width = p.baseW.toFixed(1) + 'px';
         p.el.style.opacity = (0.5 + 0.4 * p.depth).toFixed(2);
         p.u = rand(0.3, 0.7);
         p.y = initial ? rand(0, 1) * vh : -rand(30, 90);
@@ -119,7 +121,7 @@
         }
         // 左側比右側略少
         for (var f = 0; f < 11; f++) {
-            var p = { baseW: rand(26, 38), side: f < 5 ? 'L' : 'R' };
+            var p = { baseW: 30, side: f < 5 ? 'L' : 'R' };
             p.el = petalImg('petal--fall', p.baseW);
             resetFallingPetal(p, true);
             petalsLayer.appendChild(p.el);
