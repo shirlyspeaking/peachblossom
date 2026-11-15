@@ -7,231 +7,142 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>龜</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fontsapi.zeoseven.com/37/main/result.css" />
   <link rel="stylesheet" href="https://fontsapi.zeoseven.com/2214/main/result.css" />
   <link rel="stylesheet" href="https://fontsapi.zeoseven.com/957/main/result.css" />
-  <link rel="stylesheet" href="styles.css?v=lookup1" />
+  <link rel="stylesheet" href="styles.css?v=kids2" />
 </head>
 <body>
   <a class="skip" href="#main">跳到內容</a>
-  <div class="page" id="page">
+  <div class="page">
     <header class="top-bar">
-      <a class="back-link" href="../index.html">返回桃花源</a>
-      <span class="brand-kicker">契文小站</span>
+      <a class="back-link" href="../index.html">← 返回桃花源</a>
     </header>
 
-    <main id="main">
-      <section class="hero">
-        <svg class="mascot" viewBox="0 0 100 100" aria-hidden="true">
-          <ellipse cx="46" cy="78" rx="22" ry="6" fill="currentColor" opacity="0.12"/>
-          <path fill="currentColor" opacity="0.18" d="M28 54c2-18 18-30 36-26 14 4 24 18 20 32-6 18-28 26-42 18-12-6-16-14-14-24z"/>
-          <path fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M30 52c3-16 18-26 34-22 13 3 22 16 19 30-4 16-24 24-37 17-11-6-18-14-16-25z"/>
-          <path fill="none" stroke="currentColor" stroke-width="2.6" d="M42 40 54 48 44 60M54 48 66 42M54 48 62 62"/>
-          <circle cx="78" cy="46" r="9.5" fill="none" stroke="currentColor" stroke-width="4"/>
-          <circle cx="81" cy="43" r="1.8" fill="currentColor"/>
-          <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M86 50c4 2 4 8-1 9M24 58c-7 3-8 12-1 14M36 70c-2 8 4 12 10 10M64 70c4 8 12 8 14 2"/>
-        </svg>
+    <section class="hero">
+      <svg class="mascot" viewBox="0 0 100 100" aria-hidden="true">
+        <ellipse cx="50" cy="82" rx="26" ry="5" fill="currentColor" opacity="0.12"/>
+        <path fill="#ffe08a" d="M24 56c2-20 20-32 38-28 15 4 25 18 21 32-6 18-30 26-44 18-12-6-17-12-15-22z"/>
+        <path fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M24 56c2-20 20-32 38-28 15 4 25 18 21 32-6 18-30 26-44 18-12-6-17-12-15-22z"/>
+        <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M40 40 52 50 42 62M52 50 66 44M52 50 60 64"/>
+        <circle cx="82" cy="46" r="9" fill="#fff" stroke="currentColor" stroke-width="4"/>
+        <circle cx="84" cy="44" r="2.2" fill="currentColor"/>
+        <path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" d="M30 72c-4 6-2 10 3 10M66 74c3 6 9 6 11 1"/>
+      </svg>
+      <div>
         <h1>桃源契文</h1>
-        <p id="heroCopy">輸入任何字，再用下拉選單選甲骨文、金文或小篆，看看這個字在不同時代長什麼樣子。</p>
-      </section>
+        <p class="hero-sub">把字變回三千年前的樣子</p>
+      </div>
+    </section>
 
-      <nav class="mode-switch" role="tablist" aria-label="使用方式">
-        <button type="button" role="tab" id="modeLookup" aria-selected="true" class="is-on">查古字</button>
-        <button type="button" role="tab" id="modeWall" aria-selected="false">本班名牆</button>
-        <button type="button" role="tab" id="modeSeal" aria-selected="false">本班名牆小篆體</button>
-        <button type="button" role="tab" id="modeClass" aria-selected="false">猜字謎</button>
-        <button type="button" role="tab" id="modeSolo" aria-selected="false">自己查名字</button>
-      </nav>
+    <nav class="tabs" role="tablist" aria-label="選一個玩法">
+      <button type="button" role="tab" class="tab tab-wall" data-tab="wall" aria-selected="true" aria-controls="panel-wall">
+        <span class="tab-icon" aria-hidden="true">牆</span>本班名牆
+      </button>
+      <button type="button" role="tab" class="tab tab-lookup" data-tab="lookup" aria-selected="false" aria-controls="panel-lookup">
+        <span class="tab-icon" aria-hidden="true">查</span>查一個字
+      </button>
+      <button type="button" role="tab" class="tab tab-game" data-tab="game" aria-selected="false" aria-controls="panel-game">
+        <span class="tab-icon" aria-hidden="true">猜</span>猜字遊戲
+      </button>
+      <button type="button" role="tab" class="tab tab-learn" data-tab="learn" aria-selected="false" aria-controls="panel-learn">
+        <span class="tab-icon" aria-hidden="true">知</span>甲骨小知識
+      </button>
+    </nav>
 
-      <section class="lookup-panel" id="lookupPanel">
-        <form class="lookup-form" id="lookupForm">
-          <div class="lookup-row">
-            <label class="skip" for="lookupInput">要查的字</label>
-            <input
-              id="lookupInput"
-              name="chars"
-              type="text"
-              maxlength="16"
-              autocomplete="off"
-              placeholder="寫下任何字，例如：日月山"
-            />
-            <label class="script-field">
-              <span class="skip">字體</span>
-              <select id="scriptSelect" aria-label="選擇古文字體">
-                <option value="oracle">甲骨文</option>
-                <option value="bronze">金文</option>
-                <option value="seal">小篆</option>
-              </select>
-            </label>
-            <button type="submit">查字型</button>
+    <main id="main">
+      <section class="panel panel-wall" id="panel-wall" role="tabpanel">
+        <div class="toolbar">
+          <div class="script-toggle" role="group" aria-label="字體">
+            <button type="button" class="is-on" data-wall-script="oracle">甲骨文</button>
+            <button type="button" data-wall-script="seal">小篆</button>
           </div>
-        </form>
-        <div class="chips" id="lookupChips" aria-label="試試這些字">
-          <button type="button" data-chars="日">日</button>
-          <button type="button" data-chars="月">月</button>
-          <button type="button" data-chars="山">山</button>
-          <button type="button" data-chars="水">水</button>
-          <button type="button" data-chars="人">人</button>
-          <button type="button" data-chars="木">木</button>
-          <button type="button" data-chars="馬">馬</button>
-          <button type="button" data-chars="雨">雨</button>
+          <button type="button" class="btn btn-soft" id="flipAll">全部翻開</button>
+          <button type="button" class="btn btn-soft" id="resetWall">重新蓋上</button>
+          <button type="button" class="btn btn-main" id="editRoster">換成本班名單</button>
         </div>
-        <p class="status" id="lookupStatus" role="status"></p>
-        <div class="lookup-gallery" id="lookupGallery"></div>
-      </section>
+        <p class="hint" id="wallHint">點一塊翻開。一整排翻完，就知道是誰！</p>
 
-      <section class="wall-panel" id="wallPanel" hidden>
-        <details class="how-play" id="howOracle">
-          <summary>這節課怎麼玩</summary>
-          <ol class="play-steps">
-            <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
-            <li>點一塊甲骨，看它翻成現在的字，再讀磨砂框裡的小故事。</li>
-            <li>同一排都認完，這位同學的名字就會現身。</li>
-            <li>沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件。</li>
-          </ol>
-        </details>
-        <details class="how-play" id="howSeal" hidden>
-          <summary>這節課怎麼玩</summary>
-          <ol class="play-steps">
-            <li>這一牆用秦朝統一後的小篆來寫全班名字，線條圓轉，像刻在玉或銅上。</li>
-            <li>每一排仍是同一個人。先認小篆，點下去會翻成現在的字。</li>
-            <li>同一排都認完，這位同學的名字就會現身。</li>
-            <li>說文裡還沒有的字，會改用教學零件圖，避免空白缺字。</li>
-          </ol>
-        </details>
-        <p class="seal-lede" id="sealLede" hidden>秦始皇統一文字後的小篆。同一排是同一個人的名字。</p>
-        <div class="wall-toolbar">
-          <p class="play-hint" id="wallHint">同一排是同一個人的名字。把一排都翻開，現代姓名就會出現。</p>
-          <p class="class-progress" id="wallProgress" role="status"></p>
-          <button type="button" class="btn-ghost" id="resetWall">重新蓋上</button>
+        <div class="roster" id="roster" hidden>
+          <label for="rosterInput">一行寫一個名字（名單只存在這部電腦）</label>
+          <textarea id="rosterInput" rows="7" placeholder="陳小雨&#10;林安&#10;張樂"></textarea>
+          <div class="roster-actions">
+            <button type="button" class="btn btn-main" id="saveRoster">做成名牆</button>
+            <button type="button" class="btn btn-soft" id="sampleRoster">用示範名單</button>
+          </div>
         </div>
+
         <div class="name-wall" id="nameWall"></div>
       </section>
 
-      <section class="class-panel" id="classPanel" hidden>
-        <details class="how-play">
-          <summary>這節課怎麼玩</summary>
-          <ol class="play-steps">
-            <li>每人的名字只藏一個最好看、最像圖畫的古字。</li>
-            <li>抽出一塊，全班先猜：這幅小畫是什麼字？</li>
-            <li>揭曉以後，再猜：這是哪位同學名字裡的字？</li>
-            <li>最後請那位同學站起來，用一句話介紹自己。</li>
-          </ol>
-        </details>
-        <div class="class-toolbar" id="classToolbar">
-          <button type="button" class="btn-primary" id="drawOne">抽出一塊</button>
-          <button type="button" class="btn-ghost" id="resetClass">重新散落</button>
-          <button type="button" class="btn-ghost" id="editRoster">改名單</button>
-          <p class="class-progress" id="classProgress" role="status"></p>
+      <section class="panel panel-lookup" id="panel-lookup" role="tabpanel" hidden>
+        <form class="lookup-form" id="lookupForm">
+          <label class="skip" for="lookupInput">要查的字</label>
+          <input id="lookupInput" type="text" maxlength="4" autocomplete="off" placeholder="寫一個字" />
+          <button type="submit" class="btn btn-main">查一查</button>
+        </form>
+        <div class="chips" id="lookupChips" aria-label="試試這些字">
+          <button type="button">日</button>
+          <button type="button">山</button>
+          <button type="button">雨</button>
+          <button type="button">魚</button>
+          <button type="button">馬</button>
+          <button type="button">龜</button>
         </div>
-        <details class="roster-box" id="rosterBox">
-          <summary>改用其他名單</summary>
-          <p class="roster-help">一人一行。每人會藏一個最好看、最像圖畫的字。</p>
-          <label class="skip" for="rosterInput">課堂名單</label>
-          <textarea id="rosterInput" rows="8" placeholder="陳小雨&#10;林安&#10;張樂&#10;王山"></textarea>
-          <button type="button" class="btn-primary" id="carveClass">把名字刻進甲骨</button>
-        </details>
+        <div class="lookup-result" id="lookupResult" aria-live="polite"></div>
       </section>
 
-      <form class="search-panel" id="nameForm" hidden>
-        <div class="search-row">
-          <label class="skip" for="nameInput">名字</label>
-          <input
-            id="nameInput"
-            name="name"
-            type="text"
-            maxlength="8"
-            autocomplete="off"
-            placeholder="寫下你的名字，例如：小雨"
-          />
-          <button type="submit">刻上名字</button>
+      <section class="panel panel-game" id="panel-game" role="tabpanel" hidden>
+        <div class="game-top">
+          <p class="game-round" id="gameRound"></p>
+          <p class="game-stars" id="gameStars" aria-label="得分"></p>
         </div>
-        <div class="chips" aria-label="試試這些名字">
-          <button type="button" data-name="小雨">小雨</button>
-          <button type="button" data-name="明心">明心</button>
-          <button type="button" data-name="林安">林安</button>
-          <button type="button" data-name="日升">日升</button>
+        <div class="game-card" id="gameCard">
+          <p class="game-ask">這幅古老的小畫，是哪個字？</p>
+          <div class="game-glyph" id="gameGlyph"></div>
+          <div class="game-choices" id="gameChoices"></div>
+          <p class="game-feedback" id="gameFeedback" aria-live="polite"></p>
+          <button type="button" class="btn btn-main" id="gameNext" hidden>下一題 →</button>
         </div>
-        <p class="status" id="status" role="status"></p>
-      </form>
+        <div class="game-end" id="gameEnd" hidden>
+          <p class="game-end-title" id="gameEndTitle"></p>
+          <p class="game-end-stars" id="gameEndStars"></p>
+          <button type="button" class="btn btn-main" id="gameAgain">再玩一次</button>
+        </div>
+      </section>
 
-      <aside class="intro" id="intro">
-        <div id="introLookup">
-          <h2>三種古文字，三種樣子</h2>
-          <p>甲骨文刻在龜甲或牛骨上，金文鑄在青銅器上，小篆是秦始皇統一文字以後比較圓轉的寫法。先選一種字體，再寫下想查的字；點開圖樣，還能讀一小段故事。</p>
-        </div>
-        <div id="introWall" hidden>
-          <h2>這節課怎麼玩</h2>
-          <ol class="play-steps">
-            <li>名牆上每一排都是一位同學的名字，但先只看見古文字。</li>
-            <li>點一塊甲骨，看它翻成現在的字，再讀磨砂框裡的小故事。</li>
-            <li>同一排都認完，這位同學的名字就會現身。</li>
-            <li>沒有甲骨文的字，會改用金文、小篆，或把它拆成更早的零件。</li>
-          </ol>
-        </div>
-        <div id="introClass" hidden>
-          <h2>這節課怎麼玩</h2>
-          <ol class="play-steps">
-            <li>每人的名字只藏一個最好看、最像圖畫的古字。</li>
-            <li>抽出一塊，全班先猜：這幅小畫是什麼字？</li>
-            <li>揭曉以後，再猜：這是哪位同學名字裡的字？</li>
-            <li>最後請那位同學站起來，用一句話介紹自己。</li>
-          </ol>
-        </div>
-        <div id="introSeal" hidden>
-          <h2>什麼是小篆？</h2>
-          <p>秦始皇統一文字時，把各國寫法收成比較整齊、圓轉的小篆。它比甲骨文晚，也比我們現在的楷書早。名牆上的字，就是用這種秦篆的樣子來寫同學的名字。</p>
-        </div>
-        <div id="introSolo" hidden>
-          <h2>什麼是甲骨文？</h2>
-          <p>三千多年前，商朝的人把字刻在龜甲或牛骨上。那些字常常像一幅小畫：太陽是圓的，山是三座峰，雨是雲底下的水滴。我們現在寫的漢字，就是從這些小畫慢慢長出來的。</p>
-        </div>
-      </aside>
-
-      <section class="playfield" id="playfield" hidden>
-        <p class="play-hint" id="playHint">點一塊甲骨，或按「抽出一塊」。</p>
-        <div class="scatter" id="scatter"></div>
+      <section class="panel panel-learn" id="panel-learn" role="tabpanel" hidden>
+        <p class="hint">點一點卡片，翻過來看答案。</p>
+        <div class="facts" id="facts"></div>
       </section>
     </main>
 
     <div class="sheet" id="sheet" hidden>
-      <button type="button" class="sheet-backdrop" id="sheetBackdrop" aria-label="關閉說明"></button>
-      <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" id="sheetCard">
-        <button type="button" class="sheet-close" id="sheetClose" aria-label="關閉">關閉</button>
+      <button type="button" class="sheet-backdrop" id="sheetBackdrop" aria-label="關閉"></button>
+      <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetChar" id="sheetCard">
+        <button type="button" class="sheet-close" id="sheetClose" aria-label="關閉">✕</button>
         <div class="sheet-pair">
-          <div class="sheet-glyph" id="sheetOracle"></div>
-          <div class="sheet-modern-wrap">
-            <p class="sheet-kicker" id="sheetKicker">現在這樣寫</p>
-            <p class="sheet-modern" id="sheetTitle"></p>
-            <p class="sheet-pinyin" id="sheetPinyin"></p>
-            <p class="sheet-badge" id="sheetBadge"></p>
+          <div class="sheet-old">
+            <div class="sheet-glyph" id="sheetGlyph"></div>
+            <p class="sheet-label" id="sheetScript">甲骨文</p>
+          </div>
+          <span class="sheet-arrow" aria-hidden="true">→</span>
+          <div class="sheet-new">
+            <p class="sheet-char" id="sheetChar"></p>
+            <p class="sheet-label" id="sheetPinyin"></p>
           </div>
         </div>
-        <div id="sheetLore">
-          <p class="meaning" id="sheetMeaning"></p>
-          <p class="era-note" id="sheetEra"></p>
-          <p class="story" id="sheetStory"></p>
-        </div>
-        <div class="who-box" id="whoBox" hidden>
-          <p class="who-prompt" id="whoPrompt">這是誰的名字裡的字？</p>
-          <button type="button" class="btn-primary" id="revealChar">揭曉這個字</button>
-          <button type="button" class="btn-primary" id="revealWho">揭曉是誰</button>
-          <div class="who-result" id="whoResult" hidden>
-            <p class="who-name" id="sheetOwner"></p>
-            <p class="who-cue" id="sheetCue"></p>
-          </div>
-        </div>
+        <p class="sheet-meaning" id="sheetMeaning"></p>
+        <p class="sheet-story" id="sheetStory"></p>
       </div>
     </div>
 
-    <footer class="page-foot">
-      查古字：甲骨文用鏡原甲骨文，金文用敬峰中山王篆（青銅器銘文風格），小篆用全字庫《說文解字》。字庫沒有的字，改用教學零件圖。課堂名牆的甲骨字形是為小朋友辨認而畫的教學象形。
-    </footer>
+    <footer class="page-foot">古文字來自鏡原甲骨文、中山王篆、《說文解字》字型；缺字改用教學簡筆圖。</footer>
   </div>
 
-  <script src="glyphs.js?v=lookup1"></script>
-  <script src="characters.js?v=lookup1"></script>
-  <script src="app.js?v=lookup1"></script>
+  <script src="glyphs.js?v=kids2"></script>
+  <script src="characters.js?v=kids2"></script>
+  <script src="app.js?v=kids2"></script>
 </body>
 </html>
