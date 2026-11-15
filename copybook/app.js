@@ -1,29 +1,96 @@
 (function () {
     'use strict';
 
+    var SETTINGS_KEY = 'copybook-settings';
+    var settings = {};
+    try {
+        settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {};
+    } catch (_) {
+        settings = {};
+    }
+
     /* ---- Theme Picker ---- */
-    var themeDots = document.querySelectorAll('.theme-dot');
-    var THEME_KEY = 'copybook-theme';
+    var themeChips = document.querySelectorAll('.theme-chip');
+    var THEMES = ['silk', 'ru', 'ding', 'qinglv'];
+    var LEGACY_THEMES = { pink: 'silk', green: 'qinglv', blue: 'ru', silver: 'ding' };
 
     function applyTheme(name) {
+        if (LEGACY_THEMES[name]) name = LEGACY_THEMES[name];
+        if (THEMES.indexOf(name) < 0) name = 'silk';
         document.body.setAttribute('data-theme', name);
-        themeDots.forEach(function (dot) {
-            dot.classList.toggle('active', dot.getAttribute('data-theme') === name);
+        themeChips.forEach(function (chip) {
+            chip.setAttribute('aria-checked', chip.getAttribute('data-theme') === name ? 'true' : 'false');
         });
-        try { localStorage.setItem(THEME_KEY, name); } catch (_) {}
+        settings.theme = name;
     }
 
     (function initTheme() {
-        var saved = null;
-        try { saved = localStorage.getItem(THEME_KEY); } catch (_) {}
-        applyTheme(saved || 'pink');
+        var saved = settings.theme;
+        if (!saved) {
+            try { saved = localStorage.getItem('copybook-theme'); } catch (_) {}
+        }
+        applyTheme(saved || 'silk');
     })();
 
-    themeDots.forEach(function (dot) {
-        dot.addEventListener('click', function () {
-            applyTheme(dot.getAttribute('data-theme'));
+    themeChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            applyTheme(chip.getAttribute('data-theme'));
+            saveSettings();
         });
     });
+
+    /* ---- 落英 ---- */
+    var petalsLayer = document.getElementById('petals');
+    var btnPetals = document.getElementById('btnPetals');
+    var PETAL_SVG =
+        '<svg viewBox="0 0 20 24" aria-hidden="true"><path d="M10 23C4.6 19.4 1.2 14.6 1.6 9.4 2 4.6 5.6 1.2 8.6 2.6 9.3 3 9.7 3.6 10 4.4 10.3 3.6 10.7 3 11.4 2.6 14.4 1.2 18 4.6 18.4 9.4 18.8 14.6 15.4 19.4 10 23Z"/></svg>';
+
+    function rand(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function buildPetals() {
+        if (!petalsLayer || petalsLayer.childElementCount) return;
+        var html = '';
+        // 靜態散落在頁面四周，避開中央內容區
+        var spots = [
+            [3, 18], [6, 46], [2, 72], [8, 88], [12, 8],
+            [94, 14], [97, 38], [91, 62], [96, 84], [88, 94],
+            [30, 96], [62, 97], [48, 3], [76, 5]
+        ];
+        for (var i = 0; i < spots.length; i++) {
+            html +=
+                '<span class="petal petal--still" style="left:' + spots[i][0] + '%;top:' + spots[i][1] + '%;' +
+                '--size:' + rand(12, 20).toFixed(1) + 'px;--rot:' + Math.round(rand(0, 360)) + 'deg;' +
+                '--alpha:' + rand(0.35, 0.6).toFixed(2) + '">' + PETAL_SVG + '</span>';
+        }
+        var falling = 9;
+        for (var f = 0; f < falling; f++) {
+            var dur = rand(12, 20);
+            html +=
+                '<span class="petal petal--fall" style="--x:' + rand(2, 96).toFixed(1) + '%;' +
+                '--size:' + rand(13, 21).toFixed(1) + 'px;--alpha:' + rand(0.4, 0.7).toFixed(2) + ';' +
+                '--dur:' + dur.toFixed(1) + 's;--delay:-' + rand(0, dur).toFixed(1) + 's;' +
+                '--drift:' + Math.round(rand(-80, 120)) + 'px;--spin:' + Math.round(rand(160, 420)) + 'deg">' +
+                '<span class="petal-inner">' + PETAL_SVG + '</span></span>';
+        }
+        petalsLayer.innerHTML = html;
+    }
+
+    function applyPetals(on) {
+        if (on) buildPetals();
+        document.body.classList.toggle('petals-off', !on);
+        if (btnPetals) btnPetals.setAttribute('aria-pressed', on ? 'true' : 'false');
+        settings.petals = on;
+    }
+
+    applyPetals(settings.petals !== false);
+    if (btnPetals) {
+        btnPetals.addEventListener('click', function () {
+            applyPetals(btnPetals.getAttribute('aria-pressed') !== 'true');
+            saveSettings();
+        });
+    }
 
     /* ---- Controls ---- */
     var textInput = document.getElementById('textInput');
@@ -31,17 +98,25 @@
     var autoStrokeChars = document.getElementById('autoStrokeChars');
     var btnAutoStrokeFromChars = document.getElementById('btnAutoStrokeFromChars');
     var fontPreset = document.getElementById('fontPreset');
+    var fontSample = document.getElementById('fontSample');
     var gridType = document.getElementById('gridType');
     var copyStyle = document.getElementById('copyStyle');
     var fontSize = document.getElementById('fontSize');
+    var fontSizeValue = document.getElementById('fontSizeValue');
     var pageSize = document.getElementById('pageSize');
-    var pageBackground = document.getElementById('pageBackground');
-    var fontPresetStroke = document.getElementById('fontPresetStroke');
-    var gridTypeStroke = document.getElementById('gridTypeStroke');
-    var copyStyleStroke = document.getElementById('copyStyleStroke');
-    var fontSizeStroke = document.getElementById('fontSizeStroke');
-    var pageSizeStroke = document.getElementById('pageSizeStroke');
-    var pageBackgroundStroke = document.getElementById('pageBackgroundStroke');
+    var bgTiles = document.querySelectorAll('.bg-tile');
+    var bgUploadThumb = document.getElementById('bgUploadThumb');
+    var pageCountEl = document.getElementById('pageCount');
+    var previewWrap = document.getElementById('previewWrap');
+    var zoomBtns = document.querySelectorAll('.zoom-btn');
+    var panel = document.getElementById('panel');
+    var panelBackdrop = document.getElementById('panelBackdrop');
+    var btnPanelOpen = document.getElementById('btnPanelOpen');
+    var btnPanelClose = document.getElementById('btnPanelClose');
+    var currentBg = 'none';
+    var currentMode = 'free';
+    var currentZoom = 'fit';
+    var PAPER_WIDTH_PX = { a4: 793.7, a4l: 1122.5 };
     var DEFAULT_LINE_HEIGHT = 1.15;
     var DEFAULT_CHARS_PER_LINE = 12;
     var DEFAULT_LINES_PER_PAGE = 12;
@@ -67,7 +142,6 @@
     var pdfModalCanAct = false;
     var pdfModalBusy = false;
     var btnPng = document.getElementById('btnPng');
-    var btnChenyuFont = document.getElementById('btnChenyuFont');
     var bgImageInput = document.getElementById('bgImageInput');
     var btnBgImageUpload = document.getElementById('btnBgImageUpload');
     var btnBgImageClear = document.getElementById('btnBgImageClear');
@@ -327,33 +401,12 @@
     }
 
     function isStrokeMode() {
-        return !!(strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0);
-    }
-
-    function getActiveControls() {
-        if (isStrokeMode()) {
-            return {
-                fontPreset: fontPresetStroke || fontPreset,
-                gridType: gridTypeStroke || gridType,
-                copyStyle: copyStyleStroke || copyStyle,
-                fontSize: fontSizeStroke || fontSize,
-                pageSize: pageSizeStroke || pageSize,
-                pageBackground: pageBackgroundStroke || pageBackground
-            };
-        }
-        return {
-            fontPreset: fontPreset,
-            gridType: gridType,
-            copyStyle: copyStyle,
-            fontSize: fontSize,
-            pageSize: pageSize,
-            pageBackground: pageBackground
-        };
+        return currentMode === 'stroke' &&
+            !!(strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0);
     }
 
     function getFontFamily() {
-        var c = getActiveControls();
-        var value = c.fontPreset && c.fontPreset.value ? c.fontPreset.value.trim() : '';
+        var value = fontPreset && fontPreset.value ? fontPreset.value.trim() : '';
         return value || BRUSH_FONT_STACK;
     }
 
@@ -441,11 +494,6 @@
         return { rows: rows, cpl: maxCols, charsPerRow: 1 };
     }
 
-    function applyStrokePathDefaults() {
-        if (gridTypeStroke) gridTypeStroke.value = 'tian';
-        if (fontSizeStroke) fontSizeStroke.value = '40';
-    }
-
     function chunkLayoutRows(rows, lpp, padEmpty) {
         var n = Math.max(1, Math.min(20, parseInt(lpp, 10) || 12));
         var pages = [];
@@ -484,8 +532,6 @@
         try {
             var layout = await buildStrokePathLayoutRows(chars);
             strokePathLayout = { rows: layout.rows, cpl: layout.cpl };
-            if (textInput) textInput.value = '';
-            applyStrokePathDefaults();
             renderNow();
         } catch (e) {
             window.alert('筆畫拆解失敗：' + (e.message || String(e)));
@@ -564,10 +610,9 @@
         var t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         var raw = textInput.value;
         var text = normalizeText(raw);
-        var ctrls = getActiveControls();
         var cpl = DEFAULT_CHARS_PER_LINE;
         var lpp = isStrokeMode() ? DEFAULT_STROKE_LINES_PER_PAGE : DEFAULT_LINES_PER_PAGE;
-        var fsEl = ctrls.fontSize;
+        var fsEl = fontSize;
         var fsMin = fsEl ? parseInt(fsEl.getAttribute('min'), 10) : 18;
         var fsMax = fsEl ? parseInt(fsEl.getAttribute('max'), 10) : 72;
         if (!Number.isFinite(fsMin)) fsMin = 18;
@@ -577,15 +622,14 @@
         fs = Math.max(fsMin, Math.min(fsMax, fs));
 
         var lh = DEFAULT_LINE_HEIGHT;
-        var gtype = ctrls.gridType && ctrls.gridType.value ? ctrls.gridType.value : 'tian';
-        var psize = ctrls.pageSize && ctrls.pageSize.value ? ctrls.pageSize.value : 'a4';
+        var gtype = gridType && gridType.value ? gridType.value : 'tian';
+        var psize = pageSize && PAPER_WIDTH_PX[pageSize.value] ? pageSize.value : 'a4';
         var font = getFontFamily();
-        var styleVal = ctrls.copyStyle && ctrls.copyStyle.value ? ctrls.copyStyle.value : 'lightPinkHong';
+        var styleVal = copyStyle && copyStyle.value ? copyStyle.value : 'lightPinkHong';
         var hongMode = styleVal === 'hong' || styleVal === 'trace';
         var lightPinkHongMode = styleVal === 'lightPinkHong';
 
-        var useStrokePaths =
-            strokePathLayout && strokePathLayout.rows && strokePathLayout.rows.length > 0;
+        var useStrokePaths = isStrokeMode();
 
         var rows;
         var pages;
@@ -607,10 +651,10 @@
         }
 
         preview.innerHTML = '';
-        var rawBg = ctrls.pageBackground && ctrls.pageBackground.value ? ctrls.pageBackground.value : 'none';
-        var photoBgUrl = PHOTO_BGS[rawBg] || '';
-        var bgVal = PHOTO_BGS[rawBg] ? rawBg : 'none';
-        var useSheetBg = !!(uploadedBgUrl || photoBgUrl);
+        var photoBgUrl = PHOTO_BGS[currentBg] || '';
+        var bgVal = photoBgUrl ? currentBg : 'none';
+        var uploadUrl = currentBg === 'upload' ? uploadedBgUrl : '';
+        var useSheetBg = !!(uploadUrl || photoBgUrl);
         var cellBgVal = 'white';
         preview.className =
             'preview preview--' +
@@ -619,7 +663,7 @@
             (hongMode || lightPinkHongMode ? ' preview--hong' : '') +
             (lightPinkHongMode ? ' preview--light-pink-hong' : '') +
             (useSheetBg ? ' preview--bg-sheet' : '') +
-            (uploadedBgUrl ? ' preview--bg-upload' : '') +
+            (uploadUrl ? ' preview--bg-upload' : '') +
             (bgVal !== 'none' ? ' preview--bg-' + bgVal : '') +
             ' preview--cellbg-' +
             cellBgVal;
@@ -631,11 +675,11 @@
             pageEl.className = 'page';
             pageEl.setAttribute('data-page-index', String(p + 1));
 
-            if (uploadedBgUrl || photoBgUrl) {
+            if (useSheetBg) {
                 var bgImg = document.createElement('img');
-                bgImg.className = uploadedBgUrl ? 'page-upload-bg' : 'page-photo-bg';
+                bgImg.className = uploadUrl ? 'page-upload-bg' : 'page-photo-bg';
                 bgImg.decoding = 'async';
-                bgImg.src = uploadedBgUrl || photoBgUrl;
+                bgImg.src = uploadUrl || photoBgUrl;
                 bgImg.alt = '';
                 bgImg.setAttribute('aria-hidden', 'true');
                 bgImg.draggable = false;
@@ -739,12 +783,36 @@
             preview.appendChild(pageEl);
         }
 
+        if (pageCountEl) pageCountEl.textContent = '共 ' + pages.length + ' 頁';
+        applyZoom();
+
         if (typeof performance !== 'undefined') {
             var ms = performance.now() - t0;
             setStatus('已更新 · ' + pages.length + ' 頁（約 ' + ms.toFixed(0) + ' ms）');
         } else {
             setStatus('已更新 · ' + pages.length + ' 頁');
         }
+    }
+
+    function applyZoom() {
+        if (!preview) return;
+        var z;
+        if (currentZoom === 'fit') {
+            var psize = pageSize && PAPER_WIDTH_PX[pageSize.value] ? pageSize.value : 'a4';
+            var avail = previewWrap ? previewWrap.clientWidth - 4 : 800;
+            z = Math.max(0.3, Math.min(2, avail / PAPER_WIDTH_PX[psize]));
+        } else {
+            z = parseFloat(currentZoom) || 1;
+        }
+        preview.style.zoom = String(Math.round(z * 1000) / 1000);
+    }
+
+    function setZoom(value) {
+        currentZoom = value;
+        zoomBtns.forEach(function (btn) {
+            btn.setAttribute('aria-checked', btn.getAttribute('data-zoom') === value ? 'true' : 'false');
+        });
+        applyZoom();
     }
 
     function scheduleRender() {
@@ -1100,9 +1168,6 @@
         if (preview && preview.classList.contains('preview--a4l')) {
             return { format: 'a4', orientation: 'l', w: 297, h: 210 };
         }
-        if (preview && preview.classList.contains('preview--letter')) {
-            return { format: 'letter', orientation: 'p', w: 215.9, h: 279.4 };
-        }
         return { format: 'a4', orientation: 'p', w: 210, h: 297 };
     }
 
@@ -1174,7 +1239,6 @@
         var cls = 'pdf-preview-sheet-wrap';
         if (fillSheet) cls += ' is-cover';
         if (paper.orientation === 'l') cls += ' is-landscape';
-        if (paper.format === 'letter') cls += ' is-letter';
         return cls;
     }
 
@@ -1273,34 +1337,71 @@
         window.print();
     }
 
-    function applyChenyuFont() {
-        var opt = document.getElementById('fontOptChenyu');
-        var optStroke = document.getElementById('fontOptChenyuStroke');
-        if (opt && fontPreset) fontPreset.value = opt.value;
-        if (optStroke && fontPresetStroke) fontPresetStroke.value = optStroke.value;
-        setStatus('已套用辰宇落雁體（開源字型，首次載入可能稍候）');
-        renderNow();
+    /* ---- 設定記憶 ---- */
+    function saveSettings() {
+        settings.text = textInput ? textInput.value : '';
+        settings.strokeChars = autoStrokeChars ? autoStrokeChars.value : '';
+        settings.font = fontPreset ? fontPreset.value : '';
+        settings.style = copyStyle ? copyStyle.value : '';
+        settings.size = fontSize ? fontSize.value : '';
+        settings.grid = gridType ? gridType.value : '';
+        settings.paper = pageSize ? pageSize.value : '';
+        settings.bg = currentBg === 'upload' ? 'none' : currentBg;
+        settings.zoom = currentZoom;
+        settings.mode = currentMode;
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (_) {}
     }
 
-    var inputs = [
-        fontPreset, gridType, copyStyle, pageBackground, fontSize, pageSize,
-        fontPresetStroke, gridTypeStroke, copyStyleStroke, pageBackgroundStroke, fontSizeStroke, pageSizeStroke
-    ];
-    inputs.forEach(function (el) {
+    function setSelectIfValid(el, value) {
+        if (!el || value == null || value === '') return;
+        for (var i = 0; i < el.options.length; i++) {
+            if (el.options[i].value === value) {
+                el.value = value;
+                return;
+            }
+        }
+    }
+
+    function restoreSettings() {
+        if (textInput && typeof settings.text === 'string') textInput.value = settings.text;
+        if (autoStrokeChars && typeof settings.strokeChars === 'string') autoStrokeChars.value = settings.strokeChars;
+        setSelectIfValid(fontPreset, settings.font);
+        setSelectIfValid(copyStyle, settings.style);
+        setSelectIfValid(gridType, settings.grid);
+        setSelectIfValid(pageSize, settings.paper);
+        var size = parseInt(settings.size, 10);
+        if (fontSize && Number.isFinite(size)) fontSize.value = String(Math.max(18, Math.min(72, size)));
+        if (settings.bg && PHOTO_BGS[settings.bg]) currentBg = settings.bg;
+        if (settings.zoom && /^(fit|1|1\.5|2)$/.test(settings.zoom)) currentZoom = settings.zoom;
+    }
+
+    function syncFontUi() {
+        if (fontSample && fontPreset) fontSample.style.fontFamily = getFontFamily();
+        if (fontSizeValue && fontSize) fontSizeValue.textContent = fontSize.value;
+    }
+
+    function onSettingChange() {
+        syncFontUi();
+        scheduleRender();
+        saveSettings();
+    }
+
+    [fontPreset, gridType, copyStyle, fontSize, pageSize].forEach(function (el) {
         if (!el) return;
-        el.addEventListener('input', scheduleRender);
-        el.addEventListener('change', scheduleRender);
+        el.addEventListener('input', onSettingChange);
+        el.addEventListener('change', onSettingChange);
     });
+    if (pageSize) pageSize.addEventListener('change', applyZoom);
     if (textInput) {
         textInput.addEventListener('input', function () {
-            clearStrokePathLayout();
             scheduleRender();
+            saveSettings();
         });
-        textInput.addEventListener('change', scheduleRender);
     }
+    if (autoStrokeChars) autoStrokeChars.addEventListener('input', saveSettings);
     if (btnGenerate) btnGenerate.addEventListener('click', function () {
-        clearStrokePathLayout();
         renderNow();
+        closePanelSheet();
     });
     if (btnPdf) btnPdf.addEventListener('click', function () { onPdf(); });
     if (pdfPreviewClose) pdfPreviewClose.addEventListener('click', function () { closePdfPreview(); });
@@ -1333,12 +1434,29 @@
     }
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
-        if (!pdfPreviewModal || pdfPreviewModal.hidden || !pdfModalCanAct) return;
-        e.preventDefault();
-        closePdfPreview();
+        if (pdfPreviewModal && !pdfPreviewModal.hidden) {
+            if (!pdfModalCanAct) return;
+            e.preventDefault();
+            closePdfPreview();
+            return;
+        }
+        if (panel && panel.classList.contains('is-open')) closePanelSheet();
     });
-    if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () { onAutoStrokeFromChars(); });
-    if (btnChenyuFont) btnChenyuFont.addEventListener('click', applyChenyuFont);
+    if (btnAutoStrokeFromChars) btnAutoStrokeFromChars.addEventListener('click', function () {
+        saveSettings();
+        onAutoStrokeFromChars().then(closePanelSheet);
+    });
+
+    /* ---- 字帖背景 ---- */
+    function selectBg(value) {
+        if (value === 'upload' && !uploadedBgUrl) value = 'none';
+        currentBg = value;
+        bgTiles.forEach(function (tile) {
+            var on = tile.getAttribute('data-bg') === value;
+            tile.classList.toggle('is-selected', on);
+            tile.setAttribute('aria-checked', on ? 'true' : 'false');
+        });
+    }
 
     function clearUploadedBg() {
         if (uploadedBgUrl) {
@@ -1347,13 +1465,29 @@
         }
         if (bgImageInput) bgImageInput.value = '';
         if (btnBgImageClear) btnBgImageClear.hidden = true;
+        if (bgUploadThumb) {
+            bgUploadThumb.style.backgroundImage = '';
+            bgUploadThumb.classList.remove('has-image');
+        }
+        if (currentBg === 'upload') selectBg('none');
         renderNow();
+        saveSettings();
     }
 
-    if (btnBgImageUpload && bgImageInput) {
-        btnBgImageUpload.addEventListener('click', function () {
-            bgImageInput.click();
+    bgTiles.forEach(function (tile) {
+        tile.addEventListener('click', function () {
+            var value = tile.getAttribute('data-bg');
+            if (value === 'upload' && !uploadedBgUrl) {
+                if (bgImageInput) bgImageInput.click();
+                return;
+            }
+            selectBg(value);
+            renderNow();
+            saveSettings();
         });
+    });
+
+    if (btnBgImageUpload && bgImageInput) {
         bgImageInput.addEventListener('change', function () {
             var file = bgImageInput.files && bgImageInput.files[0];
             if (!file) return;
@@ -1373,6 +1507,11 @@
                     if (uploadedBgUrl) URL.revokeObjectURL(uploadedBgUrl);
                     uploadedBgUrl = url;
                     if (btnBgImageClear) btnBgImageClear.hidden = false;
+                    if (bgUploadThumb) {
+                        bgUploadThumb.style.backgroundImage = 'url("' + url + '")';
+                        bgUploadThumb.classList.add('has-image');
+                    }
+                    selectBg('upload');
                     renderNow();
                 })
                 .catch(function (e) {
@@ -1386,16 +1525,57 @@
     }
     if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
+    /* ---- 預覽大小 ---- */
+    zoomBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            setZoom(btn.getAttribute('data-zoom'));
+            saveSettings();
+        });
+    });
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+        if (currentZoom !== 'fit') return;
+        if (resizeTimer) cancelAnimationFrame(resizeTimer);
+        resizeTimer = requestAnimationFrame(applyZoom);
+    });
+
+    /* ---- 手機版設定面板 ---- */
+    function openPanelSheet() {
+        if (!panel) return;
+        panel.classList.add('is-open');
+        if (panelBackdrop) panelBackdrop.hidden = false;
+    }
+
+    function closePanelSheet() {
+        if (!panel) return;
+        panel.classList.remove('is-open');
+        if (panelBackdrop) panelBackdrop.hidden = true;
+    }
+
+    if (btnPanelOpen) btnPanelOpen.addEventListener('click', openPanelSheet);
+    if (btnPanelClose) btnPanelClose.addEventListener('click', closePanelSheet);
+    if (panelBackdrop) panelBackdrop.addEventListener('click', closePanelSheet);
+
+    /* ---- 字帖／筆順字帖 分頁 ---- */
     var modeTabs = document.querySelectorAll('.mode-tab');
-    function activateMode(tab) {
+    function activateMode(tab, silent) {
         modeTabs.forEach(function (item) {
             var selected = item === tab;
             item.classList.toggle('is-active', selected);
             item.setAttribute('aria-selected', selected ? 'true' : 'false');
             item.tabIndex = selected ? 0 : -1;
-            var panel = document.getElementById(item.getAttribute('aria-controls'));
-            if (panel) panel.hidden = !selected;
+            var tabPanel = document.getElementById(item.getAttribute('aria-controls'));
+            if (tabPanel) tabPanel.hidden = !selected;
         });
+        currentMode = tab && tab.id === 'tabStroke' ? 'stroke' : 'free';
+        if (silent) return;
+        saveSettings();
+        if (currentMode === 'stroke' && !strokePathLayout &&
+            autoStrokeChars && parseHanziChars(autoStrokeChars.value).length) {
+            onAutoStrokeFromChars();
+            return;
+        }
+        renderNow();
     }
     modeTabs.forEach(function (tab, index) {
         tab.addEventListener('click', function () {
@@ -1412,6 +1592,16 @@
         });
     });
 
+    restoreSettings();
+    syncFontUi();
+    selectBg(currentBg);
+    setZoom(currentZoom);
+    if (settings.mode === 'stroke') {
+        activateMode(document.getElementById('tabStroke'), true);
+        if (autoStrokeChars && parseHanziChars(autoStrokeChars.value).length) {
+            onAutoStrokeFromChars();
+        }
+    }
     renderNow();
     whenBrushFontReady(function () {
         renderNow();

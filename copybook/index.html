@@ -6,92 +6,130 @@
     <!-- 避免舊版 HTML／靜態資源被強快取，導致看不到字帖頁更新 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <title>桃花源 · 書法字帖生成</title>
+    <title>桃花源 · 書法字帖</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
     <link rel="preload" href="fonts/YshiPenShutiTC-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="style.css?v=70">
+    <link rel="stylesheet" href="style.css?v=71">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.4.5/dist/html2canvas-pro.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
-<body>
+<body data-theme="silk">
+    <div class="petals" id="petals" aria-hidden="true"></div>
+
     <header class="site-header">
         <div class="header-left">
             <a href="../index.html" class="back-link">← 返回桃花源</a>
-            <h1>書法字帖生成平台</h1>
-        </div>
-        <div class="theme-picker">
-            <span class="theme-label">配色</span>
-            <button type="button" class="theme-dot theme-dot--pink active" data-theme="pink" title="桃花"></button>
-            <button type="button" class="theme-dot theme-dot--green" data-theme="green" title="藕綠"></button>
-            <button type="button" class="theme-dot theme-dot--blue" data-theme="blue" title="汝窯"></button>
-            <button type="button" class="theme-dot theme-dot--silver" data-theme="silver" title="月白"></button>
-            <div class="bg-upload">
-                <input id="bgImageInput" type="file" accept="image/*" hidden>
-                <button type="button" id="btnBgImageUpload" class="bg-upload-btn" title="上傳圖片作為字帖背景">上傳背景</button>
-                <button type="button" id="btnBgImageClear" class="bg-upload-clear" hidden title="清除上傳背景">清除</button>
+            <div class="brand">
+                <h1>書法字帖</h1>
+                <span class="seal" aria-label="桃源印">桃源</span>
             </div>
+        </div>
+        <div class="header-right">
+            <div class="theme-picker" role="radiogroup" aria-label="配色">
+                <button type="button" class="theme-chip" role="radio" data-theme="silk" aria-checked="true"><span class="theme-dot theme-dot--silk"></span>絹素</button>
+                <button type="button" class="theme-chip" role="radio" data-theme="ru" aria-checked="false"><span class="theme-dot theme-dot--ru"></span>汝窯</button>
+                <button type="button" class="theme-chip" role="radio" data-theme="ding" aria-checked="false"><span class="theme-dot theme-dot--ding"></span>定窯</button>
+                <button type="button" class="theme-chip" role="radio" data-theme="qinglv" aria-checked="false"><span class="theme-dot theme-dot--qinglv"></span>青綠</button>
+            </div>
+            <button type="button" id="btnPetals" class="petal-toggle" aria-pressed="true" title="頁面背景的落花">
+                <span class="petal-toggle-track" aria-hidden="true"><span class="petal-toggle-knob"></span></span>落英
+            </button>
         </div>
     </header>
 
     <main class="layout">
-        <aside class="panel" aria-label="字帖選項">
+        <aside class="panel" id="panel" aria-label="字帖設定">
+            <div class="panel-sheet-head">
+                <span>字帖設定</span>
+                <button type="button" class="btn-text" id="btnPanelClose">收起</button>
+            </div>
             <section class="panel-section">
                 <div class="mode-tabs" role="tablist" aria-label="字帖類型">
                     <button type="button" class="mode-tab is-active" role="tab" id="tabFree" aria-selected="true" aria-controls="panelFree">字帖</button>
                     <button type="button" class="mode-tab" role="tab" id="tabStroke" aria-selected="false" aria-controls="panelStroke" tabindex="-1">筆順字帖</button>
                 </div>
+
                 <div id="panelFree" class="mode-panel" role="tabpanel" aria-labelledby="tabFree">
-                <label for="textInput">字帖內容</label>
-                <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
+                    <label for="textInput">字帖內容</label>
+                    <textarea id="textInput" rows="5" placeholder="請輸入要練習的文字">春眠不覺曉，處處聞啼鳥。
 夜來風雨聲，花落知多少。</textarea>
-                <button id="btnGenerate" type="button" class="btn-generate">生成字帖</button>
-                <details class="tune-details">
-                    <summary>
-                        <span>自訂格式</span>
-                        <span class="tune-chevron" aria-hidden="true"></span>
-                    </summary>
-                    <div class="tune-details-body">
-                        <div class="field">
-                            <label for="fontPreset">字體選擇</label>
-                            <select id="fontPreset">
-                                <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif" selected>楷體</option>
-                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif">Y式筆書（毛筆）</option>
-                                <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                                <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
-                                <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
-                                <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
-                                <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
-                                <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
-                                <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
-                                <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="copyStyle">字帖版本</label>
-                            <select id="copyStyle" name="copyStyle">
-                                <option value="standard">標準墨色</option>
-                                <option value="hong">描紅（紅框鏤空）</option>
-                                <option value="lightPinkHong" selected>淺粉色描紅</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="pageBackground">字帖背景</label>
-                            <select id="pageBackground" name="pageBackground">
-                                <option value="none">無（紙色）</option>
-                                <option value="plum">梅花</option>
-                                <option value="orchid">蘭花</option>
-                                <option value="bamboo">竹子</option>
-                                <option value="chrysanthemum">菊花</option>
-                                <option value="peony">牡丹</option>
-                            </select>
-                        </div>
-                        <div class="field">
+                    <button id="btnGenerate" type="button" class="btn-primary btn-block">生成字帖</button>
+                </div>
+                <div id="panelStroke" class="mode-panel" role="tabpanel" aria-labelledby="tabStroke" hidden>
+                    <label for="autoStrokeChars">筆順字帖輸入</label>
+                    <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
+                    <button id="btnAutoStrokeFromChars" type="button" class="btn-primary btn-block">生成筆順字帖</button>
+                </div>
+
+                <div class="settings">
+                    <div class="field">
+                        <label for="fontPreset">字體</label>
+                        <select id="fontPreset">
+                            <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif" selected>楷體</option>
+                            <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif">Y式筆書（毛筆）</option>
+                            <option id="fontOptChenyu" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
+                            <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
+                            <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
+                            <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
+                            <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
+                            <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
+                            <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
+                            <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
+                        </select>
+                        <div class="font-sample" id="fontSample" aria-hidden="true">春眠不覺曉</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="copyStyle">字帖版本</label>
+                        <select id="copyStyle">
+                            <option value="standard">標準墨色</option>
+                            <option value="hong">描紅（紅框鏤空）</option>
+                            <option value="lightPinkHong" selected>淺粉色描紅</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <div class="field-head">
                             <label for="fontSize">字體大小</label>
-                            <input id="fontSize" type="number" min="18" max="72" step="1" value="36">
+                            <output id="fontSizeValue" for="fontSize">36</output>
                         </div>
+                        <input id="fontSize" type="range" min="18" max="72" step="1" value="36">
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label" id="bgLabel">字帖背景</span>
+                        <div class="bg-grid" role="radiogroup" aria-labelledby="bgLabel">
+                            <button type="button" class="bg-tile is-selected" role="radio" aria-checked="true" data-bg="none">
+                                <span class="bg-thumb bg-thumb--none"></span><span class="bg-name">無</span>
+                            </button>
+                            <button type="button" class="bg-tile" role="radio" aria-checked="false" data-bg="plum">
+                                <img class="bg-thumb" src="backgrounds/thumbs/plum.jpg" alt=""><span class="bg-name">梅花</span>
+                            </button>
+                            <button type="button" class="bg-tile" role="radio" aria-checked="false" data-bg="orchid">
+                                <img class="bg-thumb" src="backgrounds/thumbs/orchid.jpg" alt=""><span class="bg-name">蘭花</span>
+                            </button>
+                            <button type="button" class="bg-tile" role="radio" aria-checked="false" data-bg="bamboo">
+                                <img class="bg-thumb" src="backgrounds/thumbs/bamboo.jpg" alt=""><span class="bg-name">竹子</span>
+                            </button>
+                            <button type="button" class="bg-tile" role="radio" aria-checked="false" data-bg="chrysanthemum">
+                                <img class="bg-thumb" src="backgrounds/thumbs/chrysanthemum.jpg" alt=""><span class="bg-name">菊花</span>
+                            </button>
+                            <button type="button" class="bg-tile" role="radio" aria-checked="false" data-bg="peony">
+                                <img class="bg-thumb" src="backgrounds/thumbs/peony.jpg" alt=""><span class="bg-name">牡丹</span>
+                            </button>
+                            <button type="button" class="bg-tile bg-tile--upload" role="radio" aria-checked="false" data-bg="upload" id="btnBgImageUpload" title="上傳圖片作為字帖背景">
+                                <span class="bg-thumb bg-thumb--upload" id="bgUploadThumb"><span class="bg-plus" aria-hidden="true">＋</span></span><span class="bg-name">上傳</span>
+                            </button>
+                        </div>
+                        <input id="bgImageInput" type="file" accept="image/*" hidden>
+                        <button type="button" id="btnBgImageClear" class="btn-text bg-clear" hidden>清除上傳的背景</button>
+                    </div>
+
+                    <details class="advanced">
+                        <summary>進階設定</summary>
                         <div class="field">
                             <label for="gridType">格線樣式</label>
                             <select id="gridType">
@@ -101,93 +139,34 @@
                             </select>
                         </div>
                         <div class="field">
-                            <label for="pageSize">預覽紙張</label>
+                            <label for="pageSize">紙張方向</label>
                             <select id="pageSize">
-                                <option value="a4">A4（直式）</option>
-                                <option value="a4l">A4（橫式）</option>
-                                <option value="letter">Letter</option>
+                                <option value="a4">A4 直式</option>
+                                <option value="a4l">A4 橫式</option>
                             </select>
                         </div>
-                    </div>
-                </details>
-                </div>
-                <div id="panelStroke" class="mode-panel" role="tabpanel" aria-labelledby="tabStroke" hidden>
-                <label for="autoStrokeChars">筆順字帖輸入</label>
-                <textarea id="autoStrokeChars" rows="2" placeholder="輸入漢字；可重複、可換行（例：我我我）"></textarea>
-                <button id="btnAutoStrokeFromChars" type="button" class="btn-generate">生成筆順字帖</button>
-                <details class="tune-details">
-                    <summary>
-                        <span>自訂格式</span>
-                        <span class="tune-chevron" aria-hidden="true"></span>
-                    </summary>
-                    <div class="tune-details-body">
-                        <div class="field">
-                            <label for="fontPresetStroke">字體選擇</label>
-                            <select id="fontPresetStroke">
-                                <option value="'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif" selected>楷體</option>
-                                <option value="'YShiPenShutiTC', 'Kaiti TC', 'STKaiti', 'KaiTi', serif">Y式筆書（毛筆）</option>
-                                <option id="fontOptChenyuStroke" value="'ChenYuluoyan', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">辰宇落雁體</option>
-                                <option value="'AlimamaDaoLiTi', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">阿里媽媽刀隸體</option>
-                                <option value="'全字庫說文解字', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif TC', serif">全字庫說文解字</option>
-                                <option value="'Songti TC', 'SimSun', 'Noto Serif TC', serif">宋體</option>
-                                <option value="'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif">黑體</option>
-                                <option value="'FangSong', 'STFangsong', 'Noto Serif TC', serif">仿宋</option>
-                                <option value="'Hiragino Maru Gothic ProN', 'YuGothic', 'Microsoft JhengHei', sans-serif">圓體</option>
-                                <option value="'Microsoft JhengHei', 'PingFang TC', sans-serif">微軟正黑體</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="copyStyleStroke">字帖版本</label>
-                            <select id="copyStyleStroke" name="copyStyleStroke">
-                                <option value="standard">標準墨色</option>
-                                <option value="hong">描紅（紅框鏤空）</option>
-                                <option value="lightPinkHong" selected>淺粉色描紅</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="pageBackgroundStroke">字帖背景</label>
-                            <select id="pageBackgroundStroke" name="pageBackgroundStroke">
-                                <option value="none">無（紙色）</option>
-                                <option value="plum">梅花</option>
-                                <option value="orchid">蘭花</option>
-                                <option value="bamboo">竹子</option>
-                                <option value="chrysanthemum">菊花</option>
-                                <option value="peony">牡丹</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="fontSizeStroke">字體大小</label>
-                            <input id="fontSizeStroke" type="number" min="18" max="72" step="1" value="40">
-                        </div>
-                        <div class="field">
-                            <label for="gridTypeStroke">格線樣式</label>
-                            <select id="gridTypeStroke">
-                                <option value="tian">田字格</option>
-                                <option value="mi">米字格</option>
-                                <option value="blank">空白格</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="pageSizeStroke">預覽紙張</label>
-                            <select id="pageSizeStroke">
-                                <option value="a4">A4（直式）</option>
-                                <option value="a4l">A4（橫式）</option>
-                                <option value="letter">Letter</option>
-                            </select>
-                        </div>
-                    </div>
-                </details>
+                    </details>
                 </div>
             </section>
-
-            <div class="panel-footer">
-                <button id="btnPdf" type="button" class="btn-pdf">下載 PDF</button>
-            </div>
         </aside>
 
-        <section class="preview-wrap">
-            <div id="preview" class="preview" aria-live="polite"></div>
+        <section class="preview-col">
+            <div class="preview-toolbar">
+                <button type="button" class="btn-secondary panel-open" id="btnPanelOpen">設定</button>
+                <span class="page-count" id="pageCount">第 1 頁 / 共 1 頁</span>
+                <div class="zoom-group" role="radiogroup" aria-label="預覽大小">
+                    <button type="button" class="zoom-btn" role="radio" data-zoom="fit" aria-checked="true">符合寬度</button>
+                    <button type="button" class="zoom-btn" role="radio" data-zoom="1" aria-checked="false">100%</button>
+                    <button type="button" class="zoom-btn" role="radio" data-zoom="1.5" aria-checked="false">150%</button>
+                    <button type="button" class="zoom-btn" role="radio" data-zoom="2" aria-checked="false">200%</button>
+                </div>
+                <button id="btnPdf" type="button" class="btn-primary btn-pdf">下載 PDF</button>
+            </div>
+            <div class="preview-wrap" id="previewWrap">
+                <div id="preview" class="preview" aria-live="polite"></div>
+            </div>
         </section>
+        <div class="panel-backdrop" id="panelBackdrop" hidden></div>
     </main>
 
     <div id="pdfPreviewModal" class="pdf-modal" hidden>
@@ -200,12 +179,12 @@
             </header>
             <div class="pdf-modal-body" id="pdfPreviewPages"></div>
             <footer class="pdf-modal-footer">
-                <button type="button" class="pdf-modal-cancel" id="pdfPreviewCancel">先不要</button>
-                <button type="button" class="pdf-modal-download" id="pdfPreviewDownload">確認下載</button>
+                <button type="button" class="btn-secondary pdf-modal-cancel" id="pdfPreviewCancel">先不要</button>
+                <button type="button" class="btn-primary pdf-modal-download" id="pdfPreviewDownload">確認下載</button>
             </footer>
         </div>
     </div>
 
-    <script src="app.js?v=72"></script>
+    <script src="app.js?v=73"></script>
 </body>
 </html>
