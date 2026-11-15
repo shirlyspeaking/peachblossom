@@ -63,28 +63,44 @@
         return img;
     }
 
+    // 落英只在字帖左右兩側的留白帶飄動（工具列之下、字帖之外）
+    var petalZones = { L: null, R: null };
+
+    function updatePetalZones() {
+        var page = preview && preview.querySelector('.page');
+        var toolbar = document.querySelector('.preview-toolbar');
+        if (!page || !previewWrap) {
+            petalZones.L = petalZones.R = null;
+            return;
+        }
+        var wrap = previewWrap.getBoundingClientRect();
+        var pr = page.getBoundingClientRect();
+        var top = Math.max(0, toolbar ? toolbar.getBoundingClientRect().bottom : wrap.top);
+        var lw = pr.left - wrap.left;
+        var rw = wrap.right - pr.right;
+        petalZones.L = lw >= 36 ? { left: wrap.left, width: lw, top: top } : null;
+        petalZones.R = rw >= 36 ? { left: pr.right, width: rw, top: top } : null;
+    }
+
     function resetFallingPetal(p, initial) {
-        var vw = window.innerWidth;
         var vh = window.innerHeight;
         // 遠的花瓣小、淡、慢，做出前後層次
         p.depth = rand(0.6, 1);
         p.el.style.width = (p.baseW * p.depth).toFixed(1) + 'px';
         p.el.style.opacity = (0.5 + 0.4 * p.depth).toFixed(2);
-        // 出生位置略偏右，左側設定區的花瓣稍少
-        p.x = (Math.pow(Math.random(), 0.8) * 1.05 - 0.05) * vw;
-        p.y = initial ? rand(-0.1, 1) * vh : rand(-140, -50);
+        p.u = rand(0.3, 0.7);
+        p.y = initial ? rand(0, 1) * vh : -rand(30, 90);
         p.t = rand(0, 60);
         p.fall = rand(13, 24) * p.depth;
         p.fallVar = rand(0.25, 0.6);
         p.fallFreq = rand(0.02, 0.06);
         // 主擺動＋副擺動疊加，頻率比各不相同，路徑不會重複
-        p.amp1 = rand(25, 75);
+        p.amp1 = rand(0.5, 1);
         p.freq1 = rand(0.05, 0.11);
-        p.amp2 = rand(6, 26);
+        p.amp2 = rand(0.1, 0.3);
         p.freq2 = p.freq1 * rand(1.6, 3.1);
         p.ph1 = rand(0, Math.PI * 2);
         p.ph2 = rand(0, Math.PI * 2);
-        p.bias = rand(-8, 8);
         p.vx = 0;
         p.tiltBase = rand(-50, 50);
         p.tiltAmp = rand(15, 40);
@@ -92,7 +108,6 @@
         p.flipAmp = rand(30, 70);
         p.flipPhase = rand(0, Math.PI * 2);
         p.spin = rand(-8, 8);
-        p.drift = 0;
     }
 
     function buildPetals() {
@@ -101,9 +116,9 @@
             buildStillPetals();
             return;
         }
-        var count = window.innerWidth < 600 ? 11 : 20;
-        for (var f = 0; f < count; f++) {
-            var p = { baseW: rand(28, 42) };
+        // 左側比右側略少
+        for (var f = 0; f < 11; f++) {
+            var p = { baseW: rand(26, 38), side: f < 5 ? 'L' : 'R' };
             p.el = petalImg('petal--fall', p.baseW);
             resetFallingPetal(p, true);
             petalsLayer.appendChild(p.el);
@@ -136,29 +151,34 @@
         if (!document.body.classList.contains('pdf-modal-open')) {
             petalClock += dt;
             var t = petalClock;
-            // 全域微風：緩慢變化的陣風
-            var wind = 8 * Math.sin(t * 0.07) + 5 * Math.sin(t * 0.19 + 1.3);
-            var vw = window.innerWidth;
             var vh = window.innerHeight;
             for (var i = 0; i < fallingPetals.length; i++) {
                 var p = fallingPetals[i];
+                var zone = petalZones[p.side];
+                if (!zone) {
+                    p.el.style.visibility = 'hidden';
+                    continue;
+                }
+                p.el.style.visibility = p.y < zone.top - p.baseW * 0.3 ? 'hidden' : '';
                 p.t += dt;
                 var a1 = p.t * p.freq1 * Math.PI * 2 + p.ph1;
                 var a2 = p.t * p.freq2 * Math.PI * 2 + p.ph2;
                 var swing = Math.cos(a1);
-                // 擺到兩側時下落變慢、擺回中間時稍快；整體速度也隨時間緩緩起伏
                 var pace = 1 + p.fallVar * Math.sin(p.t * p.fallFreq * Math.PI * 2);
                 p.y += p.fall * pace * (0.5 + 0.7 * Math.abs(swing)) * dt;
-                // 每片各自的小亂流，讓路線不規則
-                p.vx += (rand(-1, 1) * 18 - p.vx * 0.6) * dt;
-                p.drift += (wind * p.depth + p.bias + p.vx) * dt;
-                var x = p.x + p.drift + p.amp1 * Math.sin(a1) + p.amp2 * Math.sin(a2);
+                // 擺幅依留白帶寬度縮放，花瓣不會飄進字帖或工具列
+                var room = Math.max(0, zone.width / 2 - p.baseW * 0.6);
+                var x = zone.left + zone.width * p.u - p.baseW * 0.5 +
+                    room * 0.75 * (p.amp1 * Math.sin(a1) + p.amp2 * Math.sin(a2));
                 var tilt = p.tiltBase + p.tiltAmp * swing + p.spin * p.t;
                 var flip = p.flipAmp * Math.sin(p.t * p.flipFreq * Math.PI * 2 + p.flipPhase);
                 p.el.style.transform =
                     'translate3d(' + x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,0) rotate(' +
                     tilt.toFixed(1) + 'deg) rotateX(' + flip.toFixed(1) + 'deg)';
-                if (p.y > vh + 60 || x < -160 || x > vw + 160) resetFallingPetal(p, false);
+                if (p.y > vh + 60) {
+                    resetFallingPetal(p, false);
+                    p.y = zone.top - rand(30, 90);
+                }
             }
         }
         petalFrame = requestAnimationFrame(stepPetals);
@@ -200,14 +220,12 @@
     var bgUploadThumb = document.getElementById('bgUploadThumb');
     var pageCountEl = document.getElementById('pageCount');
     var previewWrap = document.getElementById('previewWrap');
-    var zoomBtns = document.querySelectorAll('.zoom-btn');
     var panel = document.getElementById('panel');
     var panelBackdrop = document.getElementById('panelBackdrop');
     var btnPanelOpen = document.getElementById('btnPanelOpen');
     var btnPanelClose = document.getElementById('btnPanelClose');
     var currentBg = 'none';
     var currentMode = 'free';
-    var currentZoom = 'fit';
     var PAPER_WIDTH_PX = { a4: 793.7, a4l: 1122.5 };
     var DEFAULT_LINE_HEIGHT = 1.15;
     var DEFAULT_CHARS_PER_LINE = 12;
@@ -905,25 +923,15 @@
         }
     }
 
+    // 預覽固定顯示整頁；兩側留白讓落英點綴
     function applyZoom() {
         if (!preview) return;
-        var z;
-        if (currentZoom === 'fit') {
-            var psize = pageSize && PAPER_WIDTH_PX[pageSize.value] ? pageSize.value : 'a4';
-            var avail = previewWrap ? previewWrap.clientWidth - 4 : 800;
-            z = Math.max(0.3, Math.min(2, avail / PAPER_WIDTH_PX[psize]));
-        } else {
-            z = parseFloat(currentZoom) || 1;
-        }
+        var psize = pageSize && PAPER_WIDTH_PX[pageSize.value] ? pageSize.value : 'a4';
+        var avail = previewWrap ? previewWrap.clientWidth - 4 : 800;
+        var gutter = avail < 640 ? 0 : Math.max(48, Math.min(130, avail * 0.1));
+        var z = Math.max(0.3, Math.min(1.6, (avail - gutter * 2) / PAPER_WIDTH_PX[psize]));
         preview.style.zoom = String(Math.round(z * 1000) / 1000);
-    }
-
-    function setZoom(value) {
-        currentZoom = value;
-        zoomBtns.forEach(function (btn) {
-            btn.setAttribute('aria-checked', btn.getAttribute('data-zoom') === value ? 'true' : 'false');
-        });
-        applyZoom();
+        updatePetalZones();
     }
 
     function scheduleRender() {
@@ -1458,7 +1466,6 @@
         settings.grid = gridType ? gridType.value : '';
         settings.paper = pageSize ? pageSize.value : '';
         settings.bg = currentBg === 'upload' ? 'none' : currentBg;
-        settings.zoom = currentZoom;
         settings.mode = currentMode;
         try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (_) {}
     }
@@ -1486,7 +1493,6 @@
         var size = parseInt(settings.size, 10);
         if (fontSize && Number.isFinite(size)) fontSize.value = String(Math.max(18, Math.min(72, size)));
         if (settings.bg && PHOTO_BGS[settings.bg]) currentBg = settings.bg;
-        if (settings.zoom && /^(fit|1|1\.5|2)$/.test(settings.zoom)) currentZoom = settings.zoom;
     }
 
     function syncFontUi() {
@@ -1634,19 +1640,12 @@
     }
     if (btnBgImageClear) btnBgImageClear.addEventListener('click', clearUploadedBg);
 
-    /* ---- 預覽大小 ---- */
-    zoomBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            setZoom(btn.getAttribute('data-zoom'));
-            saveSettings();
-        });
-    });
     var resizeTimer = null;
     window.addEventListener('resize', function () {
-        if (currentZoom !== 'fit') return;
         if (resizeTimer) cancelAnimationFrame(resizeTimer);
         resizeTimer = requestAnimationFrame(applyZoom);
     });
+    window.addEventListener('scroll', updatePetalZones, { passive: true });
 
     /* ---- 手機版設定面板 ---- */
     function openPanelSheet() {
@@ -1703,7 +1702,6 @@
     restoreSettings();
     syncFontUi();
     selectBg(currentBg);
-    setZoom(currentZoom);
     if (settings.mode === 'stroke') {
         activateMode(document.getElementById('tabStroke'), true);
         onAutoStrokeFromChars();

@@ -636,31 +636,9 @@ input[type="range"] {
     font-variant-numeric: tabular-nums;
 }
 
-.zoom-group {
-    display: flex;
-    gap: 2px;
-    padding: 2px;
-    background: var(--primary-soft);
-    border-radius: 7px;
-}
 
-.zoom-btn {
-    padding: 5px 9px;
-    border-radius: 5px;
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-variant-numeric: tabular-nums;
-}
 
-.zoom-btn:hover {
-    color: var(--ink);
-}
 
-.zoom-btn[aria-checked="true"] {
-    background: var(--card);
-    color: var(--primary);
-    font-weight: 600;
-}
 
 .preview-wrap {
     min-width: 0;
@@ -1047,6 +1025,13 @@ input[type="range"] {
     }
 }
 
+/* 窄螢幕字帖佔滿寬度，沒有兩側留白可飄落英 */
+@media (max-width: 700px) {
+    .petal-toggle {
+        display: none;
+    }
+}
+
 @media (max-width: 600px) {
     .header-right {
         gap: 10px;
@@ -1064,9 +1049,7 @@ input[type="range"] {
         border-width: 2px;
     }
 
-    .page-count,
-    .zoom-btn[data-zoom="1.5"],
-    .zoom-btn[data-zoom="2"] {
+    .page-count {
         display: none;
     }
 
@@ -1074,9 +1057,6 @@ input[type="range"] {
         gap: 8px;
     }
 
-    .zoom-btn {
-        padding: 5px 7px;
-    }
 
     .btn-pdf {
         padding: 9px 12px;
