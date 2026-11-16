@@ -113,6 +113,7 @@ export function CompositionCanvas({
       ref={setCanvasEl}
       className="relative mx-auto aspect-[5/4] w-full max-w-[920px] overflow-hidden rounded-2xl border border-stone-200/90 shadow-[0_22px_55px_rgba(44,40,36,0.12)] [container-type:size]"
       style={{ background: '#ebe6dc' }}
+      data-canvas=""
       onPointerDown={onDeselect}
     >
       <div
@@ -151,6 +152,7 @@ export function CompositionCanvas({
           ref={setVaseEl}
           src={vaseImagePath(vaseId)}
           alt={vase.name}
+          data-vase=""
           draggable={false}
           className={[
             'h-full w-auto max-w-[78cqw] cursor-grab object-contain select-none active:cursor-grabbing',

@@ -1,3 +1,4 @@
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { flowerImagePath } from '../data/assetPaths'
 import { FLOWERS, getFlower } from '../data/flowers'
 import { getVase } from '../data/vases'
@@ -15,7 +16,11 @@ interface ControlPanelProps {
   onLibrarySpecies: (id: SpeciesId) => void
   pendingColorId: string
   onPendingColor: (id: string) => void
-  onAddFlower: () => void
+  onBeginDrag: (
+    species: SpeciesId,
+    colorId: string,
+    event: ReactPointerEvent<HTMLElement>,
+  ) => void
   selectedFlower: PlacedFlower | null
   onPatchSelectedFlower: (patch: Partial<PlacedFlower>) => void
   onBringFront: () => void
@@ -35,7 +40,7 @@ export function ControlPanel(props: ControlPanelProps) {
     onLibrarySpecies,
     pendingColorId,
     onPendingColor,
-    onAddFlower,
+    onBeginDrag,
     selectedFlower,
     onPatchSelectedFlower,
     onBringFront,
@@ -65,9 +70,11 @@ export function ControlPanel(props: ControlPanelProps) {
         <h1 className="text-2xl font-semibold tracking-wide text-stone-800">
           花無缺
         </h1>
-        <p className="text-sm leading-relaxed text-stone-500">
-          拖動花瓶和花枝。拖右上角，或按住 Alt 再拖，可放大縮小。滾輪轉枝。
-        </p>
+        <ul className="space-y-1 text-sm leading-relaxed text-stone-500">
+          <li>把花拖到花瓶上，枝底就插進瓶裡。</li>
+          <li>拖花可以移動。拖黑點可以放大縮小。</li>
+          <li>左右拖「轉」：向右拖，花往右轉；向左拖，花往左轉。滾輪也一樣。</li>
+        </ul>
       </header>
 
       <section className="space-y-2">
@@ -82,16 +89,7 @@ export function ControlPanel(props: ControlPanelProps) {
       </section>
 
       <section className="space-y-3 rounded-xl border border-stone-200/90 bg-white/70 p-3 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium text-stone-700">名花</h2>
-          <button
-            type="button"
-            onClick={onAddFlower}
-            className="rounded-full bg-stone-900 px-3 py-1 text-xs text-[#f7f4ee] shadow-sm transition hover:bg-stone-800"
-          >
-            插入瓶中
-          </button>
-        </div>
+        <h2 className="text-sm font-medium text-stone-700">名花</h2>
         <div className="grid grid-cols-2 gap-2">
           {named.map((flower) => (
             <SpeciesButton
@@ -105,6 +103,15 @@ export function ControlPanel(props: ControlPanelProps) {
               }
               active={librarySpecies === flower.id}
               onClick={() => onLibrarySpecies(flower.id)}
+              onDragStart={(event) =>
+                onBeginDrag(
+                  flower.id,
+                  flower.id === librarySpecies
+                    ? pendingColorId
+                    : flower.colors[0].id,
+                  event,
+                )
+              }
             />
           ))}
         </div>
@@ -123,6 +130,9 @@ export function ControlPanel(props: ControlPanelProps) {
               colorId={flower.colors[0].id}
               active={librarySpecies === flower.id}
               onClick={() => onLibrarySpecies(flower.id)}
+              onDragStart={(event) =>
+                onBeginDrag(flower.id, flower.colors[0].id, event)
+              }
             />
           ))}
         </div>
@@ -142,12 +152,18 @@ export function ControlPanel(props: ControlPanelProps) {
         </div>
         {!selectedFlower ? (
           <p className="text-xs leading-relaxed text-stone-400">
-            點一枝，可改色、移到瓶前或瓶後、刪除。
+            點一枝，可改色、移到瓶前或瓶後、刪除。選中後，左右拖「轉」來轉向。
           </p>
         ) : (
           <>
             <p className="text-xs text-stone-500">
               {getFlower(selectedFlower.species).labelZh}
+              {' · '}
+              {selectedFlower.rotation === 0
+                ? '現在是直立的'
+                : selectedFlower.rotation > 0
+                  ? `往右偏了 ${Math.round(selectedFlower.rotation)} 度`
+                  : `往左偏了 ${Math.round(-selectedFlower.rotation)} 度`}
             </p>
             <ChineseColorSelector
               colors={getFlower(selectedFlower.species).colors}
@@ -229,12 +245,14 @@ function SpeciesButton({
   colorId,
   active,
   onClick,
+  onDragStart,
 }: {
   species: SpeciesId
   label: string
   colorId: string
   active: boolean
   onClick: () => void
+  onDragStart: (event: ReactPointerEvent<HTMLElement>) => void
 }) {
   return (
     <button
@@ -250,7 +268,14 @@ function SpeciesButton({
       <img
         src={flowerImagePath(species, colorId)}
         alt=""
-        className="h-12 w-full object-contain"
+        draggable={false}
+        onPointerDown={(event) => {
+          if (event.button !== 0) return
+          event.stopPropagation()
+          onClick()
+          onDragStart(event)
+        }}
+        className="h-12 w-full cursor-grab object-contain touch-none"
       />
       <span className="text-stone-700">{label}</span>
     </button>

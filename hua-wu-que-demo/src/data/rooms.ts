@@ -32,6 +32,21 @@ export const ROOMS: RoomSpec[] = [
     label: '宮廷雅室',
     note: '殿柱與遠屏，地心空闊。',
   },
+  {
+    id: 'song-shufang',
+    label: '宋人書齋',
+    note: '取宋無款《人物》的榻、屏風和紙窗。中間留空。',
+  },
+  {
+    id: 'song-tingqin',
+    label: '松下聽琴',
+    note: '取《聽琴圖》的松、竹和湖石。中間留空。',
+  },
+  {
+    id: 'song-wenhui',
+    label: '池畔文會',
+    note: '取《文會圖》的池邊黑漆方桌。桌上不放花瓶。',
+  },
 ]
 
 export function getRoom(id: RoomId): RoomSpec {

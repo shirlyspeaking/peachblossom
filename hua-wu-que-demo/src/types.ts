@@ -3,6 +3,10 @@ export type VaseId =
   | 'lisong-hualan'
   | 'wenhui-xiaoping'
   | 'tingqin-guding'
+  | 'songren-huabo'
+  | 'yaoshan-pingmei'
+  | 'luohan-liujiao'
+  | 'xiaojing-pan'
 
 export interface VasePose {
   /** Center of the vessel, percent of the canvas width. */
@@ -14,7 +18,15 @@ export interface VasePose {
 
 export const DEFAULT_VASE_POSE: VasePose = { x: 50, bottom: 4, scale: 1 }
 
-export type RoomId = 'shufang' | 'tea' | 'window' | 'garden' | 'palace'
+export type RoomId =
+  | 'shufang'
+  | 'tea'
+  | 'window'
+  | 'garden'
+  | 'palace'
+  | 'song-shufang'
+  | 'song-tingqin'
+  | 'song-wenhui'
 
 export type SpeciesId =
   | 'peony'
