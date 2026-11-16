@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { flowerImagePath } from '../data/assetPaths'
 import type { PlacedFlower } from '../types'
 import { useDirectManipulate } from '../useDirectManipulate'
-import { ScaleHandle } from './ScaleHandle'
+import { RotateHandle, ScaleHandle } from './ScaleHandle'
 
 interface FlowerPieceProps {
   flower: PlacedFlower
@@ -27,6 +27,7 @@ export function FlowerPiece({
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null)
   const src = flowerImagePath(flower.species, flower.colorId)
   const broken = brokenSrc === src
+  const rotateDrag = useRef<{ px: number; rotation: number } | null>(null)
   const gesture = useDirectManipulate({
     enabled: !passive,
     canvas,
@@ -69,10 +70,39 @@ export function FlowerPiece({
             transform: `rotate(${flower.rotation}deg) scale(${flower.scale})`,
             transformOrigin: 'center bottom',
           }}
-          onPointerDown={gesture.onPointerDown}
-          onPointerMove={gesture.onPointerMove}
-          onPointerUp={gesture.onPointerUp}
-          onPointerCancel={gesture.onPointerCancel}
+          onPointerDown={(event) => {
+            const rotating = (event.target as HTMLElement).closest?.(
+              '[data-rotate-handle]',
+            )
+            if (rotating) {
+              event.stopPropagation()
+              onSelect()
+              rotateDrag.current = {
+                px: event.clientX,
+                rotation: flower.rotation,
+              }
+              event.currentTarget.setPointerCapture(event.pointerId)
+              return
+            }
+            gesture.onPointerDown(event)
+          }}
+          onPointerMove={(event) => {
+            const rotating = rotateDrag.current
+            if (!rotating) {
+              gesture.onPointerMove(event)
+              return
+            }
+            const next = rotating.rotation + (event.clientX - rotating.px) * 0.45
+            onChange({ rotation: Math.min(80, Math.max(-80, next)) })
+          }}
+          onPointerUp={() => {
+            rotateDrag.current = null
+            gesture.onPointerUp()
+          }}
+          onPointerCancel={() => {
+            rotateDrag.current = null
+            gesture.onPointerCancel()
+          }}
           onWheel={(event) => {
             if (passive || !selected) return
             event.preventDefault()
@@ -85,7 +115,12 @@ export function FlowerPiece({
               onChange({ scale })
               return
             }
-            onChange({ rotation: flower.rotation + event.deltaY * -0.15 })
+            onChange({
+              rotation: Math.min(
+                80,
+                Math.max(-80, flower.rotation + event.deltaY * -0.15),
+              ),
+            })
           }}
         >
           {broken ? null : (
@@ -102,7 +137,12 @@ export function FlowerPiece({
               ].join(' ')}
             />
           )}
-          {selected && !passive ? <ScaleHandle /> : null}
+          {selected && !passive ? (
+            <>
+              <ScaleHandle />
+              <RotateHandle />
+            </>
+          ) : null}
         </div>
       </div>
     </div>

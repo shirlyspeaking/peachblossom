@@ -53,6 +53,42 @@ export const VASES: VaseSpec[] = [
     mouthY: 0.24,
     rootY: 0.44,
   },
+  {
+    id: 'songren-huabo',
+    painting: '宋無款《人物》',
+    name: '金釦花缽',
+    note: '臺北故宮藏。敞口、金釦、帶耳，院方說似玻璃器。',
+    mouthX: 0.5,
+    mouthY: 0.16,
+    rootY: 0.36,
+  },
+  {
+    id: 'yaoshan-pingmei',
+    painting: '南宋馬公顯《藥山李翱問答圖》',
+    name: '案上青瓷瓶',
+    note: '京都南禪寺藏。石桌上的小青瓷瓶，畫中用來插一枝梅。',
+    mouthX: 0.5,
+    mouthY: 0.08,
+    rootY: 0.28,
+  },
+  {
+    id: 'luohan-liujiao',
+    painting: '南宋《五百羅漢圖》',
+    name: '六角銅瓶',
+    note: '京都大德寺藏，淳熙年間。採蓮一鋪裡的銅瓶，唇口、六角、撇足。',
+    mouthX: 0.5,
+    mouthY: 0.08,
+    rootY: 0.28,
+  },
+  {
+    id: 'xiaojing-pan',
+    painting: '傳李公麟《孝經圖》',
+    name: '多曲盤',
+    note: '大都會藏。撇足多曲盤，花從盤心插起。',
+    mouthX: 0.5,
+    mouthY: 0.14,
+    rootY: 0.32,
+  },
 ]
 
 export function getVase(id: VaseId): VaseSpec {
