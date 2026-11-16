@@ -405,25 +405,74 @@
         .ai-summary-block h4 { font-size: 0.75rem; letter-spacing: 0.12em; color: #7a5cc2; margin-bottom: 6px; }
         .quiz-q { margin-bottom: 16px; }
         .quiz-q-title { font-weight: 700; margin-bottom: 8px; line-height: 1.6; }
-        .quiz-options { display: grid; gap: 6px; }
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
         .quiz-options label {
+            position: relative;
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid #e6def4;
-            background: #fff;
+            min-height: 72px;
+            padding: 12px 12px 12px 14px;
+            border-radius: 14px;
+            border: 1.5px solid var(--opt-border, #e6def4);
+            background: var(--opt-bg, #fff);
             cursor: pointer;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             line-height: 1.55;
-            transition: border-color 0.15s, background 0.15s;
+            transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 1px 0 rgb(79 58 140 / 0.04);
         }
-        .quiz-options label:hover { border-color: #c7b6ea; }
-        .quiz-options label:has(input:checked) { border-color: #8f72d4; background: #f5f0fd; }
-        .quiz-options input { margin-top: 4px; accent-color: #7a5cc2; }
-        .quiz-options label.reveal-correct { border-color: #4f9a6a; background: #eaf6ee; }
-        .quiz-options label.reveal-wrong { border-color: #d0695c; background: #fcefed; }
+        .quiz-options label:nth-child(1) { --opt-bg: #f7f1ff; --opt-border: #e0d2f8; --opt-letter-bg: #8f72d4; }
+        .quiz-options label:nth-child(2) { --opt-bg: #eef7fb; --opt-border: #cfe5f0; --opt-letter-bg: #4f8fb3; }
+        .quiz-options label:nth-child(3) { --opt-bg: #f7f3ea; --opt-border: #e6d9bc; --opt-letter-bg: #b08a3a; }
+        .quiz-options label:nth-child(4) { --opt-bg: #f8efef; --opt-border: #ebcfcf; --opt-letter-bg: #c26b6b; }
+        .quiz-options label:hover {
+            border-color: color-mix(in srgb, var(--opt-letter-bg) 55%, white);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgb(79 58 140 / 0.08);
+        }
+        .quiz-options label:has(input:checked) {
+            border-color: var(--opt-letter-bg);
+            background: color-mix(in srgb, var(--opt-bg) 55%, white);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--opt-letter-bg) 28%, transparent);
+        }
+        .quiz-options input { position: absolute; opacity: 0; pointer-events: none; }
+        .quiz-opt-letter {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+            color: #fff;
+            background: var(--opt-letter-bg, #8f72d4);
+            box-shadow: 0 2px 6px color-mix(in srgb, var(--opt-letter-bg) 35%, transparent);
+        }
+        .quiz-opt-text { flex: 1; min-width: 0; padding-top: 2px; color: var(--ink); }
+        .quiz-options label.reveal-correct {
+            --opt-bg: #eaf6ee;
+            --opt-border: #4f9a6a;
+            --opt-letter-bg: #3f8a5a;
+            box-shadow: 0 0 0 2px rgb(79 154 106 / 0.18);
+        }
+        .quiz-options label.reveal-wrong {
+            --opt-bg: #fcefed;
+            --opt-border: #d0695c;
+            --opt-letter-bg: #c25448;
+            box-shadow: 0 0 0 2px rgb(208 105 92 / 0.16);
+        }
+        @media (max-width: 560px) {
+            .quiz-options { gap: 8px; }
+            .quiz-options label { min-height: 64px; padding: 10px; font-size: 0.86rem; }
+            .quiz-opt-letter { width: 24px; height: 24px; border-radius: 7px; font-size: 0.76rem; }
+        }
         .quiz-explanation { display: none; font-size: 0.86rem; color: var(--ink-soft); margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: #fff; border-left: 3px solid #c7b6ea; line-height: 1.7; }
         .quiz-explanation.show { display: block; }
         .quiz-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
@@ -1358,11 +1407,14 @@
                 aiBox.classList.remove('hidden');
             }
             const qs = data.questions || [];
+            const letters = ['A', 'B', 'C', 'D'];
+            const stripOptLetter = (text) => String(text || '').replace(/^\s*[ABCD][\.\)、．]\s*/i, '').trim();
             qBox.innerHTML = qs.map((q, qIdx) => {
                 const optHtml = (q.options || []).slice(0, 4).map((opt, oIdx) => `
                     <label class="quiz-opt-label" data-o="${oIdx}">
                         <input type="radio" name="quiz_${idx}_${qIdx}" value="${oIdx}" />
-                        <span>${esc(opt)}</span>
+                        <span class="quiz-opt-letter" aria-hidden="true">${letters[oIdx]}</span>
+                        <span class="quiz-opt-text">${esc(stripOptLetter(opt))}</span>
                     </label>`).join('');
                 return `
                     <div class="quiz-q" id="quizQ_${idx}_${qIdx}">
